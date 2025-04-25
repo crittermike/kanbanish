@@ -11,11 +11,14 @@
     color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: var(--space-xs) var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     font-family: inherit;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-speed) var(--transition-ease);
+    min-width: 90px;
+    text-align: center;
 }
 
 .btn:hover {
@@ -34,15 +37,42 @@
     border-color: var(--success);
 }
 
+.secondary-btn {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+.secondary-btn:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+}
+
 .danger-btn {
     background: var(--danger);
     color: white;
     border-color: var(--danger);
-    margin-top: var(--space-xs);
 }
 
 .danger-btn:hover {
     opacity: 0.9;
+}
+
+/* Card edit action buttons container */
+.card-edit-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.card-edit-actions .btn {
+    flex: 1;
+}
+
+/* Inline card action buttons container */
+.inline-card-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: var(--space-sm);
 }
 
 /* Icon buttons */
@@ -65,7 +95,7 @@
 /* Action buttons */
 .action-buttons {
     display: flex;
-    gap: var(--space-xs);
+    gap: var(--space-sm);
 }
 
 /* Column-specific buttons */
@@ -99,29 +129,4 @@
     cursor: pointer;
     transition: all var(--transition-speed) var(--transition-ease);
     margin-top: auto;
-}
-
-.add-card:hover {
-    color: var(--text-color);
-    border-color: var(--accent);
-}
-
-.add-column {
-    background: var(--hover-bg);
-    border: 1px dashed var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    font-family: inherit;
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    transition: all var(--transition-speed) var(--transition-ease);
-    height: fit-content;
-}
-
-.add-column:hover {
-    color: var(--text-color);
-    border-color: var(--accent);
 }
