@@ -172,6 +172,13 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         ref={columnRef}
         className={`column-content ${isOver ? 'drag-over' : ''}`}
       >
+        {sortedCards().length === 0 && (
+          <div className="empty-column-placeholder">
+            <span>No cards yet</span>
+            <span>Add a card to get started</span>
+          </div>
+        )}
+        
         {sortedCards().map((card) => (
           <Card 
             key={card.id} 

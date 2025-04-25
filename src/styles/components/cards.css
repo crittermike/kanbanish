@@ -142,6 +142,32 @@
     line-height: 1.4;
 }
 
+/* Empty column placeholder */
+.empty-column-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 120px;
+    margin: 20px 0;
+    padding: var(--space-sm);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-style: italic;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.empty-column-placeholder span:first-child {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.empty-column-placeholder span:last-child {
+    font-size: var(--font-size-sm);
+}
+
 .comment-timestamp {
     margin-top: var(--space-xxs);
     color: var(--text-muted);
