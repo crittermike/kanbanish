@@ -364,9 +364,9 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                         showNotification('Reaction added');
                         
                         // Increment the counter for this emoji
-                        const currentCount = cardData.reactions && 
+                        const currentCount = ((cardData.reactions && 
                                            cardData.reactions[emoji] && 
-                                           cardData.reactions[emoji].count || 0;
+                                           cardData.reactions[emoji].count) || 0);
                         
                         const countRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/count`);
                         set(countRef, currentCount + 1)

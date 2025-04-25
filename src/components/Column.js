@@ -19,7 +19,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     if (columnData && columnData.title !== title && !isEditing) {
       setTitle(columnData.title);
     }
-  }, [columnData, isEditing]);
+  }, [columnData, isEditing, title]);
 
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({
