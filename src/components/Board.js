@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ref, set, push } from 'firebase/database';
+import React, { useEffect } from 'react';
+import { ref, set } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Column from './Column';

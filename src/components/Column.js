@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ref, set, remove, push } from 'firebase/database';
+import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Card from './Card';
@@ -7,7 +7,6 @@ import { generateId } from '../utils/helpers';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const { 
-    boardRef,
     boardId, 
     setActiveCardId, 
     setActiveColumnId, 

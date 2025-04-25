@@ -7,7 +7,6 @@ import { COMMON_EMOJIS } from '../utils/helpers';
 function Card({ cardId, cardData, columnId, showNotification }) {
     const {
         boardId,
-        boardRef,
         setActiveCardId,
         setActiveColumnId,
         setIsNewCard

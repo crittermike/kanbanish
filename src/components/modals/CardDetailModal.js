@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ref, set, remove, push } from 'firebase/database';
 import { useBoardContext } from '../../context/BoardContext';
 import { database } from '../../utils/firebase';
-import { COMMON_EMOJIS } from '../../utils/helpers';
 
 function CardDetailModal({ showNotification }) {
   const { 
     boardId,
-    boardRef, 
     activeCardId, 
     activeColumnId, 
     isNewCard, 
@@ -120,7 +118,7 @@ function CardDetailModal({ showNotification }) {
       });
   };
 
-  // Add emoji reaction to card
+    /* Emoji reaction functionality - preserved for future implementation
   const addEmojiReaction = (emoji) => {
     if (!boardId || !activeCardId || !activeColumnId) return;
 
@@ -139,6 +137,7 @@ function CardDetailModal({ showNotification }) {
       
     setShowEmojiPicker(false);
   };
+  */
 
   // Format timestamp for comment display
   const formatTimestamp = (timestamp) => {
