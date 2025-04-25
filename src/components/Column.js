@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
@@ -13,6 +13,13 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const [newCardContent, setNewCardContent] = useState('');
   const [isAddingCard, setIsAddingCard] = useState(false);
   const columnRef = useRef(null);
+  
+  // Update local title when columnData changes (from Firebase)
+  useEffect(() => {
+    if (columnData && columnData.title !== title && !isEditing) {
+      setTitle(columnData.title);
+    }
+  }, [columnData, isEditing]);
 
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({

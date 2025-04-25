@@ -108,8 +108,6 @@
     margin-top: var(--space-sm);
     padding-top: var(--space-xs);
     border-top: 1px solid var(--border-color);
-    max-height: var(--max-comments-height);
-    overflow-y: auto;
 }
 
 /* Comments styling */
