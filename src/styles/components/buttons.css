@@ -1,0 +1,127 @@
+/**
+ * Kanban App - Button Styles
+ * 
+ * Styles for all types of buttons used throughout the application.
+ * Last updated: April 25, 2025
+ */
+
+/* Standard buttons */
+.btn {
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs) var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.btn:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+}
+
+.primary-btn {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.primary-btn:hover {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.danger-btn {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+    margin-top: var(--space-xs);
+}
+
+.danger-btn:hover {
+    opacity: 0.9;
+}
+
+/* Icon buttons */
+.icon-button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xxs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.icon-button:hover {
+    color: var(--text-color);
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+/* Column-specific buttons */
+.column-action-button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.column-action-button:hover {
+    color: var(--danger);
+}
+
+.add-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+    margin-top: auto;
+}
+
+.add-card:hover {
+    color: var(--text-color);
+    border-color: var(--accent);
+}
+
+.add-column {
+    background: var(--hover-bg);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    font-family: inherit;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    transition: all var(--transition-speed) var(--transition-ease);
+    height: fit-content;
+}
+
+.add-column:hover {
+    color: var(--text-color);
+    border-color: var(--accent);
+}

@@ -1,0 +1,133 @@
+/**
+ * Kanban App - Emoji Reactions Component
+ * 
+ * Styles for emoji reactions and emoji picker functionality.
+ * Last updated: April 25, 2025
+ */
+
+/* Custom properties for emoji reactions */
+:root {
+    --emoji-reaction-gap: 0.5rem;
+    --emoji-reaction-radius: 1rem;
+    --emoji-reaction-padding: 0.25rem 0.5rem;
+    --emoji-reaction-font-size: 0.85rem;
+    --emoji-reaction-hover-bg: rgba(56, 139, 253, 0.2);
+    --emoji-reaction-active-bg: rgba(56, 139, 253, 0.3);
+}
+
+/* Main emoji container */
+.emoji-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--emoji-reaction-gap);
+    margin-top: var(--space-xs);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-color);
+    justify-content: space-between;
+}
+
+.emoji-reactions .reactions-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--emoji-reaction-gap);
+    flex: 1;
+}
+
+.emoji-reactions .reactions-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Individual reaction styling */
+.emoji-reaction {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--hover-bg);
+    border-radius: var(--emoji-reaction-radius);
+    padding: var(--emoji-reaction-padding);
+    font-size: var(--emoji-reaction-font-size);
+    cursor: pointer;
+    transition: background-color var(--transition-speed) var(--transition-ease);
+    user-select: none;
+}
+
+.emoji-reaction:hover {
+    background-color: var(--emoji-reaction-hover-bg);
+}
+
+.emoji-reaction.active {
+    background-color: var(--emoji-reaction-active-bg);
+}
+
+.emoji-reaction .emoji {
+    margin-right: var(--space-xxs);
+    font-size: var(--font-size-base);
+}
+
+.emoji-reaction .count {
+    font-size: 0.8rem;
+}
+
+/* Add reaction button */
+.add-reaction-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--emoji-reaction-radius);
+    width: 2.05rem;
+    height: 2.05rem;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity var(--transition-speed) var(--transition-ease),
+                background-color var(--transition-speed) var(--transition-ease);
+    line-height: 1;
+    padding-bottom: 2px;
+}
+
+.add-reaction-button:hover {
+    opacity: 1;
+    background-color: var(--hover-bg);
+}
+
+/* Emoji picker */
+.emoji-picker {
+    position: absolute;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-xs);
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.emoji-picker button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: var(--space-xxs);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.emoji-picker button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Modal enhancements for reactions */
+.modal-reactions {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-reactions h3 {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-sm);
+}

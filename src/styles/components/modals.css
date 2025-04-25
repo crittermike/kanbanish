@@ -1,0 +1,147 @@
+/**
+ * Kanban App - Modal & Dialog Styles
+ * 
+ * Styles for modals, dialogs, and other overlay components.
+ * Last updated: April 25, 2025
+ */
+
+/* Modal base */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: var(--modal-shadow);
+    color: var(--text-color);
+}
+
+.modal-content h2 {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.modal-body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.modal-body label {
+    display: block;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-xs);
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.modal-body input[type="text"] {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-color);
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.modal-body input[type="text"]:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
+}
+
+.modal-body .btn.primary-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+    width: 100%;
+    margin-top: var(--space-xs);
+}
+
+.modal-body .btn.primary-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.modal-body .btn.primary-btn:active {
+    transform: translateY(0);
+}
+
+.close-modal {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    font-size: 1.75rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color var(--transition-speed) var(--transition-ease);
+    background: transparent;
+    border: none;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: var(--danger);
+}
+
+/* Card editing in modal */
+#card-content-edit {
+    width: 100%;
+    min-height: 100px;
+    padding: var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+#card-content-edit:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+    }
+}

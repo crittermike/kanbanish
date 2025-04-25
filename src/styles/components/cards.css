@@ -1,0 +1,270 @@
+/**
+ * Kanban App - Card Component Styles
+ * 
+ * Styles for cards, including voting, comments, and other card features.
+ * Last updated: April 25, 2025
+ */
+
+/* Card styling */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    border-color: var(--accent);
+}
+
+.card-header {
+    display: flex;
+}
+
+.card-content {
+    flex: 1;
+    word-break: break-word;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    padding-left: var(--space-sm);
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Card votes */
+.votes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xxs);
+    padding-right: var(--space-sm);
+    border-right: 1px solid var(--border-color);
+    min-width: 30px;
+}
+
+.vote-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.1rem;
+    height: 16px;
+    width: 16px;
+}
+
+.vote-button:hover {
+    color: var(--text-color);
+}
+
+.vote-count {
+    min-width: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+/* Card Comments */
+.comments-btn {
+    display: flex;
+    align-items: self-end;
+    gap: var(--space-xxs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.comments-btn:hover {
+    color: var(--text-color);
+}
+
+.comments-section {
+    margin-top: var(--space-sm);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border-color);
+}
+
+.comments-section.hidden {
+    display: none;
+}
+
+.comment {
+    padding: var(--space-xs) var(--space-sm);
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-sm);
+    position: relative;
+    margin-bottom: var(--space-xs);
+    border-left: 2px solid var(--accent);
+    font-size: var(--font-size-sm);
+    color: #999;
+}
+
+.comment-content {
+    margin-bottom: var(--space-xxs);
+    word-break: break-word;
+}
+
+/* Comment editing styles */
+.comment-edit-area {
+    width: 100%;
+    padding: var(--space-xs);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    margin-bottom: var(--space-xs);
+    min-height: 60px;
+    resize: vertical;
+}
+
+.comment-edit-area:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.comment-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.comment-edit-actions .btn {
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-xs);
+    white-space: nowrap;
+}
+
+.comment-edit-actions .btn:not(.primary-btn) {
+    background-color: var(--hover-bg);
+}
+
+.comment-edit-actions .btn:not(.primary-btn):hover {
+    background-color: var(--border-color);
+}
+
+.comment-timestamp {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Comment form */
+.comment-form {
+    display: flex;
+    margin-top: var(--space-xs);
+}
+
+.comment-input {
+    flex: 1;
+    padding: var(--space-xs);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+}
+
+.comment-input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.comments-container {
+    max-height: var(--max-comments-height);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.no-comments {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-md);
+}
+
+.add-comment {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+}
+
+#new-comment {
+    width: 100%;
+    padding: var(--space-xs);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    min-height: 60px;
+}
+
+#new-comment:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* Comment editing and actions */
+.comment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.comment-action-button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.comment-action-button:hover {
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.comment-action-button:last-child:hover {
+    color: var(--danger);
+}
+
+/* Dragging States */
+.card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}

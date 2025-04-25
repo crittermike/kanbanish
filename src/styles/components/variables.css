@@ -1,0 +1,77 @@
+/**
+ * Kanban App - CSS Variables
+ * 
+ * This file contains all global CSS variables used throughout the application.
+ * Centralizing these values makes it easier to maintain consistent styling and
+ * implement theme changes.
+ *
+ * Last updated: April 25, 2025
+ */
+
+:root {
+    /* Color scheme */
+    --bg-color: #0d1117;
+    --text-color: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-hover: #4794e6;
+    --accent-transparent: rgba(56, 139, 253, 0.3);
+    --accent-transparent-light: rgba(56, 139, 253, 0.15);
+    --accent-transparent-lighter: rgba(56, 139, 253, 0.2);
+    
+    /* Element colors */
+    --card-bg: #161b22;
+    --hover-bg: #1f2428;
+    --border-color: #30363d;
+    --column-bg: #161b22;
+    --drag-over: var(--accent-transparent-light);
+    
+    /* Status colors */
+    --danger: #f85149;
+    --success: #2ea043;
+    --orange: #db6d28;
+    --yellow: #d29922;
+    --blue: #58a6ff;
+    
+    /* Shadows */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --notification-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* Spacing */
+    --space-xxs: 0.25rem;
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    
+    /* Typography */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.85rem;
+    --font-size-base: 1rem;
+    --font-size-md: 1.2rem;
+    --font-size-lg: 1.5rem;
+    --font-size-xl: 1.8rem;
+    
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 12px;
+    --radius-round: 1rem;
+    
+    /* Transitions */
+    --transition-speed: 0.2s;
+    --transition-ease: ease;
+    
+    /* Layout */
+    --column-width: 400px;
+    --column-width-mobile: 280px;
+    --header-height: 3.5rem;
+    --max-comments-height: 200px;
+}
+
+/* Media query breakpoints (can be used with CSS custom media queries) */
+@custom-media --mobile (max-width: 768px);
+@custom-media --tablet (min-width: 769px) and (max-width: 1024px);
+@custom-media --desktop (min-width: 1025px);

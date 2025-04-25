@@ -1,0 +1,120 @@
+/**
+ * Kanban App - Column Component Styles
+ * 
+ * Styles for column layout and functionality.
+ * Last updated: April 25, 2025
+ */
+
+/* Main Board Layout */
+main {
+    flex-grow: 1;
+    padding: var(--space-md);
+    overflow-x: auto;
+}
+
+.board-container {
+    height: 100%;
+    min-height: 300px;
+}
+
+.board {
+    display: flex;
+    height: 100%;
+    gap: var(--space-md);
+}
+
+/* Column styling */
+.column {
+    background: var(--column-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    min-width: var(--column-width);
+    max-width: var(--column-width);
+    height: fit-content;
+    max-height: calc(100vh - 150px);
+    display: flex;
+    flex-direction: column;
+}
+
+.column-header {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.column-title {
+    font-weight: 600;
+    margin: 0;
+    font-size: var(--font-size-base);
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    width: 100%;
+    background: transparent;
+    color: var(--text-color);
+    cursor: text;
+    transition: border-color var(--transition-speed) var(--transition-ease);
+}
+
+.column-title:focus {
+    border-color: var(--accent);
+    outline: none;
+    background-color: var(--hover-bg);
+}
+
+.column-title:hover:not(:focus) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.column-content {
+    padding: var(--space-sm);
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-height: 100px;
+}
+
+.column-content:empty {
+    position: relative;
+}
+
+.column-content:empty::before {
+    content: "Add a card to get started";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+.column-content.drag-over {
+    background-color: var(--drag-over);
+}
+
+.column-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.add-column-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .column {
+        min-width: var(--column-width-mobile);
+        max-width: var(--column-width-mobile);
+    }
+}

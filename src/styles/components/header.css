@@ -1,0 +1,113 @@
+/**
+ * Kanban App - Header Component Styles
+ * 
+ * Styles for the app header and top-level controls.
+ * Last updated: April 25, 2025
+ */
+
+/* Header & Controls */
+header {
+    padding: var(--space-md);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-content {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+    .header-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+h1 {
+    font-weight: 700;
+    font-size: var(--font-size-xl);
+    background: linear-gradient(45deg, var(--accent), #388bfd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+
+.board-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+    .board-controls {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-lg);
+    }
+}
+
+.board-title-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+#board-title {
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    width: 100%;
+}
+
+#board-title:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.board-id-container {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    gap: var(--space-xxs);
+}
+
+#board-id {
+    font-family: 'Fira Code', monospace;
+    color: var(--accent);
+}
+
+/* Top board controls */
+.board-top-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-md);
+}
+
+.sort-button {
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.sort-button.active {
+    background: var(--accent);
+    color: white;
+}
