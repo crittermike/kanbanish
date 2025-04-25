@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ref, onValue, off, set } from 'firebase/database';
+import { ref, onValue, off, set, remove } from 'firebase/database';
 import { database, auth, signInAnonymously } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 
@@ -126,6 +126,38 @@ export const BoardProvider = ({ children }) => {
     }
   };
 
+  // Move a card between columns
+  const moveCard = (cardId, sourceColumnId, targetColumnId) => {
+    if (!boardId || !user || sourceColumnId === targetColumnId) return;
+    
+    const sourceCardRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}`);
+    const targetCardRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
+    
+    // Get the current card data
+    const cardData = columns[sourceColumnId]?.cards?.[cardId];
+    
+    if (!cardData) {
+      console.error('Card not found');
+      return;
+    }
+    
+    // Add the card to the target column
+    set(targetCardRef, cardData)
+      .then(() => {
+        // Remove the card from the source column
+        remove(sourceCardRef)
+          .then(() => {
+            console.log(`Card ${cardId} moved from ${sourceColumnId} to ${targetColumnId}`);
+          })
+          .catch((error) => {
+            console.error('Error removing card from source column:', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error adding card to target column:', error);
+      });
+  };
+
   // Context value
   const value = {
     user,
@@ -139,7 +171,8 @@ export const BoardProvider = ({ children }) => {
     setSortByVotes,
     boardRef,
     createNewBoard,
-    openExistingBoard
+    openExistingBoard,
+    moveCard
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

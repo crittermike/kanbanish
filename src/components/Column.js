@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Card from './Card';
 import { generateId } from '../utils/helpers';
+import { useDrop } from 'react-dnd';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId } = useBoardContext();
+  const { boardId, moveCard } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
   const [isAddingCard, setIsAddingCard] = useState(false);
+  const columnRef = useRef(null);
+
+  // Set up drop target for cards
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: 'CARD',
+    drop: (item) => {
+      if (item.columnId !== columnId) {
+        moveCard(item.cardId, item.columnId, columnId);
+        showNotification('Card moved successfully');
+      }
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  }), [columnId, moveCard, showNotification]);
+
+  // Apply the drop ref to column content
+  drop(columnRef);
 
   // Handle column title change
   const handleTitleChange = (e) => {
@@ -147,7 +166,10 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </button>
         </div>
       </div>
-      <div className="column-content">
+      <div 
+        ref={columnRef}
+        className={`column-content ${isOver ? 'drag-over' : ''}`}
+      >
         {sortedCards().map((card) => (
           <Card 
             key={card.id} 

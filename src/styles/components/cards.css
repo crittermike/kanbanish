@@ -23,6 +23,15 @@
     border-color: var(--accent);
 }
 
+/* Drag and drop styling */
+.card.dragging {
+    cursor: grabbing;
+    transform: rotate(2deg) scale(1.02);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--accent);
+    z-index: 100;
+}
+
 .card-header {
     display: flex;
 }

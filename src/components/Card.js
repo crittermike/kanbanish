@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import { COMMON_EMOJIS } from '../utils/helpers';
+import { useDrag } from 'react-dnd';
 
 function Card({ cardId, cardData, columnId, showNotification }) {
     const { boardId } = useBoardContext();
@@ -11,6 +12,23 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
+    const cardRef = useRef(null);
+    
+    // Configure drag functionality
+    const [{ isDragging }, drag] = useDrag(() => ({
+        type: 'CARD',
+        item: { 
+            cardId, 
+            columnId,
+            cardData
+        },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging()
+        })
+    }), [cardId, columnId, cardData]);
+    
+    // Apply the drag ref to the card element
+    drag(cardRef);
 
     // Toggle card editing mode
     const toggleEditMode = (e) => {
@@ -274,7 +292,12 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     };
 
     return (
-        <div className="card" onClick={() => !isEditing && toggleEditMode()}>
+        <div 
+            ref={cardRef}
+            className={`card ${isDragging ? 'dragging' : ''}`} 
+            onClick={() => !isEditing && toggleEditMode()}
+            style={{ opacity: isDragging ? 0.5 : 1 }}
+        >
             {isEditing ? (
                 <div className="card-edit" onClick={(e) => e.stopPropagation()}>
                     <textarea
