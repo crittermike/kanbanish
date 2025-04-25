@@ -7,7 +7,7 @@ import { COMMON_EMOJIS } from '../utils/helpers';
 import { useDrag } from 'react-dnd';
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-    const { boardId } = useBoardContext();
+    const { boardId, user } = useBoardContext();
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState(cardData.content || '');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -183,12 +183,25 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const renderReactions = () => {
         return (
             <div className="reactions-left">
-                {cardData.reactions && Object.entries(cardData.reactions).map(([emoji, count]) => (
-                    <div className="emoji-reaction" key={emoji} onClick={(e) => addReaction(e, emoji)}>
-                        <span className="emoji">{emoji}</span>
-                        <span className="count">{count}</span>
-                    </div>
-                ))}
+                {cardData.reactions && Object.entries(cardData.reactions).map(([emoji, reactionData]) => {
+                    // Skip emojis with count of 0
+                    if (reactionData.count <= 0) return null;
+                    
+                    // Check if current user has reacted with this emoji
+                    const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
+                    
+                    return (
+                        <div 
+                            className={`emoji-reaction ${hasUserReacted ? 'active' : ''}`} 
+                            key={emoji} 
+                            onClick={(e) => addReaction(e, emoji)}
+                            title={hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction"}
+                        >
+                            <span className="emoji">{emoji}</span>
+                            <span className="count">{reactionData.count}</span>
+                        </div>
+                    );
+                })}
                 {renderEmojiPicker()} {/* Render emoji picker if showEmojiPicker is true */}
                 <button
                     className="add-reaction-button"
@@ -229,8 +242,11 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                 }}
             >
                 {COMMON_EMOJIS.map((emoji) => {
-                    // Check if this emoji is already used
-                    const isSelected = cardData.reactions && cardData.reactions[emoji];
+                    // Check if current user has already reacted with this emoji
+                    const isSelected = cardData.reactions && 
+                                     cardData.reactions[emoji] && 
+                                     cardData.reactions[emoji].users && 
+                                     cardData.reactions[emoji].users[user?.uid];
                     return (
                         <button
                             key={emoji}
@@ -315,25 +331,48 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const addReaction = (e, emoji) => {
         e.stopPropagation();
 
-        if (boardId) {
-            const reactionRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}`);
-            const currentCount = cardData.reactions && cardData.reactions[emoji] ? cardData.reactions[emoji] : 0;
-
-            // If already reacted, remove the reaction, otherwise add it
-            if (currentCount > 0) {
-                // Remove the reaction
-                remove(reactionRef)
+        if (boardId && user) {
+            // Reference to the specific user's reaction for this emoji
+            const userReactionRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/users/${user.uid}`);
+            
+            // Check if this user has already reacted with this emoji
+            const hasUserReacted = cardData.reactions && 
+                                  cardData.reactions[emoji] && 
+                                  cardData.reactions[emoji].users && 
+                                  cardData.reactions[emoji].users[user.uid];
+            
+            if (hasUserReacted) {
+                // If user already reacted, remove their reaction
+                remove(userReactionRef)
                     .then(() => {
-                        showNotification('Reaction removed');
+                        showNotification('Your reaction removed');
+                        
+                        // If this was the last reaction, clean up the empty objects
+                        const userCountRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/count`);
+                        set(userCountRef, (cardData.reactions[emoji].count || 1) - 1)
+                            .catch(error => {
+                                console.error('Error updating reaction count:', error);
+                            });
                     })
                     .catch((error) => {
                         console.error('Error removing reaction:', error);
                     });
             } else {
-                // Add the reaction
-                set(reactionRef, 1)
+                // Add user's reaction
+                set(userReactionRef, true)
                     .then(() => {
                         showNotification('Reaction added');
+                        
+                        // Increment the counter for this emoji
+                        const currentCount = cardData.reactions && 
+                                           cardData.reactions[emoji] && 
+                                           cardData.reactions[emoji].count || 0;
+                        
+                        const countRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/count`);
+                        set(countRef, currentCount + 1)
+                            .catch(error => {
+                                console.error('Error updating reaction count:', error);
+                            });
                     })
                     .catch((error) => {
                         console.error('Error adding reaction:', error);
