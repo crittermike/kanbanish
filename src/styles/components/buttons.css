@@ -120,13 +120,30 @@
     justify-content: center;
     gap: var(--space-xs);
     width: 100%;
-    padding: var(--space-sm);
-    border: 1px dashed var(--border-color);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text-muted);
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--hover-bg);
+    color: var(--text-color);
     font-family: inherit;
+    font-size: var(--font-size-base);
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-speed) var(--transition-ease);
     margin-top: auto;
+    height: 44px;
+}
+
+.add-card:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.add-card svg {
+    transition: transform var(--transition-speed) var(--transition-ease);
+}
+
+.add-card:hover svg {
+    transform: scale(1.2);
 }

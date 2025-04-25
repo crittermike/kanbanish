@@ -111,6 +111,38 @@ main {
     align-items: flex-start;
 }
 
+.add-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    min-width: 160px;
+    padding: var(--space-md);
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    transition: all var(--transition-speed) var(--transition-ease);
+    height: 44px;
+}
+
+.add-column:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.add-column svg {
+    transition: transform var(--transition-speed) var(--transition-ease);
+}
+
+.add-column:hover svg {
+    transform: scale(1.2);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .column {

@@ -108,8 +108,10 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         .catch((error) => {
           console.error('Error adding card:', error);
         });
-    } else if (!newCardContent.trim()) {
+    } else {
+      // Don't add empty cards
       hideAddCardForm();
+      showNotification('Empty cards are not allowed');
     }
   };
 
