@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
@@ -15,7 +15,35 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const [newComment, setNewComment] = useState('');
     const cardRef = useRef(null);
     const emojiButtonRef = useRef(null);
+    const emojiPickerRef = useRef(null);
     const [emojiPickerPosition, setEmojiPickerPosition] = useState({ top: 0, left: 0 });
+    
+    // Effect for handling clicks outside of the emoji picker
+    useEffect(() => {
+        if (!showEmojiPicker) return;
+        
+        // Function to handle clicks outside the picker
+        const handleClickOutside = (event) => {
+            // Don't close if clicking the button that opened the picker
+            if (emojiButtonRef.current && emojiButtonRef.current.contains(event.target)) {
+                return;
+            }
+            
+            // Check if clicking outside the picker
+            const pickerElement = document.querySelector('.emoji-picker');
+            if (pickerElement && !pickerElement.contains(event.target)) {
+                setShowEmojiPicker(false);
+            }
+        };
+        
+        // Add event listener when the picker is shown
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        // Clean up
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showEmojiPicker]);
     
     // Configure drag functionality
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -193,7 +221,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         return ReactDOM.createPortal(
             <div 
                 className="emoji-picker" 
-                onClick={(e) => e.stopPropagation()} 
+                onClick={(e) => e.stopPropagation()}
+                ref={emojiPickerRef}
                 style={{ 
                     top: emojiPickerPosition.top, 
                     left: emojiPickerPosition.left 
