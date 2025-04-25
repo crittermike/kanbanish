@@ -101,170 +101,90 @@
     border-top: 1px solid var(--border-color);
 }
 
-.comments-section.hidden {
-    display: none;
+/* Inline Card Creation and Editing */
+.inline-card-form {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    box-shadow: var(--card-shadow);
 }
 
-.comment {
-    padding: var(--space-xs) var(--space-sm);
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: var(--radius-sm);
-    position: relative;
-    margin-bottom: var(--space-xs);
-    border-left: 2px solid var(--accent);
-    font-size: var(--font-size-sm);
-    color: #999;
-}
-
-.comment-content {
-    margin-bottom: var(--space-xxs);
-    word-break: break-word;
-}
-
-/* Comment editing styles */
-.comment-edit-area {
+.inline-card-textarea {
     width: 100%;
+    min-height: 60px;
     padding: var(--space-xs);
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    background: var(--hover-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    color: var(--text-color);
-    margin-bottom: var(--space-xs);
-    min-height: 60px;
+    font-family: inherit;
+    font-size: var(--font-size-base);
     resize: vertical;
+    background: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: var(--space-sm);
 }
 
-.comment-edit-area:focus {
-    border-color: var(--accent);
+.inline-card-textarea:focus {
     outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
 }
 
-.comment-edit-actions {
+.inline-card-actions {
     display: flex;
+    gap: var(--space-sm);
+}
+
+/* Card Edit Mode */
+.card-edit {
+    width: 100%;
+}
+
+.card-edit-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: var(--space-xs);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    resize: vertical;
+    background: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: var(--space-sm);
+}
+
+.card-edit-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.card-edit-actions {
+    display: flex;
+    gap: var(--space-sm);
     justify-content: flex-end;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-xs);
 }
 
-.comment-edit-actions .btn {
-    padding: var(--space-xxs) var(--space-sm);
-    font-size: var(--font-size-sm);
-    margin-top: var(--space-xs);
-    white-space: nowrap;
-}
-
-.comment-edit-actions .btn:not(.primary-btn) {
-    background-color: var(--hover-bg);
-}
-
-.comment-edit-actions .btn:not(.primary-btn):hover {
-    background-color: var(--border-color);
-}
-
-.comment-timestamp {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
-    text-align: right;
-}
-
-/* Comment form */
+/* Comment Input */
 .comment-form {
-    display: flex;
-    margin-top: var(--space-xs);
+    margin-top: var(--space-sm);
 }
 
 .comment-input {
-    flex: 1;
+    width: 100%;
     padding: var(--space-xs);
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    background: var(--hover-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--input-bg);
     color: var(--text-color);
 }
 
 .comment-input:focus {
-    border-color: var(--accent);
     outline: none;
-}
-
-.comments-container {
-    max-height: var(--max-comments-height);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.no-comments {
-    color: var(--text-muted);
-    font-style: italic;
-    text-align: center;
-    padding: var(--space-md);
-}
-
-.add-comment {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-    margin-top: var(--space-xs);
-}
-
-#new-comment {
-    width: 100%;
-    padding: var(--space-xs);
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    background: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-color);
-    min-height: 60px;
-}
-
-#new-comment:focus {
     border-color: var(--accent);
-    outline: none;
-}
-
-/* Comment editing and actions */
-.comment-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.comment-actions {
-    display: flex;
-    gap: var(--space-xs);
-}
-
-.comment-action-button {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: var(--space-xxs);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-}
-
-.comment-action-button:hover {
-    color: var(--text-color);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.comment-action-button:last-child:hover {
-    color: var(--danger);
-}
-
-/* Dragging States */
-.card.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
+    box-shadow: 0 0 0 2px var(--accent-transparent);
 }

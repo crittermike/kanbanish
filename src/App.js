@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './styles/index.css';
 import { BoardProvider } from './context/BoardContext';
 import Board from './components/Board';
-import CardDetailModal from './components/modals/CardDetailModal';
 import OpenBoardModal from './components/modals/OpenBoardModal';
 
 function App() {
@@ -22,7 +21,6 @@ function App() {
         <Board showNotification={showNotification} />
         
         {/* Modals */}
-        <CardDetailModal showNotification={showNotification} />
         <OpenBoardModal />
         
         {/* Success Notification */}

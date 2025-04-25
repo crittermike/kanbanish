@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ref, onValue, off, set } from 'firebase/database';
 import { database, auth, signInAnonymously } from '../utils/firebase';
+import { generateId } from '../utils/helpers';
 
 // Create the context
 const BoardContext = createContext();
@@ -21,9 +22,6 @@ export const BoardProvider = ({ children }) => {
   const [boardTitle, setBoardTitle] = useState('Untitled Board');
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotes] = useState(false);
-  const [activeCardId, setActiveCardId] = useState(null);
-  const [activeColumnId, setActiveColumnId] = useState(null);
-  const [isNewCard, setIsNewCard] = useState(false);
   const [boardRef, setBoardRef] = useState(null);
 
   // Firebase authentication
@@ -52,15 +50,16 @@ export const BoardProvider = ({ children }) => {
 
       // Listen for changes to the board
       onValue(newBoardRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          if (data.title) setBoardTitle(data.title);
-          if (data.columns) setColumns(data.columns);
+        const boardData = snapshot.val();
+        if (boardData) {
+          if (boardData.title) {
+            setBoardTitle(boardData.title);
+          }
+          setColumns(boardData.columns || {});
         }
       });
 
       return () => {
-        // Clean up listener when component unmounts or boardId changes
         off(newBoardRef);
       };
     }
@@ -68,56 +67,82 @@ export const BoardProvider = ({ children }) => {
 
   // Create a new board
   const createNewBoard = () => {
-    const newBoardId = Math.random().toString(36).substring(2, 10);
+    if (!user) return null;
     
-    // Create initial board data in Firebase
+    const newBoardId = generateId();
     const newBoardRef = ref(database, `boards/${newBoardId}`);
-    set(newBoardRef, {
-      title: 'Untitled Board',
-      columns: {}
-    }).then(() => {
-      console.log('New board created in Firebase');
-    }).catch(error => {
-      console.error('Error creating new board:', error);
-    });
     
-    setBoardId(newBoardId);
-    setBoardTitle('Untitled Board');
-    setColumns({});
+    const initialData = {
+      title: 'Untitled Board',
+      created: Date.now(),
+      owner: user.uid,
+      columns: {
+        [generateId()]: {
+          title: 'To Do',
+          cards: {}
+        },
+        [generateId()]: {
+          title: 'In Progress',
+          cards: {}
+        },
+        [generateId()]: {
+          title: 'Done',
+          cards: {}
+        }
+      }
+    };
+    
+    set(newBoardRef, initialData)
+      .then(() => {
+        console.log('New board created with ID:', newBoardId);
+        setBoardId(newBoardId);
+        setBoardTitle('Untitled Board');
+      })
+      .catch((error) => {
+        console.error('Error creating board:', error);
+      });
+    
     return newBoardId;
   };
 
   // Open an existing board
-  const openExistingBoard = (id) => {
-    setBoardId(id);
+  const openExistingBoard = (boardIdToOpen) => {
+    console.log('Opening board with ID:', boardIdToOpen);
+    setBoardId(boardIdToOpen);
   };
 
-  // Value object to provide through the context
+  // Update board title
+  const updateBoardTitle = (newTitle) => {
+    if (boardId && user) {
+      const titleRef = ref(database, `boards/${boardId}/title`);
+      set(titleRef, newTitle)
+        .then(() => {
+          console.log('Board title updated');
+          setBoardTitle(newTitle);
+        })
+        .catch((error) => {
+          console.error('Error updating board title:', error);
+        });
+    }
+  };
+
+  // Context value
   const value = {
     user,
     boardId,
-    boardRef,
-    boardTitle, 
+    setBoardId,
+    boardTitle,
     setBoardTitle,
     columns,
-    setColumns,
-    sortByVotes, 
+    updateBoardTitle,
+    sortByVotes,
     setSortByVotes,
-    activeCardId, 
-    setActiveCardId,
-    activeColumnId, 
-    setActiveColumnId,
-    isNewCard, 
-    setIsNewCard,
+    boardRef,
     createNewBoard,
     openExistingBoard
   };
 
-  return (
-    <BoardContext.Provider value={value}>
-      {children}
-    </BoardContext.Provider>
-  );
+  return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };
 
 export default BoardContext;

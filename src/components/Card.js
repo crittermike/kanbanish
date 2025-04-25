@@ -5,19 +5,79 @@ import { database } from '../utils/firebase';
 import { COMMON_EMOJIS } from '../utils/helpers';
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-    const {
-        boardId,
-        setActiveCardId,
-        setActiveColumnId,
-        setIsNewCard
-    } = useBoardContext();
+    const { boardId } = useBoardContext();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedContent, setEditedContent] = useState(cardData.content || '');
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showComments, setShowComments] = useState(false);
+    const [newComment, setNewComment] = useState('');
 
-    // Open card detail modal
-    const openCardDetail = () => {
-        setActiveCardId(cardId);
-        setActiveColumnId(columnId);
-        setIsNewCard(false);
-        document.getElementById('card-detail-modal').style.display = 'flex';
+    // Toggle card editing mode
+    const toggleEditMode = (e) => {
+        if (e) e.stopPropagation();
+        setIsEditing(!isEditing);
+        setEditedContent(cardData.content || '');
+    };
+
+    // Save card edits
+    const saveCardChanges = () => {
+        if (boardId) {
+            const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+            
+            // Create an updates object with just the content
+            const updates = {
+                ...cardData,
+                content: editedContent.trim()
+            };
+            
+            // If content is empty, delete the card
+            if (!editedContent.trim()) {
+                remove(cardRef)
+                    .then(() => {
+                        showNotification('Card deleted');
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting card:', error);
+                    });
+            } else {
+                // Otherwise save the card
+                set(cardRef, updates)
+                    .then(() => {
+                        showNotification('Card saved');
+                        setIsEditing(false);
+                    })
+                    .catch((error) => {
+                        console.error('Error saving card:', error);
+                    });
+            }
+        }
+    };
+
+    // Delete card
+    const deleteCard = (e) => {
+        e.stopPropagation();
+        
+        if (boardId && window.confirm('Are you sure you want to delete this card?')) {
+            const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+            remove(cardRef)
+                .then(() => {
+                    showNotification('Card deleted');
+                })
+                .catch((error) => {
+                    console.error('Error deleting card:', error);
+                });
+        }
+    };
+
+    // Handle key press while editing
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            saveCardChanges();
+        } else if (e.key === 'Escape') {
+            setIsEditing(false);
+            setEditedContent(cardData.content || '');
+        }
     };
 
     // Handle upvoting a card
@@ -70,10 +130,6 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         ));
     };
 
-    // State for showing emoji picker and comments
-    const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
-    const [showComments, setShowComments] = React.useState(false);
-
     // Show emoji reactions if any
     const renderReactions = () => {
         return (
@@ -124,9 +180,6 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             </div>
         );
     };
-
-    // State for new comment input
-    const [newComment, setNewComment] = useState('');
 
     // Add a comment to the card
     const addComment = () => {
@@ -221,48 +274,67 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     };
 
     return (
-        <div className="card" onClick={openCardDetail}>
-            <div className="card-header">
-                <div className="votes">
-                    <button className="vote-button" onClick={upvoteCard} title="Upvote">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z" />
-                        </svg>
-                    </button>
-                    <span className="vote-count">{cardData.votes || 0}</span>
-                    <button className="vote-button" onClick={(e) => handleDownvote(e)} title="Downvote">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z" />
-                        </svg>
-                    </button>
+        <div className="card" onClick={() => !isEditing && toggleEditMode()}>
+            {isEditing ? (
+                <div className="card-edit" onClick={(e) => e.stopPropagation()}>
+                    <textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        className="card-edit-textarea"
+                        autoFocus
+                    />
+                    <div className="card-edit-actions">
+                        <button className="btn primary-btn" onClick={saveCardChanges}>Save</button>
+                        <button className="btn secondary-btn" onClick={toggleEditMode}>Cancel</button>
+                        <button className="btn danger-btn" onClick={deleteCard}>Delete</button>
+                    </div>
                 </div>
-                <div className="card-content">
-                    {formatContentWithEmojis(cardData.content)}
-                </div>
-            </div>
-            <div className="emoji-reactions">
-                {renderReactions()}
-                <div className="reactions-right">
-                    <button
-                        className="comments-btn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowComments(!showComments); // Toggle comments visibility
-                            setShowEmojiPicker(false); // Close emoji picker if open
-                        }}
-                        title="Toggle comments"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
-                        </svg>
-                        <span>
-                            {(cardData.comments && Object.keys(cardData.comments).length) || 0}
-                        </span>
-                    </button>
-                </div>
-            </div>
-            {/* Render comments section if showComments is true */}
-            {renderComments()}
+            ) : (
+                <>
+                    <div className="card-header">
+                        <div className="votes">
+                            <button className="vote-button" onClick={upvoteCard} title="Upvote">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z" />
+                                </svg>
+                            </button>
+                            <span className="vote-count">{cardData.votes || 0}</span>
+                            <button className="vote-button" onClick={(e) => handleDownvote(e)} title="Downvote">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="card-content">
+                            {formatContentWithEmojis(cardData.content)}
+                        </div>
+                    </div>
+                    <div className="emoji-reactions">
+                        {renderReactions()}
+                        <div className="reactions-right">
+                            <button
+                                className="comments-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowComments(!showComments); // Toggle comments visibility
+                                    setShowEmojiPicker(false); // Close emoji picker if open
+                                }}
+                                title="Toggle comments"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                                </svg>
+                                <span>
+                                    {(cardData.comments && Object.keys(cardData.comments).length) || 0}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    {/* Render comments section if showComments is true */}
+                    {renderComments()}
+                </>
+            )}
         </div>
     );
 }

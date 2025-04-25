@@ -6,14 +6,11 @@ import Card from './Card';
 import { generateId } from '../utils/helpers';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { 
-    boardId, 
-    setActiveCardId, 
-    setActiveColumnId, 
-    setIsNewCard 
-  } = useBoardContext();
+  const { boardId } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
+  const [newCardContent, setNewCardContent] = useState('');
+  const [isAddingCard, setIsAddingCard] = useState(false);
 
   // Handle column title change
   const handleTitleChange = (e) => {
@@ -59,12 +56,24 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     }
   };
 
-  // Add a new card
-  const addNewCard = () => {
-    if (boardId) {
+  // Show the inline card form
+  const showAddCardForm = () => {
+    setIsAddingCard(true);
+    setNewCardContent('');
+  };
+
+  // Hide the inline card form
+  const hideAddCardForm = () => {
+    setIsAddingCard(false);
+    setNewCardContent('');
+  };
+
+  // Add a new card inline
+  const saveNewCard = () => {
+    if (boardId && newCardContent.trim()) {
       const cardId = generateId();
       const cardData = {
-        content: '',
+        content: newCardContent.trim(),
         votes: 0,
         created: Date.now()
       };
@@ -74,15 +83,24 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
       set(cardRef, cardData)
         .then(() => {
-          setActiveCardId(cardId);
-          setActiveColumnId(columnId);
-          setIsNewCard(true);
-          document.getElementById('card-detail-modal').style.display = 'flex';
           showNotification('Card added');
+          hideAddCardForm();
         })
         .catch((error) => {
           console.error('Error adding card:', error);
         });
+    } else if (!newCardContent.trim()) {
+      hideAddCardForm();
+    }
+  };
+
+  // Handle key press for new card
+  const handleNewCardKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      saveNewCard();
+    } else if (e.key === 'Escape') {
+      hideAddCardForm();
     }
   };
 
@@ -139,12 +157,30 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             showNotification={showNotification}
           />
         ))}
-        <button className="add-card" onClick={addNewCard}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-          Add Card
-        </button>
+        
+        {isAddingCard ? (
+          <div className="inline-card-form">
+            <textarea
+              placeholder="Enter card content..."
+              value={newCardContent}
+              onChange={(e) => setNewCardContent(e.target.value)}
+              onKeyDown={handleNewCardKeyPress}
+              className="inline-card-textarea"
+              autoFocus
+            />
+            <div className="inline-card-actions">
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button className="add-card" onClick={showAddCardForm}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Add Card
+          </button>
+        )}
       </div>
     </div>
   );
