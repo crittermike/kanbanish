@@ -108,6 +108,55 @@
     margin-top: var(--space-sm);
     padding-top: var(--space-xs);
     border-top: 1px solid var(--border-color);
+    max-height: var(--max-comments-height);
+    overflow-y: auto;
+}
+
+/* Comments styling */
+.comments-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.comment {
+    background: var(--hover-bg);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-sm);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.comment:hover {
+    background: var(--accent-transparent-lighter);
+    border-left-color: var(--accent-hover);
+}
+
+.comment-content {
+    color: var(--text-color);
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.comment-timestamp {
+    margin-top: var(--space-xxs);
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+}
+
+.no-comments {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--space-sm);
+    text-align: center;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    margin: var(--space-xs) 0;
 }
 
 /* Inline Card Creation and Editing */
