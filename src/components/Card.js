@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
@@ -13,6 +14,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
     const cardRef = useRef(null);
+    const emojiButtonRef = useRef(null);
+    const [emojiPickerPosition, setEmojiPickerPosition] = useState({ top: 0, left: 0 });
     
     // Configure drag functionality
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -163,10 +166,20 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                     className="add-reaction-button"
                     onClick={(e) => {
                         e.stopPropagation();
+                        // Calculate and set position before showing the emoji picker
+                        if (emojiButtonRef.current) {
+                            const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+                            // Position the emoji picker near the button but adjust to ensure visibility
+                            setEmojiPickerPosition({
+                                top: buttonRect.bottom + window.scrollY + 5, // 5px below the button
+                                left: buttonRect.left + window.scrollX
+                            });
+                        }
                         setShowEmojiPicker(!showEmojiPicker); // Toggle emoji picker
                         setShowComments(false); // Close comments if open
                     }}
                     title="Add reaction"
+                    ref={emojiButtonRef}
                 >+</button>
             </div>
         );
@@ -176,8 +189,16 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     const renderEmojiPicker = () => {
         if (!showEmojiPicker) return null;
 
-        return (
-            <div className="emoji-picker" onClick={(e) => e.stopPropagation()}>
+        // Create and append the emoji picker to the document body to break out of any containers
+        return ReactDOM.createPortal(
+            <div 
+                className="emoji-picker" 
+                onClick={(e) => e.stopPropagation()} 
+                style={{ 
+                    top: emojiPickerPosition.top, 
+                    left: emojiPickerPosition.left 
+                }}
+            >
                 {COMMON_EMOJIS.map((emoji) => {
                     // Check if this emoji is already used
                     const isSelected = cardData.reactions && cardData.reactions[emoji];
@@ -195,7 +216,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                         </button>
                     );
                 })}
-            </div>
+            </div>,
+            document.body
         );
     };
 
