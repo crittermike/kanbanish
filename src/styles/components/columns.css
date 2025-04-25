@@ -68,6 +68,26 @@ main {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
+/* Column title input styling */
+.column-title-input {
+    font-weight: 600;
+    margin: 0;
+    font-size: var(--font-size-base);
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--accent);
+    width: 100%;
+    background-color: var(--hover-bg);
+    color: var(--text-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-transparent-lighter);
+    font-family: inherit;
+}
+
+.column-title-input:focus {
+    border-color: var(--accent);
+}
+
 .column-content {
     padding: var(--space-sm);
     overflow-y: auto;
