@@ -23,8 +23,11 @@ function Board({ showNotification }) {
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
     
-    if (boardRef) {
-      set(ref(boardRef, 'title'), newTitle)
+    if (boardId) {
+      // Create a direct reference to the title path
+      const titleRef = ref(database, `boards/${boardId}/title`);
+      
+      set(titleRef, newTitle)
         .then(() => {
           console.log('Board title updated');
         })

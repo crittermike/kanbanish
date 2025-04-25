@@ -24,7 +24,10 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Save column title
   const saveColumnTitle = () => {
     if (boardId) {
-      const titleRef = ref(database, `boards/${boardId}/columns/${columnId}/title`);
+      // Create a direct reference to the title path
+      const titlePath = `boards/${boardId}/columns/${columnId}/title`;
+      const titleRef = ref(database, titlePath);
+      
       set(titleRef, title)
         .then(() => {
           console.log('Column title updated');
