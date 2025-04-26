@@ -61,6 +61,14 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     // Apply the drag ref to the card element
     drag(cardRef);
 
+    /**
+     * Get database reference for the current card
+     * @returns {Object} Firebase database reference
+     */
+    const getCardRef = () => {
+        return ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+    };
+
     // Toggle card editing mode
     const toggleEditMode = (e) => {
         if (e) e.stopPropagation();
@@ -70,44 +78,47 @@ function Card({ cardId, cardData, columnId, showNotification }) {
 
     // Save card edits
     const saveCardChanges = () => {
-        if (boardId) {
-            const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
-            
-            // Create an updates object with just the content
-            const updates = {
-                ...cardData,
-                content: editedContent.trim()
-            };
-            
-            // If content is empty, delete the card
-            if (!editedContent.trim()) {
-                remove(cardRef)
-                    .then(() => {
-                        showNotification('Card deleted');
-                    })
-                    .catch((error) => {
-                        console.error('Error deleting card:', error);
-                    });
-            } else {
-                // Otherwise save the card
-                set(cardRef, updates)
-                    .then(() => {
-                        showNotification('Card saved');
-                        setIsEditing(false);
-                    })
-                    .catch((error) => {
-                        console.error('Error saving card:', error);
-                    });
-            }
+        if (!boardId) return;
+        
+        const cardRef = getCardRef();
+        const trimmedContent = editedContent.trim();
+        
+        // If content is empty, delete the card
+        if (!trimmedContent) {
+            remove(cardRef)
+                .then(() => {
+                    showNotification('Card deleted');
+                })
+                .catch((error) => {
+                    console.error('Error deleting card:', error);
+                });
+            return;
         }
+        
+        // Otherwise save the card
+        const updates = {
+            ...cardData,
+            content: trimmedContent
+        };
+        
+        set(cardRef, updates)
+            .then(() => {
+                showNotification('Card saved');
+                setIsEditing(false);
+            })
+            .catch((error) => {
+                console.error('Error saving card:', error);
+            });
     };
 
     // Delete card
     const deleteCard = (e) => {
         e.stopPropagation();
         
-        if (boardId && window.confirm('Are you sure you want to delete this card?')) {
-            const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+        if (!boardId) return;
+        
+        if (window.confirm('Are you sure you want to delete this card?')) {
+            const cardRef = getCardRef();
             remove(cardRef)
                 .then(() => {
                     showNotification('Card deleted');
@@ -129,41 +140,41 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         }
     };
 
+    /**
+     * Update votes for a card
+     * @param {number} delta - The amount to change votes by (+1 or -1)
+     * @param {Event} e - The event object
+     * @param {string} message - Notification message to show
+     */
+    const updateVotes = (delta, e, message) => {
+        e.stopPropagation();
+        
+        if (!boardId) return;
+        
+        const currentVotes = cardData.votes || 0;
+        // Don't allow negative votes
+        if (delta < 0 && currentVotes <= 0) return;
+        
+        const newVotes = currentVotes + delta;
+        const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
+        
+        set(votesRef, newVotes)
+            .then(() => {
+                showNotification(message);
+            })
+            .catch((error) => {
+                console.error('Error updating votes:', error);
+            });
+    };
+
     // Handle upvoting a card
     const upvoteCard = (e) => {
-        e.stopPropagation();
-
-        if (boardId) {
-            const newVotes = (cardData.votes || 0) + 1;
-            const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
-            set(votesRef, newVotes)
-                .then(() => {
-                    showNotification('Vote added');
-                })
-                .catch((error) => {
-                    console.error('Error adding vote:', error);
-                });
-        }
+        updateVotes(1, e, 'Vote added');
     };
 
     // Handle downvoting a card
     const handleDownvote = (e) => {
-        e.stopPropagation();
-
-        if (boardId) {
-            const currentVotes = cardData.votes || 0;
-            if (currentVotes > 0) {
-                const newVotes = currentVotes - 1;
-                const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
-                set(votesRef, newVotes)
-                    .then(() => {
-                        showNotification('Vote removed');
-                    })
-                    .catch((error) => {
-                        console.error('Error removing vote:', error);
-                    });
-            }
-        }
+        updateVotes(-1, e, 'Vote removed');
     };
 
     // Format emojis in card content
@@ -241,26 +252,19 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                     left: emojiPickerPosition.left 
                 }}
             >
-                {COMMON_EMOJIS.map((emoji) => {
-                    // Check if current user has already reacted with this emoji
-                    const isSelected = cardData.reactions && 
-                                     cardData.reactions[emoji] && 
-                                     cardData.reactions[emoji].users && 
-                                     cardData.reactions[emoji].users[user?.uid];
-                    return (
-                        <button
-                            key={emoji}
-                            className={`emoji-option ${isSelected ? 'selected' : ''}`}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                addReaction(e, emoji);
-                                setShowEmojiPicker(false); // Close picker after selecting an emoji
-                            }}
-                        >
-                            {emoji}
-                        </button>
-                    );
-                })}
+                {COMMON_EMOJIS.map((emoji) => (
+                    <button
+                        key={emoji}
+                        className={`emoji-option ${hasUserReactedWithEmoji(emoji) ? 'selected' : ''}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            addReaction(e, emoji);
+                            setShowEmojiPicker(false); // Close picker after selecting an emoji
+                        }}
+                    >
+                        {emoji}
+                    </button>
+                ))}
             </div>,
             document.body
         );
@@ -327,57 +331,79 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         );
     };
 
+    /**
+     * Check if a user has reacted with a specific emoji
+     * @param {string} emoji - The emoji to check
+     * @returns {boolean} True if user has reacted, false otherwise
+     */
+    const hasUserReactedWithEmoji = (emoji) => {
+        return !!(cardData.reactions && 
+                cardData.reactions[emoji] && 
+                cardData.reactions[emoji].users && 
+                cardData.reactions[emoji].users[user?.uid]);
+    };
+
+    /**
+     * Get the current count of a specific emoji reaction
+     * @param {string} emoji - The emoji to count
+     * @returns {number} The count value
+     */
+    const getReactionCount = (emoji) => {
+        return (cardData.reactions && 
+                cardData.reactions[emoji] && 
+                cardData.reactions[emoji].count) || 0;
+    };
+
+    /**
+     * Create reference paths for emoji reaction data
+     * @param {string} emoji - The emoji for the reaction
+     * @returns {Object} References to user and count paths
+     */
+    const getReactionRefs = (emoji) => {
+        const basePath = `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}`;
+        return {
+            userRef: ref(database, `${basePath}/users/${user.uid}`),
+            countRef: ref(database, `${basePath}/count`)
+        };
+    };
+
     // Add or remove a reaction to a card
     const addReaction = (e, emoji) => {
         e.stopPropagation();
 
-        if (boardId && user) {
-            // Reference to the specific user's reaction for this emoji
-            const userReactionRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/users/${user.uid}`);
-            
-            // Check if this user has already reacted with this emoji
-            const hasUserReacted = cardData.reactions && 
-                                  cardData.reactions[emoji] && 
-                                  cardData.reactions[emoji].users && 
-                                  cardData.reactions[emoji].users[user.uid];
-            
-            if (hasUserReacted) {
-                // If user already reacted, remove their reaction
-                remove(userReactionRef)
-                    .then(() => {
-                        showNotification('Your reaction removed');
-                        
-                        // If this was the last reaction, clean up the empty objects
-                        const userCountRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/count`);
-                        set(userCountRef, (cardData.reactions[emoji].count || 1) - 1)
-                            .catch(error => {
-                                console.error('Error updating reaction count:', error);
-                            });
-                    })
-                    .catch((error) => {
-                        console.error('Error removing reaction:', error);
-                    });
-            } else {
-                // Add user's reaction
-                set(userReactionRef, true)
-                    .then(() => {
-                        showNotification('Reaction added');
-                        
-                        // Increment the counter for this emoji
-                        const currentCount = ((cardData.reactions && 
-                                           cardData.reactions[emoji] && 
-                                           cardData.reactions[emoji].count) || 0);
-                        
-                        const countRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/reactions/${emoji}/count`);
-                        set(countRef, currentCount + 1)
-                            .catch(error => {
-                                console.error('Error updating reaction count:', error);
-                            });
-                    })
-                    .catch((error) => {
-                        console.error('Error adding reaction:', error);
-                    });
-            }
+        if (!boardId || !user) return;
+        
+        const { userRef, countRef } = getReactionRefs(emoji);
+        const hasUserReacted = hasUserReactedWithEmoji(emoji);
+        
+        if (hasUserReacted) {
+            // If user already reacted, remove their reaction
+            remove(userRef)
+                .then(() => {
+                    // Update the counter for this emoji
+                    const newCount = Math.max(0, getReactionCount(emoji) - 1);
+                    return set(countRef, newCount);
+                })
+                .then(() => {
+                    showNotification('Your reaction removed');
+                })
+                .catch((error) => {
+                    console.error('Error managing reaction:', error);
+                });
+        } else {
+            // Add user's reaction
+            set(userRef, true)
+                .then(() => {
+                    // Update the counter for this emoji
+                    const newCount = getReactionCount(emoji) + 1;
+                    return set(countRef, newCount);
+                })
+                .then(() => {
+                    showNotification('Reaction added');
+                })
+                .catch((error) => {
+                    console.error('Error managing reaction:', error);
+                });
         }
     };
 
