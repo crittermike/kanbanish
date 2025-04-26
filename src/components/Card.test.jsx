@@ -6,6 +6,7 @@ import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
 import { ref, set, remove } from 'firebase/database';
 import { useDrag } from 'react-dnd';
+import { COMMON_EMOJIS } from '../utils/helpers';
 
 // Mock firebase and react-dnd
 vi.mock('firebase/database', () => {
@@ -203,5 +204,237 @@ describe('Card Component', () => {
     // Check if emoji options are present
     const emojiOptions = screen.getAllByTestId('emoji-option');
     expect(emojiOptions.length).toBeGreaterThan(0);
+  });
+
+  test('allows adding and removing emoji reactions', async () => {
+    // Start with a card that has no reactions
+    const cardWithoutReactions = {
+      ...mockCardData,
+      reactions: {}
+    };
+    
+    // Mock the set function to update the cardData
+    set.mockImplementationOnce(() => {
+      cardWithoutReactions.reactions = {
+        [COMMON_EMOJIS[0]]: {
+          count: 1,
+          users: {
+            [mockBoardContext.user.uid]: true
+          }
+        }
+      };
+      return Promise.resolve();
+    });
+    
+    render(<Card {...mockProps} cardData={cardWithoutReactions} />);
+    
+    // Open emoji picker
+    const addReactionButton = screen.getByTitle('Add reaction');
+    fireEvent.click(addReactionButton);
+    
+    // Add a reaction
+    const emojiOptions = screen.getAllByTestId('emoji-option');
+    const firstEmoji = emojiOptions[0];
+    const emojiText = firstEmoji.textContent;
+    fireEvent.click(firstEmoji);
+    
+    // Verify reaction was added and wait for it to appear in the DOM
+    await waitFor(() => {
+      expect(set).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Reaction added');
+      const addedReaction = screen.getByTestId('emoji-reaction');
+      expect(addedReaction).toHaveTextContent(emojiText);
+    });
+    
+    // Mock the remove function
+    remove.mockImplementationOnce(() => {
+      cardWithoutReactions.reactions = {};
+      return Promise.resolve();
+    });
+    
+    // Remove the reaction
+    const addedReaction = screen.getByTestId('emoji-reaction');
+    fireEvent.click(addedReaction);
+    
+    // Verify reaction was removed
+    await waitFor(() => {
+      expect(remove).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Your reaction removed');
+    });
+  });
+
+  test('allows adding comments', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Add a comment
+    const commentInput = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.change(commentInput, { target: { value: 'New test comment' } });
+    fireEvent.keyPress(commentInput, { key: 'Enter', code: 13, charCode: 13 });
+    
+    // Verify comment was added
+    await waitFor(() => {
+      expect(set).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment added');
+    });
+  });
+
+  test('handles keyboard shortcuts for editing', async () => {
+    // Mock the set function to update the cardData
+    set.mockImplementationOnce(() => {
+      mockCardData.content = 'Updated content';
+      return Promise.resolve();
+    });
+
+    render(<Card {...mockProps} />);
+    
+    // Enter edit mode
+    const cardContent = screen.getByTestId('card-content');
+    fireEvent.click(cardContent);
+    
+    // Edit content
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: 'Updated content' } });
+    
+    // Save with Enter key
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 13, charCode: 13 });
+    
+    // Verify changes were saved
+    await waitFor(() => {
+      expect(set).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Card saved');
+    });
+    
+    // Wait for the updated content to appear and verify it's in the document
+    await waitFor(() => {
+      const cardContent = screen.getByTestId('card-content');
+      expect(cardContent).toHaveTextContent('Updated content');
+    });
+    
+    // Enter edit mode again
+    const updatedCardContent = screen.getByTestId('card-content');
+    fireEvent.click(updatedCardContent);
+    
+    // Cancel with Escape key
+    const textareaAfterClick = screen.getByRole('textbox');
+    fireEvent.keyDown(textareaAfterClick, { key: 'Escape', code: 27, charCode: 27 });
+    
+    // Verify edit mode was cancelled
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    });
+  });
+
+  test('prevents negative vote count', async () => {
+    // Set initial votes to 0
+    const cardWithZeroVotes = {
+      ...mockCardData,
+      votes: 0
+    };
+    
+    render(<Card {...mockProps} cardData={cardWithZeroVotes} />);
+    
+    // Try to downvote
+    const downvoteButton = screen.getByTitle('Downvote');
+    fireEvent.click(downvoteButton);
+    
+    // Verify vote count didn't change
+    await waitFor(() => {
+      expect(set).not.toHaveBeenCalled();
+      expect(mockProps.showNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  test('requires confirmation for card deletion', async () => {
+    window.confirm.mockReturnValueOnce(false);
+    render(<Card {...mockProps} />);
+    
+    // Enter edit mode by clicking the card content
+    const cardContent = screen.getByTestId('card-content');
+    fireEvent.click(cardContent);
+    
+    // Click delete button
+    fireEvent.click(screen.getByText('Delete'));
+    
+    // Verify card wasn't deleted
+    await waitFor(() => {
+      expect(window.confirm).toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+    });
+  });
+
+  test('removes reaction when clicking an existing reaction', async () => {
+    // Start with a card that has a reaction
+    const cardWithReaction = {
+      ...mockCardData,
+      reactions: {
+        [COMMON_EMOJIS[0]]: {
+          count: 1,
+          users: {
+            [mockBoardContext.user.uid]: true
+          }
+        }
+      }
+    };
+    
+    // Mock the remove function
+    remove.mockImplementationOnce(() => {
+      cardWithReaction.reactions = {};
+      return Promise.resolve();
+    });
+    
+    render(<Card {...mockProps} cardData={cardWithReaction} />);
+    
+    // Click the existing reaction
+    const existingReaction = screen.getByTestId('emoji-reaction');
+    fireEvent.click(existingReaction);
+    
+    // Verify reaction was removed
+    await waitFor(() => {
+      expect(remove).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Your reaction removed');
+    });
+  });
+
+  test('prevents adding empty comments', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Try to add an empty comment
+    const commentInput = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.keyPress(commentInput, { key: 'Enter', code: 13, charCode: 13 });
+    
+    // Verify no comment was added
+    await waitFor(() => {
+      expect(set).not.toHaveBeenCalled();
+      expect(mockProps.showNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  test('deletes card when saving empty content', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Enter edit mode
+    const cardContent = screen.getByTestId('card-content');
+    fireEvent.click(cardContent);
+    
+    // Clear the content
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: '' } });
+    
+    // Save with Enter key
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 13, charCode: 13 });
+    
+    // Verify card was deleted
+    await waitFor(() => {
+      expect(remove).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Card deleted');
+    });
   });
 });

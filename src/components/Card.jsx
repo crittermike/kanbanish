@@ -205,6 +205,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                         <div 
                             className={`emoji-reaction ${hasUserReacted ? 'active' : ''}`} 
                             key={emoji} 
+                            data-testid="emoji-reaction"
                             onClick={(e) => addReaction(e, emoji)}
                             title={hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction"}
                         >
@@ -447,7 +448,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                                 </svg>
                             </button>
                         </div>
-                        <div className="card-content">
+                        <div className="card-content" data-testid="card-content">
                             {formatContentWithEmojis(cardData.content)}
                         </div>
                     </div>
