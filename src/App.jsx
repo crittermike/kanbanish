@@ -20,7 +20,7 @@ function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <BoardProvider>
-        <div className="App">
+        <div className="App" data-testid="app-container">
           <Board showNotification={showNotification} />
           
           {/* Modals */}
