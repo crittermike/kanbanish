@@ -16,7 +16,7 @@
 }
 
 /* Main emoji container */
-.card-footer {
+.emoji-reactions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--emoji-reaction-gap);
@@ -26,14 +26,14 @@
     justify-content: space-between;
 }
 
-.card-footer .reactions-left {
+.emoji-reactions .reactions-left {
     display: flex;
     flex-wrap: wrap;
     gap: var(--emoji-reaction-gap);
     flex: 1;
 }
 
-.card-footer .reactions-right {
+.emoji-reactions .reactions-right {
     display: flex;
     align-items: center;
 }

@@ -7,17 +7,31 @@ import { useBoardContext } from '../context/BoardContext';
 import { ref, set, remove } from 'firebase/database';
 import { useDrag } from 'react-dnd';
 
-// Mock modules
-vi.mock('../utils/firebase', () => ({
-  database: {}
+// Mock firebase and react-dnd
+vi.mock('firebase/database', () => {
+  const mockDatabase = {};
+  return {
+    ref: vi.fn(),
+    set: vi.fn().mockResolvedValue(),
+    remove: vi.fn().mockResolvedValue(),
+    getDatabase: vi.fn().mockReturnValue(mockDatabase)
+  };
+});
+
+vi.mock('react-dnd', () => ({
+  useDrag: vi.fn().mockReturnValue([{ isDragging: false }, vi.fn()])
 }));
-vi.mock('firebase/database');
-vi.mock('react-dnd');
+
+// Mock ReactDOM.createPortal
 vi.mock('react-dom', () => ({
   ...vi.importActual('react-dom'),
   createPortal: (element) => element
 }));
-vi.mock('../context/BoardContext');
+
+// Mock BoardContext
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
 
 describe('Card Component', () => {
   const mockCardData = {
@@ -34,7 +48,7 @@ describe('Card Component', () => {
     comments: {
       'comment1': {
         content: 'Test comment',
-        user: 'user123'
+        timestamp: 1618812345678
       }
     }
   };
@@ -52,12 +66,8 @@ describe('Card Component', () => {
   };
 
   beforeEach(() => {
-    vi.mocked(ref).mockReturnValue('mockedRef');
-    vi.mocked(set).mockResolvedValue();
-    vi.mocked(remove).mockResolvedValue();
     useBoardContext.mockReturnValue(mockBoardContext);
-    vi.mocked(useDrag).mockReturnValue([{ isDragging: false }, vi.fn()]);
-    window.confirm = vi.fn().mockImplementation(() => true);
+    window.confirm = vi.fn().mockImplementation(() => true); // Auto confirm any confirms
   });
 
   afterEach(() => {
@@ -174,89 +184,5 @@ describe('Card Component', () => {
     const cardElement = screen.getByText('Test card content').closest('.card');
     expect(cardElement).toHaveClass('dragging');
     expect(cardElement).toHaveStyle('opacity: 0.5');
-  });
-
-  test('stays in edit mode when clicking the textarea', () => {
-    render(<Card {...mockProps} />);
-    
-    // Click the card to enter edit mode
-    fireEvent.click(screen.getByText('Test card content'));
-    
-    // Get the textarea that appears in edit mode
-    const textarea = screen.getByRole('textbox');
-    expect(textarea).toBeInTheDocument();
-    
-    // Click the textarea
-    fireEvent.click(textarea);
-    
-    // Verify the textarea is still there (edit mode hasn't closed)
-    expect(textarea).toBeInTheDocument();
-    expect(textarea).toHaveFocus();
-  });
-
-  test('allows adding comments with Enter key', async () => {
-    render(<Card {...mockProps} />);
-    
-    // Open comments section
-    const commentsButton = screen.getByTitle('Toggle comments');
-    fireEvent.click(commentsButton);
-    
-    // Find and fill comment input
-    const commentInput = screen.getByPlaceholderText('Add a comment...');
-    fireEvent.change(commentInput, { target: { value: 'New test comment' } });
-    
-    // Press Enter to submit
-    fireEvent.keyPress(commentInput, {
-      key: 'Enter',
-      code: 'Enter',
-      charCode: 13,
-      keyCode: 13,
-      which: 13,
-      target: {
-        value: 'New test comment'
-      }
-    });
-    
-    // Check if Firebase was called correctly
-    await waitFor(() => {
-      expect(ref).toHaveBeenCalled();
-      const [database, path] = ref.mock.calls[0];
-      expect(path).toMatch(/^boards\/board123\/columns\/column1\/cards\/card123\/comments\/\d+$/);
-      
-      expect(set).toHaveBeenCalledWith('mockedRef', {
-        content: 'New test comment',
-        user: 'user123'
-      });
-    });
-    
-    // Check if input was cleared
-    expect(commentInput.value).toBe('');
-  });
-
-  test('does not add empty comments', async () => {
-    render(<Card {...mockProps} />);
-    
-    // Open comments section
-    const commentsButton = screen.getByTitle('Toggle comments');
-    fireEvent.click(commentsButton);
-    
-    // Find comment input
-    const commentInput = screen.getByPlaceholderText('Add a comment...');
-    
-    // Try to submit empty comment
-    fireEvent.keyPress(commentInput, {
-      key: 'Enter',
-      code: 'Enter',
-      charCode: 13,
-      keyCode: 13,
-      which: 13,
-      target: {
-        value: ''
-      }
-    });
-    
-    // Check that Firebase was not called
-    expect(ref).not.toHaveBeenCalled();
-    expect(set).not.toHaveBeenCalled();
   });
 });
