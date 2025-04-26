@@ -221,6 +221,9 @@
 /* Card Edit Mode */
 .card-edit {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
 }
 
 .card-edit-textarea {
@@ -234,7 +237,6 @@
     resize: vertical;
     background: var(--input-bg);
     color: var(--text-color);
-    margin-bottom: var(--space-sm);
 }
 
 .card-edit-textarea:focus {
@@ -246,7 +248,43 @@
 .card-edit-actions {
     display: flex;
     gap: var(--space-sm);
-    justify-content: flex-end;
+}
+
+.card-edit-actions .btn {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-xs) var(--space-sm);
+}
+
+.card-edit-actions .primary-btn {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.card-edit-actions .primary-btn:hover {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.card-edit-actions .secondary-btn {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+.card-edit-actions .secondary-btn:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+}
+
+.card-edit-actions .danger-btn {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+.card-edit-actions .danger-btn:hover {
+    opacity: 0.9;
 }
 
 /* Comment Input */
