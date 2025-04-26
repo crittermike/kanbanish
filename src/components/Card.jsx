@@ -247,6 +247,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                 className="emoji-picker" 
                 onClick={(e) => e.stopPropagation()}
                 ref={emojiPickerRef}
+                data-testid="emoji-picker"
                 style={{ 
                     top: emojiPickerPosition.top, 
                     left: emojiPickerPosition.left 
@@ -256,6 +257,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
                     <button
                         key={emoji}
                         className={`emoji-option ${hasUserReactedWithEmoji(emoji) ? 'selected' : ''}`}
+                        data-testid="emoji-option"
                         onClick={(e) => {
                             e.stopPropagation();
                             addReaction(e, emoji);

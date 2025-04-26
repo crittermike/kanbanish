@@ -25,7 +25,10 @@ vi.mock('react-dnd', () => ({
 // Mock ReactDOM.createPortal
 vi.mock('react-dom', () => ({
   ...vi.importActual('react-dom'),
-  createPortal: (element) => element
+  createPortal: (element) => element,
+  default: {
+    createPortal: (element) => element
+  }
 }));
 
 // Mock BoardContext
@@ -184,5 +187,21 @@ describe('Card Component', () => {
     const cardElement = screen.getByText('Test card content').closest('.card');
     expect(cardElement).toHaveClass('dragging');
     expect(cardElement).toHaveStyle('opacity: 0.5');
+  });
+
+  test('shows emoji picker when clicking the + icon', () => {
+    render(<Card {...mockProps} />);
+    
+    // Find and click the add reaction button
+    const addReactionButton = screen.getByTitle('Add reaction');
+    fireEvent.click(addReactionButton);
+    
+    // Check if the emoji picker appears with emoji options
+    const emojiPicker = screen.getByTestId('emoji-picker');
+    expect(emojiPicker).toBeInTheDocument();
+    
+    // Check if emoji options are present
+    const emojiOptions = screen.getAllByTestId('emoji-option');
+    expect(emojiOptions.length).toBeGreaterThan(0);
   });
 });
