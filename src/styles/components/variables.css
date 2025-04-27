@@ -25,6 +25,8 @@
     --border-color: #30363d;
     --column-bg: #161b22;
     --drag-over: var(--accent-transparent-light);
+    --primary-color: #58a6ff;
+    --primary-color-rgb: 88, 166, 255;
     
     /* Status colors */
     --danger: #f85149;

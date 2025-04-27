@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ref, set } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
+import ExportBoardModal from './modals/ExportBoardModal';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
@@ -35,9 +36,10 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, toggleSortByVotes, sortByVotes }) => (
+const ActionButtons = ({ handleCreateNewBoard, toggleSortByVotes, sortByVotes, handleExportBoard }) => (
   <div className="action-buttons">
     <button id="create-board" className="btn" onClick={handleCreateNewBoard}>New Board</button>
+    <button id="export-board" className="btn secondary-btn" onClick={handleExportBoard}>Export Board</button>
     <button id="sort-by-votes" className={`sort-button ${sortByVotes ? 'active' : ''}`} onClick={toggleSortByVotes}>
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
         <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
@@ -79,6 +81,9 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
  * Main Board component responsible for rendering and managing the kanban board
  */
 function Board({ showNotification }) {
+  // State for export modal
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  
   // Get context values from BoardContext
   const { 
     boardId, 
@@ -203,6 +208,12 @@ function Board({ showNotification }) {
     }
   };
   
+  // Handle export board button click
+  const handleExportBoard = () => {
+    setIsExportModalOpen(true);
+    showNotification('Preparing board export...');
+  };
+  
   return (
     <>
       <header>
@@ -216,6 +227,7 @@ function Board({ showNotification }) {
             handleCreateNewBoard={handleCreateNewBoard}
             toggleSortByVotes={toggleSortByVotes}
             sortByVotes={sortByVotes}
+            handleExportBoard={handleExportBoard}
           />
         </div>
       </header>
@@ -228,6 +240,15 @@ function Board({ showNotification }) {
           addNewColumn={addNewColumn}
         />
       </main>
+      
+      {/* Export Board Modal */}
+      <ExportBoardModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => {
+          setIsExportModalOpen(false);
+        }}
+        showNotification={showNotification}
+      />
     </>
   );
 }
