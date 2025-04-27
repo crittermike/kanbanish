@@ -272,7 +272,6 @@
   flex-wrap: wrap;
   gap: var(--space-xxs);
   margin-top: var(--space-xs); /* Reduced from space-sm to space-xs */
-  border-top: 1px dashed var(--border-color);
   padding-top: var(--space-xxs); /* Reduced from space-xs to space-xxs */
 }
 
