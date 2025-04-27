@@ -117,9 +117,13 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
 
 // UI Component for the columns container including the add column button
 const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
-  // Get columns in their original order
+  // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
-    return Object.entries(columns || {});
+    // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
+    // to ensure they maintain their original order regardless of title changes
+    return Object.entries(columns || {}).sort((a, b) => {
+      return a[0].localeCompare(b[0]); // Sort by column ID
+    });
   };
 
   return (
