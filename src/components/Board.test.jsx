@@ -140,4 +140,37 @@ describe('Board Component', () => {
     
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
   });
+  
+  test('updates document title when board title changes', () => {
+    // Set up initial board title
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: 'Initial Board Title'
+    });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Initial document title should be set
+    expect(document.title).toBe('Initial Board Title - Kanbanish');
+    
+    // Change the board title
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: 'Updated Board Title'
+    });
+    
+    // Re-render with new board title
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Document title should be updated
+    expect(document.title).toBe('Updated Board Title - Kanbanish');
+  });
 });

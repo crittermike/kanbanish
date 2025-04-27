@@ -105,6 +105,11 @@ function Board({ showNotification }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
+  // Update document title when board title changes
+  useEffect(() => {
+    document.title = boardTitle ? `${boardTitle} - Kanbanish` : 'Kanbanish';
+  }, [boardTitle]);
+  
   /**
    * BOARD MANAGEMENT HANDLERS
    */
