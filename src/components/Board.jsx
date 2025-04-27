@@ -37,18 +37,74 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, toggleSortByVotes, sortByVotes, handleExportBoard }) => (
-  <div className="action-buttons">
-    <button id="create-board" className="btn" onClick={handleCreateNewBoard}>New Board</button>
-    <button id="export-board" className="btn secondary-btn" onClick={handleExportBoard}>Export Board</button>
-    <button id="sort-by-votes" className={`sort-button ${sortByVotes ? 'active' : ''}`} onClick={toggleSortByVotes}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-      </svg>
-      Sort by Votes
-    </button>
-  </div>
-);
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sortDropdownOpen, setSortDropdownOpen, handleExportBoard }) => {
+  // Handle clicking outside the dropdown
+  const dropdownRef = React.useRef(null);
+  
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setSortDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [setSortDropdownOpen]);
+  
+  return (
+    <div className="action-buttons">
+      <button id="create-board" className="btn" onClick={handleCreateNewBoard}>New Board</button>
+      <button id="export-board" className="btn secondary-btn" onClick={handleExportBoard}>Export Board</button>
+      
+      <div className="sort-dropdown-container" ref={dropdownRef}>
+        <button 
+          id="sort-dropdown-button" 
+          className="btn sort-dropdown-button" 
+          onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+          aria-expanded={sortDropdownOpen}
+          aria-haspopup="true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M3.5 3.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 12.293V3.5zm4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
+          </svg>
+          Sort
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}>
+            <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+          </svg>
+        </button>
+        
+        {sortDropdownOpen && (
+          <div className="sort-dropdown-menu">
+            <button 
+              className={`sort-option ${!sortByVotes ? 'selected' : ''}`} 
+              onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8.5 2.5a.5.5 0 0 0-1 0v9.793l-3.146-3.147a.5.5 0 0 0-.708.708l4 4a.5.5 0 0 0 .708 0l4-4a.5.5 0 0 0-.708-.708L8.5 12.293V2.5z"/>
+              </svg>
+              Chronological
+              {!sortByVotes && <span className="checkmark">✓</span>}
+            </button>
+            <button 
+              className={`sort-option ${sortByVotes ? 'selected' : ''}`} 
+              onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.082 5.629 9.664 7H8.598l1.789-5.332h1.234L13.402 7h-1.12l-.419-1.371h-1.781zm1.57-.785L11 2.687h-.047l-.652 2.157h1.351z"/>
+                <path d="M12.96 14H9.028v-.691l2.579-3.72v-.054H9.098v-.867h3.785v.691l-2.567 3.72v.054h2.645V14zm-8.46-.5a.5.5 0 0 1-1 0V3.707L2.354 4.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L4.5 3.707V13.5z"/>
+              </svg>
+              By Votes
+              {sortByVotes && <span className="checkmark">✓</span>}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // UI Component for the columns container including the add column button
 const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
@@ -233,6 +289,9 @@ function Board({ showNotification }) {
     user // Include user from context
   } = useBoardContext();
   
+  // State for dropdown menu
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  
   /**
    * BOARD INITIALIZATION
    */
@@ -333,10 +392,7 @@ function Board({ showNotification }) {
    * UTILITY FUNCTIONS
    */
   
-  // Toggle sort by votes
-  const toggleSortByVotes = () => {
-    setSortByVotes(!sortByVotes);
-  };
+  // We no longer need toggleSortByVotes since we directly set the sort type from dropdown
   
   // Copy share URL to clipboard
   const copyShareUrl = () => {
@@ -369,8 +425,10 @@ function Board({ showNotification }) {
           />
           <ActionButtons 
             handleCreateNewBoard={handleCreateNewBoard}
-            toggleSortByVotes={toggleSortByVotes}
             sortByVotes={sortByVotes}
+            setSortByVotes={setSortByVotes}
+            sortDropdownOpen={sortDropdownOpen}
+            setSortDropdownOpen={setSortDropdownOpen}
             handleExportBoard={handleExportBoard}
           />
         </div>

@@ -181,16 +181,50 @@ describe('Board Component', () => {
     expect(screen.getByTestId('template-modal')).toBeInTheDocument();
   });
 
-  test('toggles sort by votes when button is clicked', () => {
+  test('opens sort dropdown when dropdown button is clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
     render(
       <DndProvider backend={HTML5Backend}>
         <Board showNotification={mockShowNotification} />
       </DndProvider>
     );
     
-    const sortButton = screen.getByText('Sort by Votes');
+    // Find and click the sort dropdown button
+    const sortButton = screen.getByText('Sort');
     fireEvent.click(sortButton);
     
+    // Check that dropdown options are shown
+    expect(screen.getByText('Chronological')).toBeInTheDocument();
+    expect(screen.getByText('By Votes')).toBeInTheDocument();
+  });
+  
+  test('selects sort by votes when that option is clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const sortButton = screen.getByText('Sort');
+    fireEvent.click(sortButton);
+    
+    // Click the "By Votes" option
+    const byVotesOption = screen.getByText('By Votes');
+    fireEvent.click(byVotesOption);
+    
+    // Check that setSortByVotes was called with true
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
   });
   
