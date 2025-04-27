@@ -72,20 +72,22 @@ export const BoardProvider = ({ children }) => {
     const newBoardId = generateId();
     const newBoardRef = ref(database, `boards/${newBoardId}`);
     
+    // Using ordered IDs to help ensure columns appear in the correct order
+    // The "a_", "b_", "c_" prefixes ensure correct ordering even with Object.entries
     const initialData = {
       title: 'Untitled Board',
       created: Date.now(),
       owner: user.uid,
       columns: {
-        [generateId()]: {
+        [`a_${generateId()}`]: {
           title: 'To Do',
           cards: {}
         },
-        [generateId()]: {
+        [`b_${generateId()}`]: {
           title: 'In Progress',
           cards: {}
         },
-        [generateId()]: {
+        [`c_${generateId()}`]: {
           title: 'Done',
           cards: {}
         }

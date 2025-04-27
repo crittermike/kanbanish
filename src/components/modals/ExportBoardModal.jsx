@@ -34,7 +34,24 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       return markdown + "No columns found.";
     }
     
-    Object.entries(columns).forEach(([columnId, column]) => {
+    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    const sortedColumns = Object.entries(columns).sort((a, b) => {
+      // Define the order of standard column titles
+      const columnOrder = {
+        'To Do': 1,
+        'In Progress': 2,
+        'Done': 3,
+      };
+      
+      // Get the order for each column, defaulting to a high number for custom columns
+      const orderA = columnOrder[a[1].title] || 100;
+      const orderB = columnOrder[b[1].title] || 100;
+      
+      // Sort by the defined order
+      return orderA - orderB;
+    });
+    
+    sortedColumns.forEach(([columnId, column]) => {
       if (!column) return;
       
       markdown += `## ${column.title || "Untitled Column"}\n\n`;
@@ -91,7 +108,24 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       return text + "No columns found.";
     }
     
-    Object.entries(columns).forEach(([columnId, column]) => {
+    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    const sortedColumns = Object.entries(columns).sort((a, b) => {
+      // Define the order of standard column titles
+      const columnOrder = {
+        'To Do': 1,
+        'In Progress': 2,
+        'Done': 3,
+      };
+      
+      // Get the order for each column, defaulting to a high number for custom columns
+      const orderA = columnOrder[a[1].title] || 100;
+      const orderB = columnOrder[b[1].title] || 100;
+      
+      // Sort by the defined order
+      return orderA - orderB;
+    });
+    
+    sortedColumns.forEach(([columnId, column]) => {
       if (!column) return;
       
       const title = column.title || "Untitled Column";

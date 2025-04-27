@@ -50,32 +50,56 @@ const ActionButtons = ({ handleCreateNewBoard, toggleSortByVotes, sortByVotes, h
 );
 
 // UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => (
-  <div className="board-container">
-    <div id="board" className="board">
-      {/* Render columns */}
-      {Object.entries(columns || {}).map(([columnId, columnData]) => (
-        <Column 
-          key={columnId} 
-          columnId={columnId} 
-          columnData={columnData} 
-          sortByVotes={sortByVotes}
-          showNotification={showNotification}
-        />
-      ))}
+const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+  // Function to sort columns in the correct workflow order
+  const getSortedColumns = () => {
+    const entries = Object.entries(columns || {});
+    
+    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    return entries.sort((a, b) => {
+      // Define the order of standard column titles
+      const columnOrder = {
+        'To Do': 1,
+        'In Progress': 2,
+        'Done': 3,
+      };
       
-      {/* Add column button */}
-      <div className="add-column-container">
-        <button id="add-column" className="add-column" onClick={addNewColumn}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-          Add Column
-        </button>
+      // Get the order for each column, defaulting to a high number for custom columns
+      const orderA = columnOrder[a[1].title] || 100;
+      const orderB = columnOrder[b[1].title] || 100;
+      
+      // Sort by the defined order
+      return orderA - orderB;
+    });
+  };
+
+  return (
+    <div className="board-container">
+      <div id="board" className="board">
+        {/* Render columns in sorted order */}
+        {getSortedColumns().map(([columnId, columnData]) => (
+          <Column 
+            key={columnId} 
+            columnId={columnId} 
+            columnData={columnData} 
+            sortByVotes={sortByVotes}
+            showNotification={showNotification}
+          />
+        ))}
+        
+        {/* Add column button */}
+        <div className="add-column-container">
+          <button id="add-column" className="add-column" onClick={addNewColumn}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Add Column
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * Main Board component responsible for rendering and managing the kanban board
