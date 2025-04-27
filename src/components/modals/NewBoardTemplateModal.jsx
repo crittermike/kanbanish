@@ -8,15 +8,23 @@ const BOARD_TEMPLATES = [
   {
     id: 'default',
     name: 'Default',
-    description: 'Standard kanban workflow',
+    description: 'Simple task tracking for any project',
     columns: ['To Do', 'In Progress', 'Done'],
     icon: '📋',
     tags: ['workflow', 'kanban', 'basic']
   },
   {
+    id: 'custom',
+    name: 'Custom',
+    description: 'Create your own board structure from scratch',
+    columns: ['Untitled'],
+    icon: '✏️',
+    tags: ['custom', 'blank', 'flexible']
+  },
+  {
     id: 'lean-coffee',
     name: 'Lean Coffee',
-    description: 'Topic-based discussion format',
+    description: 'Democratically driven meeting agenda format',
     columns: ['Topics', 'Discussing', 'Done'],
     icon: '☕',
     tags: ['discussion', 'meeting', 'agenda']
@@ -24,7 +32,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'retro',
     name: 'Retrospective',
-    description: 'Team reflection and action',
+    description: 'Reflect on past work and plan improvements',
     columns: ['Went Well', 'Could Improve', 'Action Items'],
     icon: '🔄',
     tags: ['agile', 'reflection', 'team']
@@ -32,7 +40,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'feelings-improvements',
     name: 'Feelings / Improvements',
-    description: 'Emotional feedback and solutions',
+    description: 'Focus on emotional impact and concrete solutions',
     columns: ['Feelings', 'Improvements'],
     icon: '❤️',
     tags: ['feedback', 'emotions', 'solutions']
@@ -40,7 +48,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'daki',
     name: 'DAKI',
-    description: 'Drop Add Keep Improve',
+    description: 'Evaluate current processes and identify changes',
     columns: ['Drop', 'Add', 'Keep', 'Improve'],
     icon: '✨',
     tags: ['reflection', 'processes', 'practices']
@@ -48,7 +56,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'glad-sad-mad',
     name: 'Glad Sad Mad',
-    description: 'Emotional categorization',
+    description: 'Categorize feedback by emotional response',
     columns: ['Glad', 'Sad', 'Mad'],
     icon: '😊',
     tags: ['emotions', 'reflection', 'feedback']
@@ -56,7 +64,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'start-stop-continue',
     name: 'Start Stop Continue',
-    description: 'Action-based reflection',
+    description: 'Focus on actionable changes to team behavior',
     columns: ['Start', 'Stop', 'Continue'],
     icon: '🚦',
     tags: ['action', 'feedback', 'improvement']
@@ -64,7 +72,7 @@ const BOARD_TEMPLATES = [
   {
     id: '4ls',
     name: '4 Ls',
-    description: 'Liked, Learned, Lacked, Longed For',
+    description: 'Comprehensive retrospective with learning focus',
     columns: ['Liked', 'Learned', 'Lacked', 'Longed For'],
     icon: '📝',
     tags: ['reflection', 'learning', 'retrospective']
@@ -72,7 +80,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'swot',
     name: 'SWOT',
-    description: 'Strategic planning tool',
+    description: 'Analyze internal and external factors for planning',
     columns: ['Strengths', 'Weaknesses', 'Opportunities', 'Threats'],
     icon: '📊',
     tags: ['strategy', 'planning', 'analysis']
@@ -81,7 +89,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'six-thinking-hats',
     name: 'Six Thinking Hats',
-    description: 'Parallel thinking perspectives',
+    description: 'Examine ideas from multiple mental perspectives',
     columns: ['Facts', 'Emotions', 'Critical', 'Optimistic', 'Creative', 'Process'],
     icon: '🎩',
     tags: ['thinking', 'perspectives', 'discussion']
@@ -89,7 +97,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'moscow',
     name: 'MoSCoW',
-    description: 'Prioritization framework',
+    description: 'Categorize features by implementation priority',
     columns: ['Must Have', 'Should Have', 'Could Have', 'Won\'t Have'],
     icon: '📌',
     tags: ['prioritization', 'planning', 'requirements']
@@ -97,7 +105,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'five-whys',
     name: 'Five Whys',
-    description: 'Root cause analysis',
+    description: 'Iteratively identify the underlying causes of issues',
     columns: ['Problem', 'Why 1', 'Why 2', 'Why 3', 'Why 4', 'Why 5', 'Root Cause'],
     icon: '🔍',
     tags: ['problem solving', 'analysis', 'causes']
@@ -105,7 +113,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'eisenhower',
     name: 'Eisenhower Matrix',
-    description: 'Urgent vs Important decision making',
+    description: 'Prioritize tasks based on urgency and importance',
     columns: ['Urgent & Important', 'Important & Not Urgent', 'Urgent & Not Important', 'Neither'],
     icon: '⏱️',
     tags: ['decision', 'prioritization', 'time management']
@@ -113,7 +121,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'sailboat',
     name: 'Sailboat Retrospective',
-    description: 'Visual metaphor for team journey',
+    description: 'Visualize team progress with nautical metaphors',
     columns: ['Wind (Helps)', 'Anchors (Hinders)', 'Rocks (Risks)', 'Island (Goals)'],
     icon: '⛵',
     tags: ['retrospective', 'visual', 'team']
@@ -121,7 +129,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'fishbone',
     name: 'Fishbone',
-    description: 'Cause and effect analysis',
+    description: 'Identify causes across different categories',
     columns: ['People', 'Process', 'Equipment', 'Materials', 'Environment', 'Management'],
     icon: '🐟',
     tags: ['analysis', 'causes', 'problem solving']
@@ -129,7 +137,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'feedback-grid',
     name: 'Feedback Grid',
-    description: 'Structured feedback collection',
+    description: 'Balanced approach to feedback with action items',
     columns: ['What Went Well', 'What Could Be Improved', 'Questions', 'Ideas'],
     icon: '🔄',
     tags: ['feedback', 'collection', 'reflection']
@@ -137,7 +145,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'starfish',
     name: 'Starfish Retrospective',
-    description: 'Five-part retrospective model',
+    description: 'Detailed action-oriented team improvement model',
     columns: ['Keep Doing', 'Less Of', 'More Of', 'Start Doing', 'Stop Doing'],
     icon: '⭐',
     tags: ['retrospective', 'actions', 'team']
@@ -145,7 +153,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'kpt',
     name: 'KPT',
-    description: 'Keep, Problem, Try',
+    description: 'Concise approach for identifying issues and solutions',
     columns: ['Keep', 'Problem', 'Try'],
     icon: '🔑',
     tags: ['retrospective', 'simple', 'actions']
@@ -153,18 +161,10 @@ const BOARD_TEMPLATES = [
   {
     id: 'pro-con',
     name: 'Pros & Cons',
-    description: 'Decision making helper',
+    description: 'Evaluate options and make informed decisions',
     columns: ['Pros', 'Cons', 'Decisions'],
     icon: '⚖️',
     tags: ['decision', 'evaluation', 'analysis']
-  },
-  {
-    id: 'custom',
-    name: 'Custom',
-    description: 'Start with a blank slate',
-    columns: ['Untitled'],
-    icon: '✏️',
-    tags: ['custom', 'blank', 'flexible']
   }
 ];
 
@@ -181,6 +181,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     }
 
     const query = searchQuery.toLowerCase().trim();
+    // Keep searching in tags (for backend filtering) even though we don't display them
     const filtered = BOARD_TEMPLATES.filter(template => 
       template.name.toLowerCase().includes(query) || 
       template.description.toLowerCase().includes(query) ||
@@ -338,27 +339,31 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                   onClick={() => handleTemplateSelect(template.id)}
                 >
                   <div className="template-icon">{template.icon}</div>
-                  <h3>{highlightedName}</h3>
-                  <p>{highlightedDesc}</p>
-                  <div className="template-columns">
-                    {template.columns.map((col, idx) => (
-                      <span key={idx} className="template-column-pill">
-                        {searchQuery ? 
-                          <span dangerouslySetInnerHTML={{ __html: highlightMatch(col, searchQuery) }} /> : 
-                          col
-                        }
-                      </span>
-                    ))}
+                  <div className="template-info">
+                    <h3>{highlightedName}</h3>
+                    <p>{highlightedDesc}</p>
                   </div>
-                  <div className="template-tags">
-                    {template.tags.map((tag, idx) => (
-                      <span 
-                        key={idx} 
-                        className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                  <div className="template-details">
+                    <div className="template-columns">
+                      {template.columns.map((col, idx) => (
+                        <span key={idx} className="template-column-pill">
+                          {searchQuery ? 
+                            <span dangerouslySetInnerHTML={{ __html: highlightMatch(col, searchQuery) }} /> : 
+                            col
+                          }
+                        </span>
+                      ))}
+                    </div>
+                    <div className="template-tags">
+                      {template.tags.map((tag, idx) => (
+                        <span 
+                          key={idx} 
+                          className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               );

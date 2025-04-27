@@ -18,6 +18,16 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       }
     }
   }, [isOpen, format, columns, boardTitle]);
+  
+  /**
+   * Note on column ordering:
+   * 
+   * We rely on the natural ordering of column IDs to determine export order.
+   * When columns are created via templates or manually, they receive IDs with
+   * alphabetical prefixes (a_, b_, c_, etc.) to ensure consistent ordering.
+   * 
+   * This approach ensures that the export order matches what users see on the board.
+   */
 
   const generateExport = (selectedFormat) => {
     if (selectedFormat === 'markdown') {
@@ -34,130 +44,11 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       return markdown + "No columns found.";
     }
     
-    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    // Use the natural order from column IDs (which should be prefixed alphabetically)
+    // This keeps the same order as displayed on the board
     const sortedColumns = Object.entries(columns).sort((a, b) => {
-      // Define the order of standard column titles for various templates
-      const columnOrder = {
-        // Default template
-        'To Do': 1,
-        'In Progress': 2,
-        'Done': 3,
-        
-        // Lean Coffee template
-        'Topics': 1,
-        'Discussing': 2,
-        // 'Done': 3, (Already included)
-        
-        // Retrospective template
-        'Went Well': 1,
-        'Could Improve': 2,
-        'Action Items': 3,
-        
-        // Feelings / Improvements template
-        'Feelings': 1,
-        'Improvements': 2,
-        
-        // DAKI template
-        'Drop': 1,
-        'Add': 2,
-        'Keep': 3,
-        'Improve': 4,
-        
-        // Glad Sad Mad template
-        'Glad': 1,
-        'Sad': 2,
-        'Mad': 3,
-        
-        // Start Stop Continue template
-        'Start': 1,
-        'Stop': 2,
-        'Continue': 3,
-        
-        // 4 Ls template
-        'Liked': 1,
-        'Learned': 2,
-        'Lacked': 3,
-        'Longed For': 4,
-        
-        // SWOT template
-        'Strengths': 1,
-        'Weaknesses': 2,
-        'Opportunities': 3,
-        'Threats': 4,
-        
-        // Six Thinking Hats
-        'Facts': 1,
-        'Emotions': 2,
-        'Critical': 3,
-        'Optimistic': 4,
-        'Creative': 5,
-        'Process': 6,
-        
-        // MoSCoW
-        'Must Have': 1,
-        'Should Have': 2,
-        'Could Have': 3,
-        'Won\'t Have': 4,
-        
-        // Five Whys
-        'Problem': 1,
-        'Why 1': 2,
-        'Why 2': 3,
-        'Why 3': 4,
-        'Why 4': 5,
-        'Why 5': 6,
-        'Root Cause': 7,
-        
-        // Eisenhower
-        'Urgent & Important': 1,
-        'Important & Not Urgent': 2,
-        'Urgent & Not Important': 3,
-        'Neither': 4,
-        
-        // Sailboat
-        'Wind (Helps)': 1,
-        'Anchors (Hinders)': 2,
-        'Rocks (Risks)': 3,
-        'Island (Goals)': 4,
-        
-        // Fishbone
-        'People': 1,
-        'Process': 2,
-        'Equipment': 3,
-        'Materials': 4,
-        'Environment': 5,
-        'Management': 6,
-        
-        // Feedback Grid
-        'What Went Well': 1,
-        'What Could Be Improved': 2,
-        'Questions': 3,
-        'Ideas': 4,
-        
-        // Starfish
-        'Keep Doing': 1,
-        'Less Of': 2,
-        'More Of': 3,
-        'Start Doing': 4,
-        'Stop Doing': 5,
-        
-        // KPT
-        'Keep': 1,
-        'Problem': 2,
-        'Try': 3,
-        
-        // Pros & Cons
-        'Pros': 1,
-        'Cons': 2,
-        'Decisions': 3
-      };
-      
-      // Get the order for each column, defaulting to a high number for custom columns
-      const orderA = columnOrder[a[1].title] || 100;
-      const orderB = columnOrder[b[1].title] || 100;
-      
-      // Sort by the defined order
-      return orderA - orderB;
+      // Sort by column ID which preserves the order they're displayed in
+      return a[0].localeCompare(b[0]);
     });
     
     sortedColumns.forEach(([columnId, column]) => {
@@ -217,130 +108,11 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       return text + "No columns found.";
     }
     
-    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    // Use the natural order from column IDs (which should be prefixed alphabetically)
+    // This keeps the same order as displayed on the board
     const sortedColumns = Object.entries(columns).sort((a, b) => {
-      // Define the order of standard column titles for various templates
-      const columnOrder = {
-        // Default template
-        'To Do': 1,
-        'In Progress': 2,
-        'Done': 3,
-        
-        // Lean Coffee template
-        'Topics': 1,
-        'Discussing': 2,
-        // 'Done': 3, (Already included)
-        
-        // Retrospective template
-        'Went Well': 1,
-        'Could Improve': 2,
-        'Action Items': 3,
-        
-        // Feelings / Improvements template
-        'Feelings': 1,
-        'Improvements': 2,
-        
-        // DAKI template
-        'Drop': 1,
-        'Add': 2,
-        'Keep': 3,
-        'Improve': 4,
-        
-        // Glad Sad Mad template
-        'Glad': 1,
-        'Sad': 2,
-        'Mad': 3,
-        
-        // Start Stop Continue template
-        'Start': 1,
-        'Stop': 2,
-        'Continue': 3,
-        
-        // 4 Ls template
-        'Liked': 1,
-        'Learned': 2,
-        'Lacked': 3,
-        'Longed For': 4,
-        
-        // SWOT template
-        'Strengths': 1,
-        'Weaknesses': 2,
-        'Opportunities': 3,
-        'Threats': 4,
-        
-        // Six Thinking Hats
-        'Facts': 1,
-        'Emotions': 2,
-        'Critical': 3,
-        'Optimistic': 4,
-        'Creative': 5,
-        'Process': 6,
-        
-        // MoSCoW
-        'Must Have': 1,
-        'Should Have': 2,
-        'Could Have': 3,
-        'Won\'t Have': 4,
-        
-        // Five Whys
-        'Problem': 1,
-        'Why 1': 2,
-        'Why 2': 3,
-        'Why 3': 4,
-        'Why 4': 5,
-        'Why 5': 6,
-        'Root Cause': 7,
-        
-        // Eisenhower
-        'Urgent & Important': 1,
-        'Important & Not Urgent': 2,
-        'Urgent & Not Important': 3,
-        'Neither': 4,
-        
-        // Sailboat
-        'Wind (Helps)': 1,
-        'Anchors (Hinders)': 2,
-        'Rocks (Risks)': 3,
-        'Island (Goals)': 4,
-        
-        // Fishbone
-        'People': 1,
-        'Process': 2,
-        'Equipment': 3,
-        'Materials': 4,
-        'Environment': 5,
-        'Management': 6,
-        
-        // Feedback Grid
-        'What Went Well': 1,
-        'What Could Be Improved': 2,
-        'Questions': 3,
-        'Ideas': 4,
-        
-        // Starfish
-        'Keep Doing': 1,
-        'Less Of': 2,
-        'More Of': 3,
-        'Start Doing': 4,
-        'Stop Doing': 5,
-        
-        // KPT
-        'Keep': 1,
-        'Problem': 2,
-        'Try': 3,
-        
-        // Pros & Cons
-        'Pros': 1,
-        'Cons': 2,
-        'Decisions': 3
-      };
-      
-      // Get the order for each column, defaulting to a high number for custom columns
-      const orderA = columnOrder[a[1].title] || 100;
-      const orderB = columnOrder[b[1].title] || 100;
-      
-      // Sort by the defined order
-      return orderA - orderB;
+      // Sort by column ID which preserves the order they're displayed in
+      return a[0].localeCompare(b[0]);
     });
     
     sortedColumns.forEach(([columnId, column]) => {
