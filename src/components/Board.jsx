@@ -6,6 +6,8 @@ import Column from './Column';
 import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
+// Import Feather icons
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2 } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
@@ -26,10 +28,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
         onClick={copyShareUrl}
         style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>
-          <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"/>
-        </svg>
+        <Link size={16} />
         Share Board
       </button>
     </div>
@@ -67,13 +66,12 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M3.5 3.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 12.293V3.5zm4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5zm-3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
-          </svg>
+          <BarChart2 size={16} />
           Sort
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}>
-            <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-          </svg>
+          <ChevronDown 
+            size={12} 
+            className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'} 
+          />
         </button>
         
         {sortDropdownOpen && (
@@ -82,9 +80,7 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
               className={`sort-option ${!sortByVotes ? 'selected' : ''}`} 
               onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8.5 2.5a.5.5 0 0 0-1 0v9.793l-3.146-3.147a.5.5 0 0 0-.708.708l4 4a.5.5 0 0 0 .708 0l4-4a.5.5 0 0 0-.708-.708L8.5 12.293V2.5z"/>
-              </svg>
+              <ArrowDown size={14} />
               Chronological
               {!sortByVotes && <span className="checkmark">✓</span>}
             </button>
@@ -92,10 +88,7 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
               className={`sort-option ${sortByVotes ? 'selected' : ''}`} 
               onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M10.082 5.629 9.664 7H8.598l1.789-5.332h1.234L13.402 7h-1.12l-.419-1.371h-1.781zm1.57-.785L11 2.687h-.047l-.652 2.157h1.351z"/>
-                <path d="M12.96 14H9.028v-.691l2.579-3.72v-.054H9.098v-.867h3.785v.691l-2.567 3.72v.054h2.645V14zm-8.46-.5a.5.5 0 0 1-1 0V3.707L2.354 4.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L4.5 3.707V13.5z"/>
-              </svg>
+              <ThumbsUp size={14} />
               By Votes
               {sortByVotes && <span className="checkmark">✓</span>}
             </button>
@@ -256,9 +249,7 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
         {/* Add column button */}
         <div className="add-column-container">
           <button id="add-column" className="add-column" onClick={addNewColumn}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-            </svg>
+            <Plus size={16} />
             Add Column
           </button>
         </div>
