@@ -43,8 +43,13 @@ describe('Board Component', () => {
     sortByVotes: false,
     setSortByVotes: vi.fn(),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
-    openExistingBoard: vi.fn()
+    openExistingBoard: vi.fn(),
+    user: { uid: 'test-user-123' } // Default user state for most tests
   };
+
+  // Original mock URLSearchParams for testing
+  const originalURLSearchParams = window.URLSearchParams;
+  let mockURLSearchParams;
 
   beforeEach(() => {
     // Reset mocks
@@ -58,6 +63,20 @@ describe('Board Component', () => {
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
       configurable: true
     });
+
+    // Mock URL search params
+    mockURLSearchParams = vi.fn().mockImplementation(() => ({
+      get: vi.fn().mockReturnValue(null)
+    }));
+    window.URLSearchParams = mockURLSearchParams;
+
+    // Mock window.history.pushState
+    window.history.pushState = vi.fn();
+  });
+
+  afterEach(() => {
+    // Restore original URLSearchParams
+    window.URLSearchParams = originalURLSearchParams;
   });
 
   test('renders board title and columns correctly', () => {
@@ -184,5 +203,83 @@ describe('Board Component', () => {
     
     // Document title should be updated
     expect(document.title).toBe('Updated Board Title - Kanbanish');
+  });
+
+  test('initializes with board ID from URL', () => {
+    // Mock URL with board ID
+    mockURLSearchParams.mockImplementation(() => ({
+      get: vi.fn().mockReturnValue('board-from-url')
+    }));
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    expect(mockContextValue.openExistingBoard).toHaveBeenCalledWith('board-from-url');
+    expect(mockContextValue.createNewBoard).not.toHaveBeenCalled();
+  });
+
+  test('creates new board on load only when authenticated', () => {
+    // Mock URL without board ID
+    mockURLSearchParams.mockImplementation(() => ({
+      get: vi.fn().mockReturnValue(null)
+    }));
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Should create new board because user is authenticated
+    expect(mockContextValue.createNewBoard).toHaveBeenCalled();
+    expect(window.history.pushState).toHaveBeenCalledWith({}, '', '?board=new-board-123');
+  });
+
+  test('does not create board when not authenticated', () => {
+    // Mock URL without board ID
+    mockURLSearchParams.mockImplementation(() => ({
+      get: vi.fn().mockReturnValue(null)
+    }));
+    
+    // Mock context with no user (unauthenticated)
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      user: null,
+    });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Should not create a board because user is not authenticated
+    expect(mockContextValue.createNewBoard).not.toHaveBeenCalled();
+    expect(window.history.pushState).not.toHaveBeenCalled();
+  });
+
+  test('does not update URL when board creation returns null', () => {
+    // Mock createNewBoard to return null (failed creation)
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      createNewBoard: vi.fn().mockReturnValue(null)
+    });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Click the "New Board" button explicitly
+    const newBoardButton = screen.getByText('New Board');
+    fireEvent.click(newBoardButton);
+
+    // Should not update URL when board creation returns null
+    expect(window.history.pushState).not.toHaveBeenCalled();
+    expect(mockShowNotification).not.toHaveBeenCalled();
   });
 });
