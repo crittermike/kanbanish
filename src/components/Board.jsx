@@ -89,25 +89,27 @@ function Board({ showNotification }) {
     sortByVotes,
     setSortByVotes,
     createNewBoard,
-    openExistingBoard
+    openExistingBoard,
+    user // Include user from context
   } = useBoardContext();
   
   /**
    * BOARD INITIALIZATION
    */
   
-  // Check for board ID in URL on load
+  // Check for board ID in URL on load and handle board initialization
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const boardIdFromUrl = urlParams.get('board');
     
     if (boardIdFromUrl) {
       openExistingBoard(boardIdFromUrl);
-    } else {
+    } else if (user) {
+      // Only create a new board if user is already authenticated
       handleCreateNewBoard();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]); // Depend on user so this effect reruns when user authentication completes
   
   // Update document title when board title changes
   useEffect(() => {
@@ -140,8 +142,14 @@ function Board({ showNotification }) {
   // Handle creating a new board
   const handleCreateNewBoard = () => {
     const newBoardId = createNewBoard();
-    window.history.pushState({}, '', `?board=${newBoardId}`);
-    showNotification('New board created');
+    
+    // Only update URL and show notification if we got a valid board ID
+    if (newBoardId) {
+      window.history.pushState({}, '', `?board=${newBoardId}`);
+      showNotification('New board created');
+    } else {
+      console.error('Failed to create new board - user may not be authenticated yet');
+    }
   };
   
   // This function was removed as part of removing the "Open Board" functionality
