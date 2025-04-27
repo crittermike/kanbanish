@@ -7,7 +7,7 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2 } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
@@ -55,8 +55,24 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
   
   return (
     <div className="action-buttons">
-      <button id="create-board" className="btn" onClick={handleCreateNewBoard}>New Board</button>
-      <button id="export-board" className="btn secondary-btn" onClick={handleExportBoard}>Export Board</button>
+      <button 
+        id="create-board" 
+        className="btn" 
+        onClick={handleCreateNewBoard}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+      >
+        <PlusSquare size={16} />
+        New Board
+      </button>
+      <button 
+        id="export-board" 
+        className="btn secondary-btn" 
+        onClick={handleExportBoard}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+      >
+        <FileText size={16} />
+        Export Board
+      </button>
       
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button 
