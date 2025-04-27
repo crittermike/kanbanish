@@ -71,9 +71,9 @@ describe('Board Component', () => {
     const boardTitleInput = screen.getByDisplayValue('Test Board');
     expect(boardTitleInput).toBeInTheDocument();
     
-    // Check if board ID is displayed
-    const boardIdElement = screen.getByText('test-board-123');
-    expect(boardIdElement).toBeInTheDocument();
+    // Check if Share button exists
+    const shareButton = screen.getByTitle('Copy Share URL');
+    expect(shareButton).toBeInTheDocument();
     
     // Check if columns are rendered
     expect(screen.getByText('To Do')).toBeInTheDocument();
@@ -96,22 +96,34 @@ describe('Board Component', () => {
     expect(mockContextValue.setBoardTitle).toHaveBeenCalledWith('Updated Board Title');
   });
 
-  test('handles copying board ID to clipboard', async () => {
+  test('handles copying share URL to clipboard', async () => {
+    // Mock window.location
+    const originalLocation = window.location;
+    delete window.location;
+    window.location = {
+      origin: 'https://example.com',
+      pathname: '/'
+    };
+    
     render(
       <DndProvider backend={HTML5Backend}>
         <Board showNotification={mockShowNotification} />
       </DndProvider>
     );
     
-    const copyButton = screen.getByTitle('Copy Board ID');
+    const copyButton = screen.getByTitle('Copy Share URL');
     fireEvent.click(copyButton);
     
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('test-board-123');
+    const expectedUrl = 'https://example.com/?board=test-board-123';
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedUrl);
     
     // Wait for the Promise to resolve and notification to be called
     await waitFor(() => {
-      expect(mockShowNotification).toHaveBeenCalledWith('Board ID copied to clipboard');
+      expect(mockShowNotification).toHaveBeenCalledWith('Share URL copied to clipboard');
     });
+    
+    // Restore original location
+    window.location = originalLocation;
   });
 
   test('creates new board when button is clicked', () => {
