@@ -52,8 +52,8 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           if (card.comments && Object.keys(card.comments).length > 0) {
             markdown += `**Comments:**\n\n`;
             Object.entries(card.comments).forEach(([commentId, comment]) => {
-              if (comment && comment.text) {
-                markdown += `- ${comment.text}\n`;
+              if (comment && comment.content) {
+                markdown += `- ${comment.content}\n`;
               }
             });
             markdown += '\n';
@@ -61,13 +61,19 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           
           // Reactions
           if (card.reactions && Object.keys(card.reactions).length > 0) {
-            markdown += `**Reactions:** `;
-            Object.entries(card.reactions).forEach(([emoji, count], index, array) => {
-              if (emoji) {
-                markdown += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
-              }
-            });
-            markdown += '\n\n';
+            const validReactions = Object.entries(card.reactions)
+              .filter(([emoji, reactionData]) => (reactionData?.count || 0) > 0);
+              
+            if (validReactions.length > 0) {
+              markdown += `**Reactions:** `;
+              validReactions.forEach(([emoji, reactionData], index, array) => {
+                if (emoji) {
+                  const count = reactionData?.count || 0;
+                  markdown += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
+                }
+              });
+              markdown += '\n\n';
+            }
           }
         });
       }
@@ -102,8 +108,8 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           if (card.comments && Object.keys(card.comments).length > 0) {
             text += `Comments:\n`;
             Object.entries(card.comments).forEach(([commentId, comment]) => {
-              if (comment && comment.text) {
-                text += `- ${comment.text}\n`;
+              if (comment && comment.content) {
+                text += `- ${comment.content}\n`;
               }
             });
             text += '\n';
@@ -111,12 +117,18 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           
           // Reactions
           if (card.reactions && Object.keys(card.reactions).length > 0) {
-            text += `Reactions: `;
-            Object.entries(card.reactions).forEach(([emoji, count], index, array) => {
-              if (emoji) {
-                text += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
-              }
-            });
+            const validReactions = Object.entries(card.reactions)
+              .filter(([emoji, reactionData]) => (reactionData?.count || 0) > 0);
+              
+            if (validReactions.length > 0) {
+              text += `Reactions: `;
+              validReactions.forEach(([emoji, reactionData], index, array) => {
+                if (emoji) {
+                  const count = reactionData?.count || 0;
+                  text += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
+                }
+              });
+            }
             text += '\n\n';
           }
         });
