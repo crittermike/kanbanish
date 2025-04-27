@@ -5,6 +5,7 @@ import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
+import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
@@ -55,13 +56,122 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
   const getSortedColumns = () => {
     const entries = Object.entries(columns || {});
     
-    // Sort columns by title to ensure workflow order: To Do, In Progress, Done
+    // Sort columns by title to ensure workflow order
     return entries.sort((a, b) => {
-      // Define the order of standard column titles
+      // Define the order of standard column titles for various templates
       const columnOrder = {
+        // Default template
         'To Do': 1,
         'In Progress': 2,
         'Done': 3,
+        
+        // Lean Coffee template
+        'Topics': 1,
+        'Discussing': 2,
+        // 'Done': 3, (Already included)
+        
+        // Retrospective template
+        'Went Well': 1,
+        'Could Improve': 2,
+        'Action Items': 3,
+        
+        // Feelings / Improvements template
+        'Feelings': 1,
+        'Improvements': 2,
+        
+        // DAKI template
+        'Drop': 1,
+        'Add': 2,
+        'Keep': 3,
+        'Improve': 4,
+        
+        // Glad Sad Mad template
+        'Glad': 1,
+        'Sad': 2,
+        'Mad': 3,
+        
+        // Start Stop Continue template
+        'Start': 1,
+        'Stop': 2,
+        'Continue': 3,
+        
+        // 4 Ls template
+        'Liked': 1,
+        'Learned': 2,
+        'Lacked': 3,
+        'Longed For': 4,
+        
+        // SWOT template
+        'Strengths': 1,
+        'Weaknesses': 2,
+        'Opportunities': 3,
+        'Threats': 4,
+        
+        // Six Thinking Hats
+        'Facts': 1,
+        'Emotions': 2,
+        'Critical': 3,
+        'Optimistic': 4,
+        'Creative': 5,
+        'Process': 6,
+        
+        // MoSCoW
+        'Must Have': 1,
+        'Should Have': 2,
+        'Could Have': 3,
+        'Won\'t Have': 4,
+        
+        // Five Whys
+        'Problem': 1,
+        'Why 1': 2,
+        'Why 2': 3,
+        'Why 3': 4,
+        'Why 4': 5,
+        'Why 5': 6,
+        'Root Cause': 7,
+        
+        // Eisenhower
+        'Urgent & Important': 1,
+        'Important & Not Urgent': 2,
+        'Urgent & Not Important': 3,
+        'Neither': 4,
+        
+        // Sailboat
+        'Wind (Helps)': 1,
+        'Anchors (Hinders)': 2,
+        'Rocks (Risks)': 3,
+        'Island (Goals)': 4,
+        
+        // Fishbone
+        'People': 1,
+        'Process': 2,
+        'Equipment': 3,
+        'Materials': 4,
+        'Environment': 5,
+        'Management': 6,
+        
+        // Feedback Grid
+        'What Went Well': 1,
+        'What Could Be Improved': 2,
+        'Questions': 3,
+        'Ideas': 4,
+        
+        // Starfish
+        'Keep Doing': 1,
+        'Less Of': 2,
+        'More Of': 3,
+        'Start Doing': 4,
+        'Stop Doing': 5,
+        
+        // KPT
+        'Keep': 1,
+        'Problem': 2,
+        'Try': 3,
+        
+        // Pros & Cons
+        'Pros': 1,
+        'Cons': 2,
+        'Decisions': 3
       };
       
       // Get the order for each column, defaulting to a high number for custom columns
@@ -105,8 +215,9 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
  * Main Board component responsible for rendering and managing the kanban board
  */
 function Board({ showNotification }) {
-  // State for export modal
+  // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   
   // Get context values from BoardContext
   const { 
@@ -134,8 +245,8 @@ function Board({ showNotification }) {
     if (boardIdFromUrl) {
       openExistingBoard(boardIdFromUrl);
     } else if (user) {
-      // Only create a new board if user is already authenticated
-      handleCreateNewBoard();
+      // Show template selection instead of immediately creating a board
+      setIsTemplateModalOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]); // Depend on user so this effect reruns when user authentication completes
@@ -168,14 +279,23 @@ function Board({ showNotification }) {
     }
   };
   
-  // Handle creating a new board
+  // Show template modal for creating a new board
   const handleCreateNewBoard = () => {
-    const newBoardId = createNewBoard();
+    setIsTemplateModalOpen(true);
+  };
+  
+  // Create a new board with the selected template
+  const handleTemplateSelected = (templateColumns, templateName = null) => {
+    // Create a title based on the template
+    const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
+    
+    const newBoardId = createNewBoard(templateColumns, boardTitle);
     
     // Only update URL and show notification if we got a valid board ID
     if (newBoardId) {
       window.history.pushState({}, '', `?board=${newBoardId}`);
       showNotification('New board created');
+      setIsTemplateModalOpen(false);
     } else {
       console.error('Failed to create new board - user may not be authenticated yet');
     }
@@ -272,6 +392,21 @@ function Board({ showNotification }) {
           setIsExportModalOpen(false);
         }}
         showNotification={showNotification}
+      />
+      
+      {/* Template Selection Modal */}
+      <NewBoardTemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => {
+          // If the user already has a board open, just close the modal
+          // Otherwise (app just loaded without a board), create a default board
+          if (boardId) {
+            setIsTemplateModalOpen(false);
+          } else if (user) {
+            handleTemplateSelected(['To Do', 'In Progress', 'Done'], 'Default');
+          }
+        }}
+        onSelectTemplate={handleTemplateSelected}
       />
     </>
   );

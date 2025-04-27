@@ -65,33 +65,36 @@ export const BoardProvider = ({ children }) => {
     }
   }, [boardId, user]);
 
-  // Create a new board
-  const createNewBoard = () => {
+  // Create a new board with specified template columns and title
+  const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board') => {
     if (!user) return null;
     
     const newBoardId = generateId();
     const newBoardRef = ref(database, `boards/${newBoardId}`);
     
-    // Using ordered IDs to help ensure columns appear in the correct order
-    // The "a_", "b_", "c_" prefixes ensure correct ordering even with Object.entries
+    // Default columns if no template specified
+    const columnsToCreate = templateColumns || ['To Do', 'In Progress', 'Done'];
+    
+    // Build columns object with ordered prefixes
+    const columnsObj = {};
+    
+    // Using alphabet prefixes to ensure correct ordering
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    
+    columnsToCreate.forEach((columnTitle, index) => {
+      // Use alphabet prefixes up to 26 columns, then fallback to numeric prefixes
+      const prefix = index < 26 ? alphabet[index] : `col${index}`;
+      columnsObj[`${prefix}_${generateId()}`] = {
+        title: columnTitle,
+        cards: {}
+      };
+    });
+    
     const initialData = {
-      title: 'Untitled Board',
+      title: boardTitle,
       created: Date.now(),
       owner: user.uid,
-      columns: {
-        [`a_${generateId()}`]: {
-          title: 'To Do',
-          cards: {}
-        },
-        [`b_${generateId()}`]: {
-          title: 'In Progress',
-          cards: {}
-        },
-        [`c_${generateId()}`]: {
-          title: 'Done',
-          cards: {}
-        }
-      }
+      columns: columnsObj
     };
     
     set(newBoardRef, initialData)
