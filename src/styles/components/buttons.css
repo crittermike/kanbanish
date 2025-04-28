@@ -147,3 +147,40 @@
 .add-card:hover svg {
     transform: scale(1.2);
 }
+
+/* Mobile responsive button adjustments */
+@media (max-width: 768px) {
+    /* Increase tap target size for mobile */
+    .btn, 
+    .primary-btn, 
+    .secondary-btn,
+    .danger-btn {
+        padding: var(--space-md);
+        min-height: 48px;
+        min-width: 100px;
+    }
+    
+    /* Space buttons in action bar properly */
+    .action-buttons {
+        width: 100%;
+        gap: var(--space-sm);
+        justify-content: space-between;
+    }
+    
+    /* Make action buttons work well on small screens */
+    .action-buttons .btn {
+        flex: 1;
+        padding: var(--space-sm);
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Ensure card edit action buttons are properly sized */
+    .card-edit-actions {
+        gap: var(--space-md);
+    }
+    
+    .card-edit-actions .btn {
+        min-height: 44px;
+        padding: var(--space-xs) var(--space-sm);
+    }
+}

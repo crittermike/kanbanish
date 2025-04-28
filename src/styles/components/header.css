@@ -34,7 +34,7 @@ h1 {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-fill-color: transparent;
+    color: transparent;
 }
 
 .board-controls {
@@ -91,6 +91,12 @@ h1 {
     display: flex;
     justify-content: flex-end;
     margin-bottom: var(--space-md);
+}
+
+/* Share button container */
+.share-container {
+    display: flex;
+    justify-content: flex-start;
 }
 
 /* Sort dropdown styles */
@@ -194,4 +200,62 @@ h1 {
 /* Fallback for browsers that don't support :has() */
 .sort-dropdown-button[aria-expanded="true"] {
     box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Mobile responsive adjustments for header elements */
+@media (max-width: 768px) {
+    /* Better spacing for header content on mobile */
+    .header-content {
+        gap: var(--space-md);
+    }
+    
+    /* Mobile-specific styles for the share button */
+    .share-container {
+        width: 100%;
+        margin-bottom: var(--space-xs);
+    }
+    
+    #copy-share-url {
+        width: 100%;
+        min-height: 48px;
+        justify-content: center;
+    }
+    
+    /* Create a grid layout for action buttons on mobile */
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 10px;
+        width: 100%;
+    }
+    
+    /* Adjust button sizing within the header for mobile */
+    .action-buttons .btn {
+        width: 100%;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Ensure dropdown is full width on mobile */
+    .sort-dropdown-container {
+        grid-column: span 2;
+        width: 100%;
+    }
+    
+    .sort-dropdown-button {
+        width: 100%;
+        min-height: 48px;
+    }
+    
+    /* Larger tap targets for dropdown options */
+    .sort-dropdown-menu {
+        width: 100%;
+    }
+    
+    .sort-option {
+        padding: 16px;
+        min-height: 48px;
+    }
 }
