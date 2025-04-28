@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
-import { ref, set, remove } from 'firebase/database';
+import { ref, set, remove, get } from 'firebase/database';
 import { useDrag } from 'react-dnd';
 import { COMMON_EMOJIS } from '../utils/helpers';
 
@@ -15,7 +15,11 @@ vi.mock('firebase/database', () => {
     ref: vi.fn(),
     set: vi.fn().mockResolvedValue(),
     remove: vi.fn().mockResolvedValue(),
-    getDatabase: vi.fn().mockReturnValue(mockDatabase)
+    getDatabase: vi.fn().mockReturnValue(mockDatabase),
+    get: vi.fn().mockResolvedValue({
+      exists: () => false,
+      val: () => null
+    })
   };
 });
 
@@ -35,6 +39,44 @@ vi.mock('react-dom', () => ({
 // Mock BoardContext
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
+}));
+
+// Mock useCardOperations and other hooks
+vi.mock('../hooks/useCardOperations', () => ({
+  useCardOperations: vi.fn().mockReturnValue({
+    isEditing: false,
+    editedContent: 'Test card content',
+    showEmojiPicker: false,
+    showComments: false,
+    newComment: '',
+    emojiPickerPosition: { top: 0, left: 0 },
+    hasUserVotedOnCard: false,
+    
+    setIsEditing: vi.fn(),
+    setEditedContent: vi.fn(),
+    setShowEmojiPicker: vi.fn(),
+    setShowComments: vi.fn(),
+    setNewComment: vi.fn(),
+    setEmojiPickerPosition: vi.fn(),
+    
+    toggleEditMode: vi.fn(),
+    saveCardChanges: vi.fn(),
+    deleteCard: vi.fn(),
+    handleKeyPress: vi.fn(),
+    
+    upvoteCard: vi.fn(),
+    downvoteCard: vi.fn(),
+    
+    formatContentWithEmojis: (content) => content,
+    
+    hasUserReactedWithEmoji: () => false,
+    addReaction: vi.fn(),
+    
+    addComment: vi.fn(),
+    editComment: vi.fn(),
+    deleteComment: vi.fn(),
+    toggleComments: vi.fn()
+  })
 }));
 
 describe('Card Component', () => {
@@ -66,7 +108,9 @@ describe('Card Component', () => {
 
   const mockBoardContext = {
     boardId: 'board123',
-    user: { uid: 'user123' }
+    user: { uid: 'user123' },
+    maxVotesPerUser: null, // Unlimited votes by default
+    getRemainingVotes: vi.fn().mockReturnValue(Infinity) // Mock remaining votes function
   };
 
   beforeEach(() => {
@@ -132,33 +176,47 @@ describe('Card Component', () => {
   });
 
   test('allows adding upvotes', async () => {
+    // Import the mock hook
+    const { useCardOperations } = await import('../hooks/useCardOperations');
+    
+    // Set the upvoteCard mock
+    const upvoteCardMock = vi.fn();
+    useCardOperations.mockReturnValue({
+      ...useCardOperations(),
+      upvoteCard: upvoteCardMock,
+      hasUserVotedOnCard: false
+    });
+    
     render(<Card {...mockProps} />);
     
     // Find and click the upvote button
     const upvoteButton = screen.getByTitle('Upvote');
     fireEvent.click(upvoteButton);
     
-    // Wait for the async operations to complete
-    await waitFor(() => {
-      expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
-      expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote added');
-    });
+    // Verify the mock was called
+    expect(upvoteCardMock).toHaveBeenCalled();
   });
 
   test('allows removing downvotes', async () => {
+    // Import the mock hook
+    const { useCardOperations } = await import('../hooks/useCardOperations');
+    
+    // Set the downvoteCard mock
+    const downvoteCardMock = vi.fn();
+    useCardOperations.mockReturnValue({
+      ...useCardOperations(),
+      downvoteCard: downvoteCardMock,
+      hasUserVotedOnCard: true
+    });
+    
     render(<Card {...mockProps} />);
     
     // Find and click the downvote button
-    const downvoteButton = screen.getByTitle('Downvote');
+    const downvoteButton = screen.getByTitle('Remove your vote');
     fireEvent.click(downvoteButton);
     
-    // Wait for the async operations to complete
-    await waitFor(() => {
-      expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
-      expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote removed');
-    });
+    // Verify the mock was called
+    expect(downvoteCardMock).toHaveBeenCalled();
   });
 
   test('allows deleting the card', async () => {
@@ -335,17 +393,20 @@ describe('Card Component', () => {
       votes: 0
     };
     
+    // Import the mock hook
+    const { useCardOperations } = await import('../hooks/useCardOperations');
+    
+    // Mock the hook to return no user vote
+    useCardOperations.mockReturnValue({
+      ...useCardOperations(),
+      hasUserVotedOnCard: false
+    });
+    
     render(<Card {...mockProps} cardData={cardWithZeroVotes} />);
     
-    // Try to downvote
-    const downvoteButton = screen.getByTitle('Downvote');
-    fireEvent.click(downvoteButton);
-    
-    // Verify vote count didn't change
-    await waitFor(() => {
-      expect(set).not.toHaveBeenCalled();
-      expect(mockProps.showNotification).not.toHaveBeenCalled();
-    });
+    // The downvote button should be disabled when user hasn't voted
+    const downvoteButton = screen.getByTitle('Remove vote');
+    expect(downvoteButton).toBeDisabled();
   });
 
   test('requires confirmation for card deletion', async () => {

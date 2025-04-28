@@ -38,13 +38,15 @@ const CardContent = ({
   cardData, 
   formatContentWithEmojis, 
   upvoteCard, 
-  downvoteCard 
+  downvoteCard,
+  hasUserVotedOnCard 
 }) => (
   <div className="card-header">
     <VotingControls 
       votes={cardData.votes} 
       onUpvote={upvoteCard} 
       onDownvote={downvoteCard} 
+      hasUserVoted={hasUserVotedOnCard}
     />
     <div className="card-content" data-testid="card-content">
       {formatContentWithEmojis(cardData.content)}
@@ -142,6 +144,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
             downvoteCard={downvoteCard}
+            hasUserVotedOnCard={hasUserVotedOnCard}
           />
           
           <CardReactions

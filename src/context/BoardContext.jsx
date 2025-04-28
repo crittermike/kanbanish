@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ref, onValue, off, set, remove } from 'firebase/database';
+import { ref, onValue, off, set, remove, get } from 'firebase/database';
 import { database, auth, signInAnonymously } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 
@@ -23,6 +23,8 @@ export const BoardProvider = ({ children }) => {
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotes] = useState(false);
   const [boardRef, setBoardRef] = useState(null);
+  const [maxVotesPerUser, setMaxVotesPerUser] = useState(null); // null means unlimited
+  const [userVotesUsed, setUserVotesUsed] = useState(0);
 
   // Firebase authentication
   useEffect(() => {
@@ -56,11 +58,32 @@ export const BoardProvider = ({ children }) => {
             setBoardTitle(boardData.title);
           }
           setColumns(boardData.columns || {});
+          
+          // Get the vote limit configuration
+          setMaxVotesPerUser(boardData.maxVotesPerUser || null);
         }
       });
 
+      // Set up listener for user votes
+      if (user) {
+        const userVotesRef = ref(database, `boardVotes/${boardId}/users/${user.uid}`);
+        onValue(userVotesRef, (snapshot) => {
+          const userVotesData = snapshot.val();
+          if (userVotesData) {
+            // Count how many votes the user has used
+            const votesUsed = Object.keys(userVotesData).length;
+            setUserVotesUsed(votesUsed);
+          } else {
+            setUserVotesUsed(0);
+          }
+        });
+      }
+
       return () => {
         off(newBoardRef);
+        if (user) {
+          off(ref(database, `boardVotes/${boardId}/users/${user.uid}`));
+        }
       };
     }
   }, [boardId, user]);
@@ -163,6 +186,31 @@ export const BoardProvider = ({ children }) => {
       });
   };
 
+  // Set the maximum votes per user
+  const updateMaxVotesPerUser = (limit) => {
+    if (!boardId || !user) return;
+    
+    // Convert to number or null
+    const numericLimit = limit === '' || limit === undefined ? null : 
+                        (isNaN(parseInt(limit, 10)) ? null : parseInt(limit, 10));
+    
+    const maxVotesRef = ref(database, `boards/${boardId}/maxVotesPerUser`);
+    set(maxVotesRef, numericLimit)
+      .then(() => {
+        console.log(`Updated vote limit to: ${numericLimit === null ? 'unlimited' : numericLimit}`);
+        setMaxVotesPerUser(numericLimit);
+      })
+      .catch((error) => {
+        console.error('Error updating vote limit:', error);
+      });
+  };
+
+  // Get remaining votes for the current user
+  const getRemainingVotes = () => {
+    if (maxVotesPerUser === null) return Infinity; // Unlimited votes
+    return Math.max(0, maxVotesPerUser - userVotesUsed);
+  };
+
   // Context value
   const value = {
     user,
@@ -177,7 +225,11 @@ export const BoardProvider = ({ children }) => {
     boardRef,
     createNewBoard,
     openExistingBoard,
-    moveCard
+    moveCard,
+    maxVotesPerUser,
+    updateMaxVotesPerUser,
+    userVotesUsed,
+    getRemainingVotes
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

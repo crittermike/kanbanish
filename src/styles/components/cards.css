@@ -76,8 +76,17 @@
     width: 16px;
 }
 
-.vote-button:hover {
+.vote-button:hover:not(:disabled) {
     color: var(--text-color);
+}
+
+.vote-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.vote-button.voted {
+    color: var(--accent);
 }
 
 .vote-count {
@@ -85,6 +94,12 @@
     text-align: center;
     font-weight: 600;
     font-size: var(--font-size-sm);
+}
+
+.votes-remaining {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: var(--space-xxs);
 }
 
 /* Card Comments */

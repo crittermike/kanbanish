@@ -46,14 +46,28 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sortDropdownOpen, setSortDropdownOpen }) => {
+const ActionButtons = ({ 
+  handleCreateNewBoard, 
+  sortByVotes, 
+  setSortByVotes, 
+  sortDropdownOpen, 
+  setSortDropdownOpen,
+  maxVotesPerUser,
+  updateMaxVotesPerUser 
+}) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
+  const voteLimitDropdownRef = React.useRef(null);
+  const [voteLimitDropdownOpen, setVoteLimitDropdownOpen] = React.useState(false);
+  const [voteLimitValue, setVoteLimitValue] = React.useState(maxVotesPerUser || '');
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setSortDropdownOpen(false);
+      }
+      if (voteLimitDropdownRef.current && !voteLimitDropdownRef.current.contains(event.target)) {
+        setVoteLimitDropdownOpen(false);
       }
     };
 
@@ -62,6 +76,21 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [setSortDropdownOpen]);
+
+  // Update local state when the maxVotesPerUser prop changes
+  React.useEffect(() => {
+    setVoteLimitValue(maxVotesPerUser === null ? '' : maxVotesPerUser);
+  }, [maxVotesPerUser]);
+
+  const handleVoteLimitChange = (e) => {
+    const value = e.target.value;
+    setVoteLimitValue(value);
+  };
+
+  const handleVoteLimitSave = () => {
+    updateMaxVotesPerUser(voteLimitValue);
+    setVoteLimitDropdownOpen(false);
+  };
 
   return (
     <div className="action-buttons">
@@ -74,6 +103,46 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
         <PlusSquare size={16} />
         New Board
       </button>
+      
+      {/* Vote Limit Dropdown */}
+      <div className="vote-limit-dropdown-container" ref={voteLimitDropdownRef}>
+        <button
+          id="vote-limit-dropdown-button"
+          className="btn vote-limit-dropdown-button"
+          onClick={() => setVoteLimitDropdownOpen(!voteLimitDropdownOpen)}
+          aria-expanded={voteLimitDropdownOpen}
+          aria-haspopup="true"
+        >
+          <ThumbsUp size={16} />
+          {maxVotesPerUser === null ? 'Unlimited Votes' : `${maxVotesPerUser} Votes/User`}
+          <ChevronDown
+            size={12}
+            className={voteLimitDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}
+          />
+        </button>
+
+        {voteLimitDropdownOpen && (
+          <div className="sort-dropdown-menu">
+            <div className="vote-limit-input-container">
+              <label htmlFor="vote-limit">Maximum votes per user:</label>
+              <input 
+                type="number" 
+                id="vote-limit" 
+                min="1"
+                value={voteLimitValue}
+                onChange={handleVoteLimitChange}
+                placeholder="Unlimited"
+                className="vote-limit-input"
+              />
+              <div className="vote-limit-help">Leave empty for unlimited votes</div>
+              <button className="btn primary-btn vote-limit-save" onClick={handleVoteLimitSave}>
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
           id="sort-dropdown-button"
@@ -171,7 +240,9 @@ function Board({ showNotification }) {
     setSortByVotes,
     createNewBoard,
     openExistingBoard,
-    user // Include user from context
+    user, // Include user from context
+    maxVotesPerUser,
+    updateMaxVotesPerUser
   } = useBoardContext();
 
   // State for dropdown menu
@@ -315,6 +386,8 @@ function Board({ showNotification }) {
             setSortByVotes={setSortByVotes}
             sortDropdownOpen={sortDropdownOpen}
             setSortDropdownOpen={setSortDropdownOpen}
+            maxVotesPerUser={maxVotesPerUser}
+            updateMaxVotesPerUser={updateMaxVotesPerUser}
           />
         </div>
       </header>

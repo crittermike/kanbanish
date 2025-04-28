@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { ref, set, remove } from 'firebase/database';
+import { ref, set, remove, get } from 'firebase/database';
 import { database } from '../utils/firebase';
+import { useBoardContext } from '../context/BoardContext';
 
 export function useCardOperations({ 
   boardId, 
@@ -10,6 +11,9 @@ export function useCardOperations({
   user, 
   showNotification 
 }) {
+  // Get vote limit info from context
+  const { maxVotesPerUser, getRemainingVotes } = useBoardContext();
+  
   // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(cardData.content || '');
@@ -17,12 +21,31 @@ export function useCardOperations({
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [emojiPickerPosition, setEmojiPickerPosition] = useState({ top: 0, left: 0 });
+  const [hasUserVotedOnCard, setHasUserVotedOnCard] = useState(false);
 
   // Memoized database reference
   const cardRef = useMemo(() => 
     ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`),
     [boardId, columnId, cardId]
   );
+
+  // Check if user has already voted on this card
+  useEffect(() => {
+    if (!boardId || !user) return;
+
+    const userVoteRef = ref(database, `boardVotes/${boardId}/users/${user.uid}/${cardId}`);
+    
+    const checkUserVote = async () => {
+      try {
+        const snapshot = await get(userVoteRef);
+        setHasUserVotedOnCard(snapshot.exists());
+      } catch (error) {
+        console.error('Error checking if user voted:', error);
+      }
+    };
+    
+    checkUserVote();
+  }, [boardId, user, cardId]);
 
   // Toggle edit mode
   const toggleEditMode = useCallback((e) => {
@@ -86,20 +109,61 @@ export function useCardOperations({
   const updateVotes = useCallback(async (delta, e, message) => {
     e.stopPropagation();
     
-    if (!boardId) return;
+    if (!boardId || !user) return;
     
     const currentVotes = cardData.votes || 0;
     if (delta < 0 && currentVotes <= 0) return;
+
+    // Reference to track user votes
+    const userVoteRef = ref(database, `boardVotes/${boardId}/users/${user.uid}/${cardId}`);
+    const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
     
     try {
-      const newVotes = currentVotes + delta;
-      const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
-      await set(votesRef, newVotes);
-      showNotification(message);
+      // For upvote
+      if (delta > 0) {
+        // Check if user already voted on this card
+        if (hasUserVotedOnCard) {
+          showNotification('You already voted on this card');
+          return;
+        }
+        
+        // Check if user has votes remaining
+        const remainingVotes = getRemainingVotes();
+        if (maxVotesPerUser !== null && remainingVotes <= 0) {
+          showNotification(`You've used all ${maxVotesPerUser} of your votes`);
+          return;
+        }
+
+        // Record this vote
+        await set(userVoteRef, true);
+        
+        // Update card votes
+        const newVotes = currentVotes + delta;
+        await set(votesRef, newVotes);
+        setHasUserVotedOnCard(true);
+        showNotification(message);
+      } 
+      // For downvote
+      else if (delta < 0) {
+        // Can only remove your own vote
+        if (!hasUserVotedOnCard) {
+          showNotification('You can only remove your own votes');
+          return;
+        }
+        
+        // Remove user's vote record
+        await remove(userVoteRef);
+        
+        // Update card votes
+        const newVotes = currentVotes + delta;
+        await set(votesRef, newVotes);
+        setHasUserVotedOnCard(false);
+        showNotification(message);
+      }
     } catch (error) {
       console.error('Error updating votes:', error);
     }
-  }, [boardId, columnId, cardId, cardData.votes, showNotification]);
+  }, [boardId, columnId, cardId, cardData.votes, user, hasUserVotedOnCard, maxVotesPerUser, getRemainingVotes, showNotification]);
 
   const upvoteCard = useCallback((e) => {
     updateVotes(1, e, 'Vote added');
@@ -250,6 +314,7 @@ export function useCardOperations({
     showComments,
     newComment,
     emojiPickerPosition,
+    hasUserVotedOnCard,
     
     // State setters
     setIsEditing,
