@@ -55,6 +55,12 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+    min-width: 300px;
+}
+
+.share-export-buttons {
+    display: flex;
+    gap: var(--space-sm);
 }
 
 #board-title {
@@ -91,12 +97,6 @@ h1 {
     display: flex;
     justify-content: flex-end;
     margin-bottom: var(--space-md);
-}
-
-/* Share button container */
-.share-container {
-    display: flex;
-    justify-content: flex-start;
 }
 
 /* Sort dropdown styles */
@@ -207,18 +207,6 @@ h1 {
     /* Better spacing for header content on mobile */
     .header-content {
         gap: var(--space-md);
-    }
-    
-    /* Mobile-specific styles for the share button */
-    .share-container {
-        width: 100%;
-        margin-bottom: var(--space-xs);
-    }
-    
-    #copy-share-url {
-        width: 100%;
-        min-height: 48px;
-        justify-content: center;
     }
     
     /* Create a grid layout for action buttons on mobile */

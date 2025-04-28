@@ -10,98 +10,98 @@ import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare } from 'react-feather';
 
 // UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, copyShareUrl }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
   <div className="board-title-container">
-    <input 
-      type="text" 
-      id="board-title" 
-      placeholder="Untitled Board" 
-      value={boardTitle} 
+    <input
+      type="text"
+      id="board-title"
+      placeholder="Untitled Board"
+      value={boardTitle}
       onChange={handleBoardTitleChange}
-      className="header-input" 
+      className="header-input"
     />
-    <div className="share-container">
-      <button 
-        id="copy-share-url" 
-        className="btn secondary-btn" 
-        title="Copy Share URL" 
+    <div className="action-buttons">
+      <button
+        id="copy-share-url"
+        className="btn secondary-btn"
+        title="Copy Share URL"
         onClick={copyShareUrl}
         style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
         <Link size={16} />
-        Share Board
+        Share
+      </button>
+      <button
+        id="export-board"
+        className="btn secondary-btn"
+        onClick={handleExportBoard}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
+      >
+        <FileText size={16} />
+        Export
       </button>
     </div>
+
   </div>
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sortDropdownOpen, setSortDropdownOpen, handleExportBoard }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sortDropdownOpen, setSortDropdownOpen }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
-  
+
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setSortDropdownOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [setSortDropdownOpen]);
-  
+
   return (
     <div className="action-buttons">
-      <button 
-        id="create-board" 
-        className="btn" 
+      <button
+        id="create-board"
+        className="btn"
         onClick={handleCreateNewBoard}
         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
         <PlusSquare size={16} />
         New Board
       </button>
-      <button 
-        id="export-board" 
-        className="btn secondary-btn" 
-        onClick={handleExportBoard}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-      >
-        <FileText size={16} />
-        Export Board
-      </button>
-      
       <div className="sort-dropdown-container" ref={dropdownRef}>
-        <button 
-          id="sort-dropdown-button" 
-          className="btn sort-dropdown-button" 
+        <button
+          id="sort-dropdown-button"
+          className="btn sort-dropdown-button"
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
         >
           <BarChart2 size={16} />
           Sort
-          <ChevronDown 
-            size={12} 
-            className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'} 
+          <ChevronDown
+            size={12}
+            className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}
           />
         </button>
-        
+
         {sortDropdownOpen && (
           <div className="sort-dropdown-menu">
-            <button 
-              className={`sort-option ${!sortByVotes ? 'selected' : ''}`} 
+            <button
+              className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
               onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
             >
               <ArrowDown size={14} />
               Chronological
               {!sortByVotes && <span className="checkmark">✓</span>}
             </button>
-            <button 
-              className={`sort-option ${sortByVotes ? 'selected' : ''}`} 
+            <button
+              className={`sort-option ${sortByVotes ? 'selected' : ''}`}
               onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
             >
               <ThumbsUp size={14} />
@@ -131,15 +131,15 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
       <div id="board" className="board">
         {/* Render columns in sorted order */}
         {getSortedColumns().map(([columnId, columnData]) => (
-          <Column 
-            key={columnId} 
-            columnId={columnId} 
-            columnData={columnData} 
+          <Column
+            key={columnId}
+            columnId={columnId}
+            columnData={columnData}
             sortByVotes={sortByVotes}
             showNotification={showNotification}
           />
         ))}
-        
+
         {/* Add column button */}
         <div className="add-column-container">
           <button id="add-column" className="add-column" onClick={addNewColumn}>
@@ -159,13 +159,13 @@ function Board({ showNotification }) {
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  
+
   // Get context values from BoardContext
-  const { 
-    boardId, 
-    boardRef, 
-    boardTitle, 
-    setBoardTitle, 
+  const {
+    boardId,
+    boardRef,
+    boardTitle,
+    setBoardTitle,
     columns,
     sortByVotes,
     setSortByVotes,
@@ -173,19 +173,19 @@ function Board({ showNotification }) {
     openExistingBoard,
     user // Include user from context
   } = useBoardContext();
-  
+
   // State for dropdown menu
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  
+
   /**
    * BOARD INITIALIZATION
    */
-  
+
   // Check for board ID in URL on load and handle board initialization
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const boardIdFromUrl = urlParams.get('board');
-    
+
     if (boardIdFromUrl) {
       openExistingBoard(boardIdFromUrl);
     } else if (user) {
@@ -194,25 +194,25 @@ function Board({ showNotification }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]); // Depend on user so this effect reruns when user authentication completes
-  
+
   // Update document title when board title changes
   useEffect(() => {
     document.title = boardTitle ? `${boardTitle} - Kanbanish` : 'Kanbanish';
   }, [boardTitle]);
-  
+
   /**
    * BOARD MANAGEMENT HANDLERS
    */
-  
+
   // Handle board title change
   const handleBoardTitleChange = (e) => {
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
-    
+
     if (boardId) {
       // Create a direct reference to the title path
       const titleRef = ref(database, `boards/${boardId}/title`);
-      
+
       set(titleRef, newTitle)
         .then(() => {
           console.log('Board title updated');
@@ -222,19 +222,19 @@ function Board({ showNotification }) {
         });
     }
   };
-  
+
   // Show template modal for creating a new board
   const handleCreateNewBoard = () => {
     setIsTemplateModalOpen(true);
   };
-  
+
   // Create a new board with the selected template
   const handleTemplateSelected = (templateColumns, templateName = null) => {
     // Create a title based on the template
     const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
-    
+
     const newBoardId = createNewBoard(templateColumns, boardTitle);
-    
+
     // Only update URL and show notification if we got a valid board ID
     if (newBoardId) {
       window.history.pushState({}, '', `?board=${newBoardId}`);
@@ -244,26 +244,26 @@ function Board({ showNotification }) {
       console.error('Failed to create new board - user may not be authenticated yet');
     }
   };
-  
+
   // This function was removed as part of removing the "Open Board" functionality
-  
+
   /**
    * COLUMN MANAGEMENT
    */
-  
+
   // Add a new column
   const addNewColumn = () => {
     if (!boardRef || !boardId) return;
-    
+
     const columnId = generateId();
     const columnData = {
       title: 'New Column',
       cards: {}
     };
-    
+
     // Create a direct reference to the column path
     const columnRef = ref(database, `boards/${boardId}/columns/${columnId}`);
-    
+
     set(columnRef, columnData)
       .then(() => {
         showNotification('Column added');
@@ -272,13 +272,13 @@ function Board({ showNotification }) {
         console.error('Error adding column:', error);
       });
   };
-  
+
   /**
    * UTILITY FUNCTIONS
    */
-  
+
   // We no longer need toggleSortByVotes since we directly set the sort type from dropdown
-  
+
   // Copy share URL to clipboard
   const copyShareUrl = () => {
     if (boardId) {
@@ -292,51 +292,51 @@ function Board({ showNotification }) {
         });
     }
   };
-  
+
   // Handle export board button click
   const handleExportBoard = () => {
     setIsExportModalOpen(true);
     showNotification('Preparing board export...');
   };
-  
+
   return (
     <>
       <header>
         <div className="header-content">
-          <BoardHeader 
-            boardTitle={boardTitle} 
-            handleBoardTitleChange={handleBoardTitleChange} 
+          <BoardHeader
+            boardTitle={boardTitle}
+            handleBoardTitleChange={handleBoardTitleChange}
             copyShareUrl={copyShareUrl}
+            handleExportBoard={handleExportBoard}
           />
-          <ActionButtons 
+          <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}
             sortByVotes={sortByVotes}
             setSortByVotes={setSortByVotes}
             sortDropdownOpen={sortDropdownOpen}
             setSortDropdownOpen={setSortDropdownOpen}
-            handleExportBoard={handleExportBoard}
           />
         </div>
       </header>
 
       <main>
-        <ColumnsContainer 
+        <ColumnsContainer
           columns={columns}
           sortByVotes={sortByVotes}
           showNotification={showNotification}
           addNewColumn={addNewColumn}
         />
       </main>
-      
+
       {/* Export Board Modal */}
-      <ExportBoardModal 
-        isOpen={isExportModalOpen} 
+      <ExportBoardModal
+        isOpen={isExportModalOpen}
         onClose={() => {
           setIsExportModalOpen(false);
         }}
         showNotification={showNotification}
       />
-      
+
       {/* Template Selection Modal */}
       <NewBoardTemplateModal
         isOpen={isTemplateModalOpen}
