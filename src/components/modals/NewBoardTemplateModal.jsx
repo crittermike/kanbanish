@@ -165,6 +165,79 @@ const BOARD_TEMPLATES = [
     columns: ['Pros', 'Cons', 'Decisions'],
     icon: '⚖️',
     tags: ['decision', 'evaluation', 'analysis']
+  },
+  // New templates
+  {
+    id: 'user-journey',
+    name: 'User Journey Map',
+    description: 'Map out each stage of the user experience',
+    columns: ['Awareness', 'Consideration', 'Decision', 'Onboarding', 'Retention', 'Advocacy'],
+    icon: '🗺️',
+    tags: ['ux', 'design', 'customer']
+  },
+  {
+    id: 'three-horizons',
+    name: 'Three Horizons',
+    description: 'Strategic planning across different time frames',
+    columns: ['Horizon 1 (Now)', 'Horizon 2 (Next)', 'Horizon 3 (Future)'],
+    icon: '🔭',
+    tags: ['strategy', 'planning', 'innovation']
+  },
+  {
+    id: 'impact-effort',
+    name: 'Impact/Effort Matrix',
+    description: 'Prioritize tasks based on impact and required effort',
+    columns: ['High Impact/Low Effort', 'High Impact/High Effort', 'Low Impact/Low Effort', 'Low Impact/High Effort'],
+    icon: '📊',
+    tags: ['prioritization', 'planning', 'efficiency']
+  },
+  {
+    id: 'assumption-mapping',
+    name: 'Assumption Mapping',
+    description: 'Identify and test critical business assumptions',
+    columns: ['Known Knowns', 'Known Unknowns', 'Unknown Knowns', 'Unknown Unknowns'],
+    icon: '🧠',
+    tags: ['strategy', 'risk', 'planning']
+  },
+  {
+    id: 'customer-problem-solution',
+    name: 'Customer-Problem-Solution',
+    description: 'Framework for validating business model assumptions',
+    columns: ['Customer Segments', 'Problems', 'Solutions', 'Value Propositions'],
+    icon: '💡',
+    tags: ['business', 'startup', 'validation']
+  },
+  {
+    id: 'work-breakdown',
+    name: 'Work Breakdown Structure',
+    description: 'Hierarchical decomposition of project deliverables',
+    columns: ['Project', 'Major Deliverables', 'Sub-deliverables', 'Work Packages', 'Tasks'],
+    icon: '📑',
+    tags: ['project management', 'planning', 'organization']
+  },
+  {
+    id: 'five-stage-design',
+    name: 'Five Stage Design Thinking',
+    description: 'Human-centered approach to innovation',
+    columns: ['Empathize', 'Define', 'Ideate', 'Prototype', 'Test'],
+    icon: '🎨',
+    tags: ['design', 'innovation', 'process']
+  },
+  {
+    id: 'rose-thorn-bud',
+    name: 'Rose, Thorn, Bud',
+    description: 'Review positives, challenges, and opportunities',
+    columns: ['Rose (Positive)', 'Thorn (Challenge)', 'Bud (Opportunity)'],
+    icon: '🌹',
+    tags: ['feedback', 'reflection', 'opportunity']
+  },
+  {
+    id: 'four-quadrant-feedback',
+    name: 'Four Quadrant Feedback',
+    description: 'Balanced personal or project feedback',
+    columns: ['Continue', 'Consider', 'Start', 'Stop'],
+    icon: '📝',
+    tags: ['feedback', 'personal', 'development']
   }
 ];
 
