@@ -270,3 +270,41 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-transparent);
 }
+
+/* Comment edit mode */
+.comment-edit {
+    width: 100%;
+}
+
+.comment-edit-input {
+    width: 100%;
+    padding: var(--space-xs);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: var(--space-xs);
+}
+
+.comment-edit-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: var(--space-xs);
+    justify-content: space-between;
+}
+
+.btn-sm {
+    padding: 2px 6px;
+    font-size: var(--font-size-xs);
+}
+
+.comment-content {
+    cursor: pointer;
+}

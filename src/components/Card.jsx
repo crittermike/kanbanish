@@ -92,6 +92,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     
     // Comment operations
     addComment,
+    editComment,
+    deleteComment,
     toggleComments
   } = useCardOperations({
     boardId,
@@ -162,6 +164,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
               onAddComment={addComment}
               newComment={newComment}
               onCommentChange={setNewComment}
+              onEditComment={editComment}
+              onDeleteComment={deleteComment}
             />
           )}
         </>
