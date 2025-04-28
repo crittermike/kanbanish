@@ -1,7 +1,5 @@
 # Kanbanish
 
-![Kanbanish Logo](/public/logo192.png)
-
 A real-time anonymous Kanban board application built with React and Firebase. Kanbanish allows users to create, share, and collaborate on Kanban boards without requiring accounts or authentication.
 
 ## Features
