@@ -437,4 +437,157 @@ describe('Card Component', () => {
       expect(mockProps.showNotification).toHaveBeenCalledWith('Card deleted');
     });
   });
+
+  test('allows editing comments', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Check if the comment content is displayed
+    expect(screen.getByText('Test comment')).toBeInTheDocument();
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Check if the edit input appears with the correct value
+    const commentEditInput = screen.getAllByRole('textbox').find(input => input.classList.contains('comment-edit-input'));
+    expect(commentEditInput).toBeInTheDocument();
+    expect(commentEditInput).toHaveValue('Test comment');
+    
+    // Edit the comment
+    fireEvent.change(commentEditInput, { target: { value: 'Updated comment' } });
+    expect(commentEditInput).toHaveValue('Updated comment');
+    
+    // Save the edited comment
+    const saveButton = screen.getByText('Save');
+    fireEvent.click(saveButton);
+    
+    // Verify comment was updated
+    await waitFor(() => {
+      expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('comments/comment1'));
+      expect(set).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment updated');
+    });
+  });
+
+  test('allows deleting comments', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Click delete button
+    const deleteButton = screen.getByText('Delete');
+    fireEvent.click(deleteButton);
+    
+    // Verify comment was deleted
+    await waitFor(() => {
+      expect(window.confirm).toHaveBeenCalled();
+      expect(remove).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment deleted');
+    });
+  });
+
+  test('can cancel comment editing', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Edit the comment
+    const commentEditInput = screen.getAllByRole('textbox').find(input => input.classList.contains('comment-edit-input'));
+    fireEvent.change(commentEditInput, { target: { value: 'Changed but not saved' } });
+    
+    // Cancel the edit
+    const cancelButton = screen.getByText('Cancel');
+    fireEvent.click(cancelButton);
+    
+    // Verify the original comment is still there
+    expect(screen.getByText('Test comment')).toBeInTheDocument();
+    
+    // Verify no database calls were made
+    expect(set).not.toHaveBeenCalled();
+  });
+
+  test('allows saving comment with Enter key', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Edit the comment
+    const commentEditInput = screen.getAllByRole('textbox').find(input => input.classList.contains('comment-edit-input'));
+    fireEvent.change(commentEditInput, { target: { value: 'Updated with Enter key' } });
+    
+    // Save with Enter key
+    fireEvent.keyPress(commentEditInput, { key: 'Enter', code: 13, charCode: 13 });
+    
+    // Verify comment was updated
+    await waitFor(() => {
+      expect(ref).toHaveBeenCalled();
+      expect(set).toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment updated');
+    });
+  });
+
+  test('prevents adding empty comments when editing', async () => {
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Clear the comment
+    const commentEditInput = screen.getAllByRole('textbox').find(input => input.classList.contains('comment-edit-input'));
+    fireEvent.change(commentEditInput, { target: { value: '   ' } });
+    
+    // Try to save
+    fireEvent.click(screen.getByText('Save'));
+    
+    // Verify no update was made
+    await waitFor(() => {
+      expect(set).not.toHaveBeenCalled();
+    });
+  });
+
+  test('requires confirmation for comment deletion', async () => {
+    // Mock confirm to return false for this test
+    window.confirm.mockReturnValueOnce(false);
+    
+    render(<Card {...mockProps} />);
+    
+    // Open comments section
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+    
+    // Click on the comment to enter edit mode
+    fireEvent.click(screen.getByText('Test comment'));
+    
+    // Click delete button
+    const deleteButton = screen.getByText('Delete');
+    fireEvent.click(deleteButton);
+    
+    // Verify comment wasn't deleted
+    await waitFor(() => {
+      expect(window.confirm).toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+    });
+  });
 });
