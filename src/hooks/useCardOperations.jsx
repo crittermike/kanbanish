@@ -97,20 +97,22 @@ export function useCardOperations({
       return;
     }
     
-    // If multiple votes are not allowed, check if the user has already voted
-    if (!multipleVotesAllowed && cardData.voters) {
-      const userVoted = cardData.voters[user.uid];
-      
-      // If the user is trying to vote again in the same direction
-      if (userVoted === delta) {
+    // Get the user's current vote if any
+    const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
+    
+    // If multiple votes are not allowed
+    if (!multipleVotesAllowed) {
+      // If the user is trying to vote in the same direction they already voted
+      if (userCurrentVote === delta) {
         showNotification("You've already voted");
         return;
       }
       
-      // If the user is changing their vote (e.g. from upvote to downvote)
-      if (userVoted !== undefined && userVoted !== delta) {
-        // Double the delta to account for removing the previous vote
-        delta = delta * 2;
+      // If the user already voted and is now voting in opposite direction,
+      // just reset their vote (remove previous vote, don't add new one)
+      if (userCurrentVote !== 0) {
+        // Cancel their previous vote only
+        delta = -userCurrentVote;
       }
     }
     
@@ -123,9 +125,33 @@ export function useCardOperations({
       
       // Record the user's vote
       const voterRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/voters/${user.uid}`);
-      await set(voterRef, delta);
       
-      showNotification(message);
+      // Calculate the new user vote:
+      // - For multiple votes allowed: increment their current vote
+      // - For single votes only: set to the new direction, or zero if they're toggling an existing vote
+      let newUserVote;
+      if (multipleVotesAllowed) {
+        newUserVote = userCurrentVote + delta;
+      } else {
+        // If they had a previous vote and are voting opposite, clear their vote (userCurrentVote + delta = 0)
+        // If they had no previous vote, set to new direction (delta)
+        newUserVote = (userCurrentVote !== 0 && delta === -userCurrentVote) ? 0 : delta;
+      }
+      
+      if (newUserVote === 0) {
+        // If the vote is cleared, remove from the database
+        await remove(voterRef);
+      } else {
+        // Otherwise store the vote
+        await set(voterRef, newUserVote);
+      }
+      
+      // Show an appropriate message based on what happened
+      if (!multipleVotesAllowed && userCurrentVote !== 0 && delta === -userCurrentVote) {
+        showNotification('Vote removed');
+      } else {
+        showNotification(message);
+      }
     } catch (error) {
       console.error('Error updating votes:', error);
     }
