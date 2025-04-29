@@ -67,6 +67,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     showComments,
     newComment,
     emojiPickerPosition,
+    hasUserVotedOnCard,
     
     // State setters
     setEditedContent,
