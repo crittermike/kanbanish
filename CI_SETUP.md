@@ -21,7 +21,7 @@ To make passing tests a requirement for merging pull requests:
 4. Under "Branch protection rules", click "Add rule"
 5. In "Branch name pattern", enter `main`
 6. Check "Require status checks to pass before merging"
-7. In the search box, search for and select "test" (the job name from our workflow)
+7. In the search box, search for and select "Tests / test" (the workflow/job name)
 8. Optionally, check other protections you want:
    - "Require pull request reviews before merging"
    - "Require signed commits"
