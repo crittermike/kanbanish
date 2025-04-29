@@ -38,22 +38,25 @@ const CardContent = ({
   cardData, 
   formatContentWithEmojis, 
   upvoteCard, 
-  downvoteCard 
+  downvoteCard,
+  votingEnabled
 }) => (
   <div className="card-header">
-    <VotingControls 
-      votes={cardData.votes} 
-      onUpvote={upvoteCard} 
-      onDownvote={downvoteCard} 
-    />
-    <div className="card-content" data-testid="card-content">
+    {votingEnabled && (
+      <VotingControls 
+        votes={cardData.votes} 
+        onUpvote={upvoteCard} 
+        onDownvote={downvoteCard} 
+      />
+    )}
+    <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
       {formatContentWithEmojis(cardData.content)}
     </div>
   </div>
 );
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user } = useBoardContext();
+  const { boardId, user, votingEnabled } = useBoardContext();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
@@ -142,6 +145,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
             downvoteCard={downvoteCard}
+            votingEnabled={votingEnabled}
           />
           
           <CardReactions

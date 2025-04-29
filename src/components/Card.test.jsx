@@ -66,7 +66,8 @@ describe('Card Component', () => {
 
   const mockBoardContext = {
     boardId: 'board123',
-    user: { uid: 'user123' }
+    user: { uid: 'user123' },
+    votingEnabled: true
   };
 
   beforeEach(() => {
@@ -589,5 +590,24 @@ describe('Card Component', () => {
       expect(window.confirm).toHaveBeenCalled();
       expect(remove).not.toHaveBeenCalled();
     });
+  });
+
+  test('hides voting controls when voting is disabled', () => {
+    // Mock the context with voting disabled
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      votingEnabled: false
+    });
+    
+    render(<Card {...mockProps} />);
+    
+    // Voting controls should not be rendered
+    expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+    expect(screen.queryByText('5')).not.toBeInTheDocument(); // Votes count should not be visible
+    
+    // Card content should have full-width class
+    const cardContent = screen.getByTestId('card-content');
+    expect(cardContent).toHaveClass('full-width');
   });
 });

@@ -44,6 +44,10 @@
     padding-left: var(--space-sm);
 }
 
+.card-content.full-width {
+    padding-left: 0;
+}
+
 .card-footer {
     display: flex;
     justify-content: flex-end;

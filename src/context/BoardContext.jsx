@@ -22,6 +22,7 @@ export const BoardProvider = ({ children }) => {
   const [boardTitle, setBoardTitle] = useState('Untitled Board');
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotes] = useState(false);
+  const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [boardRef, setBoardRef] = useState(null);
 
   // Firebase authentication
@@ -56,6 +57,11 @@ export const BoardProvider = ({ children }) => {
             setBoardTitle(boardData.title);
           }
           setColumns(boardData.columns || {});
+          
+          // Set voting preference if available, otherwise default to true
+          if (boardData.settings && boardData.settings.votingEnabled !== undefined) {
+            setVotingEnabled(boardData.settings.votingEnabled);
+          }
         }
       });
 
@@ -94,7 +100,10 @@ export const BoardProvider = ({ children }) => {
       title: boardTitle,
       created: Date.now(),
       owner: user.uid,
-      columns: columnsObj
+      columns: columnsObj,
+      settings: {
+        votingEnabled: true // Default to enabled for new boards
+      }
     };
     
     set(newBoardRef, initialData)
@@ -128,6 +137,24 @@ export const BoardProvider = ({ children }) => {
         .catch((error) => {
           console.error('Error updating board title:', error);
         });
+    }
+  };
+  
+  // Update voting enabled setting
+  const updateVotingEnabled = (enabled) => {
+    if (boardId && user) {
+      const settingsRef = ref(database, `boards/${boardId}/settings`);
+      set(settingsRef, { votingEnabled: enabled })
+        .then(() => {
+          console.log('Voting setting updated:', enabled);
+          setVotingEnabled(enabled);
+        })
+        .catch((error) => {
+          console.error('Error updating voting setting:', error);
+        });
+    } else {
+      // If we're not connected to a board yet, just update the local state
+      setVotingEnabled(enabled);
     }
   };
 
@@ -174,6 +201,9 @@ export const BoardProvider = ({ children }) => {
     updateBoardTitle,
     sortByVotes,
     setSortByVotes,
+    votingEnabled,
+    setVotingEnabled,
+    updateVotingEnabled,
     boardRef,
     createNewBoard,
     openExistingBoard,

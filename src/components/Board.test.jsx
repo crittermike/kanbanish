@@ -54,6 +54,9 @@ describe('Board Component', () => {
     },
     sortByVotes: false,
     setSortByVotes: vi.fn(),
+    votingEnabled: true,
+    setVotingEnabled: vi.fn(),
+    updateVotingEnabled: vi.fn(),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
     user: { uid: 'test-user-123' } // Default user state for most tests
@@ -194,11 +197,12 @@ describe('Board Component', () => {
       </DndProvider>
     );
     
-    // Find and click the sort dropdown button
-    const sortButton = screen.getByText('Sort');
-    fireEvent.click(sortButton);
+    // Find and click the settings dropdown button
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
     
     // Check that dropdown options are shown
+    expect(screen.getByText('Sort Cards')).toBeInTheDocument();
     expect(screen.getByText('Chronological')).toBeInTheDocument();
     expect(screen.getByText('By Votes')).toBeInTheDocument();
   });
@@ -217,8 +221,8 @@ describe('Board Component', () => {
     );
     
     // Open the dropdown
-    const sortButton = screen.getByText('Sort');
-    fireEvent.click(sortButton);
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
     
     // Click the "By Votes" option
     const byVotesOption = screen.getByText('By Votes');
@@ -226,6 +230,34 @@ describe('Board Component', () => {
     
     // Check that setSortByVotes was called with true
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
+  });
+  
+  test('toggles voting enabled setting when clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find the "Allow Voting?" section and click the "No" option
+    const allowVotingSection = screen.getByText('Allow Voting?');
+    expect(allowVotingSection).toBeInTheDocument();
+    
+    const noOption = screen.getByText('No');
+    fireEvent.click(noOption);
+    
+    // Check that updateVotingEnabled was called with the opposite of its current value
+    expect(mockContextValue.updateVotingEnabled).toHaveBeenCalledWith(!mockContextValue.votingEnabled);
   });
   
   test('updates document title when board title changes', () => {

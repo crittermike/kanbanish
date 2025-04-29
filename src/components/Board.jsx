@@ -7,7 +7,7 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
@@ -46,7 +46,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sortDropdownOpen, setSortDropdownOpen }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, sortDropdownOpen, setSortDropdownOpen }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -76,14 +76,15 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
       </button>
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
-          id="sort-dropdown-button"
+          id="settings-dropdown-button"
           className="btn sort-dropdown-button"
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
+          title="Board settings and preferences"
         >
-          <BarChart2 size={16} />
-          Sort
+          <Settings size={16} />
+          Settings
           <ChevronDown
             size={12}
             className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}
@@ -92,22 +93,43 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, sort
 
         {sortDropdownOpen && (
           <div className="sort-dropdown-menu">
-            <button
-              className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
-              onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
-            >
-              <ArrowDown size={14} />
-              Chronological
-              {!sortByVotes && <span className="checkmark">✓</span>}
-            </button>
-            <button
-              className={`sort-option ${sortByVotes ? 'selected' : ''}`}
-              onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
-            >
-              <ThumbsUp size={14} />
-              By Votes
-              {sortByVotes && <span className="checkmark">✓</span>}
-            </button>
+            <div className="settings-section">
+              <h4 className="settings-section-title">Sort Cards</h4>
+              <button
+                className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
+                onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
+              >
+                <ArrowDown size={14} />
+                Chronological
+                {!sortByVotes && <span className="checkmark">✓</span>}
+              </button>
+              <button
+                className={`sort-option ${sortByVotes ? 'selected' : ''}`}
+                onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
+              >
+                <ThumbsUp size={14} />
+                By Votes
+                {sortByVotes && <span className="checkmark">✓</span>}
+              </button>
+            </div>
+            <div className="settings-divider"></div>
+            <div className="settings-section">
+              <h4 className="settings-section-title">Allow Voting?</h4>
+              <div className="settings-boolean-option">
+                <button
+                  className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
+                  onClick={() => { updateVotingEnabled(true); setSortDropdownOpen(false); }}
+                >
+                  Yes
+                </button>
+                <button
+                  className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
+                  onClick={() => { updateVotingEnabled(false); setSortDropdownOpen(false); }}
+                >
+                  No
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -169,13 +191,15 @@ function Board({ showNotification }) {
     columns,
     sortByVotes,
     setSortByVotes,
+    votingEnabled,
+    updateVotingEnabled,
     createNewBoard,
     openExistingBoard,
     user // Include user from context
   } = useBoardContext();
 
-  // State for dropdown menu
-  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  // State for settings dropdown menu
+  const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
 
   /**
    * BOARD INITIALIZATION
@@ -313,8 +337,10 @@ function Board({ showNotification }) {
             handleCreateNewBoard={handleCreateNewBoard}
             sortByVotes={sortByVotes}
             setSortByVotes={setSortByVotes}
-            sortDropdownOpen={sortDropdownOpen}
-            setSortDropdownOpen={setSortDropdownOpen}
+            votingEnabled={votingEnabled}
+            updateVotingEnabled={updateVotingEnabled}
+            sortDropdownOpen={settingsDropdownOpen}
+            setSortDropdownOpen={setSettingsDropdownOpen}
           />
         </div>
       </header>

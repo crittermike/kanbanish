@@ -8,7 +8,7 @@ import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard } = useBoardContext();
+  const { boardId, moveCard, votingEnabled } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');

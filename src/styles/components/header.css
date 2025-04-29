@@ -99,7 +99,7 @@ h1 {
     margin-bottom: var(--space-md);
 }
 
-/* Sort dropdown styles */
+/* Settings dropdown styles */
 .sort-dropdown-container {
     position: relative;
     display: inline-block;
@@ -142,7 +142,7 @@ h1 {
     top: 100%;
     right: 0;
     margin-top: 2px;
-    min-width: 180px;
+    min-width: 220px;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -185,6 +185,67 @@ h1 {
 .sort-option .checkmark {
     margin-left: auto;
     font-weight: bold;
+}
+
+/* Settings section styling */
+.settings-section {
+    padding: var(--space-xs) 0;
+}
+
+.settings-section-title {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    padding: var(--space-xs) var(--space-sm);
+    margin: 0;
+    border-bottom: 1px solid var(--border-color-light);
+}
+
+.settings-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: var(--space-xs) 0;
+}
+
+.settings-section-placeholder {
+    padding: var(--space-sm);
+}
+
+.settings-coming-soon {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    font-style: italic;
+}
+
+/* Boolean option styling (Yes/No buttons) */
+.settings-boolean-option {
+    display: flex;
+    padding: var(--space-xs) var(--space-sm);
+    gap: var(--space-xs);
+}
+
+.boolean-option {
+    flex: 1;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.boolean-option:hover {
+    background-color: var(--hover-bg);
+}
+
+.boolean-option.selected {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
 }
 
 @keyframes dropdown-fade-in {
