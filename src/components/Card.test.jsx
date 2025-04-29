@@ -67,7 +67,8 @@ describe('Card Component', () => {
   const mockBoardContext = {
     boardId: 'board123',
     user: { uid: 'user123' },
-    votingEnabled: true
+    votingEnabled: true,
+    multipleVotesAllowed: false
   };
 
   beforeEach(() => {
@@ -143,7 +144,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote added');
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
     });
   });
 
@@ -158,7 +159,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote removed');
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Downvoted card');
     });
   });
 
@@ -342,10 +343,10 @@ describe('Card Component', () => {
     const downvoteButton = screen.getByTitle('Downvote');
     fireEvent.click(downvoteButton);
     
-    // Verify vote count didn't change
+    // Verify vote count didn't change and notification was shown
     await waitFor(() => {
       expect(set).not.toHaveBeenCalled();
-      expect(mockProps.showNotification).not.toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith("Can't have negative votes");
     });
   });
 
@@ -609,5 +610,40 @@ describe('Card Component', () => {
     // Card content should have full-width class
     const cardContent = screen.getByTestId('card-content');
     expect(cardContent).toHaveClass('full-width');
+  });
+
+  test('respects multiple votes allowed setting', async () => {
+    // Mock the context with multiple votes allowed
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      multipleVotesAllowed: true
+    });
+    
+    // Reset mocks to track calls more easily
+    set.mockClear();
+    mockProps.showNotification.mockClear();
+    
+    render(<Card {...mockProps} />);
+    
+    // Upvote the card
+    const upvoteButton = screen.getByTitle('Upvote');
+    fireEvent.click(upvoteButton);
+    
+    // Wait for first vote to be processed
+    await waitFor(() => {
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+    });
+    
+    // Reset the mocks after first vote
+    set.mockClear();
+    mockProps.showNotification.mockClear();
+    
+    // Upvote again
+    fireEvent.click(upvoteButton);
+    
+    // Verify second vote was processed
+    await waitFor(() => {
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+    });
   });
 });

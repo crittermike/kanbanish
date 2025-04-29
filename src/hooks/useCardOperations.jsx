@@ -8,7 +8,8 @@ export function useCardOperations({
   cardId, 
   cardData, 
   user, 
-  showNotification 
+  showNotification,
+  multipleVotesAllowed = false // pass this from the Card component
 }) {
   // State
   const [isEditing, setIsEditing] = useState(false);
@@ -86,15 +87,44 @@ export function useCardOperations({
   const updateVotes = useCallback(async (delta, e, message) => {
     e.stopPropagation();
     
-    if (!boardId) return;
+    if (!boardId || !user) return;
     
     const currentVotes = cardData.votes || 0;
-    if (delta < 0 && currentVotes <= 0) return;
+    
+    // Prevent negative votes
+    if (delta < 0 && currentVotes <= 0) {
+      showNotification("Can't have negative votes");
+      return;
+    }
+    
+    // If multiple votes are not allowed, check if the user has already voted
+    if (!multipleVotesAllowed && cardData.voters) {
+      const userVoted = cardData.voters[user.uid];
+      
+      // If the user is trying to vote again in the same direction
+      if (userVoted === delta) {
+        showNotification("You've already voted");
+        return;
+      }
+      
+      // If the user is changing their vote (e.g. from upvote to downvote)
+      if (userVoted !== undefined && userVoted !== delta) {
+        // Double the delta to account for removing the previous vote
+        delta = delta * 2;
+      }
+    }
     
     try {
       const newVotes = currentVotes + delta;
+      
+      // Update the total vote count
       const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
       await set(votesRef, newVotes);
+      
+      // Record the user's vote
+      const voterRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/voters/${user.uid}`);
+      await set(voterRef, delta);
+      
       showNotification(message);
     } catch (error) {
       console.error('Error updating votes:', error);
@@ -102,11 +132,11 @@ export function useCardOperations({
   }, [boardId, columnId, cardId, cardData.votes, showNotification]);
 
   const upvoteCard = useCallback((e) => {
-    updateVotes(1, e, 'Vote added');
+    updateVotes(1, e, 'Upvoted card');
   }, [updateVotes]);
 
   const downvoteCard = useCallback((e) => {
-    updateVotes(-1, e, 'Vote removed');
+    updateVotes(-1, e, 'Downvoted card');
   }, [updateVotes]);
 
   // Format content

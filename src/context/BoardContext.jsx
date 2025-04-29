@@ -23,6 +23,7 @@ export const BoardProvider = ({ children }) => {
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotes] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
+  const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [boardRef, setBoardRef] = useState(null);
 
   // Firebase authentication
@@ -58,9 +59,14 @@ export const BoardProvider = ({ children }) => {
           }
           setColumns(boardData.columns || {});
           
-          // Set voting preference if available, otherwise default to true
-          if (boardData.settings && boardData.settings.votingEnabled !== undefined) {
-            setVotingEnabled(boardData.settings.votingEnabled);
+          // Set voting preferences if available, otherwise use defaults
+          if (boardData.settings) {
+            if (boardData.settings.votingEnabled !== undefined) {
+              setVotingEnabled(boardData.settings.votingEnabled);
+            }
+            if (boardData.settings.multipleVotesAllowed !== undefined) {
+              setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
+            }
           }
         }
       });
@@ -102,7 +108,8 @@ export const BoardProvider = ({ children }) => {
       owner: user.uid,
       columns: columnsObj,
       settings: {
-        votingEnabled: true // Default to enabled for new boards
+        votingEnabled: true, // Default to enabled for new boards
+        multipleVotesAllowed: false // Default to not allowing multiple votes
       }
     };
     
@@ -144,7 +151,10 @@ export const BoardProvider = ({ children }) => {
   const updateVotingEnabled = (enabled) => {
     if (boardId && user) {
       const settingsRef = ref(database, `boards/${boardId}/settings`);
-      set(settingsRef, { votingEnabled: enabled })
+      set(settingsRef, { 
+        votingEnabled: enabled,
+        multipleVotesAllowed: multipleVotesAllowed 
+      })
         .then(() => {
           console.log('Voting setting updated:', enabled);
           setVotingEnabled(enabled);
@@ -155,6 +165,27 @@ export const BoardProvider = ({ children }) => {
     } else {
       // If we're not connected to a board yet, just update the local state
       setVotingEnabled(enabled);
+    }
+  };
+  
+  // Update multiple votes allowed setting
+  const updateMultipleVotesAllowed = (allowed) => {
+    if (boardId && user) {
+      const settingsRef = ref(database, `boards/${boardId}/settings`);
+      set(settingsRef, { 
+        votingEnabled: votingEnabled,
+        multipleVotesAllowed: allowed 
+      })
+        .then(() => {
+          console.log('Multiple votes setting updated:', allowed);
+          setMultipleVotesAllowed(allowed);
+        })
+        .catch((error) => {
+          console.error('Error updating multiple votes setting:', error);
+        });
+    } else {
+      // If we're not connected to a board yet, just update the local state
+      setMultipleVotesAllowed(allowed);
     }
   };
 
@@ -204,6 +235,9 @@ export const BoardProvider = ({ children }) => {
     votingEnabled,
     setVotingEnabled,
     updateVotingEnabled,
+    multipleVotesAllowed,
+    setMultipleVotesAllowed,
+    updateMultipleVotesAllowed,
     boardRef,
     createNewBoard,
     openExistingBoard,

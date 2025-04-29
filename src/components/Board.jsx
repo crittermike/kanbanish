@@ -46,7 +46,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, sortDropdownOpen, setSortDropdownOpen }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -114,7 +114,7 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
             </div>
             <div className="settings-divider"></div>
             <div className="settings-section">
-              <h4 className="settings-section-title">Allow Voting?</h4>
+              <h4 className="settings-section-title">Allow voting?</h4>
               <div className="settings-boolean-option">
                 <button
                   className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
@@ -125,6 +125,24 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
                 <button
                   className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
                   onClick={() => { updateVotingEnabled(false); setSortDropdownOpen(false); }}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+            <div className="settings-divider"></div>
+            <div className="settings-section">
+              <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
+              <div className="settings-boolean-option">
+                <button
+                  className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
+                  onClick={() => { updateMultipleVotesAllowed(true); setSortDropdownOpen(false); }}
+                >
+                  Yes
+                </button>
+                <button
+                  className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
+                  onClick={() => { updateMultipleVotesAllowed(false); setSortDropdownOpen(false); }}
                 >
                   No
                 </button>
@@ -193,6 +211,8 @@ function Board({ showNotification }) {
     setSortByVotes,
     votingEnabled,
     updateVotingEnabled,
+    multipleVotesAllowed,
+    updateMultipleVotesAllowed,
     createNewBoard,
     openExistingBoard,
     user // Include user from context
@@ -339,6 +359,8 @@ function Board({ showNotification }) {
             setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
             updateVotingEnabled={updateVotingEnabled}
+            multipleVotesAllowed={multipleVotesAllowed}
+            updateMultipleVotesAllowed={updateMultipleVotesAllowed}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
           />

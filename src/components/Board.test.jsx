@@ -57,6 +57,9 @@ describe('Board Component', () => {
     votingEnabled: true,
     setVotingEnabled: vi.fn(),
     updateVotingEnabled: vi.fn(),
+    multipleVotesAllowed: false,
+    setMultipleVotesAllowed: vi.fn(),
+    updateMultipleVotesAllowed: vi.fn(),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
     user: { uid: 'test-user-123' } // Default user state for most tests
@@ -250,14 +253,43 @@ describe('Board Component', () => {
     fireEvent.click(settingsButton);
     
     // Find the "Allow Voting?" section and click the "No" option
-    const allowVotingSection = screen.getByText('Allow Voting?');
+    const allowVotingSection = screen.getByText('Allow voting?');
     expect(allowVotingSection).toBeInTheDocument();
     
-    const noOption = screen.getByText('No');
-    fireEvent.click(noOption);
+    const noOptions = screen.getAllByText('No');
+    // First 'No' option is for voting settings
+    fireEvent.click(noOptions[0]);
     
     // Check that updateVotingEnabled was called with the opposite of its current value
     expect(mockContextValue.updateVotingEnabled).toHaveBeenCalledWith(!mockContextValue.votingEnabled);
+  });
+  
+  test('toggles multiple votes allowed setting when clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find the "Allow users to vote multiple times on the same card?" section and click the "Yes" option
+    const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
+    expect(allowMultipleVotesSection).toBeInTheDocument();
+    
+    const yesOption = screen.getAllByText('Yes')[1]; // Get the second "Yes" button (for multiple votes)
+    fireEvent.click(yesOption);
+    
+    // Check that updateMultipleVotesAllowed was called with true
+    expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
   });
   
   test('updates document title when board title changes', () => {

@@ -56,7 +56,7 @@ const CardContent = ({
 );
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled } = useBoardContext();
+  const { boardId, user, votingEnabled, multipleVotesAllowed } = useBoardContext();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
@@ -104,7 +104,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     cardId,
     cardData,
     user,
-    showNotification
+    showNotification,
+    multipleVotesAllowed
   });
   
   // Configure drag functionality
