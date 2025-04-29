@@ -7,5 +7,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.js'],
+    reporters: ['default', 'json'],
+    outputFile: 'vitest.results.json',
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
   },
 });
