@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
 import Board from './Board';
@@ -263,9 +263,12 @@ describe('Board Component', () => {
     const allowVotingSection = screen.getByText('Allow voting?');
     expect(allowVotingSection).toBeInTheDocument();
     
-    const noOptions = screen.getAllByText('No');
-    // First 'No' option is for voting settings
-    fireEvent.click(noOptions[0]);
+    // Find the closest parent section element containing the setting
+    const votingSection = allowVotingSection.closest('.settings-section');
+    
+    // Within that section, find the No option and click it
+    const noOption = within(votingSection).getByText('No');
+    fireEvent.click(noOption);
     
     // Check that updateVotingEnabled was called with the opposite of its current value
     expect(mockContextValue.updateVotingEnabled).toHaveBeenCalledWith(!mockContextValue.votingEnabled);
@@ -292,9 +295,12 @@ describe('Board Component', () => {
     const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
     expect(allowMultipleVotesSection).toBeInTheDocument();
     
-    const yesOptions = screen.getAllByText('Yes');
-    // Third "Yes" option is for multiple votes (after voting enabled and downvoting enabled)
-    fireEvent.click(yesOptions[2]);
+    // Find the closest parent section element containing the setting
+    const multipleVotesSection = allowMultipleVotesSection.closest('.settings-section');
+    
+    // Within that section, find the Yes option and click it
+    const yesOption = within(multipleVotesSection).getByText('Yes');
+    fireEvent.click(yesOption);
     
     // Check that updateMultipleVotesAllowed was called with true
     expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
@@ -421,9 +427,12 @@ describe('Board Component', () => {
     const allowDownvotingSection = screen.getByText('Allow downvoting?');
     expect(allowDownvotingSection).toBeInTheDocument();
     
-    const noOptions = screen.getAllByText('No');
-    // Second 'No' option is for downvoting setting
-    fireEvent.click(noOptions[1]);
+    // Find the closest parent section element containing the setting
+    const downvotingSection = allowDownvotingSection.closest('.settings-section');
+    
+    // Within that section, find the No option and click it
+    const noOption = within(downvotingSection).getByText('No');
+    fireEvent.click(noOption);
     
     // Check that updateDownvotingEnabled was called with false
     expect(mockContextValue.updateDownvotingEnabled).toHaveBeenCalledWith(false);
