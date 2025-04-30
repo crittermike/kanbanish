@@ -60,6 +60,7 @@ describe('Board Component', () => {
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
+    resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
     user: { uid: 'test-user-123' } // Default user state for most tests
@@ -90,6 +91,9 @@ describe('Board Component', () => {
 
     // Mock window.history.pushState
     window.history.pushState = vi.fn();
+    
+    // Mock window.confirm
+    global.window.confirm = vi.fn();
   });
 
   afterEach(() => {
@@ -390,5 +394,91 @@ describe('Board Component', () => {
     // But we can verify that pushState and notification are not called when board creation fails
     expect(window.history.pushState).not.toHaveBeenCalled();
     expect(mockShowNotification).not.toHaveBeenCalled();
+  });
+  
+  // Tests for Reset All Votes functionality are already defined above
+  
+  test('resets all votes when reset votes button is clicked', async () => {
+    // Set up specific mock for resetAllVotes that simulates the confirm dialog internally returning true
+    const mockResetAllVotes = vi.fn().mockImplementation(() => {
+      return true; // Simulate user clicking "OK" in confirm dialog
+    });
+    
+    // Override the mock for this specific test
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      resetAllVotes: mockResetAllVotes
+    });
+    
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find and click the reset votes button
+    const resetVotesButton = screen.getByText('Reset all votes');
+    expect(resetVotesButton).toBeInTheDocument();
+    fireEvent.click(resetVotesButton);
+    
+    // Verify resetAllVotes was called 
+    expect(mockResetAllVotes).toHaveBeenCalled();
+    
+    // Verify notification was shown
+    expect(mockShowNotification).toHaveBeenCalledWith('All votes reset to zero');
+    
+    // Verify dropdown remains open
+    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
+  });
+  
+  test('does not reset votes if user cancels confirmation', async () => {
+    // Set up specific mock for resetAllVotes that simulates the confirm dialog internally returning false
+    const mockResetAllVotes = vi.fn().mockImplementation(() => {
+      return false; // Simulate user clicking "Cancel" in confirm dialog
+    });
+    
+    // Override the mock for this specific test
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      resetAllVotes: mockResetAllVotes
+    });
+    
+    // Simulate having a board ID in the URL
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find and click the reset votes button
+    const resetVotesButton = screen.getByText('Reset all votes');
+    fireEvent.click(resetVotesButton);
+    
+    // Verify resetAllVotes was called
+    expect(mockResetAllVotes).toHaveBeenCalled();
+    
+    // Verify notification was NOT shown
+    expect(mockShowNotification).not.toHaveBeenCalledWith('All votes reset to zero');
+    
+    // Dropdown should still be open
+    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 });

@@ -189,6 +189,34 @@ export const BoardProvider = ({ children }) => {
     }
   };
 
+  // Reset all votes in the board
+  const resetAllVotes = () => {
+    if (!boardId || !user) return false;
+    
+    // Confirm before proceeding
+    const confirmMessage = 'Are you sure you want to reset all votes to zero? This cannot be undone.';
+    if (!window.confirm(confirmMessage)) {
+      return false;
+    }
+    
+    // Loop through all columns and cards
+    Object.entries(columns).forEach(([columnId, column]) => {
+      if (column.cards) {
+        Object.entries(column.cards).forEach(([cardId, card]) => {
+          // Reset votes to 0 and clear all voters
+          const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+          const updatedCard = { ...card, votes: 0, voters: {} };
+          set(cardRef, updatedCard)
+            .catch(error => {
+              console.error(`Error resetting votes for card ${cardId}:`, error);
+            });
+        });
+      }
+    });
+    
+    return true;
+  };
+
   // Move a card between columns
   const moveCard = (cardId, sourceColumnId, targetColumnId) => {
     if (!boardId || !user || sourceColumnId === targetColumnId) return;
@@ -241,7 +269,8 @@ export const BoardProvider = ({ children }) => {
     boardRef,
     createNewBoard,
     openExistingBoard,
-    moveCard
+    moveCard,
+    resetAllVotes
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

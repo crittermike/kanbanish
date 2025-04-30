@@ -46,7 +46,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -97,7 +97,7 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
               <h4 className="settings-section-title">Sort Cards</h4>
               <button
                 className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
-                onClick={() => { setSortByVotes(false); setSortDropdownOpen(false); }}
+                onClick={() => { setSortByVotes(false); }}
               >
                 <ArrowDown size={14} />
                 Chronological
@@ -105,7 +105,7 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
               </button>
               <button
                 className={`sort-option ${sortByVotes ? 'selected' : ''}`}
-                onClick={() => { setSortByVotes(true); setSortDropdownOpen(false); }}
+                onClick={() => { setSortByVotes(true); }}
               >
                 <ThumbsUp size={14} />
                 By Votes
@@ -118,13 +118,13 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
               <div className="settings-boolean-option">
                 <button
                   className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
-                  onClick={() => { updateVotingEnabled(true); setSortDropdownOpen(false); }}
+                  onClick={() => { updateVotingEnabled(true); }}
                 >
                   Yes
                 </button>
                 <button
                   className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
-                  onClick={() => { updateVotingEnabled(false); setSortDropdownOpen(false); }}
+                  onClick={() => { updateVotingEnabled(false); }}
                 >
                   No
                 </button>
@@ -136,17 +136,32 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
               <div className="settings-boolean-option">
                 <button
                   className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                  onClick={() => { updateMultipleVotesAllowed(true); setSortDropdownOpen(false); }}
+                  onClick={() => { updateMultipleVotesAllowed(true); }}
                 >
                   Yes
                 </button>
                 <button
                   className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                  onClick={() => { updateMultipleVotesAllowed(false); setSortDropdownOpen(false); }}
+                  onClick={() => { updateMultipleVotesAllowed(false); }}
                 >
                   No
                 </button>
               </div>
+            </div>
+            <div className="settings-divider"></div>
+            <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
+              <button
+                className="btn danger-btn"
+                style={{ width: '100%', margin: 'var(--space-xs) 0' }}
+                onClick={() => {
+                  if (resetAllVotes()) {
+                    showNotification('All votes reset to zero');
+                    // Keep dropdown open after resetting votes
+                  }
+                }}
+              >
+                Reset all votes
+              </button>
             </div>
           </div>
         )}
@@ -215,6 +230,7 @@ function Board({ showNotification }) {
     updateMultipleVotesAllowed,
     createNewBoard,
     openExistingBoard,
+    resetAllVotes,
     user // Include user from context
   } = useBoardContext();
 
@@ -363,6 +379,8 @@ function Board({ showNotification }) {
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
+            resetAllVotes={resetAllVotes}
+            showNotification={showNotification}
           />
         </div>
       </header>
