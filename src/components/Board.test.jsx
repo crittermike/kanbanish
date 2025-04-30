@@ -481,4 +481,62 @@ describe('Board Component', () => {
     // Dropdown should still be open
     expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
+  
+  test('hides multi-vote setting and reset votes button when voting is disabled', () => {
+    // Override the mock for this specific test - voting is disabled
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      votingEnabled: false
+    });
+    
+    // Simulate having a board ID in the URL
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Verify vote settings are displayed correctly
+    expect(screen.getByText('Allow voting?')).toBeInTheDocument();
+    
+    // The multi-vote setting and reset votes button should be hidden when voting is disabled
+    expect(screen.queryByText('Allow users to vote multiple times on the same card?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reset all votes')).not.toBeInTheDocument();
+  });
+  
+  test('shows multi-vote setting and reset votes button when voting is enabled', () => {
+    // Override the mock for this specific test - voting is enabled
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      votingEnabled: true
+    });
+    
+    // Simulate having a board ID in the URL
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Verify all vote settings are displayed
+    expect(screen.getByText('Allow voting?')).toBeInTheDocument();
+    expect(screen.getByText('Allow users to vote multiple times on the same card?')).toBeInTheDocument();
+    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
+  });
 });
