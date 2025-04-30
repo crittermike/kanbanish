@@ -130,39 +130,43 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
                 </button>
               </div>
             </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section">
-              <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
-              <div className="settings-boolean-option">
-                <button
-                  className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                  onClick={() => { updateMultipleVotesAllowed(true); }}
-                >
-                  Yes
-                </button>
-                <button
-                  className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                  onClick={() => { updateMultipleVotesAllowed(false); }}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
-              <button
-                className="btn danger-btn"
-                style={{ width: '100%', margin: 'var(--space-xs) 0' }}
-                onClick={() => {
-                  if (resetAllVotes()) {
-                    showNotification('All votes reset to zero');
-                    // Keep dropdown open after resetting votes
-                  }
-                }}
-              >
-                Reset all votes
-              </button>
-            </div>
+            {votingEnabled && (
+              <>
+                <div className="settings-divider"></div>
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
+                  <div className="settings-boolean-option">
+                    <button
+                      className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
+                      onClick={() => { updateMultipleVotesAllowed(true); }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
+                      onClick={() => { updateMultipleVotesAllowed(false); }}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+                <div className="settings-divider"></div>
+                <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
+                  <button
+                    className="btn danger-btn"
+                    style={{ width: '100%', margin: 'var(--space-xs) 0' }}
+                    onClick={() => {
+                      if (resetAllVotes()) {
+                        showNotification('All votes reset to zero');
+                        // Keep dropdown open after resetting votes
+                      }
+                    }}
+                  >
+                    Reset all votes
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
