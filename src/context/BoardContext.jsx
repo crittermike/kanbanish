@@ -25,6 +25,7 @@ export const BoardProvider = ({ children }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
+  const [boardFrozen, setBoardFrozen] = useState(false); // Default to unfrozen
   const [boardRef, setBoardRef] = useState(null);
 
   // Firebase authentication
@@ -71,6 +72,9 @@ export const BoardProvider = ({ children }) => {
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
             }
+            if (boardData.settings.boardFrozen !== undefined) {
+              setBoardFrozen(boardData.settings.boardFrozen);
+            }
           }
         }
       });
@@ -114,7 +118,8 @@ export const BoardProvider = ({ children }) => {
       settings: {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
-        multipleVotesAllowed: false // Default to not allowing multiple votes
+        multipleVotesAllowed: false, // Default to not allowing multiple votes
+        boardFrozen: false // Default to unfrozen for new boards
       }
     };
     
@@ -159,7 +164,8 @@ export const BoardProvider = ({ children }) => {
       set(settingsRef, { 
         votingEnabled: enabled,
         downvotingEnabled: downvotingEnabled,
-        multipleVotesAllowed: multipleVotesAllowed 
+        multipleVotesAllowed: multipleVotesAllowed,
+        boardFrozen: boardFrozen
       })
         .then(() => {
           console.log('Voting setting updated:', enabled);
@@ -181,7 +187,8 @@ export const BoardProvider = ({ children }) => {
       set(settingsRef, { 
         votingEnabled: votingEnabled,
         downvotingEnabled: enabled,
-        multipleVotesAllowed: multipleVotesAllowed 
+        multipleVotesAllowed: multipleVotesAllowed,
+        boardFrozen: boardFrozen
       })
         .then(() => {
           console.log('Downvoting setting updated:', enabled);
@@ -203,7 +210,8 @@ export const BoardProvider = ({ children }) => {
       set(settingsRef, { 
         votingEnabled: votingEnabled,
         downvotingEnabled: downvotingEnabled,
-        multipleVotesAllowed: allowed 
+        multipleVotesAllowed: allowed,
+        boardFrozen: boardFrozen
       })
         .then(() => {
           console.log('Multiple votes setting updated:', allowed);
@@ -215,6 +223,29 @@ export const BoardProvider = ({ children }) => {
     } else {
       // If we're not connected to a board yet, just update the local state
       setMultipleVotesAllowed(allowed);
+    }
+  };
+
+  // Update board frozen setting
+  const updateBoardFrozen = (frozen) => {
+    if (boardId && user) {
+      const settingsRef = ref(database, `boards/${boardId}/settings`);
+      set(settingsRef, { 
+        votingEnabled: votingEnabled,
+        downvotingEnabled: downvotingEnabled,
+        multipleVotesAllowed: multipleVotesAllowed,
+        boardFrozen: frozen 
+      })
+        .then(() => {
+          console.log('Board frozen setting updated:', frozen);
+          setBoardFrozen(frozen);
+        })
+        .catch((error) => {
+          console.error('Error updating board frozen setting:', error);
+        });
+    } else {
+      // If we're not connected to a board yet, just update the local state
+      setBoardFrozen(frozen);
     }
   };
 
@@ -298,6 +329,9 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
+    boardFrozen,
+    setBoardFrozen,
+    updateBoardFrozen,
     boardRef,
     createNewBoard,
     openExistingBoard,

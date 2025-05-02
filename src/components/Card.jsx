@@ -41,7 +41,8 @@ const CardContent = ({
   downvoteCard,
   votingEnabled,
   downvotingEnabled,
-  userId
+  userId,
+  boardFrozen
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -57,6 +58,7 @@ const CardContent = ({
           onUpvote={upvoteCard} 
           onDownvote={downvoteCard} 
           showDownvoteButton={showDownvoteButton}
+          disabled={boardFrozen}
         />
       )}
       <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
@@ -67,7 +69,7 @@ const CardContent = ({
 };
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, boardFrozen } = useBoardContext();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
@@ -138,7 +140,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     <div 
       ref={cardElementRef}
       className={`card ${isDragging ? 'dragging' : ''}`} 
-      onClick={() => !isEditing && toggleEditMode()}
+      onClick={() => !isEditing && !boardFrozen && toggleEditMode()}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       {isEditing ? (
@@ -160,20 +162,22 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             votingEnabled={votingEnabled}
             downvotingEnabled={downvotingEnabled}
             userId={user?.uid}
+            boardFrozen={boardFrozen}
           />
           
           <CardReactions
             reactions={cardData.reactions}
             userId={user?.uid}
-            showEmojiPicker={showEmojiPicker}
-            setShowEmojiPicker={setShowEmojiPicker}
-            setShowComments={setShowComments}
-            addReaction={addReaction}
+            showEmojiPicker={showEmojiPicker && !boardFrozen}
+            setShowEmojiPicker={(val) => !boardFrozen && setShowEmojiPicker(val)}
+            setShowComments={(val) => !boardFrozen && setShowComments(val)}
+            addReaction={!boardFrozen ? addReaction : null}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
             commentCount={commentCount}
-            toggleComments={toggleComments}
+            toggleComments={!boardFrozen ? toggleComments : null}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
+            boardFrozen={boardFrozen}
           />
           
           {showComments && (
@@ -184,6 +188,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
               onCommentChange={setNewComment}
               onEditComment={editComment}
               onDeleteComment={deleteComment}
+              boardFrozen={boardFrozen}
             />
           )}
         </>

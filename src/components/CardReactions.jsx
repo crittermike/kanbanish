@@ -13,7 +13,8 @@ const CardReactions = React.memo(({
   commentCount,
   toggleComments,
   emojiPickerPosition,
-  setEmojiPickerPosition
+  setEmojiPickerPosition,
+  boardFrozen
 }) => {
   const emojiButtonRef = useRef(null);
 
@@ -30,8 +31,8 @@ const CardReactions = React.memo(({
               className={`emoji-reaction ${hasUserReacted ? 'active' : ''}`} 
               key={emoji} 
               data-testid="emoji-reaction"
-              onClick={(e) => addReaction(e, emoji)}
-              title={hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction"}
+              onClick={(e) => !boardFrozen && addReaction && addReaction(e, emoji)}
+              title={boardFrozen ? "Board is frozen" : hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction"}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>
@@ -49,6 +50,7 @@ const CardReactions = React.memo(({
         <button
           className="add-reaction-button"
           onClick={(e) => {
+            if (boardFrozen) return;
             e.stopPropagation();
             if (emojiButtonRef.current) {
               const buttonRect = emojiButtonRef.current.getBoundingClientRect();
@@ -60,18 +62,21 @@ const CardReactions = React.memo(({
             setShowEmojiPicker(!showEmojiPicker);
             setShowComments(false);
           }}
-          title="Add reaction"
+          title={boardFrozen ? "Board is frozen" : "Add reaction"}
           ref={emojiButtonRef}
+          style={boardFrozen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
         >+</button>
       </div>
       <div className="reactions-right">
         <button
           className="comments-btn"
           onClick={(e) => {
+            if (boardFrozen) return;
             e.stopPropagation();
-            toggleComments();
+            toggleComments && toggleComments();
           }}
-          title="Toggle comments"
+          title={boardFrozen ? "Board is frozen" : "Toggle comments"}
+          style={boardFrozen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
         >
           <MessageSquare size={16} />
           <span>{commentCount || 0}</span>

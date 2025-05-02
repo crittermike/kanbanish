@@ -7,10 +7,10 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Pause, Play } from 'react-feather';
 
 // UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl, boardFrozen, toggleBoardFrozen }) => (
   <div className="board-title-container">
     <input
       type="text"
@@ -21,6 +21,16 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
       className="header-input"
     />
     <div className="action-buttons">
+      <button
+        id="freeze-board"
+        className="btn secondary-btn"
+        title={boardFrozen ? "Unfreeze board" : "Freeze board"}
+        onClick={toggleBoardFrozen}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
+      >
+        {boardFrozen ? <Play size={16} /> : <Pause size={16} />}
+        {boardFrozen ? 'Unfreeze' : 'Freeze'}
+      </button>
       <button
         id="copy-share-url"
         className="btn secondary-btn"
@@ -252,6 +262,8 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    boardFrozen,
+    updateBoardFrozen,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
@@ -305,6 +317,13 @@ function Board({ showNotification }) {
           console.error('Error updating board title:', error);
         });
     }
+  };
+
+  // Toggle board frozen state
+  const toggleBoardFrozen = () => {
+    const newFrozenState = !boardFrozen;
+    updateBoardFrozen(newFrozenState);
+    showNotification(newFrozenState ? 'Board frozen' : 'Board unfrozen');
   };
 
   // Show template modal for creating a new board
@@ -392,6 +411,8 @@ function Board({ showNotification }) {
             handleBoardTitleChange={handleBoardTitleChange}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
+            boardFrozen={boardFrozen}
+            toggleBoardFrozen={toggleBoardFrozen}
           />
           <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}

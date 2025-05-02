@@ -8,7 +8,7 @@ import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled } = useBoardContext();
+  const { boardId, moveCard, votingEnabled, boardFrozen } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -163,12 +163,12 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             autoFocus
           />
         ) : (
-          <h2 className="column-title" onClick={() => setIsEditing(true)}>
+          <h2 className="column-title" onClick={() => !boardFrozen && setIsEditing(true)}>
             {title}
           </h2>
         )}
         <div className="column-actions">
-          <button className="icon-button" title="Delete Column" onClick={deleteColumn}>
+          <button className="icon-button" title={boardFrozen ? "Board is frozen" : "Delete Column"} onClick={() => !boardFrozen && deleteColumn()} style={boardFrozen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}>
             <Trash2 />
           </button>
         </div>
@@ -210,9 +210,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             </div>
           </div>
         ) : (
-          <button className="add-card" onClick={showAddCardForm}>
+          <button className="add-card" onClick={!boardFrozen ? showAddCardForm : undefined} style={boardFrozen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}>
             <Plus />
-            Add Card
+            {boardFrozen ? "Board Frozen" : "Add Card"}
           </button>
         )}
       </div>
