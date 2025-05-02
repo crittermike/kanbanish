@@ -26,6 +26,16 @@
     border-color: var(--accent);
 }
 
+.icon-btn {
+    min-width: unset;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .primary-btn {
     background: var(--accent);
     color: white;
@@ -158,6 +168,14 @@
         padding: var(--space-md);
         min-height: 48px;
         min-width: 100px;
+    }
+    
+    /* Icon buttons stay compact on mobile */
+    .icon-btn {
+        min-width: unset;
+        width: 48px;
+        height: 48px;
+        padding: 0;
     }
     
     /* Space buttons in action bar properly */

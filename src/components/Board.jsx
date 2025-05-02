@@ -185,28 +185,6 @@ const ActionButtons = ({
                   </div>
                 </div>
                 <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Theme Preference</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${darkMode ? 'selected' : ''}`}
-                      onClick={() => { updateDarkMode(true); }}
-                      title="Dark mode"
-                    >
-                      <Moon size={14} style={{ marginRight: '4px' }} />
-                      Dark
-                    </button>
-                    <button
-                      className={`boolean-option ${!darkMode ? 'selected' : ''}`}
-                      onClick={() => { updateDarkMode(false); }}
-                      title="Light mode"
-                    >
-                      <Sun size={14} style={{ marginRight: '4px' }} />
-                      Light
-                    </button>
-                  </div>
-                </div>
-                <div className="settings-divider"></div>
                 <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
                   <button
                     className="btn danger-btn"
@@ -226,6 +204,15 @@ const ActionButtons = ({
           </div>
         )}
       </div>
+      <button
+        id="theme-toggle"
+        className="btn icon-btn"
+        onClick={() => { updateDarkMode(!darkMode); }}
+        title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        style={{ marginLeft: 'var(--space-xs)' }}
+      >
+        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+      </button>
     </div>
   );
 };
