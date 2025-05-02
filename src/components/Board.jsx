@@ -46,7 +46,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, boardFrozen, updateBoardFrozen, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -125,6 +125,24 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
                 <button
                   className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
                   onClick={() => { updateVotingEnabled(false); }}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+            <div className="settings-divider"></div>
+            <div className="settings-section">
+              <h4 className="settings-section-title">Freeze Board</h4>
+              <div className="settings-boolean-option">
+                <button
+                  className={`boolean-option ${boardFrozen ? 'selected' : ''}`}
+                  onClick={() => { updateBoardFrozen(true); }}
+                >
+                  Yes
+                </button>
+                <button
+                  className={`boolean-option ${!boardFrozen ? 'selected' : ''}`}
+                  onClick={() => { updateBoardFrozen(false); }}
                 >
                   No
                 </button>
@@ -252,6 +270,8 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    boardFrozen,
+    updateBoardFrozen,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
@@ -403,6 +423,8 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
+            boardFrozen={boardFrozen}
+            updateBoardFrozen={updateBoardFrozen}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
