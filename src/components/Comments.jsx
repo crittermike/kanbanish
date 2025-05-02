@@ -36,12 +36,14 @@ const Comments = React.memo(({
   newComment, 
   onCommentChange,
   onEditComment,
-  onDeleteComment
+  onDeleteComment,
+  boardFrozen
 }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
   
   const startEditing = (commentId, content) => {
+    if (boardFrozen) return;
     setEditingCommentId(commentId);
     setEditedContent(content);
   };
@@ -95,22 +97,24 @@ const Comments = React.memo(({
         <p className="no-comments">No comments yet</p>
       )}
 
-      <div className="comment-form">
-        <input
-          type="text"
-          placeholder="Add a comment..."
-          className="comment-input"
-          value={newComment}
-          onChange={(e) => onCommentChange(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && newComment.trim()) {
-              e.preventDefault();
-              onAddComment();
-            }
-          }}
-        />
-      </div>
+      {!boardFrozen && (
+        <div className="comment-form">
+          <input
+            type="text"
+            placeholder="Add a comment..."
+            className="comment-input"
+            value={newComment}
+            onChange={(e) => onCommentChange(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && newComment.trim()) {
+                e.preventDefault();
+                onAddComment();
+              }
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 });

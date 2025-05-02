@@ -187,6 +187,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
               onCommentChange={setNewComment}
               onEditComment={editComment}
               onDeleteComment={deleteComment}
+              boardFrozen={boardFrozen}
             />
           )}
         </>
