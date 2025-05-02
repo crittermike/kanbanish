@@ -7,10 +7,10 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Pause, Play } from 'react-feather';
 
 // UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl, boardFrozen, toggleBoardFrozen }) => (
   <div className="board-title-container">
     <input
       type="text"
@@ -21,6 +21,16 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
       className="header-input"
     />
     <div className="action-buttons">
+      <button
+        id="freeze-board"
+        className="btn secondary-btn"
+        title={boardFrozen ? "Unfreeze board" : "Freeze board"}
+        onClick={toggleBoardFrozen}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
+      >
+        {boardFrozen ? <Play size={16} /> : <Pause size={16} />}
+        {boardFrozen ? 'Unfreeze' : 'Freeze'}
+      </button>
       <button
         id="copy-share-url"
         className="btn secondary-btn"
@@ -46,7 +56,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, boardFrozen, updateBoardFrozen, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -125,24 +135,6 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
                 <button
                   className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
                   onClick={() => { updateVotingEnabled(false); }}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section">
-              <h4 className="settings-section-title">Freeze Board</h4>
-              <div className="settings-boolean-option">
-                <button
-                  className={`boolean-option ${boardFrozen ? 'selected' : ''}`}
-                  onClick={() => { updateBoardFrozen(true); }}
-                >
-                  Yes
-                </button>
-                <button
-                  className={`boolean-option ${!boardFrozen ? 'selected' : ''}`}
-                  onClick={() => { updateBoardFrozen(false); }}
                 >
                   No
                 </button>
@@ -327,6 +319,13 @@ function Board({ showNotification }) {
     }
   };
 
+  // Toggle board frozen state
+  const toggleBoardFrozen = () => {
+    const newFrozenState = !boardFrozen;
+    updateBoardFrozen(newFrozenState);
+    showNotification(newFrozenState ? 'Board frozen' : 'Board unfrozen');
+  };
+
   // Show template modal for creating a new board
   const handleCreateNewBoard = () => {
     setIsTemplateModalOpen(true);
@@ -412,6 +411,8 @@ function Board({ showNotification }) {
             handleBoardTitleChange={handleBoardTitleChange}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
+            boardFrozen={boardFrozen}
+            toggleBoardFrozen={toggleBoardFrozen}
           />
           <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}
@@ -423,8 +424,6 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
-            boardFrozen={boardFrozen}
-            updateBoardFrozen={updateBoardFrozen}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}

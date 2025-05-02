@@ -52,15 +52,16 @@ const CardContent = ({
 
   return (
     <div className="card-header">
-      {votingEnabled && !boardFrozen && (
+      {votingEnabled && (
         <VotingControls 
           votes={cardData.votes} 
           onUpvote={upvoteCard} 
           onDownvote={downvoteCard} 
           showDownvoteButton={showDownvoteButton}
+          disabled={boardFrozen}
         />
       )}
-      <div className={`card-content ${!votingEnabled || boardFrozen ? 'full-width' : ''}`} data-testid="card-content">
+      <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
         {formatContentWithEmojis(cardData.content)}
       </div>
     </div>
