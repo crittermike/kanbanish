@@ -7,7 +7,7 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
@@ -46,7 +46,23 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
+const ActionButtons = ({ 
+  handleCreateNewBoard, 
+  sortByVotes, 
+  setSortByVotes, 
+  votingEnabled, 
+  updateVotingEnabled, 
+  downvotingEnabled, 
+  updateDownvotingEnabled, 
+  multipleVotesAllowed, 
+  updateMultipleVotesAllowed, 
+  sortDropdownOpen, 
+  setSortDropdownOpen, 
+  resetAllVotes, 
+  showNotification,
+  darkMode,
+  updateDarkMode
+}) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -169,6 +185,28 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
                   </div>
                 </div>
                 <div className="settings-divider"></div>
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Theme Preference</h4>
+                  <div className="settings-boolean-option">
+                    <button
+                      className={`boolean-option ${darkMode ? 'selected' : ''}`}
+                      onClick={() => { updateDarkMode(true); }}
+                      title="Dark mode"
+                    >
+                      <Moon size={14} style={{ marginRight: '4px' }} />
+                      Dark
+                    </button>
+                    <button
+                      className={`boolean-option ${!darkMode ? 'selected' : ''}`}
+                      onClick={() => { updateDarkMode(false); }}
+                      title="Light mode"
+                    >
+                      <Sun size={14} style={{ marginRight: '4px' }} />
+                      Light
+                    </button>
+                  </div>
+                </div>
+                <div className="settings-divider"></div>
                 <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
                   <button
                     className="btn danger-btn"
@@ -255,7 +293,9 @@ function Board({ showNotification }) {
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
-    user // Include user from context
+    user, // Include user from context
+    darkMode,
+    updateDarkMode
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -407,6 +447,8 @@ function Board({ showNotification }) {
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
             showNotification={showNotification}
+            darkMode={darkMode}
+            updateDarkMode={updateDarkMode}
           />
         </div>
       </header>
