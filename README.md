@@ -59,6 +59,37 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
 
+4. Set up Firebase Database Rules:
+
+   - Go to your Firebase Console: https://console.firebase.google.com/
+   - Select your project
+   - Navigate to "Realtime Database" > "Rules" tab
+   - Replace the rules with the following to ensure proper permissions for user preferences:
+
+```json
+{
+  "rules": {
+    "boards": {
+      ".read": true,
+      ".write": "auth !== null"
+    },
+    "users": {
+      "$userId": {
+        "preferences": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        }
+      }
+    }
+  }
+}
+```
+
+These rules allow:
+- Any user to read boards
+- Authenticated users to write to boards
+- Users to read and write only their own preferences
+
 ### Available Scripts
 
 - **Development Server**: `npm run dev` or `npm start`

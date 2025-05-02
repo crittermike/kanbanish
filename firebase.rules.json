@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "boards": {
+      ".read": true,
+      ".write": "auth !== null"
+    },
+    "users": {
+      "$userId": {
+        "preferences": {
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        }
+      }
+    }
+  }
+}
