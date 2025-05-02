@@ -23,6 +23,7 @@ export const BoardProvider = ({ children }) => {
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotes] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
+  const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [boardRef, setBoardRef] = useState(null);
 
@@ -63,6 +64,9 @@ export const BoardProvider = ({ children }) => {
           if (boardData.settings) {
             if (boardData.settings.votingEnabled !== undefined) {
               setVotingEnabled(boardData.settings.votingEnabled);
+            }
+            if (boardData.settings.downvotingEnabled !== undefined) {
+              setDownvotingEnabled(boardData.settings.downvotingEnabled);
             }
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
@@ -109,6 +113,7 @@ export const BoardProvider = ({ children }) => {
       columns: columnsObj,
       settings: {
         votingEnabled: true, // Default to enabled for new boards
+        downvotingEnabled: true, // Default to enabled for new boards
         multipleVotesAllowed: false // Default to not allowing multiple votes
       }
     };
@@ -153,6 +158,7 @@ export const BoardProvider = ({ children }) => {
       const settingsRef = ref(database, `boards/${boardId}/settings`);
       set(settingsRef, { 
         votingEnabled: enabled,
+        downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: multipleVotesAllowed 
       })
         .then(() => {
@@ -168,12 +174,35 @@ export const BoardProvider = ({ children }) => {
     }
   };
   
+  // Update downvoting enabled setting
+  const updateDownvotingEnabled = (enabled) => {
+    if (boardId && user) {
+      const settingsRef = ref(database, `boards/${boardId}/settings`);
+      set(settingsRef, { 
+        votingEnabled: votingEnabled,
+        downvotingEnabled: enabled,
+        multipleVotesAllowed: multipleVotesAllowed 
+      })
+        .then(() => {
+          console.log('Downvoting setting updated:', enabled);
+          setDownvotingEnabled(enabled);
+        })
+        .catch((error) => {
+          console.error('Error updating downvoting setting:', error);
+        });
+    } else {
+      // If we're not connected to a board yet, just update the local state
+      setDownvotingEnabled(enabled);
+    }
+  };
+  
   // Update multiple votes allowed setting
   const updateMultipleVotesAllowed = (allowed) => {
     if (boardId && user) {
       const settingsRef = ref(database, `boards/${boardId}/settings`);
       set(settingsRef, { 
         votingEnabled: votingEnabled,
+        downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: allowed 
       })
         .then(() => {
@@ -263,6 +292,9 @@ export const BoardProvider = ({ children }) => {
     votingEnabled,
     setVotingEnabled,
     updateVotingEnabled,
+    downvotingEnabled,
+    setDownvotingEnabled,
+    updateDownvotingEnabled,
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,

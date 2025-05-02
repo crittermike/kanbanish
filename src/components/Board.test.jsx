@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
 import Board from './Board';
@@ -57,6 +57,9 @@ describe('Board Component', () => {
     votingEnabled: true,
     setVotingEnabled: vi.fn(),
     updateVotingEnabled: vi.fn(),
+    downvotingEnabled: true,
+    setDownvotingEnabled: vi.fn(),
+    updateDownvotingEnabled: vi.fn(),
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
@@ -260,9 +263,12 @@ describe('Board Component', () => {
     const allowVotingSection = screen.getByText('Allow voting?');
     expect(allowVotingSection).toBeInTheDocument();
     
-    const noOptions = screen.getAllByText('No');
-    // First 'No' option is for voting settings
-    fireEvent.click(noOptions[0]);
+    // Find the closest parent section element containing the setting
+    const votingSection = allowVotingSection.closest('.settings-section');
+    
+    // Within that section, find the No option and click it
+    const noOption = within(votingSection).getByText('No');
+    fireEvent.click(noOption);
     
     // Check that updateVotingEnabled was called with the opposite of its current value
     expect(mockContextValue.updateVotingEnabled).toHaveBeenCalledWith(!mockContextValue.votingEnabled);
@@ -289,7 +295,11 @@ describe('Board Component', () => {
     const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
     expect(allowMultipleVotesSection).toBeInTheDocument();
     
-    const yesOption = screen.getAllByText('Yes')[1]; // Get the second "Yes" button (for multiple votes)
+    // Find the closest parent section element containing the setting
+    const multipleVotesSection = allowMultipleVotesSection.closest('.settings-section');
+    
+    // Within that section, find the Yes option and click it
+    const yesOption = within(multipleVotesSection).getByText('Yes');
     fireEvent.click(yesOption);
     
     // Check that updateMultipleVotesAllowed was called with true
@@ -394,6 +404,64 @@ describe('Board Component', () => {
     // But we can verify that pushState and notification are not called when board creation fails
     expect(window.history.pushState).not.toHaveBeenCalled();
     expect(mockShowNotification).not.toHaveBeenCalled();
+  });
+  
+  test('toggles downvoting enabled setting when clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find the "Allow downvoting?" section and click the "No" option
+    const allowDownvotingSection = screen.getByText('Allow downvoting?');
+    expect(allowDownvotingSection).toBeInTheDocument();
+    
+    // Find the closest parent section element containing the setting
+    const downvotingSection = allowDownvotingSection.closest('.settings-section');
+    
+    // Within that section, find the No option and click it
+    const noOption = within(downvotingSection).getByText('No');
+    fireEvent.click(noOption);
+    
+    // Check that updateDownvotingEnabled was called with false
+    expect(mockContextValue.updateDownvotingEnabled).toHaveBeenCalledWith(false);
+  });
+  
+  test('hides downvoting setting when voting is disabled', () => {
+    // Override the mock for this specific test - voting is disabled
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      votingEnabled: false
+    });
+    
+    // Simulate having a board ID in the URL
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Verify the downvoting option is not visible when voting is disabled
+    expect(screen.queryByText('Allow downvoting?')).not.toBeInTheDocument();
   });
   
   // Tests for Reset All Votes functionality are already defined above

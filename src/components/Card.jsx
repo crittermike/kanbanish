@@ -39,24 +39,35 @@ const CardContent = ({
   formatContentWithEmojis, 
   upvoteCard, 
   downvoteCard,
-  votingEnabled
-}) => (
-  <div className="card-header">
-    {votingEnabled && (
-      <VotingControls 
-        votes={cardData.votes} 
-        onUpvote={upvoteCard} 
-        onDownvote={downvoteCard} 
-      />
-    )}
-    <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
-      {formatContentWithEmojis(cardData.content)}
+  votingEnabled,
+  downvotingEnabled,
+  userId
+}) => {
+  // Determine if we should show the downvote button:
+  // 1. Always show if downvotingEnabled is true
+  // 2. Only show if user has upvoted and downvotingEnabled is false
+  const userVotes = cardData.voters && userId ? cardData.voters[userId] || 0 : 0;
+  const showDownvoteButton = downvotingEnabled || userVotes > 0;
+
+  return (
+    <div className="card-header">
+      {votingEnabled && (
+        <VotingControls 
+          votes={cardData.votes} 
+          onUpvote={upvoteCard} 
+          onDownvote={downvoteCard} 
+          showDownvoteButton={showDownvoteButton}
+        />
+      )}
+      <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
+        {formatContentWithEmojis(cardData.content)}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
@@ -147,6 +158,8 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             upvoteCard={upvoteCard}
             downvoteCard={downvoteCard}
             votingEnabled={votingEnabled}
+            downvotingEnabled={downvotingEnabled}
+            userId={user?.uid}
           />
           
           <CardReactions

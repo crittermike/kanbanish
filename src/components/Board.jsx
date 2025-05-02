@@ -46,7 +46,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
+const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -132,6 +132,24 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
             </div>
             {votingEnabled && (
               <>
+                <div className="settings-divider"></div>
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Allow downvoting?</h4>
+                  <div className="settings-boolean-option">
+                    <button
+                      className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
+                      onClick={() => { updateDownvotingEnabled(true); }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
+                      onClick={() => { updateDownvotingEnabled(false); }}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
                 <div className="settings-divider"></div>
                 <div className="settings-section">
                   <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
@@ -230,6 +248,8 @@ function Board({ showNotification }) {
     setSortByVotes,
     votingEnabled,
     updateVotingEnabled,
+    downvotingEnabled,
+    updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
     createNewBoard,
@@ -379,6 +399,8 @@ function Board({ showNotification }) {
             setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
             updateVotingEnabled={updateVotingEnabled}
+            downvotingEnabled={downvotingEnabled}
+            updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
             sortDropdownOpen={settingsDropdownOpen}

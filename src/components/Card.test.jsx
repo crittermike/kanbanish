@@ -68,6 +68,7 @@ describe('Card Component', () => {
     boardId: 'board123',
     user: { uid: 'user123' },
     votingEnabled: true,
+    downvotingEnabled: true,
     multipleVotesAllowed: false
   };
 
@@ -148,8 +149,56 @@ describe('Card Component', () => {
     });
   });
 
-  test('allows removing downvotes', async () => {
+  test('hides downvote button when downvotingEnabled is false', () => {
+    // Override the mock for this specific test
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      downvotingEnabled: false
+    });
+    
     render(<Card {...mockProps} />);
+    
+    // Upvote button should be visible
+    expect(screen.getByTitle('Upvote')).toBeInTheDocument();
+    
+    // Downvote button should not be visible
+    expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+  });
+
+  test('shows downvote button when the user has upvoted even if downvotingEnabled is false', () => {
+    // Override the mock for this specific test
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      downvotingEnabled: false
+    });
+    
+    // Set up card data with the user having upvoted
+    const cardWithUserVotes = {
+      ...mockCardData,
+      voters: {
+        'user123': 2 // User has 2 upvotes
+      }
+    };
+    
+    render(<Card {...mockProps} cardData={cardWithUserVotes} />);
+    
+    // Upvote button should be visible
+    expect(screen.getByTitle('Upvote')).toBeInTheDocument();
+    
+    // Downvote button should be visible since user has upvoted
+    expect(screen.getByTitle('Downvote')).toBeInTheDocument();
+  });
+
+  test('allows removing downvotes', async () => {
+    // Use a modified card with user votes
+    const cardWithUserVotes = {
+      ...mockCardData,
+      voters: {
+        'user123': 2 // User has 2 upvotes
+      }
+    };
+    
+    render(<Card {...mockProps} cardData={cardWithUserVotes} />);
     
     // Find and click the downvote button
     const downvoteButton = screen.getByTitle('Downvote');
@@ -159,7 +208,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Downvoted card');
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote removed');
     });
   });
 
