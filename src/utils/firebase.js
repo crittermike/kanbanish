@@ -1,6 +1,6 @@
 // Firebase configuration for the Kanban app
 import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { getDatabase, get } from 'firebase/database';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
 // Your web app's Firebase configuration
@@ -22,5 +22,5 @@ const database = getDatabase(app);
 const auth = getAuth(app);
 
 // Export for use in other files
-export { database, auth, signInAnonymously };
+export { database, auth, signInAnonymously, get };
 export default app;

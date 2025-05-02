@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ref, onValue, off, set, remove, get } from 'firebase/database';
-import { database, auth, signInAnonymously } from '../utils/firebase';
+import { ref, onValue, off, set, remove } from 'firebase/database';
+import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 
 // Create the context
