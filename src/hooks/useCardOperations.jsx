@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { database } from '../utils/firebase';
+import { determineVoteChange, calculateNewUserVote } from '../utils/voteHelpers';
 
 export function useCardOperations({ 
   boardId, 
@@ -84,40 +85,46 @@ export function useCardOperations({
   }, [saveCardChanges, cardData.content]);
 
   // Voting operations
+  /**
+   * Updates the votes for a card
+   * 
+   * Voting logic:
+   * 1. If votes would go negative, block the operation
+   * 2. For single vote mode (multipleVotesAllowed=false):
+   *    - If user votes in the same direction they already voted, no change occurs
+   *    - If user votes in the opposite direction, their previous vote is removed
+   *    - If user hasn't voted yet, their vote is counted in the specified direction
+   * 3. For multiple votes mode (multipleVotesAllowed=true):
+   *    - Users can vote multiple times in either direction
+   * 
+   * @param {number} delta - The requested vote change (1 or -1)
+   * @param {Event} e - The event that triggered the vote
+   * @param {string} message - The message to show on successful vote
+   */
   const updateVotes = useCallback(async (delta, e, message) => {
     e.stopPropagation();
     
     if (!boardId || !user) return;
     
     const currentVotes = cardData.votes || 0;
+    const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
     
-    // Prevent negative votes
-    if (delta < 0 && currentVotes <= 0) {
-      showNotification("Can't have negative votes");
+    // Determine how to handle this vote action
+    const voteResult = determineVoteChange({
+      userCurrentVote,
+      requestedDelta: delta,
+      multipleVotesAllowed,
+      currentTotalVotes: currentVotes
+    });
+    
+    // Exit early if needed (e.g., already voted, would go negative)
+    if (voteResult.shouldReturn) {
+      showNotification(voteResult.message);
       return;
     }
     
-    // Get the user's current vote if any
-    const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
-    
-    // If multiple votes are not allowed
-    if (!multipleVotesAllowed) {
-      // If the user is trying to vote in the same direction they already voted
-      if (userCurrentVote === delta) {
-        showNotification("You've already voted");
-        return;
-      }
-      
-      // If the user already voted and is now voting in opposite direction,
-      // just reset their vote (remove previous vote, don't add new one)
-      if (userCurrentVote !== 0) {
-        // Cancel their previous vote only
-        delta = -userCurrentVote;
-      }
-    }
-    
     try {
-      const newVotes = currentVotes + delta;
+      const newVotes = currentVotes + voteResult.delta;
       
       // Update the total vote count
       const votesRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/votes`);
@@ -126,17 +133,12 @@ export function useCardOperations({
       // Record the user's vote
       const voterRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/voters/${user.uid}`);
       
-      // Calculate the new user vote:
-      // - For multiple votes allowed: increment their current vote
-      // - For single votes only: set to the new direction, or zero if they're toggling an existing vote
-      let newUserVote;
-      if (multipleVotesAllowed) {
-        newUserVote = userCurrentVote + delta;
-      } else {
-        // If they had a previous vote and are voting opposite, clear their vote (userCurrentVote + delta = 0)
-        // If they had no previous vote, set to new direction (delta)
-        newUserVote = (userCurrentVote !== 0 && delta === -userCurrentVote) ? 0 : delta;
-      }
+      // Calculate the new user vote value
+      const newUserVote = calculateNewUserVote({
+        userCurrentVote,
+        delta: voteResult.delta,
+        multipleVotesAllowed
+      });
       
       if (newUserVote === 0) {
         // If the vote is cleared, remove from the database
@@ -146,21 +148,25 @@ export function useCardOperations({
         await set(voterRef, newUserVote);
       }
       
-      // Show an appropriate message based on what happened
-      if (!multipleVotesAllowed && userCurrentVote !== 0 && delta === -userCurrentVote) {
-        showNotification('Vote removed');
-      } else {
-        showNotification(message);
-      }
+      // Show appropriate message
+      showNotification(voteResult.isVoteRemoval ? 'Vote removed' : message);
     } catch (error) {
       console.error('Error updating votes:', error);
     }
-  }, [boardId, columnId, cardId, cardData.votes, showNotification]);
+  }, [boardId, columnId, cardId, cardData.votes, cardData.voters, user, showNotification, multipleVotesAllowed]);
 
+  /**
+   * Upvotes a card by adding one vote
+   * @param {Event} e - The event that triggered the upvote
+   */
   const upvoteCard = useCallback((e) => {
     updateVotes(1, e, 'Upvoted card');
   }, [updateVotes]);
 
+  /**
+   * Downvotes a card by subtracting one vote
+   * @param {Event} e - The event that triggered the downvote
+   */
   const downvoteCard = useCallback((e) => {
     updateVotes(-1, e, 'Downvoted card');
   }, [updateVotes]);
