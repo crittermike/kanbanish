@@ -29,6 +29,77 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
    * This approach ensures that the export order matches what users see on the board.
    */
 
+  /**
+   * Get a normalized structure of the board data for export
+   * @returns {object} Normalized board data with sorted columns and cards
+   */
+  const getBoardStructure = () => {
+    const boardData = {
+      title: boardTitle || "Untitled Board",
+      columns: []
+    };
+    
+    if (!columns || Object.keys(columns).length === 0) {
+      return boardData;
+    }
+    
+    // Sort columns by their ID to maintain the same order as displayed on board
+    const sortedColumns = Object.entries(columns).sort((a, b) => {
+      return a[0].localeCompare(b[0]);
+    });
+    
+    // Process each column
+    sortedColumns.forEach(([columnId, column]) => {
+      if (!column) return;
+      
+      const processedColumn = {
+        title: column.title || "Untitled Column",
+        cards: []
+      };
+      
+      // Process cards in the column
+      if (column.cards) {
+        Object.entries(column.cards).forEach(([cardId, card]) => {
+          // Process card data
+          const processedCard = {
+            content: card.content || "Empty Card",
+            votes: card.votes || 0,
+            comments: [],
+            reactions: []
+          };
+          
+          // Process comments
+          if (card.comments && Object.keys(card.comments).length > 0) {
+            Object.entries(card.comments).forEach(([commentId, comment]) => {
+              if (comment && comment.content) {
+                processedCard.comments.push(comment.content);
+              }
+            });
+          }
+          
+          // Process reactions
+          if (card.reactions && Object.keys(card.reactions).length > 0) {
+            const validReactions = Object.entries(card.reactions)
+              .filter(([emoji, reactionData]) => (reactionData?.count || 0) > 0);
+              
+            validReactions.forEach(([emoji, reactionData]) => {
+              if (emoji) {
+                const count = reactionData?.count || 0;
+                processedCard.reactions.push({ emoji, count });
+              }
+            });
+          }
+          
+          processedColumn.cards.push(processedCard);
+        });
+      }
+      
+      boardData.columns.push(processedColumn);
+    });
+    
+    return boardData;
+  };
+
   const generateExport = (selectedFormat) => {
     if (selectedFormat === 'markdown') {
       setExportedContent(generateMarkdownExport());
@@ -38,62 +109,41 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   };
 
   const generateMarkdownExport = () => {
-    let markdown = `# ${boardTitle || "Untitled Board"}\n\n`;
+    const boardData = getBoardStructure();
+    let markdown = `# ${boardData.title}\n\n`;
     
-    if (!columns || Object.keys(columns).length === 0) {
+    if (boardData.columns.length === 0) {
       return markdown + "No columns found.";
     }
     
-    // Use the natural order from column IDs (which should be prefixed alphabetically)
-    // This keeps the same order as displayed on the board
-    const sortedColumns = Object.entries(columns).sort((a, b) => {
-      // Sort by column ID which preserves the order they're displayed in
-      return a[0].localeCompare(b[0]);
-    });
-    
-    sortedColumns.forEach(([columnId, column]) => {
-      if (!column) return;
+    boardData.columns.forEach(column => {
+      markdown += `## ${column.title}\n\n`;
       
-      markdown += `## ${column.title || "Untitled Column"}\n\n`;
-      
-      if (column.cards) {
-        Object.entries(column.cards).forEach(([cardId, card]) => {
-          // Card content as heading with vote count
-          const voteCount = card.votes ? Object.keys(card.votes).length : 0;
-          const content = card.content || "Empty Card";
-          
-          // Use content as heading/title
-          markdown += `### ${content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n\n`;
-          
-          // Comments
-          if (card.comments && Object.keys(card.comments).length > 0) {
-            markdown += `**Comments:**\n\n`;
-            Object.entries(card.comments).forEach(([commentId, comment]) => {
-              if (comment && comment.content) {
-                markdown += `- ${comment.content}\n`;
-              }
-            });
-            markdown += '\n';
-          }
-          
-          // Reactions
-          if (card.reactions && Object.keys(card.reactions).length > 0) {
-            const validReactions = Object.entries(card.reactions)
-              .filter(([emoji, reactionData]) => (reactionData?.count || 0) > 0);
-              
-            if (validReactions.length > 0) {
-              markdown += `**Reactions:** `;
-              validReactions.forEach(([emoji, reactionData], index, array) => {
-                if (emoji) {
-                  const count = reactionData?.count || 0;
-                  markdown += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
-                }
-              });
-              markdown += '\n\n';
-            }
-          }
-        });
-      }
+      column.cards.forEach(card => {
+        // Card content as heading with vote count
+        const voteCount = card.votes;
+        
+        // Use content as heading/title
+        markdown += `### ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n\n`;
+        
+        // Comments
+        if (card.comments.length > 0) {
+          markdown += `**Comments:**\n\n`;
+          card.comments.forEach(comment => {
+            markdown += `- ${comment}\n`;
+          });
+          markdown += '\n';
+        }
+        
+        // Reactions
+        if (card.reactions.length > 0) {
+          markdown += `**Reactions:** `;
+          card.reactions.forEach((reaction, index, array) => {
+            markdown += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+          });
+          markdown += '\n\n';
+        }
+      });
       
       markdown += '\n';
     });
@@ -102,61 +152,41 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   };
 
   const generatePlainTextExport = () => {
-    let text = `${boardTitle || "Untitled Board"}\n\n`;
+    const boardData = getBoardStructure();
+    let text = `${boardData.title}\n\n`;
     
-    if (!columns || Object.keys(columns).length === 0) {
+    if (boardData.columns.length === 0) {
       return text + "No columns found.";
     }
     
-    // Use the natural order from column IDs (which should be prefixed alphabetically)
-    // This keeps the same order as displayed on the board
-    const sortedColumns = Object.entries(columns).sort((a, b) => {
-      // Sort by column ID which preserves the order they're displayed in
-      return a[0].localeCompare(b[0]);
-    });
-    
-    sortedColumns.forEach(([columnId, column]) => {
-      if (!column) return;
-      
-      const title = column.title || "Untitled Column";
+    boardData.columns.forEach(column => {
+      const title = column.title;
       text += `${title}\n${'='.repeat(title.length)}\n\n`;
       
-      if (column.cards) {
-        Object.entries(column.cards).forEach(([cardId, card]) => {
-          // Card content as heading with vote count
-          const voteCount = card.votes ? Object.keys(card.votes).length : 0;
-          const content = card.content || "Empty Card";
-          text += `${content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n${'-'.repeat(content.length)}\n\n`;
-          
-          // Comments
-          if (card.comments && Object.keys(card.comments).length > 0) {
-            text += `Comments:\n`;
-            Object.entries(card.comments).forEach(([commentId, comment]) => {
-              if (comment && comment.content) {
-                text += `- ${comment.content}\n`;
-              }
-            });
-            text += '\n';
-          }
-          
-          // Reactions
-          if (card.reactions && Object.keys(card.reactions).length > 0) {
-            const validReactions = Object.entries(card.reactions)
-              .filter(([emoji, reactionData]) => (reactionData?.count || 0) > 0);
-              
-            if (validReactions.length > 0) {
-              text += `Reactions: `;
-              validReactions.forEach(([emoji, reactionData], index, array) => {
-                if (emoji) {
-                  const count = reactionData?.count || 0;
-                  text += `${emoji} (${count})${index < array.length - 1 ? ', ' : ''}`;
-                }
-              });
-            }
-            text += '\n\n';
-          }
-        });
-      }
+      column.cards.forEach(card => {
+        // Card content as heading with vote count
+        const voteCount = card.votes;
+        const content = card.content;
+        text += `${content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n${'-'.repeat(content.length)}\n\n`;
+        
+        // Comments
+        if (card.comments.length > 0) {
+          text += `Comments:\n`;
+          card.comments.forEach(comment => {
+            text += `- ${comment}\n`;
+          });
+          text += '\n';
+        }
+        
+        // Reactions
+        if (card.reactions.length > 0) {
+          text += `Reactions: `;
+          card.reactions.forEach((reaction, index, array) => {
+            text += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+          });
+          text += '\n\n';
+        }
+      });
       
       text += '\n';
     });
