@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 
 // Import modularized components
@@ -66,8 +67,9 @@ const CardContent = ({
   );
 };
 
-function Card({ cardId, cardData, columnId, showNotification }) {
+function Card({ cardId, cardData, columnId }) {
   const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { showNotification } = useNotification();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
