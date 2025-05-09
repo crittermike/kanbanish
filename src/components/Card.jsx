@@ -1,7 +1,10 @@
 import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
-import { useCardOperations } from '../hooks/useCardOperations';
+import { useCardEditing } from '../hooks/useCardEditing';
+import { useCardVoting } from '../hooks/useCardVoting';
+import { useCardReactions } from '../hooks/useCardReactions';
+import { useCardComments } from '../hooks/useCardComments';
 
 // Import modularized components
 import Comments from './Comments';
@@ -69,47 +72,29 @@ const CardContent = ({
 function Card({ cardId, cardData, columnId, showNotification }) {
   const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
   const cardElementRef = useRef(null);
-  
-  // Use the custom hook for card operations
+
+  // Use the modular hooks for card operations
   const {
-    // State
     isEditing,
     editedContent,
-    showEmojiPicker,
-    showComments,
-    newComment,
-    emojiPickerPosition,
-    
-    // State setters
     setEditedContent,
-    setShowEmojiPicker,
-    setShowComments,
-    setNewComment,
-    setEmojiPickerPosition,
-    
-    // Card operations
     toggleEditMode,
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-    
-    // Voting operations
+    formatContentWithEmojis
+  } = useCardEditing({
+    boardId,
+    columnId,
+    cardId,
+    cardData,
+    showNotification
+  });
+
+  const {
     upvoteCard,
-    downvoteCard,
-    
-    // Content formatting
-    formatContentWithEmojis,
-    
-    // Reaction operations
-    hasUserReactedWithEmoji,
-    addReaction,
-    
-    // Comment operations
-    addComment,
-    editComment,
-    deleteComment,
-    toggleComments
-  } = useCardOperations({
+    downvoteCard
+  } = useCardVoting({
     boardId,
     columnId,
     cardId,
@@ -117,6 +102,43 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     user,
     showNotification,
     multipleVotesAllowed
+  });
+
+  // Initially set up reactions with a dummy setShowComments that will be updated
+  const {
+    showEmojiPicker,
+    emojiPickerPosition,
+    setShowEmojiPicker,
+    toggleEmojiPicker,
+    setEmojiPickerPosition,
+    hasUserReactedWithEmoji,
+    addReaction
+  } = useCardReactions({
+    boardId,
+    columnId,
+    cardId,
+    cardData,
+    user,
+    showNotification,
+    setShowComments: setShowComments
+  });
+
+  const {
+    showComments,
+    newComment,
+    setShowComments,
+    setNewComment,
+    addComment,
+    editComment,
+    deleteComment,
+    toggleComments
+  } = useCardComments({
+    boardId,
+    columnId,
+    cardId,
+    cardData,
+    showNotification,
+    setShowEmojiPicker // Pass the real setter from reactions hook
   });
   
   // Configure drag functionality
@@ -167,6 +189,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             userId={user?.uid}
             showEmojiPicker={showEmojiPicker}
             setShowEmojiPicker={setShowEmojiPicker}
+            toggleEmojiPicker={toggleEmojiPicker}
             setShowComments={setShowComments}
             addReaction={addReaction}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}

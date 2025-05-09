@@ -7,6 +7,7 @@ const CardReactions = React.memo(({
   userId, 
   showEmojiPicker,
   setShowEmojiPicker,
+  toggleEmojiPicker,
   setShowComments,
   addReaction,
   hasUserReactedWithEmoji,
@@ -52,13 +53,12 @@ const CardReactions = React.memo(({
             e.stopPropagation();
             if (emojiButtonRef.current) {
               const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-              setEmojiPickerPosition({
+              const position = {
                 top: buttonRect.bottom + window.scrollY + 5,
                 left: buttonRect.left + window.scrollX
-              });
+              };
+              toggleEmojiPicker(!showEmojiPicker, position);
             }
-            setShowEmojiPicker(!showEmojiPicker);
-            setShowComments(false);
           }}
           title="Add reaction"
           ref={emojiButtonRef}
