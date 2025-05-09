@@ -1,10 +1,7 @@
 import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
-import { useCardEditing } from '../hooks/useCardEditing';
-import { useCardVoting } from '../hooks/useCardVoting';
-import { useCardReactions } from '../hooks/useCardReactions';
-import { useCardComments } from '../hooks/useCardComments';
+import { useCardEditing, useCardVoting, useCardReactions, useCardComments } from '../hooks';
 
 // Import modularized components
 import Comments from './Comments';
@@ -73,6 +70,12 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
   const cardElementRef = useRef(null);
 
+  // Initialize state that will be shared between hooks
+  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+  const [showComments, setShowComments] = React.useState(false);
+  const [emojiPickerPosition, setEmojiPickerPosition] = React.useState({ top: 0, left: 0 });
+  const [newComment, setNewComment] = React.useState('');
+
   // Use the modular hooks for card operations
   const {
     isEditing,
@@ -104,13 +107,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     multipleVotesAllowed
   });
 
-  // Initially set up reactions with a dummy setShowComments that will be updated
   const {
-    showEmojiPicker,
-    emojiPickerPosition,
-    setShowEmojiPicker,
-    toggleEmojiPicker,
-    setEmojiPickerPosition,
     hasUserReactedWithEmoji,
     addReaction
   } = useCardReactions({
@@ -119,27 +116,64 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     cardId,
     cardData,
     user,
-    showNotification,
-    setShowComments: setShowComments
+    showNotification
   });
 
   const {
-    showComments,
-    newComment,
-    setShowComments,
-    setNewComment,
     addComment,
     editComment,
-    deleteComment,
-    toggleComments
+    deleteComment
   } = useCardComments({
     boardId,
     columnId,
     cardId,
     cardData,
-    showNotification,
-    setShowEmojiPicker // Pass the real setter from reactions hook
+    showNotification
   });
+
+  // Add emoji picker click-outside effect
+  React.useEffect(() => {
+    if (!showEmojiPicker) return;
+    
+    const handleClickOutside = (event) => {
+      const pickerElement = document.querySelector('.emoji-picker');
+      if (pickerElement && !pickerElement.contains(event.target) && 
+          !event.target.closest('.add-reaction-button')) {
+        setShowEmojiPicker(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
+
+  // Handler for adding comments
+  const handleAddComment = React.useCallback(() => {
+    if (newComment.trim()) {
+      addComment(newComment).then(success => {
+        if (success) {
+          setNewComment('');
+        }
+      });
+    }
+  }, [addComment, newComment]);
+
+  // Handler for toggling emoji picker
+  const toggleEmojiPicker = React.useCallback((event) => {
+    if (event) {
+      event.stopPropagation();
+      const button = event.currentTarget;
+      if (button) {
+        const buttonRect = button.getBoundingClientRect();
+        setEmojiPickerPosition({
+          top: buttonRect.bottom + window.scrollY + 5,
+          left: buttonRect.left + window.scrollX
+        });
+      }
+    }
+    setShowEmojiPicker(!showEmojiPicker);
+    setShowComments(false);
+  }, [showEmojiPicker]);
   
   // Configure drag functionality
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -194,7 +228,10 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             addReaction={addReaction}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
             commentCount={commentCount}
-            toggleComments={toggleComments}
+            toggleComments={() => {
+              setShowComments(!showComments);
+              setShowEmojiPicker(false);
+            }}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
           />
@@ -202,7 +239,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
           {showComments && (
             <Comments
               comments={cardData.comments}
-              onAddComment={addComment}
+              onAddComment={handleAddComment}
               newComment={newComment}
               onCommentChange={setNewComment}
               onEditComment={editComment}

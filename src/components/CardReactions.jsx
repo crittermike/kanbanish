@@ -45,21 +45,12 @@ const CardReactions = React.memo(({
             onEmojiSelect={addReaction}
             onClose={() => setShowEmojiPicker(false)}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
+            data-testid="emoji-picker"
           />
         )}
         <button
           className="add-reaction-button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (emojiButtonRef.current) {
-              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-              const position = {
-                top: buttonRect.bottom + window.scrollY + 5,
-                left: buttonRect.left + window.scrollX
-              };
-              toggleEmojiPicker(!showEmojiPicker, position);
-            }
-          }}
+          onClick={toggleEmojiPicker}
           title="Add reaction"
           ref={emojiButtonRef}
         >+</button>
