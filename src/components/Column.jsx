@@ -4,6 +4,7 @@ import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Card from './Card';
 import { generateId } from '../utils/helpers';
+import { addCard } from '../utils/boardUtils';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
@@ -98,23 +99,17 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Add a new card inline
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
-      const cardId = generateId();
-      const cardData = {
-        content: newCardContent.trim(),
-        votes: 0,
-        created: Date.now()
-      };
-      
-      // Create a direct reference to the card path
-      const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
-
-      set(cardRef, cardData)
+      addCard(boardId, columnId, newCardContent)
         .then(() => {
           showNotification('Card added');
           hideAddCardForm();
         })
         .catch((error) => {
           console.error('Error adding card:', error);
+          if (error.message === 'Card content is required') {
+            hideAddCardForm();
+            showNotification('Empty cards are not allowed');
+          }
         });
     } else {
       // Don't add empty cards
