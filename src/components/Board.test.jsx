@@ -66,6 +66,7 @@ describe('Board Component', () => {
     resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
+    updateBoardTitle: vi.fn(),
     user: { uid: 'test-user-123' } // Default user state for most tests
   };
 
@@ -128,6 +129,22 @@ describe('Board Component', () => {
   });
 
   test('handles board title change correctly', () => {
+    // Setup mock for local state
+    let localBoardTitle = 'Test Board';
+    const mockSetBoardTitle = vi.fn((newTitle) => {
+      localBoardTitle = newTitle;
+    });
+    
+    // Add updateBoardTitle to the mock with access to updated boardTitle
+    const mockUpdateBoardTitle = vi.fn();
+    
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: localBoardTitle,
+      setBoardTitle: mockSetBoardTitle,
+      updateBoardTitle: mockUpdateBoardTitle
+    });
+    
     render(
       <DndProvider backend={HTML5Backend}>
         <Board showNotification={mockShowNotification} />
@@ -135,9 +152,35 @@ describe('Board Component', () => {
     );
     
     const boardTitleInput = screen.getByDisplayValue('Test Board');
+    
+    // Change the title
     fireEvent.change(boardTitleInput, { target: { value: 'Updated Board Title' } });
     
-    expect(mockContextValue.setBoardTitle).toHaveBeenCalledWith('Updated Board Title');
+    // Title should be updated locally but not in Firebase yet
+    expect(mockSetBoardTitle).toHaveBeenCalledWith('Updated Board Title');
+    expect(mockUpdateBoardTitle).not.toHaveBeenCalled();
+    
+    // Update the mock to return the new title
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: 'Updated Board Title',
+      setBoardTitle: mockSetBoardTitle,
+      updateBoardTitle: mockUpdateBoardTitle
+    });
+    
+    // Re-render with new title
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Get the updated input and blur it
+    const updatedBoardTitleInput = screen.getByDisplayValue('Updated Board Title');
+    fireEvent.blur(updatedBoardTitleInput);
+    
+    // Now updateBoardTitle should be called with the updated title
+    expect(mockUpdateBoardTitle).toHaveBeenCalledWith('Updated Board Title');
   });
 
   test('handles copying share URL to clipboard', async () => {

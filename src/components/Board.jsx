@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, set } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
-import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
@@ -11,7 +9,7 @@ import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 
 // UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard }) => (
   <div className="board-title-container">
     <input
       type="text"
@@ -19,6 +17,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
       placeholder="Untitled Board"
       value={boardTitle}
       onChange={handleBoardTitleChange}
+      onBlur={handleBoardTitleBlur}
       className="header-input"
     />
     <div className="action-buttons">
@@ -281,6 +280,7 @@ function Board({ showNotification }) {
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
+    updateBoardTitle,
     user, // Include user from context
     darkMode,
     updateDarkMode
@@ -316,23 +316,15 @@ function Board({ showNotification }) {
    * BOARD MANAGEMENT HANDLERS
    */
 
-  // Handle board title change
+  // Handle board title change (update local state only)
   const handleBoardTitleChange = (e) => {
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
-
-    if (boardId) {
-      // Create a direct reference to the title path
-      const titleRef = ref(database, `boards/${boardId}/title`);
-
-      set(titleRef, newTitle)
-        .then(() => {
-          console.log('Board title updated');
-        })
-        .catch((error) => {
-          console.error('Error updating board title:', error);
-        });
-    }
+  };
+  
+  // Handle board title blur (update Firebase)
+  const handleBoardTitleBlur = () => {
+    updateBoardTitle(boardTitle);
   };
 
   // Show template modal for creating a new board
@@ -409,6 +401,7 @@ function Board({ showNotification }) {
           <BoardHeader
             boardTitle={boardTitle}
             handleBoardTitleChange={handleBoardTitleChange}
+            handleBoardTitleBlur={handleBoardTitleBlur}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
           />
