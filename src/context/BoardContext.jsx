@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ref, onValue, off, set, remove } from 'firebase/database';
-import { database, auth, signInAnonymously } from '../utils/firebase';
+import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 
 // Create the context
@@ -26,6 +26,7 @@ export const BoardProvider = ({ children }) => {
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [boardRef, setBoardRef] = useState(null);
+  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
 
   // Firebase authentication
   useEffect(() => {
@@ -33,6 +34,19 @@ export const BoardProvider = ({ children }) => {
       if (user) {
         console.log('User authenticated:', user.uid);
         setUser(user);
+        
+        // Load user preferences including theme
+        const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+        get(userPrefsRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const prefs = snapshot.val();
+            if (prefs.darkMode !== undefined) {
+              setDarkMode(prefs.darkMode);
+            }
+          }
+        }).catch((error) => {
+          console.error('Error loading user preferences:', error);
+        });
       } else {
         console.log('No user, signing in anonymously');
         signInAnonymously(auth)
@@ -44,6 +58,15 @@ export const BoardProvider = ({ children }) => {
 
     return () => unsubscribe();
   }, []);
+  
+  // Update document class when dark mode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.remove('light-mode');
+    } else {
+      document.documentElement.classList.add('light-mode');
+    }
+  }, [darkMode]);
 
   // Set up board reference when boardId changes
   useEffect(() => {
@@ -278,6 +301,24 @@ export const BoardProvider = ({ children }) => {
       });
   };
 
+  // Update dark mode preference
+  const updateDarkMode = (enabled) => {
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      set(userPrefsRef, { darkMode: enabled })
+        .then(() => {
+          console.log('Dark mode preference updated:', enabled);
+          setDarkMode(enabled);
+        })
+        .catch((error) => {
+          console.error('Error updating dark mode preference:', error);
+        });
+    } else {
+      // If we're not connected to a user yet, just update the local state
+      setDarkMode(enabled);
+    }
+  };
+
   // Context value
   const value = {
     user,
@@ -302,7 +343,9 @@ export const BoardProvider = ({ children }) => {
     createNewBoard,
     openExistingBoard,
     moveCard,
-    resetAllVotes
+    resetAllVotes,
+    darkMode,
+    updateDarkMode
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

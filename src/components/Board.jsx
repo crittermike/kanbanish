@@ -7,7 +7,7 @@ import { generateId } from '../utils/helpers';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl }) => (
@@ -46,7 +46,23 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, co
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, votingEnabled, updateVotingEnabled, downvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed, updateMultipleVotesAllowed, sortDropdownOpen, setSortDropdownOpen, resetAllVotes, showNotification }) => {
+const ActionButtons = ({ 
+  handleCreateNewBoard, 
+  sortByVotes, 
+  setSortByVotes, 
+  votingEnabled, 
+  updateVotingEnabled, 
+  downvotingEnabled, 
+  updateDownvotingEnabled, 
+  multipleVotesAllowed, 
+  updateMultipleVotesAllowed, 
+  sortDropdownOpen, 
+  setSortDropdownOpen, 
+  resetAllVotes, 
+  showNotification,
+  darkMode,
+  updateDarkMode
+}) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -188,6 +204,15 @@ const ActionButtons = ({ handleCreateNewBoard, sortByVotes, setSortByVotes, voti
           </div>
         )}
       </div>
+      <button
+        id="theme-toggle"
+        className="btn icon-btn"
+        onClick={() => { updateDarkMode(!darkMode); }}
+        title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        style={{ marginLeft: 'var(--space-xs)' }}
+      >
+        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+      </button>
     </div>
   );
 };
@@ -255,7 +280,9 @@ function Board({ showNotification }) {
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
-    user // Include user from context
+    user, // Include user from context
+    darkMode,
+    updateDarkMode
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -407,6 +434,8 @@ function Board({ showNotification }) {
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
             showNotification={showNotification}
+            darkMode={darkMode}
+            updateDarkMode={updateDarkMode}
           />
         </div>
       </header>

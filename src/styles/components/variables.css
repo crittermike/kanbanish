@@ -9,7 +9,7 @@
  */
 
 :root {
-    /* Color scheme */
+    /* Color scheme - Dark theme by default */
     --bg-color: #0d1117;
     --text-color: #c9d1d9;
     --text-muted: #8b949e;
@@ -71,6 +71,30 @@
     --column-width-mobile: 280px;
     --header-height: 3.5rem;
     --max-comments-height: 200px;
+}
+
+/* Light theme variables */
+.light-mode {
+    /* Color scheme - Light theme */
+    --bg-color: #f6f8fa;
+    --text-color: #24292f;
+    --text-muted: #57606a;
+    --accent: #0969da;
+    --accent-hover: #0858c5;
+    --accent-transparent: rgba(9, 105, 218, 0.3);
+    --accent-transparent-light: rgba(9, 105, 218, 0.1);
+    --accent-transparent-lighter: rgba(9, 105, 218, 0.15);
+    
+    /* Element colors */
+    --card-bg: #ffffff;
+    --hover-bg: #f3f4f6;
+    --border-color: #d0d7de;
+    --column-bg: #ffffff;
+    
+    /* Shadows for light theme */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --modal-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+    --notification-shadow: 0 2px 8px rgba(140, 149, 159, 0.15);
 }
 
 /* Media query breakpoints (can be used with CSS custom media queries) */
