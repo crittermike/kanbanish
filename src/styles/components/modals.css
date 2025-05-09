@@ -166,10 +166,10 @@
 }
 
 .modal-container {
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--modal-shadow);
   padding: 0;
   width: 90%;
   max-width: 600px;
@@ -184,15 +184,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1px solid #30363d;
-  background-color: #161b22;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--card-bg);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #e6edf3;
+  color: var(--text-color);
 }
 
 .modal-body {
@@ -201,7 +201,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background-color: #0d1117;
+  background-color: var(--bg-color);
 }
 
 .format-selector {
@@ -220,21 +220,21 @@
   align-items: center;
   justify-content: center;
   padding: 12px 16px;
-  border: 1px solid #30363d;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background-color: #0d1117;
+  background-color: var(--bg-color);
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: center;
 }
 
 .format-label:hover {
-  background-color: #161b22;
+  background-color: var(--card-bg);
 }
 
 .format-label.selected {
-  border-color: #58a6ff;
-  background-color: #121d2f;
+  border-color: var(--accent);
+  background-color: var(--accent-transparent-lighter);
 }
 
 .format-radio {
@@ -247,7 +247,7 @@
 .format-name {
   font-weight: 500;
   font-size: 16px;
-  color: #c9d1d9;
+  color: var(--text-color);
   text-align: center;
 }
 
@@ -268,10 +268,10 @@
   width: 100%;
   height: 300px;
   padding: 16px;
-  border: 1px solid #30363d;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background-color: #0d1117;
-  color: #c9d1d9;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 14px;
   line-height: 1.6;
@@ -286,8 +286,8 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid #30363d;
-  background-color: #161b22;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--card-bg);
 }
 
 .primary-button {
