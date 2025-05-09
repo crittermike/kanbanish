@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ref, set } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
@@ -59,11 +60,12 @@ const ActionButtons = ({
   updateMultipleVotesAllowed, 
   sortDropdownOpen, 
   setSortDropdownOpen, 
-  resetAllVotes, 
-  showNotification,
+  resetAllVotes,
   darkMode,
   updateDarkMode
 }) => {
+  const { showNotification } = useNotification();
+  
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -219,7 +221,9 @@ const ActionButtons = ({
 };
 
 // UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
+  const { showNotification } = useNotification();
+  
   // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
     // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
@@ -239,7 +243,6 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
             columnId={columnId}
             columnData={columnData}
             sortByVotes={sortByVotes}
-            showNotification={showNotification}
           />
         ))}
 
@@ -258,7 +261,7 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
 /**
  * Main Board component responsible for rendering and managing the kanban board
  */
-function Board({ showNotification }) {
+function Board() {
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -285,6 +288,9 @@ function Board({ showNotification }) {
     darkMode,
     updateDarkMode
   } = useBoardContext();
+  
+  // Get notification function from context
+  const { showNotification } = useNotification();
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -425,7 +431,6 @@ function Board({ showNotification }) {
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
-            showNotification={showNotification}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
           />
@@ -436,7 +441,6 @@ function Board({ showNotification }) {
         <ColumnsContainer
           columns={columns}
           sortByVotes={sortByVotes}
-          showNotification={showNotification}
           addNewColumn={addNewColumn}
         />
       </main>
@@ -447,7 +451,6 @@ function Board({ showNotification }) {
         onClose={() => {
           setIsExportModalOpen(false);
         }}
-        showNotification={showNotification}
       />
 
       {/* Template Selection Modal */}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useBoardContext } from '../../context/BoardContext';
+import { useNotification } from '../../context/NotificationContext';
 import { Clipboard } from 'react-feather';
 
-const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
+const ExportBoardModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('markdown');
   const [exportedContent, setExportedContent] = useState('');
   const { boardTitle, columns } = useBoardContext();
+  const { showNotification } = useNotification();
 
   // Generate export content when modal is opened or format changes
   useEffect(() => {
@@ -197,9 +199,7 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(exportedContent)
       .then(() => {
-        if (showNotification) {
-          showNotification('Copied to clipboard');
-        }
+        showNotification('Copied to clipboard');
         onClose();
       })
       .catch(err => {

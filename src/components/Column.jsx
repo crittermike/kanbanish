@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import Card from './Card';
 import { generateId } from '../utils/helpers';
@@ -8,8 +9,9 @@ import { addCard } from '../utils/boardUtils';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
-function Column({ columnId, columnData, sortByVotes, showNotification }) {
+function Column({ columnId, columnData, sortByVotes }) {
   const { boardId, moveCard, votingEnabled } = useBoardContext();
+  const { showNotification } = useNotification();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');

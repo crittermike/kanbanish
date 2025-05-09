@@ -1,16 +1,18 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { database } from '../utils/firebase';
+import { useNotification } from '../context/NotificationContext';
 
 export function useCardOperations({ 
   boardId, 
   columnId, 
   cardId, 
   cardData, 
-  user, 
-  showNotification,
+  user,
   multipleVotesAllowed = false // pass this from the Card component
 }) {
+  const { showNotification } = useNotification();
+  
   // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(cardData.content || '');

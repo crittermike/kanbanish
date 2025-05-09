@@ -11,24 +11,6 @@ export function generateId() {
 }
 
 /**
- * Shows a notification message
- * @param {string} message The message to show
- */
-export function showNotification(message) {
-  const notification = document.getElementById('notification');
-  const notificationMessage = document.getElementById('notification-message');
-  
-  if (notification && notificationMessage) {
-    notificationMessage.textContent = message;
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-      notification.classList.remove('show');
-    }, 3000);
-  }
-}
-
-/**
  * Common emoji set for reactions
  */
 export const COMMON_EMOJIS = [
