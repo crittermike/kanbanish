@@ -4,6 +4,7 @@ import { useBoardContext } from '../context/BoardContext';
 import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
+import { addColumn } from '../utils/boardUtils';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
@@ -366,16 +367,7 @@ function Board({ showNotification }) {
   const addNewColumn = () => {
     if (!boardRef || !boardId) return;
 
-    const columnId = generateId();
-    const columnData = {
-      title: 'New Column',
-      cards: {}
-    };
-
-    // Create a direct reference to the column path
-    const columnRef = ref(database, `boards/${boardId}/columns/${columnId}`);
-
-    set(columnRef, columnData)
+    addColumn(boardId)
       .then(() => {
         showNotification('Column added');
       })
