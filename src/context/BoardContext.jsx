@@ -175,70 +175,62 @@ export const BoardProvider = ({ children }) => {
     }
   };
   
-  // Update voting enabled setting
-  const updateVotingEnabled = (enabled) => {
+  // Update board settings with merged values
+  const updateBoardSettings = (newSettings) => {
     if (boardId && user) {
       const settingsRef = ref(database, `boards/${boardId}/settings`);
-      set(settingsRef, { 
-        votingEnabled: enabled,
+      // Merge new settings with existing state
+      const updatedSettings = {
+        votingEnabled: votingEnabled,
         downvotingEnabled: downvotingEnabled,
-        multipleVotesAllowed: multipleVotesAllowed 
-      })
+        multipleVotesAllowed: multipleVotesAllowed,
+        ...newSettings
+      };
+      
+      set(settingsRef, updatedSettings)
         .then(() => {
-          console.log('Voting setting updated:', enabled);
-          setVotingEnabled(enabled);
+          console.log('Board settings updated:', updatedSettings);
+          // Update local state based on newSettings
+          if (newSettings.votingEnabled !== undefined) {
+            setVotingEnabled(newSettings.votingEnabled);
+          }
+          if (newSettings.downvotingEnabled !== undefined) {
+            setDownvotingEnabled(newSettings.downvotingEnabled);
+          }
+          if (newSettings.multipleVotesAllowed !== undefined) {
+            setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+          }
         })
         .catch((error) => {
-          console.error('Error updating voting setting:', error);
+          console.error('Error updating board settings:', error);
         });
     } else {
       // If we're not connected to a board yet, just update the local state
-      setVotingEnabled(enabled);
+      if (newSettings.votingEnabled !== undefined) {
+        setVotingEnabled(newSettings.votingEnabled);
+      }
+      if (newSettings.downvotingEnabled !== undefined) {
+        setDownvotingEnabled(newSettings.downvotingEnabled);
+      }
+      if (newSettings.multipleVotesAllowed !== undefined) {
+        setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+      }
     }
+  };
+  
+  // Update voting enabled setting
+  const updateVotingEnabled = (enabled) => {
+    updateBoardSettings({ votingEnabled: enabled });
   };
   
   // Update downvoting enabled setting
   const updateDownvotingEnabled = (enabled) => {
-    if (boardId && user) {
-      const settingsRef = ref(database, `boards/${boardId}/settings`);
-      set(settingsRef, { 
-        votingEnabled: votingEnabled,
-        downvotingEnabled: enabled,
-        multipleVotesAllowed: multipleVotesAllowed 
-      })
-        .then(() => {
-          console.log('Downvoting setting updated:', enabled);
-          setDownvotingEnabled(enabled);
-        })
-        .catch((error) => {
-          console.error('Error updating downvoting setting:', error);
-        });
-    } else {
-      // If we're not connected to a board yet, just update the local state
-      setDownvotingEnabled(enabled);
-    }
+    updateBoardSettings({ downvotingEnabled: enabled });
   };
   
   // Update multiple votes allowed setting
   const updateMultipleVotesAllowed = (allowed) => {
-    if (boardId && user) {
-      const settingsRef = ref(database, `boards/${boardId}/settings`);
-      set(settingsRef, { 
-        votingEnabled: votingEnabled,
-        downvotingEnabled: downvotingEnabled,
-        multipleVotesAllowed: allowed 
-      })
-        .then(() => {
-          console.log('Multiple votes setting updated:', allowed);
-          setMultipleVotesAllowed(allowed);
-        })
-        .catch((error) => {
-          console.error('Error updating multiple votes setting:', error);
-        });
-    } else {
-      // If we're not connected to a board yet, just update the local state
-      setMultipleVotesAllowed(allowed);
-    }
+    updateBoardSettings({ multipleVotesAllowed: allowed });
   };
 
   // Reset all votes in the board
@@ -339,6 +331,7 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
+    updateBoardSettings,
     boardRef,
     createNewBoard,
     openExistingBoard,
