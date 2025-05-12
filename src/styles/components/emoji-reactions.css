@@ -51,6 +51,11 @@
     user-select: none;
 }
 
+.emoji-reaction.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .emoji-reaction:hover {
     background-color: var(--emoji-reaction-hover-bg);
 }
@@ -87,9 +92,21 @@
     padding-bottom: 2px;
 }
 
+.add-reaction-button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: transparent;
+    border-color: var(--border-color);
+}
+
 .add-reaction-button:hover {
     opacity: 1;
     background-color: var(--hover-bg);
+}
+
+.add-reaction-button.disabled:hover {
+    opacity: 0.4;
+    background-color: transparent;
 }
 
 /* Emoji picker */

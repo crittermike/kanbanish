@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import EmojiPicker from './EmojiPicker';
-import { MessageSquare } from 'react-feather';
+import { MessageSquare, Lock } from 'react-feather';
 
 const CardReactions = React.memo(({
   reactions, 
@@ -13,7 +13,8 @@ const CardReactions = React.memo(({
   commentCount,
   toggleComments,
   emojiPickerPosition,
-  setEmojiPickerPosition
+  setEmojiPickerPosition,
+  boardLocked
 }) => {
   const emojiButtonRef = useRef(null);
 
@@ -47,9 +48,12 @@ const CardReactions = React.memo(({
           />
         )}
         <button
-          className="add-reaction-button"
+          className={`add-reaction-button ${boardLocked ? 'disabled' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+            if (boardLocked) {
+              return;
+            }
             if (emojiButtonRef.current) {
               const buttonRect = emojiButtonRef.current.getBoundingClientRect();
               setEmojiPickerPosition({
@@ -60,9 +64,10 @@ const CardReactions = React.memo(({
             setShowEmojiPicker(!showEmojiPicker);
             setShowComments(false);
           }}
-          title="Add reaction"
+          title={boardLocked ? "Board is locked - Cannot add reactions" : "Add reaction"}
           ref={emojiButtonRef}
-        >+</button>
+          disabled={boardLocked}
+        >+{boardLocked && <Lock size={10} style={{ marginLeft: '2px', opacity: 0.7 }} />}</button>
       </div>
       <div className="reactions-right">
         <button
@@ -71,7 +76,7 @@ const CardReactions = React.memo(({
             e.stopPropagation();
             toggleComments();
           }}
-          title="Toggle comments"
+          title={boardLocked ? "Board is locked - Only view comments" : "Toggle comments"}
         >
           <MessageSquare size={16} />
           <span>{commentCount || 0}</span>

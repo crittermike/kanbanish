@@ -6,10 +6,10 @@ import Card from './Card';
 import { generateId } from '../utils/helpers';
 import { addCard } from '../utils/boardUtils';
 import { useDrop } from 'react-dnd';
-import { Trash2, Plus } from 'react-feather';
+import { Trash2, Plus, Lock } from 'react-feather';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled } = useBoardContext();
+  const { boardId, moveCard, votingEnabled, boardLocked } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -27,6 +27,10 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
     drop: (item) => {
+      if (boardLocked) {
+        showNotification('Board is locked - Cannot move cards');
+        return;
+      }
       if (item.columnId !== columnId) {
         moveCard(item.cardId, item.columnId, columnId);
         showNotification('Card moved successfully');
@@ -35,18 +39,28 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
-  }), [columnId, moveCard, showNotification]);
+  }), [columnId, moveCard, showNotification, boardLocked]);
 
   // Apply the drop ref to column content
   drop(columnRef);
 
   // Handle column title change
   const handleTitleChange = (e) => {
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot edit column title');
+      return;
+    }
     setTitle(e.target.value);
   };
 
   // Save column title
   const saveColumnTitle = () => {
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot edit column title');
+      setIsEditing(false);
+      return;
+    }
+    
     if (boardId) {
       // Create a direct reference to the title path
       const titlePath = `boards/${boardId}/columns/${columnId}/title`;
@@ -72,6 +86,11 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
   // Delete column
   const deleteColumn = () => {
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot delete column');
+      return;
+    }
+    
     if (boardId && window.confirm('Are you sure you want to delete this column and all its cards?')) {
       const columnRef = ref(database, `boards/${boardId}/columns/${columnId}`);
       remove(columnRef)
@@ -86,6 +105,11 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
   // Show the inline card form
   const showAddCardForm = () => {
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot add cards');
+      return;
+    }
+    
     setIsAddingCard(true);
     setNewCardContent('');
   };
@@ -158,13 +182,19 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             autoFocus
           />
         ) : (
-          <h2 className="column-title" onClick={() => setIsEditing(true)}>
+          <h2 className="column-title" onClick={() => boardLocked ? showNotification('Board is locked - Cannot edit column title') : setIsEditing(true)}>
             {title}
+            {boardLocked && <Lock size={14} className="ml-2" style={{ marginLeft: '6px', opacity: 0.7 }} />}
           </h2>
         )}
         <div className="column-actions">
-          <button className="icon-button" title="Delete Column" onClick={deleteColumn}>
-            <Trash2 />
+          <button 
+            className="icon-button" 
+            title={boardLocked ? "Board is locked - Cannot delete column" : "Delete Column"} 
+            onClick={deleteColumn}
+            disabled={boardLocked}
+          >
+            <Trash2 style={{ opacity: boardLocked ? 0.5 : 1 }} />
           </button>
         </div>
       </div>
@@ -205,9 +235,14 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             </div>
           </div>
         ) : (
-          <button className="add-card" onClick={showAddCardForm}>
-            <Plus />
-            Add Card
+          <button 
+            className={`add-card ${boardLocked ? 'disabled' : ''}`} 
+            onClick={showAddCardForm}
+            disabled={boardLocked}
+            title={boardLocked ? "Board is locked - Cannot add cards" : "Add Card"}
+          >
+            <Plus style={{ opacity: boardLocked ? 0.5 : 1 }} />
+            Add Card {boardLocked && <Lock size={14} style={{ marginLeft: '5px', opacity: 0.7 }} />}
           </button>
         )}
       </div>

@@ -63,6 +63,9 @@ describe('Board Component', () => {
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
+    boardLocked: false,
+    setBoardLocked: vi.fn(),
+    updateBoardLocked: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
@@ -304,6 +307,47 @@ describe('Board Component', () => {
     
     // Check that updateMultipleVotesAllowed was called with true
     expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
+  });
+  
+  test('toggles board lock setting when clicked', () => {
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+    
+    // Open the dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+    
+    // Find the "Lock/Freeze board?" section and click the "Yes" option
+    const lockBoardSection = screen.getByText('Lock/Freeze board?');
+    expect(lockBoardSection).toBeInTheDocument();
+    
+    // Find the closest parent section element containing the setting
+    const lockBoardSectionElement = lockBoardSection.closest('.settings-section');
+    
+    // Within that section, find the Yes option and click it
+    const yesOption = within(lockBoardSectionElement).getByText('Yes');
+    fireEvent.click(yesOption);
+    
+    // Check that updateBoardLocked was called with true
+    expect(mockContextValue.updateBoardLocked).toHaveBeenCalledWith(true);
+    expect(mockShowNotification).toHaveBeenCalledWith('Board locked - No changes allowed');
+    
+    // Now click "No" to unlock
+    const noOption = within(lockBoardSectionElement).getByText('No');
+    fireEvent.click(noOption);
+    
+    // Check that updateBoardLocked was called with false
+    expect(mockContextValue.updateBoardLocked).toHaveBeenCalledWith(false);
+    expect(mockShowNotification).toHaveBeenCalledWith('Board unlocked - Changes are now allowed');
   });
   
   test('updates document title when board title changes', () => {

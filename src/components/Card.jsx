@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import { Lock } from 'react-feather';
 
 // Import modularized components
 import Comments from './Comments';
@@ -67,7 +68,7 @@ const CardContent = ({
 };
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, boardLocked } = useBoardContext();
   const cardElementRef = useRef(null);
   
   // Use the custom hook for card operations
@@ -123,10 +124,11 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
     item: { cardId, columnId, cardData },
+    canDrag: !boardLocked, // Disable dragging when board is locked
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
-  }), [cardId, columnId, cardData]);
+  }), [cardId, columnId, cardData, boardLocked]);
   
   // Apply the drag ref to the card element
   drag(cardElementRef);
@@ -137,8 +139,14 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   return (
     <div 
       ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''}`} 
-      onClick={() => !isEditing && toggleEditMode()}
+      className={`card ${isDragging ? 'dragging' : ''} ${boardLocked ? 'locked' : ''}`} 
+      onClick={() => {
+        if (boardLocked) {
+          showNotification('Board is locked - Cannot edit cards');
+          return;
+        }
+        if (!isEditing) toggleEditMode();
+      }}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       {isEditing ? (
@@ -146,44 +154,51 @@ function Card({ cardId, cardData, columnId, showNotification }) {
           editedContent={editedContent}
           setEditedContent={setEditedContent}
           handleKeyPress={handleKeyPress}
-          saveCardChanges={saveCardChanges}
-          toggleEditMode={toggleEditMode}
-          deleteCard={deleteCard}
+          saveCardChanges={boardLocked ? () => showNotification('Board is locked - Cannot edit cards') : saveCardChanges}
+          toggleEditMode={boardLocked ? () => showNotification('Board is locked - Cannot edit cards') : toggleEditMode}
+          deleteCard={boardLocked ? () => showNotification('Board is locked - Cannot delete cards') : deleteCard}
         />
       ) : (
         <>
           <CardContent 
             cardData={cardData}
             formatContentWithEmojis={formatContentWithEmojis}
-            upvoteCard={upvoteCard}
-            downvoteCard={downvoteCard}
+            upvoteCard={boardLocked ? () => showNotification('Board is locked - Cannot vote') : upvoteCard}
+            downvoteCard={boardLocked ? () => showNotification('Board is locked - Cannot vote') : downvoteCard}
             votingEnabled={votingEnabled}
             downvotingEnabled={downvotingEnabled}
             userId={user?.uid}
           />
+          {boardLocked && (
+            <div className="card-locked-indicator" style={{ position: 'absolute', top: '4px', right: '4px' }}>
+              <Lock size={14} style={{ opacity: 0.7 }} />
+            </div>
+          )}
           
           <CardReactions
             reactions={cardData.reactions}
             userId={user?.uid}
             showEmojiPicker={showEmojiPicker}
-            setShowEmojiPicker={setShowEmojiPicker}
+            setShowEmojiPicker={boardLocked ? () => showNotification('Board is locked - Cannot add reactions') : setShowEmojiPicker}
             setShowComments={setShowComments}
-            addReaction={addReaction}
+            addReaction={boardLocked ? () => showNotification('Board is locked - Cannot add reactions') : addReaction}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
             commentCount={commentCount}
             toggleComments={toggleComments}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
+            boardLocked={boardLocked}
           />
           
           {showComments && (
             <Comments
               comments={cardData.comments}
-              onAddComment={addComment}
+              onAddComment={boardLocked ? () => showNotification('Board is locked - Cannot add comments') : addComment}
               newComment={newComment}
-              onCommentChange={setNewComment}
-              onEditComment={editComment}
-              onDeleteComment={deleteComment}
+              onCommentChange={boardLocked ? () => showNotification('Board is locked - Cannot add comments') : setNewComment}
+              onEditComment={boardLocked ? () => showNotification('Board is locked - Cannot edit comments') : editComment}
+              onDeleteComment={boardLocked ? () => showNotification('Board is locked - Cannot delete comments') : deleteComment}
+              boardLocked={boardLocked}
             />
           )}
         </>

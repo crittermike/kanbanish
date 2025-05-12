@@ -25,6 +25,7 @@ export const BoardProvider = ({ children }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
+  const [boardLocked, setBoardLocked] = useState(false); // Default to unlocked
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
 
@@ -94,6 +95,9 @@ export const BoardProvider = ({ children }) => {
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
             }
+            if (boardData.settings.boardLocked !== undefined) {
+              setBoardLocked(boardData.settings.boardLocked);
+            }
           }
         }
       });
@@ -137,7 +141,8 @@ export const BoardProvider = ({ children }) => {
       settings: {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
-        multipleVotesAllowed: false // Default to not allowing multiple votes
+        multipleVotesAllowed: false, // Default to not allowing multiple votes
+        boardLocked: false // Default to unlocked for new boards
       }
     };
     
@@ -184,6 +189,7 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: votingEnabled,
         downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: multipleVotesAllowed,
+        boardLocked: boardLocked,
         ...newSettings
       };
       
@@ -200,6 +206,9 @@ export const BoardProvider = ({ children }) => {
           if (newSettings.multipleVotesAllowed !== undefined) {
             setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
           }
+          if (newSettings.boardLocked !== undefined) {
+            setBoardLocked(newSettings.boardLocked);
+          }
         })
         .catch((error) => {
           console.error('Error updating board settings:', error);
@@ -214,6 +223,9 @@ export const BoardProvider = ({ children }) => {
       }
       if (newSettings.multipleVotesAllowed !== undefined) {
         setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+      }
+      if (newSettings.boardLocked !== undefined) {
+        setBoardLocked(newSettings.boardLocked);
       }
     }
   };
@@ -231,6 +243,11 @@ export const BoardProvider = ({ children }) => {
   // Update multiple votes allowed setting
   const updateMultipleVotesAllowed = (allowed) => {
     updateBoardSettings({ multipleVotesAllowed: allowed });
+  };
+  
+  // Update board locked setting
+  const updateBoardLocked = (locked) => {
+    updateBoardSettings({ boardLocked: locked });
   };
 
   // Reset all votes in the board
@@ -331,6 +348,9 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
+    boardLocked,
+    setBoardLocked,
+    updateBoardLocked,
     updateBoardSettings,
     boardRef,
     createNewBoard,
