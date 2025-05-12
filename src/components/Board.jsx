@@ -209,7 +209,6 @@ const ActionButtons = ({
         className="btn icon-btn"
         onClick={() => { updateDarkMode(!darkMode); }}
         title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        style={{ marginLeft: 'var(--space-xs)' }}
       >
         {darkMode ? <Sun size={16} /> : <Moon size={16} />}
       </button>
