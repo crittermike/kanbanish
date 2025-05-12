@@ -167,12 +167,14 @@ export const BoardProvider = ({ children }) => {
 
   // Update board title
   const updateBoardTitle = (newTitle) => {
+    // Optimistically update the local state first for better UI responsiveness
+    setBoardTitle(newTitle);
+    
     if (boardId && user) {
       const titleRef = ref(database, `boards/${boardId}/title`);
       set(titleRef, newTitle)
         .then(() => {
           console.log('Board title updated');
-          setBoardTitle(newTitle);
         })
         .catch((error) => {
           console.error('Error updating board title:', error);

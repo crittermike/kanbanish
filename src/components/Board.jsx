@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ref, set } from 'firebase/database';
 import { useBoardContext } from '../context/BoardContext';
-import { database } from '../utils/firebase';
 import Column from './Column';
 import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
@@ -241,7 +239,6 @@ const ActionButtons = ({
         className="btn icon-btn"
         onClick={() => { updateDarkMode(!darkMode); }}
         title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        style={{ marginLeft: 'var(--space-xs)' }}
       >
         {darkMode ? <Sun size={16} /> : <Moon size={16} />}
       </button>
@@ -314,6 +311,7 @@ function Board({ showNotification }) {
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
+    updateBoardTitle,
     user, // Include user from context
     darkMode,
     updateDarkMode
@@ -349,7 +347,7 @@ function Board({ showNotification }) {
    * BOARD MANAGEMENT HANDLERS
    */
 
-  // Handle board title change
+  // Handle board title change (update local state only)
   const handleBoardTitleChange = (e) => {
     if (boardLocked) {
       showNotification('Board is locked - Cannot edit title');
@@ -358,19 +356,11 @@ function Board({ showNotification }) {
     
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
-
-    if (boardId) {
-      // Create a direct reference to the title path
-      const titleRef = ref(database, `boards/${boardId}/title`);
-
-      set(titleRef, newTitle)
-        .then(() => {
-          console.log('Board title updated');
-        })
-        .catch((error) => {
-          console.error('Error updating board title:', error);
-        });
-    }
+  };
+  
+  // Handle board title blur (update Firebase)
+  const handleBoardTitleBlur = () => {
+    updateBoardTitle(boardTitle);
   };
 
   // Show template modal for creating a new board
@@ -452,6 +442,7 @@ function Board({ showNotification }) {
           <BoardHeader
             boardTitle={boardTitle}
             handleBoardTitleChange={handleBoardTitleChange}
+            handleBoardTitleBlur={handleBoardTitleBlur}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             boardLocked={boardLocked}
