@@ -10,6 +10,21 @@ main {
     flex-grow: 1;
     padding: var(--space-md);
     overflow-x: auto;
+    position: relative;
+}
+
+/* Board locked banner */
+.board-locked-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 59, 48, 0.15);
+    color: var(--text-color);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    border: 1px solid rgba(255, 59, 48, 0.3);
 }
 
 .board-container {
@@ -149,6 +164,21 @@ main {
     height: 44px;
 }
 
+.add-column.disabled,
+.add-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+.add-column.disabled:hover,
+.add-card.disabled:hover {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
 .add-column:hover {
     background: var(--card-bg);
     border-color: var(--accent);
@@ -161,6 +191,41 @@ main {
 
 .add-column:hover svg {
     transform: scale(1.2);
+}
+
+.add-column.disabled:hover svg,
+.add-card.disabled:hover svg {
+    transform: none;
+}
+
+/* Disabled icon button */
+.icon-button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Add Card Button */
+.add-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+    width: 100%;
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.add-card:hover {
+    background: var(--card-bg);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 /* Responsive adjustments */

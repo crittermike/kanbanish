@@ -6,20 +6,24 @@ import { addColumn } from '../utils/boardUtils';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon, Lock } from 'react-feather';
 
 // UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleExportBoard, copyShareUrl, boardLocked }) => (
   <div className="board-title-container">
-    <input
-      type="text"
-      id="board-title"
-      placeholder="Untitled Board"
-      value={boardTitle}
-      onChange={handleBoardTitleChange}
-      onBlur={handleBoardTitleBlur}
-      className="header-input"
-    />
+    <div className="title-with-lock">
+      <input
+        type="text"
+        id="board-title"
+        placeholder="Untitled Board"
+        value={boardTitle}
+        onChange={handleBoardTitleChange}
+        className={`header-input ${boardLocked ? 'locked' : ''}`}
+        disabled={boardLocked}
+        title={boardLocked ? "Board is locked - Cannot edit title" : ""}
+      />
+      {boardLocked && <Lock size={18} style={{ marginLeft: '10px', opacity: 0.7 }} />}
+    </div>
     <div className="action-buttons">
       <button
         id="copy-share-url"
@@ -56,6 +60,8 @@ const ActionButtons = ({
   updateDownvotingEnabled, 
   multipleVotesAllowed, 
   updateMultipleVotesAllowed, 
+  boardLocked,
+  updateBoardLocked,
   sortDropdownOpen, 
   setSortDropdownOpen, 
   resetAllVotes, 
@@ -201,6 +207,30 @@ const ActionButtons = ({
                 </div>
               </>
             )}
+            <div className="settings-divider"></div>
+            <div className="settings-section">
+              <h4 className="settings-section-title">Lock/Freeze board?</h4>
+              <div className="settings-boolean-option">
+                <button
+                  className={`boolean-option ${boardLocked ? 'selected' : ''}`}
+                  onClick={() => { 
+                    updateBoardLocked(true);
+                    showNotification('Board locked - No changes allowed');
+                  }}
+                >
+                  Yes
+                </button>
+                <button
+                  className={`boolean-option ${!boardLocked ? 'selected' : ''}`}
+                  onClick={() => { 
+                    updateBoardLocked(false);
+                    showNotification('Board unlocked - Changes are now allowed');
+                  }}
+                >
+                  No
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -276,6 +306,8 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    boardLocked,
+    updateBoardLocked,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
@@ -317,6 +349,11 @@ function Board({ showNotification }) {
 
   // Handle board title change (update local state only)
   const handleBoardTitleChange = (e) => {
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot edit title');
+      return;
+    }
+    
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
   };
@@ -357,6 +394,11 @@ function Board({ showNotification }) {
   // Add a new column
   const addNewColumn = () => {
     if (!boardRef || !boardId) return;
+    
+    if (boardLocked) {
+      showNotification('Board is locked - Cannot add columns');
+      return;
+    }
 
     addColumn(boardId)
       .then(() => {
@@ -403,6 +445,7 @@ function Board({ showNotification }) {
             handleBoardTitleBlur={handleBoardTitleBlur}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
+            boardLocked={boardLocked}
           />
           <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}
@@ -414,6 +457,8 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
+            boardLocked={boardLocked}
+            updateBoardLocked={updateBoardLocked}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
@@ -425,6 +470,12 @@ function Board({ showNotification }) {
       </header>
 
       <main>
+        {boardLocked && (
+          <div className="board-locked-banner">
+            <Lock size={16} style={{ marginRight: '8px' }} />
+            Board is locked - No changes allowed
+          </div>
+        )}
         <ColumnsContainer
           columns={columns}
           sortByVotes={sortByVotes}

@@ -5,7 +5,8 @@ const CommentEditor = ({
   setEditedComment, 
   saveComment, 
   cancelEdit, 
-  deleteComment 
+  deleteComment,
+  boardLocked
 }) => (
   <div className="comment-edit" onClick={(e) => e.stopPropagation()}>
     <input
@@ -36,12 +37,16 @@ const Comments = React.memo(({
   newComment, 
   onCommentChange,
   onEditComment,
-  onDeleteComment
+  onDeleteComment,
+  boardLocked
 }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
   
   const startEditing = (commentId, content) => {
+    if (boardLocked) {
+      return;
+    }
     setEditingCommentId(commentId);
     setEditedContent(content);
   };
@@ -77,12 +82,17 @@ const Comments = React.memo(({
                 saveComment={saveComment}
                 cancelEdit={cancelEdit}
                 deleteComment={() => confirmDelete(commentId)}
+                boardLocked={boardLocked}
               />
             ) : (
               <div 
                 className="comment-content"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (boardLocked) {
+                    e.preventDefault();
+                    return;
+                  }
                   startEditing(commentId, comment.content);
                 }}
               >
@@ -98,17 +108,18 @@ const Comments = React.memo(({
       <div className="comment-form">
         <input
           type="text"
-          placeholder="Add a comment..."
-          className="comment-input"
+          placeholder={boardLocked ? "Comments disabled - Board is locked" : "Add a comment..."}
+          className={`comment-input ${boardLocked ? 'disabled' : ''}`}
           value={newComment}
           onChange={(e) => onCommentChange(e.target.value)}
           onClick={(e) => e.stopPropagation()}
           onKeyPress={(e) => {
-            if (e.key === 'Enter' && newComment.trim()) {
+            if (!boardLocked && e.key === 'Enter' && newComment.trim()) {
               e.preventDefault();
               onAddComment();
             }
           }}
+          disabled={boardLocked}
         />
       </div>
     </div>

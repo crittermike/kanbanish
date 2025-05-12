@@ -19,6 +19,24 @@
     flex-direction: column;
 }
 
+/* Locked card styling */
+.card.locked {
+    cursor: not-allowed;
+    border-color: var(--border-color);
+    opacity: 0.9;
+    position: relative;
+}
+
+.card.locked:hover {
+    border-color: var(--border-color);
+    box-shadow: var(--card-shadow);
+    transform: none;
+}
+
+.card-locked-indicator {
+    color: var(--text-muted);
+}
+
 .card:hover {
     border-color: var(--accent);
 }
@@ -201,6 +219,13 @@
     font-size: var(--font-size-sm);
     background: var(--input-bg);
     color: var(--text-color);
+}
+
+.comment-input.disabled {
+    background: var(--hover-bg);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    border-color: var(--border-color);
 }
 
 .comment-input:focus {
