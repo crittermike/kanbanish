@@ -125,7 +125,7 @@ describe('Card Reveal Mode', () => {
         expect(cardContent).not.toHaveClass('obfuscated');
     });
 
-    test('obfuscated text preserves spaces and punctuation', () => {
+    test('obfuscated text preserves spaces only', () => {
         const cardDataWithPunctuation = {
             ...mockCardData,
             content: 'Hello, world! This is a test.',
@@ -150,12 +150,12 @@ describe('Card Reveal Mode', () => {
         // Should preserve spaces
         expect(obfuscatedText).toContain(' ');
 
-        // Should preserve some punctuation
-        expect(obfuscatedText).toContain(',');
-        expect(obfuscatedText).toContain('!');
-        expect(obfuscatedText).toContain('.');
+        // Should NOT preserve punctuation (now using simple fallback)
+        expect(obfuscatedText).not.toContain(',');
+        expect(obfuscatedText).not.toContain('!');
+        expect(obfuscatedText).not.toContain('.');
 
-        // Should contain block characters for letters
+        // Should contain block characters for letters and punctuation
         expect(obfuscatedText).toContain('█');
     });
 

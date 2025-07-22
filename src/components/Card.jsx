@@ -59,9 +59,6 @@ const CardContent = ({
     return text.split('').map(char => {
       if (char === ' ') return ' ';
       if (char === '\n') return '\n';
-      if (/[a-zA-Z]/.test(char)) return '█';
-      if (/[0-9]/.test(char)) return '█';
-      if (/[.,!?;:]/.test(char)) return char; // Keep some punctuation for readability
       return '█';
     }).join('');
   };
@@ -86,7 +83,7 @@ const CardContent = ({
         />
       )}
       <div className={`card-content ${!votingEnabled ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
-        {showObfuscatedText ? displayContent : formatContentWithEmojis(cardData.content)}
+        {displayContent}
       </div>
     </div>
   );
