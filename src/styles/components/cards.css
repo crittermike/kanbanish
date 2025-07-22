@@ -39,13 +39,20 @@
 .card-content {
     flex: 1;
     word-break: break-word;
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    padding-left: var(--space-sm);
+    color: var(--text-color);
+    line-height: 1.4;
+    margin-left: var(--space-sm);
+}
+
+.card-content.obfuscated {
+    font-family: monospace;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 .card-content.full-width {
-    padding-left: 0;
+    margin-left: 0;
 }
 
 .card-footer {
@@ -315,100 +322,101 @@
 
 /* Mobile responsive adjustments for cards */
 @media (max-width: 768px) {
+
     /* Enhance touch targets for card actions */
     .card {
         padding: var(--space-md);
     }
-    
+
     /* Better spacing for action buttons on mobile */
     .card-edit-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .card-edit-actions .btn {
         padding: var(--space-md);
         min-height: 50px;
         font-size: var(--font-size-base);
     }
-    
+
     /* Make Save button more prominent */
     .card-edit-actions .primary-btn {
         order: -3;
     }
-    
+
     /* Put Cancel second */
     .card-edit-actions .secondary-btn {
         order: -2;
     }
-    
+
     /* Put Delete last */
     .card-edit-actions .danger-btn {
         order: -1;
     }
-    
+
     /* Better spacing for inline card actions */
     .inline-card-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .inline-card-actions .btn {
         padding: var(--space-md);
         min-height: 50px;
     }
-    
+
     /* Improve comment editing on mobile */
     .comment-edit-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .comment-edit-actions .btn-sm {
         flex: 1;
         padding: var(--space-sm);
         font-size: var(--font-size-sm);
         min-height: 40px;
     }
-    
+
     /* Order the comment edit buttons properly on mobile */
     .comment-edit-actions .primary-btn {
         order: -3;
     }
-    
+
     .comment-edit-actions .secondary-btn {
         order: -2;
     }
-    
+
     .comment-edit-actions .danger-btn {
         order: -1;
     }
-    
+
     /* Make comment inputs easier to use on mobile */
     .comment-input {
         padding: var(--space-sm);
         min-height: 40px;
         font-size: var(--font-size-base);
     }
-    
+
     .comment-edit-input {
         padding: var(--space-sm);
         min-height: 40px;
         font-size: var(--font-size-base);
         margin-bottom: var(--space-sm);
     }
-    
+
     /* Increase touch area for voting buttons */
     .vote-button {
         height: 30px;
         width: 30px;
         padding: 6px;
     }
-    
+
     .votes {
         min-width: 40px;
     }
-    
+
     /* Make comments button easier to tap */
     .comments-btn {
         padding: 8px;

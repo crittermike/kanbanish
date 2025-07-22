@@ -25,6 +25,8 @@ export const BoardProvider = ({ children }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
+  const [revealMode, setRevealMode] = useState(false); // Default to disabled (cards are visible)
+  const [cardsRevealed, setCardsRevealed] = useState(false); // Track if cards have been revealed
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
 
@@ -34,7 +36,7 @@ export const BoardProvider = ({ children }) => {
       if (user) {
         console.log('User authenticated:', user.uid);
         setUser(user);
-        
+
         // Load user preferences including theme
         const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
         get(userPrefsRef).then((snapshot) => {
@@ -58,7 +60,7 @@ export const BoardProvider = ({ children }) => {
 
     return () => unsubscribe();
   }, []);
-  
+
   // Update document class when dark mode changes
   useEffect(() => {
     if (darkMode) {
@@ -82,7 +84,7 @@ export const BoardProvider = ({ children }) => {
             setBoardTitle(boardData.title);
           }
           setColumns(boardData.columns || {});
-          
+
           // Set voting preferences if available, otherwise use defaults
           if (boardData.settings) {
             if (boardData.settings.votingEnabled !== undefined) {
@@ -93,6 +95,11 @@ export const BoardProvider = ({ children }) => {
             }
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
+            }
+            if (boardData.settings.revealMode !== undefined) {
+              setRevealMode(boardData.settings.revealMode);
+              // Reset cards revealed when reveal mode setting changes
+              setCardsRevealed(false);
             }
           }
         }
@@ -107,19 +114,19 @@ export const BoardProvider = ({ children }) => {
   // Create a new board with specified template columns and title
   const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board') => {
     if (!user) return null;
-    
+
     const newBoardId = generateId();
     const newBoardRef = ref(database, `boards/${newBoardId}`);
-    
+
     // Default columns if no template specified
     const columnsToCreate = templateColumns || ['To Do', 'In Progress', 'Done'];
-    
+
     // Build columns object with ordered prefixes
     const columnsObj = {};
-    
+
     // Using alphabet prefixes to ensure correct ordering
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    
+
     columnsToCreate.forEach((columnTitle, index) => {
       // Use alphabet prefixes up to 26 columns, then fallback to numeric prefixes
       const prefix = index < 26 ? alphabet[index] : `col${index}`;
@@ -128,7 +135,7 @@ export const BoardProvider = ({ children }) => {
         cards: {}
       };
     });
-    
+
     const initialData = {
       title: boardTitle,
       created: Date.now(),
@@ -137,10 +144,11 @@ export const BoardProvider = ({ children }) => {
       settings: {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
-        multipleVotesAllowed: false // Default to not allowing multiple votes
+        multipleVotesAllowed: false, // Default to not allowing multiple votes
+        revealMode: false // Default to disabled (cards are visible)
       }
     };
-    
+
     set(newBoardRef, initialData)
       .then(() => {
         console.log('New board created with ID:', newBoardId);
@@ -150,7 +158,7 @@ export const BoardProvider = ({ children }) => {
       .catch((error) => {
         console.error('Error creating board:', error);
       });
-    
+
     return newBoardId;
   };
 
@@ -164,7 +172,7 @@ export const BoardProvider = ({ children }) => {
   const updateBoardTitle = (newTitle) => {
     // Optimistically update the local state first for better UI responsiveness
     setBoardTitle(newTitle);
-    
+
     if (boardId && user) {
       const titleRef = ref(database, `boards/${boardId}/title`);
       set(titleRef, newTitle)
@@ -176,7 +184,7 @@ export const BoardProvider = ({ children }) => {
         });
     }
   };
-  
+
   // Update board settings with merged values
   const updateBoardSettings = (newSettings) => {
     if (boardId && user) {
@@ -188,7 +196,7 @@ export const BoardProvider = ({ children }) => {
         multipleVotesAllowed: multipleVotesAllowed,
         ...newSettings
       };
-      
+
       set(settingsRef, updatedSettings)
         .then(() => {
           console.log('Board settings updated:', updatedSettings);
@@ -201,6 +209,11 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.multipleVotesAllowed !== undefined) {
             setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+          }
+          if (newSettings.revealMode !== undefined) {
+            setRevealMode(newSettings.revealMode);
+            // Reset cards revealed when reveal mode setting changes
+            setCardsRevealed(false);
           }
         })
         .catch((error) => {
@@ -217,34 +230,49 @@ export const BoardProvider = ({ children }) => {
       if (newSettings.multipleVotesAllowed !== undefined) {
         setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
       }
+      if (newSettings.revealMode !== undefined) {
+        setRevealMode(newSettings.revealMode);
+        // Reset cards revealed when reveal mode setting changes
+        setCardsRevealed(false);
+      }
     }
   };
-  
+
   // Update voting enabled setting
   const updateVotingEnabled = (enabled) => {
     updateBoardSettings({ votingEnabled: enabled });
   };
-  
+
   // Update downvoting enabled setting
   const updateDownvotingEnabled = (enabled) => {
     updateBoardSettings({ downvotingEnabled: enabled });
   };
-  
+
   // Update multiple votes allowed setting
   const updateMultipleVotesAllowed = (allowed) => {
     updateBoardSettings({ multipleVotesAllowed: allowed });
   };
 
+  // Update reveal mode setting
+  const updateRevealMode = (enabled) => {
+    updateBoardSettings({ revealMode: enabled });
+  };
+
+  // Reveal all cards (local state change only)
+  const revealAllCards = () => {
+    setCardsRevealed(true);
+  };
+
   // Reset all votes in the board
   const resetAllVotes = () => {
     if (!boardId || !user) return false;
-    
+
     // Confirm before proceeding
     const confirmMessage = 'Are you sure you want to reset all votes to zero? This cannot be undone.';
     if (!window.confirm(confirmMessage)) {
       return false;
     }
-    
+
     // Loop through all columns and cards
     Object.entries(columns).forEach(([columnId, column]) => {
       if (column.cards) {
@@ -259,25 +287,25 @@ export const BoardProvider = ({ children }) => {
         });
       }
     });
-    
+
     return true;
   };
 
   // Move a card between columns
   const moveCard = (cardId, sourceColumnId, targetColumnId) => {
     if (!boardId || !user || sourceColumnId === targetColumnId) return;
-    
+
     const sourceCardRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}`);
     const targetCardRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
-    
+
     // Get the current card data
     const cardData = columns[sourceColumnId]?.cards?.[cardId];
-    
+
     if (!cardData) {
       console.error('Card not found');
       return;
     }
-    
+
     // Add the card to the target column
     set(targetCardRef, cardData)
       .then(() => {
@@ -333,6 +361,12 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
+    revealMode,
+    setRevealMode,
+    updateRevealMode,
+    cardsRevealed,
+    setCardsRevealed,
+    revealAllCards,
     updateBoardSettings,
     boardRef,
     createNewBoard,

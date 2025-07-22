@@ -9,13 +9,13 @@ import VotingControls from './VotingControls';
 import CardReactions from './CardReactions';
 
 // Card Editor component for editing mode
-const CardEditor = ({ 
-  editedContent, 
-  setEditedContent, 
-  handleKeyPress, 
-  saveCardChanges, 
-  toggleEditMode, 
-  deleteCard 
+const CardEditor = ({
+  editedContent,
+  setEditedContent,
+  handleKeyPress,
+  saveCardChanges,
+  toggleEditMode,
+  deleteCard
 }) => (
   <div className="card-edit" onClick={(e) => e.stopPropagation()}>
     <textarea
@@ -34,14 +34,16 @@ const CardEditor = ({
 );
 
 // Card Content component for display mode
-const CardContent = ({ 
-  cardData, 
-  formatContentWithEmojis, 
-  upvoteCard, 
+const CardContent = ({
+  cardData,
+  formatContentWithEmojis,
+  upvoteCard,
   downvoteCard,
   votingEnabled,
   downvotingEnabled,
-  userId
+  userId,
+  revealMode,
+  cardsRevealed
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -49,27 +51,51 @@ const CardContent = ({
   const userVotes = cardData.voters && userId ? cardData.voters[userId] || 0 : 0;
   const showDownvoteButton = downvotingEnabled || userVotes > 0;
 
+  // Generate obfuscated text that matches the length of the original content
+  const generateObfuscatedText = (text) => {
+    if (!text) return '';
+
+    // Replace each character with appropriate obfuscation
+    return text.split('').map(char => {
+      if (char === ' ') return ' ';
+      if (char === '\n') return '\n';
+      if (/[a-zA-Z]/.test(char)) return '█';
+      if (/[0-9]/.test(char)) return '█';
+      if (/[.,!?;:]/.test(char)) return char; // Keep some punctuation for readability
+      return '█';
+    }).join('');
+  };
+
+  // Determine what content to show
+  const shouldObfuscate = revealMode && !cardsRevealed;
+  const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
+  const showObfuscatedText = shouldObfuscate && !isCreator; // Don't obfuscate for the creator
+
+  const displayContent = showObfuscatedText ?
+    generateObfuscatedText(cardData.content) :
+    formatContentWithEmojis(cardData.content);
+
   return (
     <div className="card-header">
       {votingEnabled && (
-        <VotingControls 
-          votes={cardData.votes} 
-          onUpvote={upvoteCard} 
-          onDownvote={downvoteCard} 
+        <VotingControls
+          votes={cardData.votes}
+          onUpvote={upvoteCard}
+          onDownvote={downvoteCard}
           showDownvoteButton={showDownvoteButton}
         />
       )}
-      <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
-        {formatContentWithEmojis(cardData.content)}
+      <div className={`card-content ${!votingEnabled ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
+        {showObfuscatedText ? displayContent : formatContentWithEmojis(cardData.content)}
       </div>
     </div>
   );
 };
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, revealMode, cardsRevealed } = useBoardContext();
   const cardElementRef = useRef(null);
-  
+
   // Use the custom hook for card operations
   const {
     // State
@@ -79,31 +105,31 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     showComments,
     newComment,
     emojiPickerPosition,
-    
+
     // State setters
     setEditedContent,
     setShowEmojiPicker,
     setShowComments,
     setNewComment,
     setEmojiPickerPosition,
-    
+
     // Card operations
     toggleEditMode,
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-    
+
     // Voting operations
     upvoteCard,
     downvoteCard,
-    
+
     // Content formatting
     formatContentWithEmojis,
-    
+
     // Reaction operations
     hasUserReactedWithEmoji,
     addReaction,
-    
+
     // Comment operations
     addComment,
     editComment,
@@ -118,7 +144,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     showNotification,
     multipleVotesAllowed
   });
-  
+
   // Configure drag functionality
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
@@ -127,22 +153,22 @@ function Card({ cardId, cardData, columnId, showNotification }) {
       isDragging: monitor.isDragging()
     })
   }), [cardId, columnId, cardData]);
-  
+
   // Apply the drag ref to the card element
   drag(cardElementRef);
-  
+
   // Get comment count
   const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
-  
+
   return (
-    <div 
+    <div
       ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''}`} 
+      className={`card ${isDragging ? 'dragging' : ''}`}
       onClick={() => !isEditing && toggleEditMode()}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       {isEditing ? (
-        <CardEditor 
+        <CardEditor
           editedContent={editedContent}
           setEditedContent={setEditedContent}
           handleKeyPress={handleKeyPress}
@@ -152,7 +178,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         />
       ) : (
         <>
-          <CardContent 
+          <CardContent
             cardData={cardData}
             formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
@@ -160,8 +186,10 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             votingEnabled={votingEnabled}
             downvotingEnabled={downvotingEnabled}
             userId={user?.uid}
+            revealMode={revealMode}
+            cardsRevealed={cardsRevealed}
           />
-          
+
           <CardReactions
             reactions={cardData.reactions}
             userId={user?.uid}
@@ -175,7 +203,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
           />
-          
+
           {showComments && (
             <Comments
               comments={cardData.comments}

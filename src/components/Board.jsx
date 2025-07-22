@@ -46,19 +46,23 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ 
-  handleCreateNewBoard, 
-  sortByVotes, 
-  setSortByVotes, 
-  votingEnabled, 
-  updateVotingEnabled, 
-  downvotingEnabled, 
-  updateDownvotingEnabled, 
-  multipleVotesAllowed, 
-  updateMultipleVotesAllowed, 
-  sortDropdownOpen, 
-  setSortDropdownOpen, 
-  resetAllVotes, 
+const ActionButtons = ({
+  handleCreateNewBoard,
+  sortByVotes,
+  setSortByVotes,
+  votingEnabled,
+  updateVotingEnabled,
+  downvotingEnabled,
+  updateDownvotingEnabled,
+  multipleVotesAllowed,
+  updateMultipleVotesAllowed,
+  revealMode,
+  updateRevealMode,
+  cardsRevealed,
+  revealAllCards,
+  sortDropdownOpen,
+  setSortDropdownOpen,
+  resetAllVotes,
   showNotification,
   darkMode,
   updateDarkMode
@@ -81,6 +85,29 @@ const ActionButtons = ({
 
   return (
     <div className="action-buttons">
+      {/* Show reveal button if reveal mode is enabled and cards are not revealed */}
+      {revealMode && !cardsRevealed && (
+        <button
+          id="reveal-cards"
+          className="btn primary-btn reveal-button"
+          onClick={() => {
+            revealAllCards();
+            showNotification('All cards revealed!');
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: 'var(--accent)',
+            color: 'white',
+            fontWeight: '600',
+            animation: 'pulse 2s infinite'
+          }}
+        >
+          👁️ Reveal All Cards
+        </button>
+      )}
+
       <button
         id="create-board"
         className="btn"
@@ -185,6 +212,27 @@ const ActionButtons = ({
                   </div>
                 </div>
                 <div className="settings-divider"></div>
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Reveal Mode (for retrospectives)</h4>
+                  <div className="settings-boolean-option">
+                    <button
+                      className={`boolean-option ${revealMode ? 'selected' : ''}`}
+                      onClick={() => { updateRevealMode(true); }}
+                    >
+                      On
+                    </button>
+                    <button
+                      className={`boolean-option ${!revealMode ? 'selected' : ''}`}
+                      onClick={() => { updateRevealMode(false); }}
+                    >
+                      Off
+                    </button>
+                  </div>
+                  <p className="settings-hint" style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    When enabled, new cards appear with hidden text until revealed
+                  </p>
+                </div>
+                <div className="settings-divider"></div>
                 <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
                   <button
                     className="btn danger-btn"
@@ -276,6 +324,10 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    revealMode,
+    updateRevealMode,
+    cardsRevealed,
+    revealAllCards,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
@@ -320,7 +372,7 @@ function Board({ showNotification }) {
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
   };
-  
+
   // Handle board title blur (update Firebase)
   const handleBoardTitleBlur = () => {
     updateBoardTitle(boardTitle);
@@ -414,6 +466,10 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
+            revealMode={revealMode}
+            updateRevealMode={updateRevealMode}
+            cardsRevealed={cardsRevealed}
+            revealAllCards={revealAllCards}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
