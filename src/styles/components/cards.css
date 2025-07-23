@@ -91,6 +91,27 @@
     color: var(--text-color);
 }
 
+.vote-button.disabled,
+.vote-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.vote-button.disabled:hover,
+.vote-button:disabled:hover {
+    color: var(--text-muted);
+}
+
+.card.editing-disabled {
+    cursor: not-allowed !important;
+}
+
+.card.editing-disabled:hover {
+    background-color: var(--card-bg);
+    transform: none;
+}
+
 .vote-count {
     min-width: 1.5rem;
     text-align: center;

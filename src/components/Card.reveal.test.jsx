@@ -206,4 +206,180 @@ describe('Card Reveal Mode', () => {
         expect(cardContent.textContent).toContain('█');
         expect(cardContent).toHaveClass('obfuscated');
     });
+
+    test('disables voting when cards are obfuscated for non-creators', () => {
+        const cardDataFromOtherUser = {
+            ...mockCardData,
+            createdBy: 'other-user-456' // Different creator
+        };
+
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard({ cardData: cardDataFromOtherUser });
+
+        // Find voting buttons by their exact disabled titles
+        const voteButtons = screen.getAllByTitle('Voting disabled until cards are revealed');
+        expect(voteButtons).toHaveLength(2); // Should be upvote and downvote
+
+        const upvoteButton = voteButtons[0];
+        const downvoteButton = voteButtons[1];
+
+        expect(upvoteButton).toBeDisabled();
+        expect(downvoteButton).toBeDisabled();
+        expect(upvoteButton.title).toBe('Voting disabled until cards are revealed');
+        expect(downvoteButton.title).toBe('Voting disabled until cards are revealed');
+    });
+
+    test('disables reactions when cards are obfuscated for non-creators', () => {
+        const cardDataFromOtherUser = {
+            ...mockCardData,
+            createdBy: 'other-user-456', // Different creator
+            reactions: {
+                '😄': { count: 1, users: { 'other-user': true } }
+            }
+        };
+
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard({ cardData: cardDataFromOtherUser });
+
+        // Find add reaction button specifically by role and text
+        const addReactionButton = screen.getByRole('button', { name: '+' });
+        expect(addReactionButton).toBeDisabled();
+        expect(addReactionButton.title).toContain('Reactions disabled until cards are revealed');
+
+        // Existing reaction should be disabled
+        const emojiReaction = screen.getByTestId('emoji-reaction');
+        expect(emojiReaction).toHaveClass('disabled');
+    });
+
+    test('disables voting and reactions for ALL users (including creators) when cards not revealed', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' }, // Same as card creator
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard(); // Uses default mockCardData with createdBy: 'user123'
+
+        // Even for creators, voting buttons should be disabled when cards aren't revealed
+        const voteButtons = screen.getAllByTitle('Voting disabled until cards are revealed');
+        expect(voteButtons).toHaveLength(2);
+
+        const upvoteButton = voteButtons[0];
+        const downvoteButton = voteButtons[1];
+
+        expect(upvoteButton).toBeDisabled();
+        expect(downvoteButton).toBeDisabled();
+
+        // Add reaction button should also be disabled for creators
+        const addReactionButton = screen.getByRole('button', { name: '+' });
+        expect(addReactionButton).toBeDisabled();
+        expect(addReactionButton.title).toContain('Reactions disabled until cards are revealed');
+    });
+
+    test('enables voting and reactions when cards are revealed', () => {
+        const cardDataFromOtherUser = {
+            ...mockCardData,
+            createdBy: 'other-user-456', // Different creator
+            reactions: {
+                '😄': { count: 1, users: { 'other-user': true } }
+            }
+        };
+
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: true // Cards are revealed
+        });
+
+        renderCard({ cardData: cardDataFromOtherUser });
+
+        // Find voting buttons by their normal titles when enabled
+        const upvoteButton = screen.getByTitle('Upvote');
+        const downvoteButton = screen.getByTitle('Downvote');
+
+        expect(upvoteButton).not.toBeDisabled();
+        expect(downvoteButton).not.toBeDisabled();
+
+        // Add reaction button should be enabled when revealed
+        const addReactionButton = screen.getByRole('button', { name: '+' });
+        expect(addReactionButton).not.toBeDisabled();
+
+        // Existing reaction should NOT have disabled class
+        const emojiReaction = screen.getByTestId('emoji-reaction');
+        expect(emojiReaction).not.toHaveClass('disabled');
+    });
+
+    test('disables editing for non-creators when cards are obfuscated', () => {
+        const cardDataFromOtherUser = {
+            ...mockCardData,
+            createdBy: 'other-user-456' // Different creator
+        };
+
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' }, // Different from card creator
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard({ cardData: cardDataFromOtherUser });
+
+        // Find the card element by its test content
+        const cardContent = screen.getByTestId('card-content');
+        const cardElement = cardContent.closest('.card');
+
+        // Card should have editing-disabled class and not-allowed cursor
+        expect(cardElement).toHaveClass('editing-disabled');
+        expect(cardElement).toHaveStyle('cursor: not-allowed');
+    });
+
+    test('allows editing for creators when cards are obfuscated', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' }, // Same as card creator
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard(); // Uses default mockCardData with createdBy: 'user123'
+
+        // Find the card element
+        const cardElement = screen.getByText('Test card content for retro').closest('.card');
+
+        // Card should NOT have editing-disabled class and should have pointer cursor
+        expect(cardElement).not.toHaveClass('editing-disabled');
+        expect(cardElement).toHaveStyle('cursor: pointer');
+    });
 });

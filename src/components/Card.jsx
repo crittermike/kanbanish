@@ -68,6 +68,9 @@ const CardContent = ({
   const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
   const showObfuscatedText = shouldObfuscate && !isCreator; // Don't obfuscate for the creator
 
+  // Disable interactions for ALL users when reveal mode is active and cards haven't been revealed yet
+  const interactionsDisabled = shouldObfuscate; // This affects everyone, not just non-creators
+
   const displayContent = showObfuscatedText ?
     generateObfuscatedText(cardData.content) :
     formatContentWithEmojis(cardData.content);
@@ -77,9 +80,10 @@ const CardContent = ({
       {votingEnabled && (
         <VotingControls
           votes={cardData.votes}
-          onUpvote={upvoteCard}
-          onDownvote={downvoteCard}
+          onUpvote={interactionsDisabled ? () => { } : upvoteCard}
+          onDownvote={interactionsDisabled ? () => { } : downvoteCard}
           showDownvoteButton={showDownvoteButton}
+          disabled={interactionsDisabled}
         />
       )}
       <div className={`card-content ${!votingEnabled ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
@@ -157,12 +161,20 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   // Get comment count
   const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
 
+  // Determine if editing should be disabled for this user
+  const shouldObfuscate = revealMode && !cardsRevealed;
+  const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
+  const editingDisabled = shouldObfuscate && !isCreator;
+
   return (
     <div
       ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''}`}
-      onClick={() => !isEditing && toggleEditMode()}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''}`}
+      onClick={() => !isEditing && !editingDisabled && toggleEditMode()}
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+        cursor: editingDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer')
+      }}
     >
       {isEditing ? (
         <CardEditor
@@ -199,6 +211,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             toggleComments={toggleComments}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
+            disabled={revealMode && !cardsRevealed}
           />
 
           {showComments && (
