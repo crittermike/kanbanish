@@ -112,6 +112,15 @@
     transform: none;
 }
 
+.card.drag-disabled {
+    cursor: not-allowed !important;
+}
+
+.card.drag-disabled:hover {
+    background-color: var(--card-bg);
+    transform: none;
+}
+
 .vote-count {
     min-width: 1.5rem;
     text-align: center;

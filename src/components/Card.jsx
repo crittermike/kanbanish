@@ -146,18 +146,6 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     multipleVotesAllowed
   });
 
-  // Configure drag functionality
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'CARD',
-    item: { cardId, columnId, cardData },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    })
-  }), [cardId, columnId, cardData]);
-
-  // Apply the drag ref to the card element
-  drag(cardElementRef);
-
   // Get comment count
   const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
 
@@ -166,14 +154,32 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
   const editingDisabled = shouldObfuscate && !isCreator;
 
+  // Disable drag for ALL users when cards are obfuscated (before reveal)
+  const dragDisabled = shouldObfuscate;
+
+  // Configure drag functionality - disable when obfuscated
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: 'CARD',
+    item: dragDisabled ? null : { cardId, columnId, cardData },
+    canDrag: !dragDisabled,
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    })
+  }), [cardId, columnId, cardData, dragDisabled]);
+
+  // Apply the drag ref to the card element only if drag is not disabled
+  if (!dragDisabled) {
+    drag(cardElementRef);
+  }
+
   return (
     <div
       ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''}`}
+      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled ? 'drag-disabled' : ''}`}
       onClick={() => !isEditing && !editingDisabled && toggleEditMode()}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        cursor: editingDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer')
+        cursor: dragDisabled ? 'not-allowed' : (editingDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer'))
       }}
     >
       {isEditing ? (

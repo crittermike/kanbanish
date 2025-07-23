@@ -378,8 +378,77 @@ describe('Card Reveal Mode', () => {
         // Find the card element
         const cardElement = screen.getByText('Test card content for retro').closest('.card');
 
-        // Card should NOT have editing-disabled class and should have pointer cursor
+        // Card should NOT have editing-disabled class (creator can edit)
         expect(cardElement).not.toHaveClass('editing-disabled');
+
+        // But card SHOULD have drag-disabled class (dragging disabled for everyone)
+        expect(cardElement).toHaveClass('drag-disabled');
+        expect(cardElement).toHaveStyle('cursor: not-allowed'); // Because dragging is disabled
+    });
+
+    test('disables dragging for ALL users when cards are obfuscated', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' }, // Same as card creator
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false
+        });
+
+        renderCard(); // Uses default mockCardData with createdBy: 'user123'
+
+        // Find the card element
+        const cardContent = screen.getByTestId('card-content');
+        const cardElement = cardContent.closest('.card');
+
+        // Card should have drag-disabled class even for creators
+        expect(cardElement).toHaveClass('drag-disabled');
+        expect(cardElement).toHaveStyle('cursor: not-allowed');
+    });
+
+    test('enables dragging when cards are revealed', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: true // Cards are revealed
+        });
+
+        renderCard();
+
+        // Find the card element
+        const cardContent = screen.getByTestId('card-content');
+        const cardElement = cardContent.closest('.card');
+
+        // Card should NOT have drag-disabled class when revealed
+        expect(cardElement).not.toHaveClass('drag-disabled');
+        expect(cardElement).toHaveStyle('cursor: pointer');
+    });
+
+    test('enables dragging when reveal mode is disabled', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: false, // Reveal mode is off
+            cardsRevealed: false
+        });
+
+        renderCard();
+
+        // Find the card element
+        const cardContent = screen.getByTestId('card-content');
+        const cardElement = cardContent.closest('.card');
+
+        // Card should NOT have drag-disabled class when reveal mode is off
+        expect(cardElement).not.toHaveClass('drag-disabled');
         expect(cardElement).toHaveStyle('cursor: pointer');
     });
 });
