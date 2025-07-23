@@ -195,6 +195,7 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: votingEnabled,
         downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: multipleVotesAllowed,
+        revealMode: revealMode,
         ...newSettings
       };
 

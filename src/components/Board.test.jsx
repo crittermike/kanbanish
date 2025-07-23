@@ -63,6 +63,12 @@ describe('Board Component', () => {
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
+    revealMode: false,
+    setRevealMode: vi.fn(),
+    updateRevealMode: vi.fn(),
+    cardsRevealed: true,
+    setCardsRevealed: vi.fn(),
+    revealAllCards: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
@@ -327,6 +333,44 @@ describe('Board Component', () => {
 
     // Check that updateMultipleVotesAllowed was called with true
     expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
+  });
+
+  test('does not reset reveal mode when changing other settings', () => {
+    // Start with reveal mode enabled
+    const contextWithRevealMode = {
+      ...mockContextValue,
+      revealMode: true,
+      cardsRevealed: false
+    };
+
+    useBoardContext.mockReturnValue(contextWithRevealMode);
+
+    // For this test, let's simulate having a board ID in the URL 
+    // so the template modal doesn't open automatically
+    mockURLSearchParams.mockImplementation(() => ({
+      get: (param) => param === 'board' ? 'existing-board-id' : null
+    }));
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Open the settings dropdown
+    const settingsButton = screen.getByText('Settings');
+    fireEvent.click(settingsButton);
+
+    // Change the multiple votes setting
+    const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
+    const multipleVotesSection = allowMultipleVotesSection.closest('.settings-section');
+    const yesOption = within(multipleVotesSection).getByText('Yes');
+    fireEvent.click(yesOption);
+
+    // Verify that only updateMultipleVotesAllowed was called, not updateRevealMode
+    expect(contextWithRevealMode.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
+    expect(contextWithRevealMode.updateRevealMode).not.toHaveBeenCalled();
+    expect(contextWithRevealMode.setCardsRevealed).not.toHaveBeenCalled();
   });
 
   test('updates document title when board title changes', () => {
