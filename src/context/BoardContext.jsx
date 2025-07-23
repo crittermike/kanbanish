@@ -97,9 +97,10 @@ export const BoardProvider = ({ children }) => {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
             }
             if (boardData.settings.revealMode !== undefined) {
-              setRevealMode(boardData.settings.revealMode);
-              // Reset cards revealed when reveal mode setting changes
-              setCardsRevealed(false);
+              const newRevealMode = boardData.settings.revealMode;
+              setRevealMode(newRevealMode);
+              // Set cards revealed based on reveal mode: false when enabled, true when disabled
+              setCardsRevealed(!newRevealMode);
             }
           }
         }
@@ -212,8 +213,8 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.revealMode !== undefined) {
             setRevealMode(newSettings.revealMode);
-            // Reset cards revealed when reveal mode setting changes
-            setCardsRevealed(false);
+            // Set cards revealed based on reveal mode: false when enabled, true when disabled
+            setCardsRevealed(!newSettings.revealMode);
           }
         })
         .catch((error) => {
@@ -232,8 +233,8 @@ export const BoardProvider = ({ children }) => {
       }
       if (newSettings.revealMode !== undefined) {
         setRevealMode(newSettings.revealMode);
-        // Reset cards revealed when reveal mode setting changes
-        setCardsRevealed(false);
+        // Set cards revealed based on reveal mode: false when enabled, true when disabled
+        setCardsRevealed(!newSettings.revealMode);
       }
     }
   };
