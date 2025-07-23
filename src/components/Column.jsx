@@ -9,13 +9,13 @@ import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled } = useBoardContext();
+  const { boardId, moveCard, votingEnabled, user } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
   const [isAddingCard, setIsAddingCard] = useState(false);
   const columnRef = useRef(null);
-  
+
   // Update local title when columnData changes (from Firebase)
   useEffect(() => {
     if (columnData && columnData.title !== title && !isEditing) {
@@ -51,7 +51,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
       // Create a direct reference to the title path
       const titlePath = `boards/${boardId}/columns/${columnId}/title`;
       const titleRef = ref(database, titlePath);
-      
+
       set(titleRef, title)
         .then(() => {
           console.log('Column title updated');
@@ -99,7 +99,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Add a new card inline
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
-      addCard(boardId, columnId, newCardContent)
+      addCard(boardId, columnId, newCardContent, user)
         .then(() => {
           showNotification('Card added');
           hideAddCardForm();
@@ -131,7 +131,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Sort cards by votes or creation time
   const sortedCards = () => {
     if (!columnData.cards) return [];
-    
+
     const cardsArray = Object.entries(columnData.cards).map(([id, data]) => ({
       id,
       ...data
@@ -168,7 +168,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </button>
         </div>
       </div>
-      <div 
+      <div
         ref={columnRef}
         className={`column-content ${isOver ? 'drag-over' : ''}`}
       >
@@ -178,17 +178,17 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             <span>Add a card to get started</span>
           </div>
         )}
-        
+
         {sortedCards().map((card) => (
-          <Card 
-            key={card.id} 
-            cardId={card.id} 
-            cardData={card} 
+          <Card
+            key={card.id}
+            cardId={card.id}
+            cardData={card}
             columnId={columnId}
             showNotification={showNotification}
           />
         ))}
-        
+
         {isAddingCard ? (
           <div className="inline-card-form">
             <textarea

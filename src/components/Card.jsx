@@ -9,13 +9,13 @@ import VotingControls from './VotingControls';
 import CardReactions from './CardReactions';
 
 // Card Editor component for editing mode
-const CardEditor = ({ 
-  editedContent, 
-  setEditedContent, 
-  handleKeyPress, 
-  saveCardChanges, 
-  toggleEditMode, 
-  deleteCard 
+const CardEditor = ({
+  editedContent,
+  setEditedContent,
+  handleKeyPress,
+  saveCardChanges,
+  toggleEditMode,
+  deleteCard
 }) => (
   <div className="card-edit" onClick={(e) => e.stopPropagation()}>
     <textarea
@@ -34,14 +34,16 @@ const CardEditor = ({
 );
 
 // Card Content component for display mode
-const CardContent = ({ 
-  cardData, 
-  formatContentWithEmojis, 
-  upvoteCard, 
+const CardContent = ({
+  cardData,
+  formatContentWithEmojis,
+  upvoteCard,
   downvoteCard,
   votingEnabled,
   downvotingEnabled,
-  userId
+  userId,
+  revealMode,
+  cardsRevealed
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -49,27 +51,52 @@ const CardContent = ({
   const userVotes = cardData.voters && userId ? cardData.voters[userId] || 0 : 0;
   const showDownvoteButton = downvotingEnabled || userVotes > 0;
 
+  // Generate obfuscated text that matches the length of the original content
+  const generateObfuscatedText = (text) => {
+    if (!text) return '';
+
+    // Replace each character with appropriate obfuscation
+    return text.split('').map(char => {
+      if (char === ' ') return ' ';
+      if (char === '\n') return '\n';
+      return '█';
+    }).join('');
+  };
+
+  // Determine what content to show
+  const shouldObfuscate = revealMode && !cardsRevealed;
+  const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
+  const showObfuscatedText = shouldObfuscate && !isCreator; // Don't obfuscate for the creator
+
+  // Disable interactions for ALL users when reveal mode is active and cards haven't been revealed yet
+  const interactionsDisabled = shouldObfuscate; // This affects everyone, not just non-creators
+
+  const displayContent = showObfuscatedText ?
+    generateObfuscatedText(cardData.content) :
+    formatContentWithEmojis(cardData.content);
+
   return (
     <div className="card-header">
       {votingEnabled && (
-        <VotingControls 
-          votes={cardData.votes} 
-          onUpvote={upvoteCard} 
-          onDownvote={downvoteCard} 
+        <VotingControls
+          votes={cardData.votes}
+          onUpvote={interactionsDisabled ? () => { } : upvoteCard}
+          onDownvote={interactionsDisabled ? () => { } : downvoteCard}
           showDownvoteButton={showDownvoteButton}
+          disabled={interactionsDisabled}
         />
       )}
-      <div className={`card-content ${!votingEnabled ? 'full-width' : ''}`} data-testid="card-content">
-        {formatContentWithEmojis(cardData.content)}
+      <div className={`card-content ${!votingEnabled ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
+        {displayContent}
       </div>
     </div>
   );
 };
 
 function Card({ cardId, cardData, columnId, showNotification }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, revealMode, cardsRevealed } = useBoardContext();
   const cardElementRef = useRef(null);
-  
+
   // Use the custom hook for card operations
   const {
     // State
@@ -79,31 +106,31 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     showComments,
     newComment,
     emojiPickerPosition,
-    
+
     // State setters
     setEditedContent,
     setShowEmojiPicker,
     setShowComments,
     setNewComment,
     setEmojiPickerPosition,
-    
+
     // Card operations
     toggleEditMode,
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-    
+
     // Voting operations
     upvoteCard,
     downvoteCard,
-    
+
     // Content formatting
     formatContentWithEmojis,
-    
+
     // Reaction operations
     hasUserReactedWithEmoji,
     addReaction,
-    
+
     // Comment operations
     addComment,
     editComment,
@@ -118,31 +145,45 @@ function Card({ cardId, cardData, columnId, showNotification }) {
     showNotification,
     multipleVotesAllowed
   });
-  
-  // Configure drag functionality
+
+  // Get comment count
+  const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
+
+  // Determine if editing should be disabled for this user
+  const shouldObfuscate = revealMode && !cardsRevealed;
+  const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
+  const editingDisabled = shouldObfuscate && !isCreator;
+
+  // Disable drag for ALL users when cards are obfuscated (before reveal)
+  const dragDisabled = shouldObfuscate;
+
+  // Configure drag functionality - disable when obfuscated
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
-    item: { cardId, columnId, cardData },
+    item: dragDisabled ? null : { cardId, columnId, cardData },
+    canDrag: !dragDisabled,
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
-  }), [cardId, columnId, cardData]);
-  
-  // Apply the drag ref to the card element
-  drag(cardElementRef);
-  
-  // Get comment count
-  const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
-  
+  }), [cardId, columnId, cardData, dragDisabled]);
+
+  // Apply the drag ref to the card element only if drag is not disabled
+  if (!dragDisabled) {
+    drag(cardElementRef);
+  }
+
   return (
-    <div 
+    <div
       ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''}`} 
-      onClick={() => !isEditing && toggleEditMode()}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled ? 'drag-disabled' : ''}`}
+      onClick={() => !isEditing && !editingDisabled && toggleEditMode()}
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+        cursor: dragDisabled ? 'not-allowed' : (editingDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer'))
+      }}
     >
       {isEditing ? (
-        <CardEditor 
+        <CardEditor
           editedContent={editedContent}
           setEditedContent={setEditedContent}
           handleKeyPress={handleKeyPress}
@@ -152,7 +193,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
         />
       ) : (
         <>
-          <CardContent 
+          <CardContent
             cardData={cardData}
             formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
@@ -160,8 +201,10 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             votingEnabled={votingEnabled}
             downvotingEnabled={downvotingEnabled}
             userId={user?.uid}
+            revealMode={revealMode}
+            cardsRevealed={cardsRevealed}
           />
-          
+
           <CardReactions
             reactions={cardData.reactions}
             userId={user?.uid}
@@ -174,8 +217,9 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             toggleComments={toggleComments}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
+            disabled={revealMode && !cardsRevealed}
           />
-          
+
           {showComments && (
             <Comments
               comments={cardData.comments}

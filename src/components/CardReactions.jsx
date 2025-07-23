@@ -3,8 +3,8 @@ import EmojiPicker from './EmojiPicker';
 import { MessageSquare } from 'react-feather';
 
 const CardReactions = React.memo(({
-  reactions, 
-  userId, 
+  reactions,
+  userId,
   showEmojiPicker,
   setShowEmojiPicker,
   setShowComments,
@@ -13,7 +13,8 @@ const CardReactions = React.memo(({
   commentCount,
   toggleComments,
   emojiPickerPosition,
-  setEmojiPickerPosition
+  setEmojiPickerPosition,
+  disabled = false
 }) => {
   const emojiButtonRef = useRef(null);
 
@@ -22,16 +23,16 @@ const CardReactions = React.memo(({
       <div className="reactions-left">
         {reactions && Object.entries(reactions).map(([emoji, reactionData]) => {
           if (reactionData.count <= 0) return null;
-          
+
           const hasUserReacted = reactionData.users && reactionData.users[userId];
-          
+
           return (
-            <div 
-              className={`emoji-reaction ${hasUserReacted ? 'active' : ''}`} 
-              key={emoji} 
+            <div
+              className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+              key={emoji}
               data-testid="emoji-reaction"
-              onClick={(e) => addReaction(e, emoji)}
-              title={hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction"}
+              onClick={disabled ? undefined : (e) => addReaction(e, emoji)}
+              title={disabled ? "Reactions disabled until cards are revealed" : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>
@@ -47,8 +48,8 @@ const CardReactions = React.memo(({
           />
         )}
         <button
-          className="add-reaction-button"
-          onClick={(e) => {
+          className={`add-reaction-button ${disabled ? 'disabled' : ''}`}
+          onClick={disabled ? undefined : (e) => {
             e.stopPropagation();
             if (emojiButtonRef.current) {
               const buttonRect = emojiButtonRef.current.getBoundingClientRect();
@@ -60,8 +61,9 @@ const CardReactions = React.memo(({
             setShowEmojiPicker(!showEmojiPicker);
             setShowComments(false);
           }}
-          title="Add reaction"
+          title={disabled ? "Reactions disabled until cards are revealed" : "Add reaction"}
           ref={emojiButtonRef}
+          disabled={disabled}
         >+</button>
       </div>
       <div className="reactions-right">
