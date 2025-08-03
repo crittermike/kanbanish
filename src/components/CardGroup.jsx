@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
-import { ChevronDown, ChevronRight, Scissors, Edit2 } from 'react-feather';
+import { ChevronDown, ChevronRight, Layers, Edit2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import Card from './Card';
 import VotingControls from './VotingControls';
@@ -184,7 +184,7 @@ function CardGroup({
               }}
               title="Ungroup cards"
             >
-              <Scissors size={14} />
+              <Layers size={14} />
             </button>
           </div>
         </div>

@@ -533,7 +533,9 @@ export const BoardProvider = ({ children }) => {
     Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]).catch((error) => {
+    ]).then(() => {
+      showNotification('Upvoted group');
+    }).catch((error) => {
       console.error('Error updating group votes:', error);
     });
   };
@@ -566,7 +568,9 @@ export const BoardProvider = ({ children }) => {
     Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]).catch((error) => {
+    ]).then(() => {
+      showNotification('Downvoted group');
+    }).catch((error) => {
       console.error('Error updating group votes:', error);
     });
   };
