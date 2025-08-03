@@ -363,10 +363,6 @@
     font-size: var(--font-size-xs);
 }
 
-.comment-content {
-    cursor: pointer;
-}
-
 /* Inline Card Creation and Editing */
 .inline-card-form {
     background: var(--card-bg);
