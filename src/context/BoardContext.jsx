@@ -29,6 +29,7 @@ export const BoardProvider = ({ children }) => {
   const [cardsRevealed, setCardsRevealed] = useState(false); // Track if cards have been revealed
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
 
   // Firebase authentication
   useEffect(() => {
@@ -108,6 +109,56 @@ export const BoardProvider = ({ children }) => {
 
       return () => {
         off(newBoardRef);
+      };
+    }
+  }, [boardId, user]);
+
+  // Track user presence on the board
+  useEffect(() => {
+    if (boardId && user) {
+      const presenceRef = ref(database, `boards/${boardId}/presence/${user.uid}`);
+      const presenceCountRef = ref(database, `boards/${boardId}/presence`);
+      
+      // Set this user as active
+      set(presenceRef, {
+        lastSeen: Date.now(),
+        uid: user.uid
+      });
+
+      // Listen to all active users
+      const handlePresenceChange = (snapshot) => {
+        if (snapshot.exists()) {
+          const presenceData = snapshot.val();
+          const now = Date.now();
+          const activeThreshold = 30000; // Consider users active if seen within last 30 seconds
+          
+          // Count users who were active recently
+          const activeUserCount = Object.values(presenceData).filter(userData => 
+            userData.lastSeen && (now - userData.lastSeen < activeThreshold)
+          ).length;
+          
+          setActiveUsers(activeUserCount);
+        } else {
+          setActiveUsers(0);
+        }
+      };
+
+      onValue(presenceCountRef, handlePresenceChange);
+
+      // Update presence every 10 seconds while user is active
+      const presenceInterval = setInterval(() => {
+        set(presenceRef, {
+          lastSeen: Date.now(),
+          uid: user.uid
+        });
+      }, 10000);
+
+      // Clean up when user leaves
+      return () => {
+        off(presenceCountRef, handlePresenceChange);
+        clearInterval(presenceInterval);
+        // Remove user from presence when they leave
+        remove(presenceRef);
       };
     }
   }, [boardId, user]);
@@ -627,6 +678,7 @@ export const BoardProvider = ({ children }) => {
     resetAllVotes,
     darkMode,
     updateDarkMode,
+    activeUsers,
     // Card grouping functions
     createCardGroup,
     ungroupCards,

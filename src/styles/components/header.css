@@ -308,3 +308,44 @@ h1 {
         min-height: 48px;
     }
 }
+
+/* User Counter Styles */
+.user-counter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+
+.user-counter:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+}
+
+.user-count {
+    color: var(--text-primary);
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* User counter icon color */
+.user-counter svg {
+    color: var(--text-secondary);
+}
+
+/* Responsive adjustments for user counter */
+@media (max-width: 767px) {
+    .user-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+}

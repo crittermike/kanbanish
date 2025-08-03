@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBoardContext } from '../context/BoardContext';
 import Column from './Column';
+import UserCounter from './UserCounter';
 import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
 import ExportBoardModal from './modals/ExportBoardModal';
@@ -21,6 +22,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       className="header-input"
     />
     <div className="action-buttons">
+      <UserCounter />
       <button
         id="copy-share-url"
         className="btn secondary-btn"
