@@ -66,19 +66,21 @@ const CardReactions = React.memo(({
           disabled={disabled}
         >+</button>
       </div>
-      <div className="reactions-right">
-        <button
-          className="comments-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleComments();
-          }}
-          title="Toggle comments"
-        >
-          <MessageSquare size={16} />
-          <span>{commentCount || 0}</span>
-        </button>
-      </div>
+      {!disabled && (
+        <div className="reactions-right">
+          <button
+            className="comments-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleComments();
+            }}
+            title="Toggle comments"
+          >
+            <MessageSquare size={16} />
+            <span>{commentCount || 0}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 });

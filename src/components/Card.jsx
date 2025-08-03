@@ -147,7 +147,10 @@ function Card({
     
     // Authorship checking
     isCardAuthor,
-    isCommentAuthor
+    isCommentAuthor,
+    
+    // Reveal mode checking
+    isInteractionDisabled
   } = useCardOperations({
     boardId,
     columnId,
@@ -155,7 +158,9 @@ function Card({
     cardData,
     user,
     showNotification,
-    multipleVotesAllowed
+    multipleVotesAllowed,
+    revealMode,
+    cardsRevealed
   });
 
   // Get comment count
@@ -258,7 +263,7 @@ function Card({
             toggleComments={toggleComments}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
-            disabled={revealMode && !cardsRevealed}
+            disabled={isInteractionDisabled()}
           />
 
           {showComments && (

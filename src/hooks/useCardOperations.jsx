@@ -9,7 +9,9 @@ export function useCardOperations({
   cardData, 
   user, 
   showNotification,
-  multipleVotesAllowed = false // pass this from the Card component
+  multipleVotesAllowed = false, // pass this from the Card component
+  revealMode = false,
+  cardsRevealed = false
 }) {
   // State
   const [isEditing, setIsEditing] = useState(false);
@@ -31,6 +33,11 @@ export function useCardOperations({
     if (!comment.createdBy) return true;
     return comment.createdBy && user?.uid && comment.createdBy === user.uid;
   }, [user?.uid]);
+
+  // Helper to check if interactions should be disabled due to reveal mode
+  const isInteractionDisabled = useCallback(() => {
+    return revealMode && !cardsRevealed;
+  }, [revealMode, cardsRevealed]);
 
   // Memoized database reference
   const cardRef = useMemo(() => 
@@ -223,6 +230,12 @@ export function useCardOperations({
 
     if (!boardId || !user) return;
     
+    // Check if interactions are disabled due to reveal mode
+    if (isInteractionDisabled()) {
+      showNotification('Reactions are disabled until cards are revealed');
+      return;
+    }
+    
     const { userRef, countRef } = getReactionRefs(emoji);
     const hasUserReacted = hasUserReactedWithEmoji(emoji);
     
@@ -241,7 +254,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error managing reaction:', error);
     }
-  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification]);
+  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled]);
 
   // Comment operations
   const addComment = useCallback(async () => {
@@ -376,6 +389,9 @@ export function useCardOperations({
     
     // Authorship checking
     isCardAuthor,
-    isCommentAuthor
+    isCommentAuthor,
+    
+    // Reveal mode checking
+    isInteractionDisabled
   };
 }
