@@ -452,11 +452,27 @@ export const BoardProvider = ({ children }) => {
       const sourceCardRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}`);
       const targetCardRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
 
-      // Create new card data without groupId (cards move to target column ungrouped)
+      // Create new card data, setting groupId if moving into a group
       const { groupId, ...cardDataWithoutGroup } = cardData;
+      const newCardData = targetGroupId 
+        ? { ...cardDataWithoutGroup, groupId: targetGroupId }
+        : cardDataWithoutGroup;
       
       promises.push(remove(sourceCardRef));
-      promises.push(set(targetCardRef, cardDataWithoutGroup));
+      promises.push(set(targetCardRef, newCardData));
+
+      // Add card to target group if specified
+      if (targetGroupId) {
+        const targetGroup = columns[targetColumnId]?.groups?.[targetGroupId];
+        if (targetGroup) {
+          const currentCardIds = targetGroup.cardIds || [];
+          if (!currentCardIds.includes(cardId)) {
+            const newCardIds = [...currentCardIds, cardId];
+            const groupCardIdsRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/groups/${targetGroupId}/cardIds`);
+            promises.push(set(groupCardIdsRef, newCardIds));
+          }
+        }
+      }
 
       // Remove card from source group if it was in one
       if (cardData.groupId) {
@@ -470,12 +486,13 @@ export const BoardProvider = ({ children }) => {
     }
 
     // Execute all operations atomically
-    Promise.all(promises)
+    return Promise.all(promises)
       .then(() => {
         console.log(`Card ${cardId} moved from ${sourceColumnId} to ${targetColumnId}${targetGroupId ? ` (group ${targetGroupId})` : ''}`);
       })
       .catch((error) => {
         console.error('Error moving card:', error);
+        throw error; // Re-throw so caller can handle it
       });
   };
 

@@ -263,4 +263,42 @@ describe('CardGroup Component', () => {
     // Verify success notification
     expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
   });
+
+  test('handles moving card from different column to group', async () => {
+    const { useDrop } = await import('react-dnd');
+    
+    // Mock a card being dragged from a different column
+    const draggedCard = {
+      cardId: 'card4',
+      columnId: 'column2', // Different column
+      groupId: null,
+      cardData: { content: 'Card from another column' }
+    };
+
+    // Mock useDrop to simulate dropping a card from another column
+    useDrop.mockReturnValueOnce([
+      { isOver: false },
+      vi.fn().mockImplementation((ref) => {
+        // Simulate the drop event
+        const dropHandlers = useDrop.mock.calls[useDrop.mock.calls.length - 1][0];
+        dropHandlers().drop(draggedCard);
+        return ref;
+      })
+    ]);
+
+    render(<CardGroup {...mockProps} />);
+    
+    // Verify that moveCard was called correctly to move from column2 to this group in column1
+    await waitFor(() => {
+      expect(mockBoardContext.moveCard).toHaveBeenCalledWith(
+        'card4', // cardId
+        'column2', // sourceColumnId (different column)
+        'column1', // targetColumnId (this group's column) 
+        'group123' // targetGroupId (this group)
+      );
+    });
+    
+    // Verify success notification
+    expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
+  });
 });

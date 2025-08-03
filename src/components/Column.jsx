@@ -10,7 +10,7 @@ import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled, user, createCardGroup, revealMode, cardsRevealed } = useBoardContext();
+  const { boardId, moveCard, votingEnabled, user, createCardGroup, revealMode, cardsRevealed, columns } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -201,7 +201,26 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     if (!revealMode || !cardsRevealed) return; // Only allow grouping after cards are revealed
     if (draggedCardId === targetCardId) return; // Can't group with itself
     
-    setDraggedCardForGrouping({ draggedCardId, targetCardId });
+    // Find which column the dragged card belongs to
+    let draggedCardColumn = null;
+    Object.keys(columns || {}).forEach(colId => {
+      if (columns[colId].cards && columns[colId].cards[draggedCardId]) {
+        draggedCardColumn = colId;
+      }
+    });
+    
+    if (!draggedCardColumn) {
+      showNotification('Error: Could not find dragged card');
+      return;
+    }
+    
+    // Store both the card IDs and column info for group creation
+    setDraggedCardForGrouping({ 
+      draggedCardId, 
+      targetCardId, 
+      draggedCardColumn,
+      targetCardColumn: columnId
+    });
     setShowGroupModal(true);
     setNewGroupName('');
   };
@@ -214,15 +233,29 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     }
 
     if (draggedCardForGrouping) {
-      // Create group from dragged card onto target card
-      const { draggedCardId, targetCardId } = draggedCardForGrouping;
+      const { draggedCardId, targetCardId, draggedCardColumn, targetCardColumn } = draggedCardForGrouping;
       
       // Get the target card's created timestamp to maintain sort position
       const targetCard = columnData.cards?.[targetCardId];
       const targetCreatedTime = targetCard?.created;
       
-      createCardGroup(columnId, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
-      showNotification(`Group "${newGroupName.trim()}" created`);
+      if (draggedCardColumn === targetCardColumn) {
+        // Same column - create group directly
+        createCardGroup(columnId, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
+        showNotification(`Group "${newGroupName.trim()}" created`);
+      } else {
+        // Cross-column - move the dragged card first, then create group
+        moveCard(draggedCardId, draggedCardColumn, targetCardColumn, null)
+          .then(() => {
+            // Now that the card has been moved, create the group
+            createCardGroup(targetCardColumn, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
+            showNotification(`Card moved and group "${newGroupName.trim()}" created`);
+          })
+          .catch((error) => {
+            console.error('Error moving card for group creation:', error);
+            showNotification('Error creating group across columns');
+          });
+      }
     }
 
     setShowGroupModal(false);

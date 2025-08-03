@@ -35,11 +35,8 @@ function CardGroup({
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
     drop: (item) => {
-      // Only allow dropping if the card is not already in this group
-      // AND the card is not coming from this same group
-      if (item.columnId === columnId && 
-          !groupData.cardIds?.includes(item.cardId) &&
-          item.groupId !== groupId) {
+      // Allow dropping cards from any column, as long as the card is not already in this group
+      if (!groupData.cardIds?.includes(item.cardId) && item.groupId !== groupId) {
         moveCard(item.cardId, item.columnId, columnId, groupId);
         showNotification('Card added to group');
         return { handled: true }; // Signal that this drop was handled
