@@ -85,26 +85,31 @@ const ActionButtons = ({
 
   return (
     <div className="action-buttons">
-      {/* Show reveal button if reveal mode is enabled and cards are not revealed */}
-      {revealMode && !cardsRevealed && (
+      {/* Show reveal button or indicator when reveal mode is enabled */}
+      {revealMode && (
         <button
           id="reveal-cards"
           className="btn primary-btn reveal-button"
           onClick={() => {
-            revealAllCards();
-            showNotification('All cards revealed!');
+            if (!cardsRevealed) {
+              revealAllCards();
+              showNotification('All cards revealed!');
+            }
           }}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            backgroundColor: 'var(--accent)',
+            backgroundColor: cardsRevealed ? 'var(--success)' : 'var(--accent)',
             color: 'white',
             fontWeight: '600',
-            animation: 'pulse 2s infinite'
+            animation: cardsRevealed ? 'none' : 'pulse 2s infinite',
+            cursor: cardsRevealed ? 'default' : 'pointer',
+            opacity: cardsRevealed ? '0.9' : '1'
           }}
+          disabled={cardsRevealed}
         >
-          👁️ Reveal All Cards
+          {cardsRevealed ? '✅ Cards Revealed' : '👁️ Reveal All Cards'}
         </button>
       )}
 
@@ -265,7 +270,7 @@ const ActionButtons = ({
 };
 
 // UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn, cardsRevealed }) => {
   // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
     // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
@@ -289,13 +294,15 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
           />
         ))}
 
-        {/* Add column button */}
-        <div className="add-column-container">
-          <button id="add-column" className="add-column" onClick={addNewColumn}>
-            <Plus size={16} />
-            Add Column
-          </button>
-        </div>
+        {/* Add column button - hidden when cards are revealed */}
+        {!cardsRevealed && (
+          <div className="add-column-container">
+            <button id="add-column" className="add-column" onClick={addNewColumn}>
+              <Plus size={16} />
+              Add Column
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -486,6 +493,7 @@ function Board({ showNotification }) {
           sortByVotes={sortByVotes}
           showNotification={showNotification}
           addNewColumn={addNewColumn}
+          cardsRevealed={cardsRevealed}
         />
       </main>
 

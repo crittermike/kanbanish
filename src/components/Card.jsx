@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useDrag } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 
@@ -43,7 +43,8 @@ const CardContent = ({
   downvotingEnabled,
   userId,
   revealMode,
-  cardsRevealed
+  cardsRevealed,
+  groupId
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -77,7 +78,7 @@ const CardContent = ({
 
   return (
     <div className="card-header">
-      {votingEnabled && (
+      {votingEnabled && !groupId && (
         <VotingControls
           votes={cardData.votes}
           onUpvote={interactionsDisabled ? () => { } : upvoteCard}
@@ -86,14 +87,21 @@ const CardContent = ({
           disabled={interactionsDisabled}
         />
       )}
-      <div className={`card-content ${!votingEnabled ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
+      <div className={`card-content ${!votingEnabled || groupId ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
         {displayContent}
       </div>
     </div>
   );
 };
 
-function Card({ cardId, cardData, columnId, showNotification }) {
+function Card({ 
+  cardId, 
+  cardData, 
+  columnId, 
+  groupId = null,
+  showNotification,
+  onCardDropOnCard = null
+}) {
   const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, revealMode, cardsRevealed } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -154,32 +162,60 @@ function Card({ cardId, cardData, columnId, showNotification }) {
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
   const editingDisabled = shouldObfuscate && !isCreator;
 
-  // Disable drag for ALL users when cards are obfuscated (before reveal)
-  const dragDisabled = shouldObfuscate;
+  // Grouping is only available when reveal mode is enabled AND cards have been revealed
+  const dragDisabled = shouldObfuscate && !isCreator; // Only disable drag for non-creators when obfuscated
+  const canDropOnCard = revealMode && cardsRevealed; // Only allow card-on-card drops after "Reveal All Cards" is clicked
 
-  // Configure drag functionality - disable when obfuscated
+  // Configure drag functionality - allow drag for normal column movement or grouping after reveal
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
-    item: dragDisabled ? null : { cardId, columnId, cardData },
-    canDrag: !dragDisabled,
+    item: { cardId, columnId, cardData, groupId },
+    canDrag: !dragDisabled || canDropOnCard, // Allow drag when not obfuscated OR when grouping is available
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     })
-  }), [cardId, columnId, cardData, dragDisabled]);
+  }), [cardId, columnId, cardData, dragDisabled, groupId, canDropOnCard]);
 
-  // Apply the drag ref to the card element only if drag is not disabled
-  if (!dragDisabled) {
-    drag(cardElementRef);
-  }
+  // Configure drop functionality - allow cards to be dropped on this card after "Reveal All Cards" is clicked
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: 'CARD',
+    drop: (item) => {
+      if (canDropOnCard && onCardDropOnCard && item.cardId !== cardId) {
+        onCardDropOnCard(item.cardId, cardId);
+      }
+    },
+    canDrop: () => canDropOnCard,
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver() && !!monitor.canDrop(),
+    }),
+  }), [canDropOnCard, onCardDropOnCard, cardId]);
+
+  // Handle card click - enter edit mode when not obfuscated and not in grouping mode
+  const handleCardClick = () => {
+    if (!isEditing && !editingDisabled && !canDropOnCard) {
+      toggleEditMode();
+    }
+  };
+
+  // Combine drag and drop refs
+  const combinedRef = (element) => {
+    cardElementRef.current = element;
+    if (!dragDisabled || canDropOnCard) {
+      drag(element);
+    }
+    if (canDropOnCard) {
+      drop(element);
+    }
+  };
 
   return (
     <div
-      ref={cardElementRef}
-      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled ? 'drag-disabled' : ''}`}
-      onClick={() => !isEditing && !editingDisabled && toggleEditMode()}
+      ref={combinedRef}
+      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled && !canDropOnCard ? 'drag-disabled' : ''} ${isOver ? 'drop-target' : ''} ${canDropOnCard ? 'groupable' : ''}`}
+      onClick={handleCardClick}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        cursor: dragDisabled ? 'not-allowed' : (editingDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer'))
+        cursor: canDropOnCard ? 'grab' : (dragDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer'))
       }}
     >
       {isEditing ? (
@@ -203,6 +239,7 @@ function Card({ cardId, cardData, columnId, showNotification }) {
             userId={user?.uid}
             revealMode={revealMode}
             cardsRevealed={cardsRevealed}
+            groupId={groupId}
           />
 
           <CardReactions

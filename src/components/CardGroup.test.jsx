@@ -1,0 +1,221 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+import CardGroup from './CardGroup';
+import { useBoardContext } from '../context/BoardContext';
+
+// Mock react-dnd
+vi.mock('react-dnd', () => ({
+  useDrop: vi.fn().mockReturnValue([{ isOver: false }, vi.fn()])
+}));
+
+// Mock Card component
+vi.mock('./Card', () => ({
+  default: ({ cardData, cardId }) => (
+    <div data-testid="card-content">{cardData.content}</div>
+  )
+}));
+
+// Mock VotingControls component
+vi.mock('./VotingControls', () => ({
+  default: ({ votes, onUpvote, onDownvote, showDownvoteButton }) => (
+    <div className="votes">
+      <button title="Upvote" onClick={onUpvote}>+</button>
+      <span>{votes}</span>
+      {showDownvoteButton && <button title="Downvote" onClick={onDownvote}>-</button>}
+    </div>
+  )
+}));
+
+// Mock BoardContext
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
+
+describe('CardGroup Component', () => {
+  const mockGroupData = {
+    name: 'Test Group',
+    expanded: true,
+    created: Date.now(),
+    cards: {
+      'card1': {
+        content: 'First card',
+        votes: 3,
+        created: Date.now() - 1000
+      },
+      'card2': {
+        content: 'Second card',
+        votes: 1,
+        created: Date.now()
+      }
+    }
+  };
+
+  const mockProps = {
+    groupId: 'group123',
+    groupData: mockGroupData,
+    columnId: 'column1',
+    showNotification: vi.fn(),
+    sortByVotes: false
+  };
+
+  const mockBoardContext = {
+    boardId: 'board123',
+    moveCard: vi.fn(),
+    ungroupCards: vi.fn(),
+    updateGroupName: vi.fn(),
+    votingEnabled: true,
+    downvotingEnabled: true,
+    upvoteGroup: vi.fn(),
+    downvoteGroup: vi.fn()
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useBoardContext.mockReturnValue(mockBoardContext);
+  });
+
+  test('renders group with correct name and card count', () => {
+    render(<CardGroup {...mockProps} />);
+    
+    expect(screen.getByText('Test Group')).toBeInTheDocument();
+    expect(screen.getByText('2 cards')).toBeInTheDocument();
+  });
+
+  test('shows cards when expanded', () => {
+    render(<CardGroup {...mockProps} />);
+    
+    expect(screen.getByText('First card')).toBeInTheDocument();
+    expect(screen.getByText('Second card')).toBeInTheDocument();
+  });
+
+  test('shows card previews when collapsed', () => {
+    const collapsedGroupData = { ...mockGroupData, expanded: false };
+    render(<CardGroup {...mockProps} groupData={collapsedGroupData} />);
+    
+    // Cards should show in preview mode (truncated content)
+    expect(screen.getByText(/First card/)).toBeInTheDocument();
+    expect(screen.getByText(/Second card/)).toBeInTheDocument();
+    
+    // But the full card components (with testid) should not be present
+    expect(screen.queryByTestId('card-content')).not.toBeInTheDocument();
+  });
+
+  test('toggles expanded state when header is clicked', () => {
+    render(<CardGroup {...mockProps} />);
+    
+    const header = screen.getByRole('heading', { name: 'Test Group' }).closest('.card-group-header');
+    
+    // Initially expanded, cards should be visible
+    expect(screen.getByText('First card')).toBeInTheDocument();
+    
+    // Click to collapse
+    fireEvent.click(header);
+    
+    // Cards should be hidden (test the preview mode instead)
+    expect(screen.queryByTestId('card-content')).not.toBeInTheDocument();
+  });
+
+  test('handles group name editing', async () => {
+    render(<CardGroup {...mockProps} />);
+    
+    const groupName = screen.getByText('Test Group');
+    
+    // Click to edit
+    fireEvent.click(groupName);
+    
+    const input = screen.getByDisplayValue('Test Group');
+    expect(input).toBeInTheDocument();
+    
+    // Change the name
+    fireEvent.change(input, { target: { value: 'Updated Group Name' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    
+    await waitFor(() => {
+      expect(mockBoardContext.updateGroupName).toHaveBeenCalledWith(
+        'column1',
+        'group123',
+        'Updated Group Name'
+      );
+    });
+  });
+
+  test('handles ungrouping', async () => {
+    // Mock window.confirm to return true
+    window.confirm = vi.fn().mockReturnValue(true);
+    
+    render(<CardGroup {...mockProps} />);
+    
+    const ungroupButton = screen.getByTitle('Ungroup cards');
+    fireEvent.click(ungroupButton);
+    
+    await waitFor(() => {
+      expect(mockBoardContext.ungroupCards).toHaveBeenCalledWith('column1', 'group123');
+    });
+  });
+
+  test('shows empty state when no cards in group', () => {
+    const emptyGroupData = { ...mockGroupData, cards: {} };
+    render(<CardGroup {...mockProps} groupData={emptyGroupData} />);
+    
+    expect(screen.getByText('No cards in this group')).toBeInTheDocument();
+    expect(screen.getByText('Drag cards here to add them')).toBeInTheDocument();
+  });
+
+  test('sorts cards by votes when sortByVotes is true', () => {
+    render(<CardGroup {...mockProps} sortByVotes={true} />);
+    
+    const cards = screen.getAllByTestId('card-content');
+    // First card should have higher votes (3) and appear first
+    expect(cards[0]).toHaveTextContent('First card');
+    expect(cards[1]).toHaveTextContent('Second card');
+  });
+
+  test('shows voting controls for groups when voting is enabled', () => {
+    const groupDataWithVotes = { ...mockGroupData, votes: 5 };
+    render(<CardGroup {...mockProps} groupData={groupDataWithVotes} />);
+    
+    // Should show vote count
+    expect(screen.getByText('5')).toBeInTheDocument();
+    
+    // Should show upvote and downvote buttons
+    const voteButtons = screen.getAllByRole('button');
+    const upvoteButton = voteButtons.find(button => button.title === 'Upvote');
+    const downvoteButton = voteButtons.find(button => button.title === 'Downvote');
+    
+    expect(upvoteButton).toBeInTheDocument();
+    expect(downvoteButton).toBeInTheDocument();
+  });
+
+  test('calls upvoteGroup when upvote button is clicked', () => {
+    const groupDataWithVotes = { ...mockGroupData, votes: 3 };
+    render(<CardGroup {...mockProps} groupData={groupDataWithVotes} />);
+    
+    const voteButtons = screen.getAllByRole('button');
+    const upvoteButton = voteButtons.find(button => button.title === 'Upvote');
+    
+    fireEvent.click(upvoteButton);
+    
+    expect(mockBoardContext.upvoteGroup).toHaveBeenCalledWith(
+      'column1',
+      'group123',
+      3,
+      mockProps.showNotification
+    );
+  });
+
+  test('hides voting controls when voting is disabled', () => {
+    const contextWithoutVoting = { ...mockBoardContext, votingEnabled: false };
+    useBoardContext.mockReturnValue(contextWithoutVoting);
+    
+    const groupDataWithVotes = { ...mockGroupData, votes: 5 };
+    render(<CardGroup {...mockProps} groupData={groupDataWithVotes} />);
+    
+    // Should not show vote count in voting controls
+    const voteButtons = screen.getAllByRole('button');
+    const upvoteButton = voteButtons.find(button => button.title === 'Upvote');
+    
+    expect(upvoteButton).toBeUndefined();
+  });
+});

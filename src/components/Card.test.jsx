@@ -5,7 +5,7 @@ import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
 import { ref, set, remove } from 'firebase/database';
-import { useDrag } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { COMMON_EMOJIS } from '../utils/helpers';
 
 // Mock firebase and react-dnd
@@ -20,7 +20,8 @@ vi.mock('firebase/database', () => {
 });
 
 vi.mock('react-dnd', () => ({
-  useDrag: vi.fn().mockReturnValue([{ isDragging: false }, vi.fn()])
+  useDrag: vi.fn().mockReturnValue([{ isDragging: false }, vi.fn()]),
+  useDrop: vi.fn().mockReturnValue([{ isOver: false }, vi.fn()])
 }));
 
 // Mock ReactDOM.createPortal

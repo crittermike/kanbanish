@@ -23,6 +23,62 @@
     border-color: var(--accent);
 }
 
+/* Card selection styles */
+.card.selected {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Card grouping styles for reveal mode */
+.card.groupable {
+    cursor: grab !important;
+    transition: all var(--transition-speed);
+}
+
+.card.groupable:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card.drop-target {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+    box-shadow: 0 0 0 3px var(--accent-transparent);
+    transform: scale(1.02);
+}
+
+.card.multi-select-mode {
+    cursor: pointer !important;
+}
+
+.card-selection-indicator {
+    position: absolute;
+    top: var(--space-xs);
+    right: var(--space-xs);
+    z-index: 10;
+}
+
+.selection-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: bold;
+    color: var(--accent);
+    transition: all var(--transition-speed);
+}
+
+.selection-checkbox.checked {
+    background: var(--accent);
+    color: white;
+}
+
 /* Drag and drop styling */
 .card.dragging {
     cursor: grabbing;

@@ -12,6 +12,7 @@
 @import 'components/buttons.css';
 @import 'components/columns.css'; 
 @import 'components/cards.css';
+@import 'components/card-groups.css';
 @import 'components/modals.css';
 @import 'components/emoji-reactions.css';
 @import 'components/template-select.css';

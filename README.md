@@ -7,6 +7,7 @@ A real-time anonymous Kanban board application built with React and Firebase. Ka
 - **Anonymous Access**: No login required – just create a board and share the link
 - **Real-time Updates**: Changes appear instantly across all connected users
 - **Drag and Drop Interface**: Easily move cards between columns using intuitive drag and drop
+- **Card Grouping**: Group related cards together with visual stacking and expand/collapse functionality
 - **Emoji Reactions**: Express yourself with emoji reactions on cards
 - **Responsive Design**: Works on desktop and mobile devices
 - **Customizable Boards**: Create and name columns to fit your workflow
@@ -62,14 +63,17 @@ VITE_FIREBASE_APP_ID=your_app_id
 ### Available Scripts
 
 - **Development Server**: `npm run dev` or `npm start`
+
   - Starts the Vite development server
   - Open [http://localhost:3001/kanbanish/](http://localhost:3001/kanbanish/) in your browser
 
 - **Build for Production**: `npm run build`
+
   - Builds the app for production to the `build` folder
   - Optimized and ready for deployment
 
 - **Preview Production Build**: `npm run preview`
+
   - Locally preview the production build
 
 - **Run Tests**: `npm test`
@@ -78,20 +82,31 @@ VITE_FIREBASE_APP_ID=your_app_id
 ## 📱 Using Kanbanish
 
 1. **Creating a Board**:
+
    - Visit the application and click "Create New Board"
    - Give your board a name and customize columns as needed
    - Share the generated URL with collaborators
 
 2. **Adding Cards**:
+
    - Click "+" in any column to add a new card
    - Enter a title and description for your card
    - Save to add it to the board
 
 3. **Moving Cards**:
+
    - Drag and drop cards between columns to update their status
 
 4. **Adding Reactions**:
+
    - Click the reaction button on any card to add emoji reactions
+
+5. **Grouping Cards**:
+   - Select multiple cards by clicking on them
+   - Click the group button (📦) in the column header
+   - Enter a name for your group and confirm
+   - Expand/collapse groups by clicking the group header
+   - Ungroup cards using the scissors (✂️) button
 
 ## 🤝 Contributing
 

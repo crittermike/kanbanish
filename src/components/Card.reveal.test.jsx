@@ -16,6 +16,7 @@ vi.mock('react-dnd', async (importOriginal) => {
     return {
         ...actual,
         useDrag: () => [{ isDragging: false }, vi.fn()],
+        useDrop: () => [{ isOver: false }, vi.fn()],
         DndProvider: ({ children }) => children // Simple mock that just renders children
     };
 });
@@ -338,7 +339,7 @@ describe('Card Reveal Mode', () => {
     test('disables editing for non-creators when cards are obfuscated', () => {
         const cardDataFromOtherUser = {
             ...mockCardData,
-            createdBy: 'other-user-456' // Different creator
+            createdBy: 'other-user-456' // Different from the current user
         };
 
         useBoardContext.mockReturnValue({
@@ -357,8 +358,9 @@ describe('Card Reveal Mode', () => {
         const cardContent = screen.getByTestId('card-content');
         const cardElement = cardContent.closest('.card');
 
-        // Card should have editing-disabled class and not-allowed cursor
+        // Card should have editing-disabled class and normal drag (no grouping yet)
         expect(cardElement).toHaveClass('editing-disabled');
+        expect(cardElement).not.toHaveClass('groupable');
         expect(cardElement).toHaveStyle('cursor: not-allowed');
     });
 
@@ -381,12 +383,12 @@ describe('Card Reveal Mode', () => {
         // Card should NOT have editing-disabled class (creator can edit)
         expect(cardElement).not.toHaveClass('editing-disabled');
 
-        // But card SHOULD have drag-disabled class (dragging disabled for everyone)
-        expect(cardElement).toHaveClass('drag-disabled');
-        expect(cardElement).toHaveStyle('cursor: not-allowed'); // Because dragging is disabled
+        // Card should NOT be groupable yet (cards not revealed)
+        expect(cardElement).not.toHaveClass('groupable');
+        expect(cardElement).toHaveStyle('cursor: pointer'); // Creator can still edit
     });
 
-    test('disables dragging for ALL users when cards are obfuscated', () => {
+    test('enables card-on-card dragging for grouping when cards are revealed', () => {
         useBoardContext.mockReturnValue({
             boardId: 'board123',
             user: { uid: 'user123' }, // Same as card creator
@@ -394,7 +396,7 @@ describe('Card Reveal Mode', () => {
             downvotingEnabled: true,
             multipleVotesAllowed: false,
             revealMode: true,
-            cardsRevealed: false
+            cardsRevealed: true // Cards have been revealed - NOW grouping is available
         });
 
         renderCard(); // Uses default mockCardData with createdBy: 'user123'
@@ -403,7 +405,29 @@ describe('Card Reveal Mode', () => {
         const cardContent = screen.getByTestId('card-content');
         const cardElement = cardContent.closest('.card');
 
-        // Card should have drag-disabled class even for creators
+        // Card should be groupable for drag-onto-card functionality after cards are revealed
+        expect(cardElement).toHaveClass('groupable');
+        expect(cardElement).toHaveStyle('cursor: grab');
+    });
+
+    test('disables dragging when cards are obfuscated (before reveal) for non-creators', () => {
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'other-user' }, // Non-creator
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: false // Cards are obfuscated
+        });
+
+        renderCard(); // Uses default mockCardData with createdBy: 'user123'
+
+        // Find the card element
+        const cardContent = screen.getByTestId('card-content');
+        const cardElement = cardContent.closest('.card');
+
+        // Card should have drag disabled when obfuscated for non-creators
         expect(cardElement).toHaveClass('drag-disabled');
         expect(cardElement).toHaveStyle('cursor: not-allowed');
     });
@@ -427,7 +451,7 @@ describe('Card Reveal Mode', () => {
 
         // Card should NOT have drag-disabled class when revealed
         expect(cardElement).not.toHaveClass('drag-disabled');
-        expect(cardElement).toHaveStyle('cursor: pointer');
+        expect(cardElement).toHaveStyle('cursor: grab'); // Grouping mode cursor
     });
 
     test('enables dragging when reveal mode is disabled', () => {

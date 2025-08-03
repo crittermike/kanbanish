@@ -1,0 +1,276 @@
+/**
+ * Card Group Styles
+ * 
+ * Styles for card grouping functionality including visual stacking,
+ * expand/collapse, and drag-and-drop interactions.
+ */
+
+/* Card Group Container */
+.card-group {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-md);
+    overflow: hidden;
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.card-group.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+}
+
+.card-group:hover {
+    border-color: var(--accent-light);
+}
+
+/* Group Header */
+.card-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface-2);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed);
+}
+
+.card-group-header:hover {
+    background: var(--surface-3);
+}
+
+.card-group-title-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 1;
+}
+
+.expand-icon {
+    color: var(--text-secondary);
+    transition: transform var(--transition-speed);
+    flex-shrink: 0;
+}
+
+.card-group-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-speed);
+}
+
+.card-group-name:hover {
+    background: var(--input-bg);
+}
+
+.group-name-input {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    background: var(--input-bg);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    color: var(--text-color);
+    outline: none;
+    font-family: inherit;
+}
+
+.card-group-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.card-group-actions .votes {
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+}
+
+.card-group-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.card-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.group-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-speed);
+}
+
+.group-action-btn:hover {
+    background: var(--danger-transparent);
+    color: var(--danger);
+}
+
+/* Group Content */
+.card-group-content {
+    padding: var(--space-sm);
+}
+
+.card-group-content .card {
+    margin-bottom: var(--space-sm);
+}
+
+.card-group-content .card:last-child {
+    margin-bottom: 0;
+}
+
+.empty-group-placeholder {
+    text-align: center;
+    padding: var(--space-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.empty-group-placeholder span {
+    display: block;
+    margin-bottom: var(--space-xs);
+}
+
+.empty-group-placeholder span:last-child {
+    margin-bottom: 0;
+    font-size: var(--font-size-xs);
+    opacity: 0.7;
+}
+
+/* Card Preview for Collapsed Groups */
+.card-group-preview {
+    position: relative;
+    padding: var(--space-md);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-preview {
+    position: absolute;
+    left: var(--space-md);
+    top: var(--space-sm);
+    width: calc(100% - var(--space-lg));
+    height: 40px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+    display: flex;
+    align-items: center;
+    transition: all var(--transition-speed);
+    box-shadow: var(--card-shadow);
+}
+
+.card-preview-content {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.more-cards-indicator {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--accent);
+    color: white;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    z-index: 10;
+}
+
+/* Enhanced stacking effect on hover */
+.card-group:not(:hover) .card-preview:nth-child(2) {
+    transform: translateX(8px) translateY(4px);
+}
+
+.card-group:not(:hover) .card-preview:nth-child(3) {
+    transform: translateX(12px) translateY(6px);
+}
+
+.card-group:hover .card-preview {
+    transform: translateX(0) translateY(0) !important;
+}
+
+/* Group Selection and Multi-select */
+.card-group.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-group-header {
+        padding: var(--space-md);
+    }
+    
+    .card-group-name {
+        font-size: var(--font-size-sm);
+    }
+    
+    .card-count {
+        font-size: var(--font-size-xs);
+    }
+    
+    .group-action-btn {
+        padding: var(--space-sm);
+    }
+    
+    .card-group-preview {
+        padding: var(--space-sm);
+        min-height: 50px;
+    }
+    
+    .card-preview {
+        height: 35px;
+        left: var(--space-sm);
+        width: calc(100% - var(--space-md));
+    }
+    
+    .more-cards-indicator {
+        right: var(--space-sm);
+        padding: var(--space-xs);
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .card-group {
+        border-color: var(--border-color-dark);
+    }
+    
+    .card-group-header {
+        background: var(--surface-2-dark);
+        border-bottom-color: var(--border-color-dark);
+    }
+    
+    .card-preview {
+        background: var(--card-bg-dark);
+        border-color: var(--border-color-dark);
+    }
+}

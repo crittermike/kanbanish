@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { ref, onValue, off, set, remove } from 'firebase/database';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
@@ -97,10 +97,10 @@ export const BoardProvider = ({ children }) => {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
             }
             if (boardData.settings.revealMode !== undefined) {
-              const newRevealMode = boardData.settings.revealMode;
-              setRevealMode(newRevealMode);
-              // Set cards revealed based on reveal mode: false when enabled, true when disabled
-              setCardsRevealed(!newRevealMode);
+              setRevealMode(boardData.settings.revealMode);
+            }
+            if (boardData.settings.cardsRevealed !== undefined) {
+              setCardsRevealed(boardData.settings.cardsRevealed);
             }
           }
         }
@@ -146,7 +146,8 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
         multipleVotesAllowed: false, // Default to not allowing multiple votes
-        revealMode: false // Default to disabled (cards are visible)
+        revealMode: false, // Default to disabled (cards are visible)
+        cardsRevealed: false // Default to cards not revealed
       }
     };
 
@@ -196,6 +197,7 @@ export const BoardProvider = ({ children }) => {
         downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: multipleVotesAllowed,
         revealMode: revealMode,
+        cardsRevealed: cardsRevealed,
         ...newSettings
       };
 
@@ -214,8 +216,9 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.revealMode !== undefined) {
             setRevealMode(newSettings.revealMode);
-            // Set cards revealed based on reveal mode: false when enabled, true when disabled
-            setCardsRevealed(!newSettings.revealMode);
+          }
+          if (newSettings.cardsRevealed !== undefined) {
+            setCardsRevealed(newSettings.cardsRevealed);
           }
         })
         .catch((error) => {
@@ -233,9 +236,20 @@ export const BoardProvider = ({ children }) => {
         setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
       }
       if (newSettings.revealMode !== undefined) {
-        setRevealMode(newSettings.revealMode);
-        // Set cards revealed based on reveal mode: false when enabled, true when disabled
-        setCardsRevealed(!newSettings.revealMode);
+        const newRevealMode = newSettings.revealMode;
+        const currentRevealMode = revealModeRef.current;
+        
+        // Only reset cardsRevealed if revealMode actually changes
+        if (currentRevealMode !== newRevealMode) {
+          setRevealMode(newRevealMode);
+          setCardsRevealed(!newRevealMode);
+        } else {
+          // Just update revealMode without affecting cardsRevealed
+          setRevealMode(newRevealMode);
+        }
+      }
+      if (newSettings.cardsRevealed !== undefined) {
+        setCardsRevealed(newSettings.cardsRevealed);
       }
     }
   };
@@ -257,12 +271,18 @@ export const BoardProvider = ({ children }) => {
 
   // Update reveal mode setting
   const updateRevealMode = (enabled) => {
-    updateBoardSettings({ revealMode: enabled });
+    if (enabled) {
+      // When enabling reveal mode, just update that setting
+      updateBoardSettings({ revealMode: enabled });
+    } else {
+      // When disabling reveal mode, also reset cardsRevealed to false
+      updateBoardSettings({ revealMode: enabled, cardsRevealed: false });
+    }
   };
 
-  // Reveal all cards (local state change only)
+  // Reveal all cards (persist to Firebase)
   const revealAllCards = () => {
-    setCardsRevealed(true);
+    updateBoardSettings({ cardsRevealed: true });
   };
 
   // Reset all votes in the board
@@ -288,15 +308,78 @@ export const BoardProvider = ({ children }) => {
             });
         });
       }
+
+      // Also reset group votes
+      if (column.groups) {
+        Object.entries(column.groups).forEach(([groupId, group]) => {
+          // Reset group votes to 0 and clear all voters
+          const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
+          const updatedGroup = { ...group, votes: 0, voters: {} };
+          set(groupRef, updatedGroup)
+            .catch(error => {
+              console.error(`Error resetting votes for group ${groupId}:`, error);
+            });
+        });
+      }
     });
 
     return true;
   };
 
-  // Move a card between columns
-  const moveCard = (cardId, sourceColumnId, targetColumnId) => {
-    if (!boardId || !user || sourceColumnId === targetColumnId) return;
+  // Move a card between columns or into/out of groups
+  const moveCard = (cardId, sourceColumnId, targetColumnId, targetGroupId = null) => {
+    if (!boardId || !user) return;
 
+    // Handle moving within the same column but different group status
+    if (sourceColumnId === targetColumnId) {
+      // Check if card is currently in a group
+      const sourceColumn = columns[sourceColumnId];
+      let sourceGroupId = null;
+      let cardData = null;
+
+      // Find the card in the column - either in a group or loose
+      if (sourceColumn?.cards?.[cardId]) {
+        cardData = sourceColumn.cards[cardId];
+      } else if (sourceColumn?.groups) {
+        // Search for the card in groups
+        Object.entries(sourceColumn.groups).forEach(([groupId, group]) => {
+          if (group.cards?.[cardId]) {
+            sourceGroupId = groupId;
+            cardData = group.cards[cardId];
+          }
+        });
+      }
+
+      if (!cardData) {
+        console.error('Card not found');
+        return;
+      }
+
+      // If moving to the same location, do nothing
+      if (sourceGroupId === targetGroupId) return;
+
+      // Remove from source location
+      if (sourceGroupId) {
+        const sourceRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/groups/${sourceGroupId}/cards/${cardId}`);
+        remove(sourceRef);
+      } else {
+        const sourceRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}`);
+        remove(sourceRef);
+      }
+
+      // Add to target location
+      if (targetGroupId) {
+        const targetRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/groups/${targetGroupId}/cards/${cardId}`);
+        set(targetRef, cardData);
+      } else {
+        const targetRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
+        set(targetRef, cardData);
+      }
+
+      return;
+    }
+
+    // Handle moving between different columns (existing logic)
     const sourceCardRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}`);
     const targetCardRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
 
@@ -323,6 +406,173 @@ export const BoardProvider = ({ children }) => {
       .catch((error) => {
         console.error('Error adding card to target column:', error);
       });
+  };
+
+  // Create a new group with selected cards
+  const createCardGroup = (columnId, cardIds, groupName = 'New Group', targetCreatedTime = null) => {
+    if (!boardId || !user || !cardIds.length) return;
+
+    const groupId = generateId();
+    const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
+
+    // Collect card data for the group
+    const groupCards = {};
+    const removePromises = [];
+
+    cardIds.forEach(cardId => {
+      const cardData = columns[columnId]?.cards?.[cardId];
+      if (cardData) {
+        groupCards[cardId] = cardData;
+        // Add promise to remove card from column
+        const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+        removePromises.push(remove(cardRef));
+      }
+    });
+
+    // Use target card's created time if provided, otherwise use current time
+    const createdTime = targetCreatedTime || Date.now();
+
+    const groupData = {
+      name: groupName,
+      created: createdTime,
+      expanded: true,
+      votes: 0,
+      voters: {},
+      cards: groupCards
+    };
+
+    // Create the group and remove cards from column
+    set(groupRef, groupData)
+      .then(() => {
+        return Promise.all(removePromises);
+      })
+      .then(() => {
+        console.log(`Group ${groupId} created with ${cardIds.length} cards`);
+      })
+      .catch((error) => {
+        console.error('Error creating group:', error);
+      });
+  };
+
+  // Ungroup cards (move them back to the column)
+  const ungroupCards = (columnId, groupId) => {
+    if (!boardId || !user) return;
+
+    const groupData = columns[columnId]?.groups?.[groupId];
+    if (!groupData || !groupData.cards) return;
+
+    const movePromises = [];
+
+    // Move each card from group back to column
+    Object.entries(groupData.cards).forEach(([cardId, cardData]) => {
+      const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+      movePromises.push(set(cardRef, cardData));
+    });
+
+    // Remove the group
+    const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
+
+    Promise.all(movePromises)
+      .then(() => {
+        return remove(groupRef);
+      })
+      .then(() => {
+        console.log(`Group ${groupId} ungrouped`);
+      })
+      .catch((error) => {
+        console.error('Error ungrouping cards:', error);
+      });
+  };
+
+  // Update group name
+  const updateGroupName = (columnId, groupId, newName) => {
+    if (!boardId || !user) return;
+
+    const nameRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/name`);
+    set(nameRef, newName)
+      .then(() => {
+        console.log('Group name updated');
+      })
+      .catch((error) => {
+        console.error('Error updating group name:', error);
+      });
+  };
+
+  // Toggle group expanded state
+  const toggleGroupExpanded = (columnId, groupId, expanded) => {
+    if (!boardId || !user) return;
+
+    const expandedRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/expanded`);
+    set(expandedRef, expanded)
+      .catch((error) => {
+        console.error('Error updating group expanded state:', error);
+      });
+  };
+
+  // Upvote a group
+  const upvoteGroup = (columnId, groupId, currentVotes = 0, showNotification) => {
+    if (!boardId || !user) return;
+
+    const currentGroup = columns[columnId]?.groups?.[groupId];
+    if (!currentGroup) return;
+
+    const currentVoters = currentGroup.voters || {};
+    const userId = user.uid;
+
+    // Check if multiple votes are allowed
+    if (!multipleVotesAllowed && currentVoters[userId] && currentVoters[userId] > 0) {
+      showNotification('You have already voted on this group');
+      return;
+    }
+
+    const newVotes = currentVotes + 1;
+    const newVoters = {
+      ...currentVoters,
+      [userId]: (currentVoters[userId] || 0) + 1
+    };
+
+    const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
+    const groupVotersRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/voters`);
+
+    Promise.all([
+      set(groupVotesRef, newVotes),
+      set(groupVotersRef, newVoters)
+    ]).catch((error) => {
+      console.error('Error updating group votes:', error);
+    });
+  };
+
+  // Downvote a group
+  const downvoteGroup = (columnId, groupId, currentVotes = 0, showNotification) => {
+    if (!boardId || !user) return;
+
+    const currentGroup = columns[columnId]?.groups?.[groupId];
+    if (!currentGroup) return;
+
+    const currentVoters = currentGroup.voters || {};
+    const userId = user.uid;
+
+    // Check if multiple votes are allowed
+    if (!multipleVotesAllowed && currentVoters[userId] && currentVoters[userId] < 0) {
+      showNotification('You have already voted on this group');
+      return;
+    }
+
+    const newVotes = currentVotes - 1;
+    const newVoters = {
+      ...currentVoters,
+      [userId]: (currentVoters[userId] || 0) - 1
+    };
+
+    const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
+    const groupVotersRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/voters`);
+
+    Promise.all([
+      set(groupVotesRef, newVotes),
+      set(groupVotersRef, newVoters)
+    ]).catch((error) => {
+      console.error('Error updating group votes:', error);
+    });
   };
 
   // Update dark mode preference
@@ -376,7 +626,14 @@ export const BoardProvider = ({ children }) => {
     moveCard,
     resetAllVotes,
     darkMode,
-    updateDarkMode
+    updateDarkMode,
+    // Card grouping functions
+    createCardGroup,
+    ungroupCards,
+    updateGroupName,
+    toggleGroupExpanded,
+    upvoteGroup,
+    downvoteGroup
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

@@ -170,3 +170,209 @@ main {
         max-width: var(--column-width-mobile);
     }
 }
+
+/* Card Selection Styles */
+.select-btn {
+    background: var(--accent);
+    color: white;
+}
+
+.select-btn:hover {
+    background: var(--accent-dark);
+}
+
+.selected-count {
+    font-size: var(--font-size-sm);
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: var(--space-sm);
+}
+
+.group-btn {
+    background: var(--accent);
+    color: white;
+}
+
+.group-btn:disabled {
+    background: var(--text-secondary);
+    color: var(--surface-1);
+    cursor: not-allowed;
+}
+
+.clear-btn {
+    background: var(--danger);
+    color: white;
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Group Modal Styles */
+.group-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.group-modal {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.group-modal h3 {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-color);
+}
+
+.group-modal p {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.group-modal .group-name-input {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+    background: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: var(--space-md);
+}
+
+.group-modal .group-name-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.group-modal-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+}
+
+/* Card selection and grouping styles */
+.selected-count {
+    font-size: var(--font-size-sm);
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: var(--space-xs);
+}
+
+.group-btn {
+    color: var(--accent) !important;
+}
+
+.group-btn:disabled {
+    color: var(--text-secondary) !important;
+    cursor: not-allowed !important;
+}
+
+.clear-btn {
+    color: var(--danger) !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+/* Group creation modal */
+.group-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.group-modal {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    min-width: 300px;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+}
+
+.group-modal h3 {
+    margin: 0 0 var(--space-sm) 0;
+    color: var(--text-color);
+    font-size: var(--font-size-lg);
+}
+
+.group-modal p {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.group-modal .group-name-input {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-md);
+}
+
+.group-modal .group-name-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.group-modal-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+}
+
+/* Mobile responsive adjustments for grouping */
+@media (max-width: 768px) {
+    .column-actions {
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+    
+    .selected-count {
+        font-size: var(--font-size-xs);
+        order: -1;
+        flex-basis: 100%;
+        text-align: center;
+        margin: 0 0 var(--space-xs) 0;
+    }
+    
+    .group-modal {
+        margin: var(--space-md);
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .group-modal-actions {
+        flex-direction: column;
+    }
+    
+    .group-modal-actions .btn {
+        width: 100%;
+    }
+}
