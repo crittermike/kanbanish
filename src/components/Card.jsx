@@ -2,6 +2,11 @@ import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import { 
+  shouldObfuscateContent, 
+  areInteractionsDisabled, 
+  getDisabledReason 
+} from '../utils/revealModeUtils';
 
 // Import modularized components
 import Comments from './Comments';
@@ -47,7 +52,7 @@ const CardContent = ({
   groupId,
   isInteractionDisabled,
   interactionsRevealed,
-  getDisabledReason
+  disabledReason
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -68,12 +73,11 @@ const CardContent = ({
   };
 
   // Determine what content to show
-  const shouldObfuscate = revealMode && !cardsRevealed;
   const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
-  const showObfuscatedText = shouldObfuscate && !isCreator; // Don't obfuscate for the creator
+  const showObfuscatedText = shouldObfuscateContent(revealMode, cardsRevealed, isCreator);
 
   // For now, calculate interactions disabled directly based on reveal mode and cards revealed status
-  const interactionsDisabled = (revealMode && !cardsRevealed) || interactionsRevealed;
+  const interactionsDisabled = areInteractionsDisabled(revealMode, cardsRevealed, interactionsRevealed);
 
   const displayContent = showObfuscatedText ?
     generateObfuscatedText(cardData.content) :
@@ -88,7 +92,7 @@ const CardContent = ({
           onDownvote={interactionsDisabled ? () => { } : downvoteCard}
           showDownvoteButton={showDownvoteButton}
           disabled={interactionsDisabled}
-          disabledReason={getDisabledReason()}
+          disabledReason={disabledReason}
         />
       )}
       <div className={`card-content ${!votingEnabled || groupId ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
@@ -171,18 +175,12 @@ function Card({
   // Get comment count
   const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
 
-  // Determine the reason for disabled interactions
-  const getDisabledReason = () => {
-    const disabled = isInteractionDisabled();
-    if (!disabled) return null;
-    if (interactionsRevealed) return 'frozen';
-    return 'cards-not-revealed';
-  };
+  // Get disabled reason using utility function
+  const disabledReason = getDisabledReason(revealMode, cardsRevealed, interactionsRevealed);
 
   // Determine if editing should be disabled for this user
-  const shouldObfuscate = revealMode && !cardsRevealed;
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
-  const editingDisabled = shouldObfuscate && !isCreator;
+  const editingDisabled = shouldObfuscateContent(revealMode, cardsRevealed, isCreator);
 
   // Filter interactions to show only user's own if interactions are not revealed
   const shouldHideOthersInteractions = revealMode && cardsRevealed && !interactionsRevealed;
@@ -208,7 +206,7 @@ function Card({
   } : cardData;
 
   // Grouping is only available when reveal mode is enabled AND cards have been revealed
-  const dragDisabled = shouldObfuscate && !isCreator; // Only disable drag for non-creators when obfuscated
+  const dragDisabled = shouldObfuscateContent(revealMode, cardsRevealed, isCreator); // Only disable drag for non-creators when obfuscated
   const canDropOnCard = revealMode && cardsRevealed; // Only allow card-on-card drops after "Reveal All Cards" is clicked
 
   // Configure drag functionality - allow drag for normal column movement or grouping after reveal
@@ -287,7 +285,7 @@ function Card({
             groupId={groupId}
             isInteractionDisabled={isInteractionDisabled}
             interactionsRevealed={interactionsRevealed}
-            getDisabledReason={getDisabledReason}
+            disabledReason={disabledReason}
           />
 
           <CardReactions
@@ -303,7 +301,7 @@ function Card({
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
             disabled={isInteractionDisabled()}
-            disabledReason={getDisabledReason()}
+            disabledReason={disabledReason}
             revealMode={revealMode}
             cardsRevealed={cardsRevealed}
           />
@@ -318,7 +316,7 @@ function Card({
               onDeleteComment={deleteComment}
               isCommentAuthor={isCommentAuthor}
               interactionsDisabled={isInteractionDisabled()}
-              disabledReason={getDisabledReason()}
+              disabledReason={disabledReason}
             />
           )}
         </>

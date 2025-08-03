@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { shouldHideFeature, getCommentDisabledMessage } from '../utils/revealModeUtils';
 
 const CommentEditor = ({ 
   editedComment, 
@@ -44,11 +45,15 @@ const Comments = React.memo(({
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
   
+  // Use utility functions for consistent logic
+  const shouldShowAlert = !shouldHideFeature(disabledReason);
+  const hideCommentForm = shouldHideFeature(disabledReason);
+  
   const startEditing = (commentId, content) => {
     // Don't allow editing if interactions are disabled
     if (interactionsDisabled) {
       // Only show message if not in frozen state (Phase 3)
-      if (disabledReason !== 'frozen') {
+      if (shouldShowAlert) {
         const message = 'Comment editing is disabled until cards are revealed';
         alert(message);
       }
@@ -72,19 +77,13 @@ const Comments = React.memo(({
   };
   
   // Get appropriate disabled message for comments
-  const getCommentDisabledMessage = () => {
-    if (!interactionsDisabled) return null;
-    // Don't show frozen message in Phase 3
-    return disabledReason === 'frozen' 
-      ? null
-      : 'Comments are disabled until cards are revealed';
-  };
+  const commentDisabledMessage = getCommentDisabledMessage(disabledReason);
 
   const handleAddComment = () => {
     if (interactionsDisabled) {
       // Only show alert if not in frozen state
-      if (disabledReason !== 'frozen') {
-        alert(getCommentDisabledMessage());
+      if (shouldShowAlert && commentDisabledMessage) {
+        alert(commentDisabledMessage);
       }
       return;
     }
@@ -123,8 +122,8 @@ const Comments = React.memo(({
                   }
                 }}
                 title={
-                  interactionsDisabled && disabledReason !== 'frozen'
-                    ? getCommentDisabledMessage()
+                  interactionsDisabled && shouldShowAlert
+                    ? commentDisabledMessage
                     : (isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment')
                 }
               >
@@ -138,13 +137,13 @@ const Comments = React.memo(({
       )}
 
       {/* Hide comment form when interactions are frozen */}
-      {disabledReason !== 'frozen' && (
+      {!hideCommentForm && (
         <div className="comment-form">
           <input
             type="text"
             placeholder={
-              interactionsDisabled && disabledReason !== 'frozen' 
-                ? getCommentDisabledMessage() 
+              interactionsDisabled && shouldShowAlert 
+                ? commentDisabledMessage 
                 : "Add a comment..."
             }
             className="comment-input"
@@ -159,8 +158,8 @@ const Comments = React.memo(({
             }}
             disabled={interactionsDisabled}
             title={
-              interactionsDisabled && disabledReason !== 'frozen' 
-                ? getCommentDisabledMessage() 
+              interactionsDisabled && shouldShowAlert 
+                ? commentDisabledMessage 
                 : ""
             }
           />

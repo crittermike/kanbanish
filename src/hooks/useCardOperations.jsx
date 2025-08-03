@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
 import { database } from '../utils/firebase';
+import { areInteractionsDisabled } from '../utils/revealModeUtils';
 
 export function useCardOperations({ 
   boardId, 
@@ -37,10 +38,7 @@ export function useCardOperations({
 
   // Helper to check if interactions should be disabled due to reveal mode
   const isInteractionDisabled = useCallback(() => {
-    // Disable interactions if:
-    // 1. Reveal mode is on and cards haven't been revealed yet, OR
-    // 2. Interactions have been revealed (freeze state after reveal)
-    return (revealMode && !cardsRevealed) || interactionsRevealed;
+    return areInteractionsDisabled(revealMode, cardsRevealed, interactionsRevealed);
   }, [revealMode, cardsRevealed, interactionsRevealed]);
 
   // Memoized database reference

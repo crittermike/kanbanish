@@ -1,6 +1,11 @@
 import React, { useRef } from 'react';
 import EmojiPicker from './EmojiPicker';
 import { MessageSquare } from 'react-feather';
+import { 
+  shouldUseDisabledStyling, 
+  shouldHideFeature, 
+  getReactionDisabledMessage 
+} from '../utils/revealModeUtils';
 
 const CardReactions = React.memo(({
   reactions,
@@ -25,21 +30,10 @@ const CardReactions = React.memo(({
   // Hide comments button only in Phase 1 of reveal mode (reveal mode on, cards not revealed)
   const shouldShowCommentsButton = !(revealMode && !cardsRevealed);
 
-  // Determine the appropriate disabled message based on the reason
-  const getDisabledMessage = () => {
-    switch (disabledReason) {
-      case 'frozen':
-        return 'Interactions are now frozen - no more changes allowed';
-      case 'cards-not-revealed':
-      default:
-        return 'Reactions disabled until cards are revealed';
-    }
-  };
-
-  // Determine styling approach based on disabled reason
-  // In frozen state (Phase 3), keep normal appearance but disable interactions
-  // In cards-not-revealed state (Phase 1), use disabled styling
-  const shouldUseDisabledStyling = disabled && disabledReason !== 'frozen';
+  // Use utility functions for consistent logic
+  const useDisabledStyling = shouldUseDisabledStyling(disabled, disabledReason);
+  const hideAddButton = shouldHideFeature(disabledReason);
+  const isFrozen = disabledReason === 'frozen';
 
   return (
     <div className="emoji-reactions">
@@ -51,12 +45,12 @@ const CardReactions = React.memo(({
 
           return (
             <div
-              className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${shouldUseDisabledStyling ? 'disabled' : ''} ${disabledReason === 'frozen' ? 'frozen' : ''}`}
+              className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${useDisabledStyling ? 'disabled' : ''} ${isFrozen ? 'frozen' : ''}`}
               key={emoji}
               data-testid="emoji-reaction"
               onClick={disabled ? undefined : (e) => addReaction(e, emoji)}
-              title={disabled ? getDisabledMessage() : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
-              style={disabledReason === 'frozen' ? { pointerEvents: 'none', cursor: 'default' } : undefined}
+              title={disabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
+              style={isFrozen ? { pointerEvents: 'none', cursor: 'default' } : undefined}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>
@@ -72,9 +66,9 @@ const CardReactions = React.memo(({
           />
         )}
         {/* Hide add reaction button when interactions are frozen */}
-        {disabledReason !== 'frozen' && (
+        {!hideAddButton && (
           <button
-            className={`add-reaction-button ${shouldUseDisabledStyling ? 'disabled' : ''}`}
+            className={`add-reaction-button ${useDisabledStyling ? 'disabled' : ''}`}
             onClick={disabled ? undefined : (e) => {
               e.stopPropagation();
               if (emojiButtonRef.current) {
@@ -87,9 +81,9 @@ const CardReactions = React.memo(({
               setShowEmojiPicker(!showEmojiPicker);
               setShowComments(false);
             }}
-            title={disabled ? getDisabledMessage() : "Add reaction"}
+            title={disabled ? getReactionDisabledMessage(disabledReason) : "Add reaction"}
             ref={emojiButtonRef}
-            disabled={shouldUseDisabledStyling}
+            disabled={useDisabledStyling}
           >+</button>
         )}
       </div>
