@@ -25,19 +25,17 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       <UserCounter />
       <button
         id="copy-share-url"
-        className="btn secondary-btn"
+        className="btn secondary-btn btn-with-icon"
         title="Copy Share URL"
         onClick={copyShareUrl}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
         <Link size={16} />
         Share
       </button>
       <button
         id="export-board"
-        className="btn secondary-btn"
+        className="btn secondary-btn btn-with-icon"
         onClick={handleExportBoard}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
         <FileText size={16} />
         Export
@@ -93,23 +91,12 @@ const ActionButtons = ({
       {revealMode && (
         <button
           id="reveal-cards"
-          className="btn primary-btn reveal-button"
+          className={`btn primary-btn reveal-button ${cardsRevealed ? 'active' : 'pending'}`}
           onClick={() => {
             if (!cardsRevealed) {
               revealAllCards();
               showNotification('All cards revealed!');
             }
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: cardsRevealed ? 'var(--success)' : 'var(--accent)',
-            color: 'white',
-            fontWeight: '600',
-            animation: cardsRevealed ? 'none' : 'pulse 2s infinite',
-            cursor: cardsRevealed ? 'default' : 'pointer',
-            opacity: cardsRevealed ? '0.9' : '1'
           }}
           disabled={cardsRevealed}
         >
@@ -120,23 +107,12 @@ const ActionButtons = ({
       {revealMode && cardsRevealed && (
         <button
           id="reveal-interactions"
-          className="btn primary-btn reveal-button"
+          className={`btn primary-btn reveal-button ${interactionsRevealed ? 'active' : 'pending'}`}
           onClick={() => {
             if (!interactionsRevealed) {
               revealAllInteractions();
               showNotification('Interactions revealed! You can now see all votes, comments, and reactions.');
             }
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: interactionsRevealed ? 'var(--success)' : 'var(--accent)',
-            color: 'white',
-            fontWeight: '600',
-            animation: interactionsRevealed ? 'none' : 'pulse 2s infinite',
-            cursor: interactionsRevealed ? 'default' : 'pointer',
-            opacity: interactionsRevealed ? '0.9' : '1'
           }}
           disabled={interactionsRevealed}
         >
@@ -146,9 +122,8 @@ const ActionButtons = ({
 
       <button
         id="create-board"
-        className="btn"
+        className="btn btn-with-icon"
         onClick={handleCreateNewBoard}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
         <PlusSquare size={16} />
         New Board
@@ -264,15 +239,14 @@ const ActionButtons = ({
                       Off
                     </button>
                   </div>
-                  <p className="settings-hint" style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  <p className="settings-hint">
                     When enabled, new cards appear with hidden text until revealed
                   </p>
                 </div>
                 <div className="settings-divider"></div>
-                <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
+                <div className="settings-section settings-section-padded">
                   <button
-                    className="btn danger-btn"
-                    style={{ width: '100%', margin: 'var(--space-xs) 0' }}
+                    className="btn danger-btn settings-full-width-btn"
                     onClick={() => {
                       if (resetAllVotes()) {
                         showNotification('All votes reset to zero');

@@ -251,15 +251,31 @@ function Card({
     }
   };
 
+  // Determine dynamic classes based on state
+  const getDynamicClasses = () => {
+    const classes = [];
+    
+    if (isDragging) classes.push('dragging');
+    if (editingDisabled) classes.push('editing-disabled');
+    if (dragDisabled && !canDropOnCard) classes.push('drag-disabled');
+    if (isOver) classes.push('drop-target');
+    if (canDropOnCard) classes.push('groupable');
+    if (isCardAuthor()) classes.push('author-editable');
+    
+    // Cursor classes
+    if (canDropOnCard) classes.push('cursor-grab');
+    else if (dragDisabled) classes.push('cursor-not-allowed');
+    else if (isEditing) classes.push('cursor-default');
+    else classes.push('cursor-pointer');
+    
+    return classes.join(' ');
+  };
+
   return (
     <div
       ref={combinedRef}
-      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled && !canDropOnCard ? 'drag-disabled' : ''} ${isOver ? 'drop-target' : ''} ${canDropOnCard ? 'groupable' : ''} ${isCardAuthor() ? 'author-editable' : ''}`}
+      className={`card ${getDynamicClasses()}`}
       onClick={handleCardClick}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-        cursor: canDropOnCard ? 'grab' : (dragDisabled ? 'not-allowed' : (isEditing ? 'default' : 'pointer'))
-      }}
     >
       {isEditing ? (
         <CardEditor

@@ -193,6 +193,27 @@
     transform: none;
 }
 
+/* Dynamic card states */
+.card.dragging {
+    opacity: 0.5;
+}
+
+.card.cursor-grab {
+    cursor: grab;
+}
+
+.card.cursor-not-allowed {
+    cursor: not-allowed;
+}
+
+.card.cursor-default {
+    cursor: default;
+}
+
+.card.cursor-pointer {
+    cursor: pointer;
+}
+
 .vote-count {
     min-width: 1.5rem;
     text-align: center;

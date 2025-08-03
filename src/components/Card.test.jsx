@@ -239,7 +239,6 @@ describe('Card Component', () => {
     // Check if the card div has the dragging class
     const cardElement = screen.getByText('Test card content').closest('.card');
     expect(cardElement).toHaveClass('dragging');
-    expect(cardElement).toHaveStyle('opacity: 0.5');
   });
 
   test('shows emoji picker when clicking the + icon', () => {

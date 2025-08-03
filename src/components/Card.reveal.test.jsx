@@ -400,7 +400,7 @@ describe('Card Reveal Mode', () => {
         // Card should have editing-disabled class and normal drag (no grouping yet)
         expect(cardElement).toHaveClass('editing-disabled');
         expect(cardElement).not.toHaveClass('groupable');
-        expect(cardElement).toHaveStyle('cursor: not-allowed');
+        expect(cardElement).toHaveClass('cursor-not-allowed');
     });
 
     test('allows editing for creators when cards are obfuscated', () => {
@@ -424,7 +424,7 @@ describe('Card Reveal Mode', () => {
 
         // Card should NOT be groupable yet (cards not revealed)
         expect(cardElement).not.toHaveClass('groupable');
-        expect(cardElement).toHaveStyle('cursor: pointer'); // Creator can still edit
+        expect(cardElement).toHaveClass('cursor-pointer'); // Creator can still edit
     });
 
     test('enables card-on-card dragging for grouping when cards are revealed', () => {
@@ -446,7 +446,7 @@ describe('Card Reveal Mode', () => {
 
         // Card should be groupable for drag-onto-card functionality after cards are revealed
         expect(cardElement).toHaveClass('groupable');
-        expect(cardElement).toHaveStyle('cursor: grab');
+        expect(cardElement).toHaveClass('cursor-grab');
     });
 
     test('disables dragging when cards are obfuscated (before reveal) for non-creators', () => {
@@ -468,7 +468,7 @@ describe('Card Reveal Mode', () => {
 
         // Card should have drag disabled when obfuscated for non-creators
         expect(cardElement).toHaveClass('drag-disabled');
-        expect(cardElement).toHaveStyle('cursor: not-allowed');
+        expect(cardElement).toHaveClass('cursor-not-allowed');
     });
 
     test('enables dragging when cards are revealed', () => {
@@ -490,7 +490,7 @@ describe('Card Reveal Mode', () => {
 
         // Card should NOT have drag-disabled class when revealed
         expect(cardElement).not.toHaveClass('drag-disabled');
-        expect(cardElement).toHaveStyle('cursor: grab'); // Grouping mode cursor
+        expect(cardElement).toHaveClass('cursor-grab'); // Grouping mode cursor
     });
 
     test('enables dragging when reveal mode is disabled', () => {
@@ -512,6 +512,6 @@ describe('Card Reveal Mode', () => {
 
         // Card should NOT have drag-disabled class when reveal mode is off
         expect(cardElement).not.toHaveClass('drag-disabled');
-        expect(cardElement).toHaveStyle('cursor: pointer');
+        expect(cardElement).toHaveClass('cursor-pointer');
     });
 });

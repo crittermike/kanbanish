@@ -50,7 +50,6 @@ const CardReactions = React.memo(({
               data-testid="emoji-reaction"
               onClick={disabled ? undefined : (e) => addReaction(e, emoji)}
               title={disabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
-              style={isFrozen ? { pointerEvents: 'none', cursor: 'default' } : undefined}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>

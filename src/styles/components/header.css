@@ -192,6 +192,21 @@ h1 {
     padding: var(--space-xs) 0;
 }
 
+.settings-section.settings-section-padded {
+    padding: 0 var(--space-sm);
+}
+
+.settings-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.settings-full-width-btn {
+    width: 100%;
+    margin: var(--space-xs) 0;
+}
+
 .settings-section-title {
     font-size: var(--font-size-sm);
     color: var(--text-muted);

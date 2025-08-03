@@ -34,6 +34,52 @@
     justify-content: center;
 }
 
+/* Button with icon layout */
+.btn-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+}
+
+/* Reveal button variants */
+.reveal-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-weight: 600;
+}
+
+.reveal-button.active {
+  background-color: var(--success);
+  cursor: default;
+  opacity: 0.9;
+  animation: none;
+}
+
+.reveal-button.pending {
+  background-color: var(--accent);
+  cursor: pointer;
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+.reveal-button.active {
+    background-color: var(--success) !important;
+    color: white;
+    cursor: default;
+    opacity: 0.9;
+}
+
+.reveal-button.pending {
+    background-color: var(--accent);
+    color: white;
+    animation: pulse 2s infinite;
+    cursor: pointer;
+    opacity: 1;
+}
+
 .primary-btn {
     background: var(--accent);
     color: white;
