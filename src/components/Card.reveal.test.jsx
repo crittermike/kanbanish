@@ -315,7 +315,8 @@ describe('Card Reveal Mode', () => {
             downvotingEnabled: true,
             multipleVotesAllowed: false,
             revealMode: true,
-            cardsRevealed: true // Cards are revealed
+            cardsRevealed: true, // Cards are revealed
+            interactionsRevealed: true // Interactions are also revealed
         });
 
         renderCard({ cardData: cardDataFromOtherUser });

@@ -11,7 +11,8 @@ export function useCardOperations({
   showNotification,
   multipleVotesAllowed = false, // pass this from the Card component
   revealMode = false,
-  cardsRevealed = false
+  cardsRevealed = false,
+  interactionsRevealed = false
 }) {
   // State
   const [isEditing, setIsEditing] = useState(false);

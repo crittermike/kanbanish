@@ -27,6 +27,7 @@ export const BoardProvider = ({ children }) => {
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [revealMode, setRevealMode] = useState(false); // Default to disabled (cards are visible)
   const [cardsRevealed, setCardsRevealed] = useState(false); // Track if cards have been revealed
+  const [interactionsRevealed, setInteractionsRevealed] = useState(false); // Track if interactions have been revealed
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
@@ -102,6 +103,9 @@ export const BoardProvider = ({ children }) => {
             }
             if (boardData.settings.cardsRevealed !== undefined) {
               setCardsRevealed(boardData.settings.cardsRevealed);
+            }
+            if (boardData.settings.interactionsRevealed !== undefined) {
+              setInteractionsRevealed(boardData.settings.interactionsRevealed);
             }
           }
         }
@@ -198,7 +202,8 @@ export const BoardProvider = ({ children }) => {
         downvotingEnabled: true, // Default to enabled for new boards
         multipleVotesAllowed: false, // Default to not allowing multiple votes
         revealMode: false, // Default to disabled (cards are visible)
-        cardsRevealed: false // Default to cards not revealed
+        cardsRevealed: false, // Default to cards not revealed
+        interactionsRevealed: false // Default to interactions not revealed
       }
     };
 
@@ -249,6 +254,7 @@ export const BoardProvider = ({ children }) => {
         multipleVotesAllowed: multipleVotesAllowed,
         revealMode: revealMode,
         cardsRevealed: cardsRevealed,
+        interactionsRevealed: interactionsRevealed,
         ...newSettings
       };
 
@@ -270,6 +276,9 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.cardsRevealed !== undefined) {
             setCardsRevealed(newSettings.cardsRevealed);
+          }
+          if (newSettings.interactionsRevealed !== undefined) {
+            setInteractionsRevealed(newSettings.interactionsRevealed);
           }
         })
         .catch((error) => {
@@ -302,6 +311,9 @@ export const BoardProvider = ({ children }) => {
       if (newSettings.cardsRevealed !== undefined) {
         setCardsRevealed(newSettings.cardsRevealed);
       }
+      if (newSettings.interactionsRevealed !== undefined) {
+        setInteractionsRevealed(newSettings.interactionsRevealed);
+      }
     }
   };
 
@@ -326,14 +338,19 @@ export const BoardProvider = ({ children }) => {
       // When enabling reveal mode, just update that setting
       updateBoardSettings({ revealMode: enabled });
     } else {
-      // When disabling reveal mode, also reset cardsRevealed to false
-      updateBoardSettings({ revealMode: enabled, cardsRevealed: false });
+      // When disabling reveal mode, also reset cardsRevealed and interactionsRevealed to false
+      updateBoardSettings({ revealMode: enabled, cardsRevealed: false, interactionsRevealed: false });
     }
   };
 
   // Reveal all cards (persist to Firebase)
   const revealAllCards = () => {
     updateBoardSettings({ cardsRevealed: true });
+  };
+
+  // Reveal all interactions (persist to Firebase)
+  const revealAllInteractions = () => {
+    updateBoardSettings({ interactionsRevealed: true });
   };
 
   // Reset all votes in the board
@@ -670,6 +687,9 @@ export const BoardProvider = ({ children }) => {
     cardsRevealed,
     setCardsRevealed,
     revealAllCards,
+    interactionsRevealed,
+    setInteractionsRevealed,
+    revealAllInteractions,
     updateBoardSettings,
     boardRef,
     createNewBoard,

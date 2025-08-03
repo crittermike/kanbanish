@@ -102,7 +102,7 @@ function Card({
   showNotification,
   onCardDropOnCard = null
 }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, revealMode, cardsRevealed } = useBoardContext();
+  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, revealMode, cardsRevealed, interactionsRevealed } = useBoardContext();
   const cardElementRef = useRef(null);
 
   // Use the custom hook for card operations
@@ -160,7 +160,8 @@ function Card({
     showNotification,
     multipleVotesAllowed,
     revealMode,
-    cardsRevealed
+    cardsRevealed,
+    interactionsRevealed
   });
 
   // Get comment count
@@ -170,6 +171,29 @@ function Card({
   const shouldObfuscate = revealMode && !cardsRevealed;
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
   const editingDisabled = shouldObfuscate && !isCreator;
+
+  // Filter interactions to show only user's own if interactions are not revealed
+  const shouldHideOthersInteractions = revealMode && cardsRevealed && !interactionsRevealed;
+  
+  // Create filtered card data for display
+  const displayCardData = shouldHideOthersInteractions ? {
+    ...cardData,
+    // Filter votes to only show user's own vote count
+    votes: cardData.voters && user?.uid && cardData.voters[user.uid] ? Math.abs(cardData.voters[user.uid]) : 0,
+    voters: cardData.voters && user?.uid ? { [user.uid]: cardData.voters[user.uid] } : {},
+    // Filter reactions to only show user's own
+    reactions: cardData.reactions ? Object.fromEntries(
+      Object.entries(cardData.reactions).filter(([emoji, data]) => 
+        data.users && user?.uid && data.users[user.uid]
+      ).map(([emoji, data]) => [emoji, { count: 1, users: { [user.uid]: true } }])
+    ) : {},
+    // Filter comments to only show user's own
+    comments: cardData.comments ? Object.fromEntries(
+      Object.entries(cardData.comments).filter(([commentId, comment]) => 
+        comment.createdBy === user?.uid
+      )
+    ) : {}
+  } : cardData;
 
   // Grouping is only available when reveal mode is enabled AND cards have been revealed
   const dragDisabled = shouldObfuscate && !isCreator; // Only disable drag for non-creators when obfuscated
@@ -239,7 +263,7 @@ function Card({
       ) : (
         <>
           <CardContent
-            cardData={cardData}
+            cardData={displayCardData}
             formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
             downvoteCard={downvoteCard}
@@ -252,14 +276,14 @@ function Card({
           />
 
           <CardReactions
-            reactions={cardData.reactions}
+            reactions={displayCardData.reactions}
             userId={user?.uid}
             showEmojiPicker={showEmojiPicker}
             setShowEmojiPicker={setShowEmojiPicker}
             setShowComments={setShowComments}
             addReaction={addReaction}
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-            commentCount={commentCount}
+            commentCount={Object.keys(displayCardData.comments || {}).length}
             toggleComments={toggleComments}
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
@@ -268,7 +292,7 @@ function Card({
 
           {showComments && (
             <Comments
-              comments={cardData.comments}
+              comments={displayCardData.comments}
               onAddComment={addComment}
               newComment={newComment}
               onCommentChange={setNewComment}

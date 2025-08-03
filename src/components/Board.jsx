@@ -62,6 +62,8 @@ const ActionButtons = ({
   updateRevealMode,
   cardsRevealed,
   revealAllCards,
+  interactionsRevealed,
+  revealAllInteractions,
   sortDropdownOpen,
   setSortDropdownOpen,
   resetAllVotes,
@@ -112,6 +114,33 @@ const ActionButtons = ({
           disabled={cardsRevealed}
         >
           {cardsRevealed ? '✅ Cards Revealed' : '👁️ Reveal All Cards'}
+        </button>
+      )}
+
+      {revealMode && cardsRevealed && (
+        <button
+          id="reveal-interactions"
+          className="btn primary-btn reveal-button"
+          onClick={() => {
+            if (!interactionsRevealed) {
+              revealAllInteractions();
+              showNotification('Interactions revealed! You can now see all votes, comments, and reactions.');
+            }
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: interactionsRevealed ? 'var(--success)' : 'var(--accent)',
+            color: 'white',
+            fontWeight: '600',
+            animation: interactionsRevealed ? 'none' : 'pulse 2s infinite',
+            cursor: interactionsRevealed ? 'default' : 'pointer',
+            opacity: interactionsRevealed ? '0.9' : '1'
+          }}
+          disabled={interactionsRevealed}
+        >
+          {interactionsRevealed ? '✅ Interactions Revealed' : '🗣️ Reveal Interactions'}
         </button>
       )}
 
@@ -337,6 +366,8 @@ function Board({ showNotification }) {
     updateRevealMode,
     cardsRevealed,
     revealAllCards,
+    interactionsRevealed,
+    revealAllInteractions,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
@@ -479,6 +510,8 @@ function Board({ showNotification }) {
             updateRevealMode={updateRevealMode}
             cardsRevealed={cardsRevealed}
             revealAllCards={revealAllCards}
+            interactionsRevealed={interactionsRevealed}
+            revealAllInteractions={revealAllInteractions}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
