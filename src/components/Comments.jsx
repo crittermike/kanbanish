@@ -37,12 +37,24 @@ const Comments = React.memo(({
   onCommentChange,
   onEditComment,
   onDeleteComment,
-  isCommentAuthor
+  isCommentAuthor,
+  interactionsDisabled = false,
+  disabledReason = null
 }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
   
   const startEditing = (commentId, content) => {
+    // Don't allow editing if interactions are disabled
+    if (interactionsDisabled) {
+      // Only show message if not in frozen state (Phase 3)
+      if (disabledReason !== 'frozen') {
+        const message = 'Comment editing is disabled until cards are revealed';
+        alert(message);
+      }
+      return;
+    }
+    
     setEditingCommentId(commentId);
     setEditedContent(content);
   };
@@ -59,6 +71,28 @@ const Comments = React.memo(({
     }
   };
   
+  // Get appropriate disabled message for comments
+  const getCommentDisabledMessage = () => {
+    if (!interactionsDisabled) return null;
+    // Don't show frozen message in Phase 3
+    return disabledReason === 'frozen' 
+      ? null
+      : 'Comments are disabled until cards are revealed';
+  };
+
+  const handleAddComment = () => {
+    if (interactionsDisabled) {
+      // Only show alert if not in frozen state
+      if (disabledReason !== 'frozen') {
+        alert(getCommentDisabledMessage());
+      }
+      return;
+    }
+    if (newComment.trim()) {
+      onAddComment();
+    }
+  };
+
   const confirmDelete = (commentId) => {
     if (window.confirm('Are you sure you want to delete this comment?')) {
       onDeleteComment(commentId);
@@ -81,14 +115,18 @@ const Comments = React.memo(({
               />
             ) : (
               <div 
-                className={`comment-content ${isCommentAuthor(comment) ? 'editable' : ''}`}
+                className={`comment-content ${isCommentAuthor(comment) && !interactionsDisabled ? 'editable' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isCommentAuthor(comment)) {
                     startEditing(commentId, comment.content);
                   }
                 }}
-                title={isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment'}
+                title={
+                  interactionsDisabled && disabledReason !== 'frozen'
+                    ? getCommentDisabledMessage()
+                    : (isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment')
+                }
               >
                 {comment.content}
               </div>
@@ -99,22 +137,35 @@ const Comments = React.memo(({
         <p className="no-comments">No comments yet</p>
       )}
 
-      <div className="comment-form">
-        <input
-          type="text"
-          placeholder="Add a comment..."
-          className="comment-input"
-          value={newComment}
-          onChange={(e) => onCommentChange(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && newComment.trim()) {
-              e.preventDefault();
-              onAddComment();
+      {/* Hide comment form when interactions are frozen */}
+      {disabledReason !== 'frozen' && (
+        <div className="comment-form">
+          <input
+            type="text"
+            placeholder={
+              interactionsDisabled && disabledReason !== 'frozen' 
+                ? getCommentDisabledMessage() 
+                : "Add a comment..."
             }
-          }}
-        />
-      </div>
+            className="comment-input"
+            value={newComment}
+            onChange={(e) => onCommentChange(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && newComment.trim()) {
+                e.preventDefault();
+                handleAddComment();
+              }
+            }}
+            disabled={interactionsDisabled}
+            title={
+              interactionsDisabled && disabledReason !== 'frozen' 
+                ? getCommentDisabledMessage() 
+                : ""
+            }
+          />
+        </div>
+      )}
     </div>
   );
 });

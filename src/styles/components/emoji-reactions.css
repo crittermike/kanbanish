@@ -69,6 +69,11 @@
     background-color: var(--hover-bg);
 }
 
+/* Frozen state: no hover effects but normal appearance */
+.emoji-reaction.frozen:hover {
+    background-color: transparent;
+}
+
 .emoji-reaction .emoji {
     margin-right: var(--space-xxs);
     font-size: var(--font-size-base);

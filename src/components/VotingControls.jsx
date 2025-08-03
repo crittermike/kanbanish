@@ -1,13 +1,28 @@
 import React from 'react';
 import { ChevronUp, ChevronDown } from 'react-feather';
 
-const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteButton = true, disabled = false }) => {
+const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteButton = true, disabled = false, disabledReason = 'voting-disabled' }) => {
+  // Determine the appropriate title based on the disabled reason
+  const getButtonTitle = (action) => {
+    if (!disabled) {
+      return action === 'upvote' ? 'Upvote' : 'Downvote';
+    }
+    
+    switch (disabledReason) {
+      case 'frozen':
+        return 'Voting is frozen - no more changes allowed';
+      case 'cards-not-revealed':
+      default:
+        return 'Voting disabled until cards are revealed';
+    }
+  };
+
   return (
     <div className="votes">
       <button
         className={`vote-button ${disabled ? 'disabled' : ''}`}
         onClick={disabled ? undefined : onUpvote}
-        title={disabled ? "Voting disabled until cards are revealed" : "Upvote"}
+        title={getButtonTitle('upvote')}
         disabled={disabled}
       >
         <ChevronUp size={16} />
@@ -17,7 +32,7 @@ const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteBu
         <button
           className={`vote-button ${disabled ? 'disabled' : ''}`}
           onClick={disabled ? undefined : onDownvote}
-          title={disabled ? "Voting disabled until cards are revealed" : "Downvote"}
+          title={getButtonTitle('downvote')}
           disabled={disabled}
         >
           <ChevronDown size={16} />

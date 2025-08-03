@@ -299,7 +299,45 @@ describe('Card Reveal Mode', () => {
         expect(addReactionButton.title).toContain('Reactions disabled until cards are revealed');
     });
 
-    test('enables voting and reactions when cards are revealed', () => {
+    test('enables voting and reactions when cards are revealed but interactions not revealed', () => {
+        const cardDataFromOtherUser = {
+            ...mockCardData,
+            createdBy: 'other-user-456', // Different creator
+            reactions: {
+                '😄': { count: 2, users: { 'other-user': true, 'user123': true } } // Include current user's reaction
+            }
+        };
+
+        useBoardContext.mockReturnValue({
+            boardId: 'board123',
+            user: { uid: 'user123' },
+            votingEnabled: true,
+            downvotingEnabled: true,
+            multipleVotesAllowed: false,
+            revealMode: true,
+            cardsRevealed: true, // Cards are revealed
+            interactionsRevealed: false // Interactions NOT revealed yet (phase 2)
+        });
+
+        renderCard({ cardData: cardDataFromOtherUser });
+
+        // Find voting buttons by their normal titles when enabled
+        const upvoteButton = screen.getByTitle('Upvote');
+        const downvoteButton = screen.getByTitle('Downvote');
+
+        expect(upvoteButton).not.toBeDisabled();
+        expect(downvoteButton).not.toBeDisabled();
+
+        // Add reaction button should be enabled when revealed
+        const addReactionButton = screen.getByRole('button', { name: '+' });
+        expect(addReactionButton).not.toBeDisabled();
+
+        // Since the test data includes reactions, check for existing reaction
+        const emojiReaction = screen.getByTestId('emoji-reaction');
+        expect(emojiReaction).not.toHaveClass('disabled');
+    });
+
+    test('freezes interactions when interactions are revealed', () => {
         const cardDataFromOtherUser = {
             ...mockCardData,
             createdBy: 'other-user-456', // Different creator
@@ -316,25 +354,25 @@ describe('Card Reveal Mode', () => {
             multipleVotesAllowed: false,
             revealMode: true,
             cardsRevealed: true, // Cards are revealed
-            interactionsRevealed: true // Interactions are also revealed
+            interactionsRevealed: true // Interactions revealed (phase 3 - frozen)
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
 
-        // Find voting buttons by their normal titles when enabled
-        const upvoteButton = screen.getByTitle('Upvote');
-        const downvoteButton = screen.getByTitle('Downvote');
+        // Find voting buttons - they should be disabled when interactions are revealed
+        const votingButtons = screen.getAllByTitle('Voting is frozen - no more changes allowed');
+        expect(votingButtons).toHaveLength(2); // upvote and downvote
+        votingButtons.forEach(button => {
+            expect(button).toBeDisabled();
+        });
 
-        expect(upvoteButton).not.toBeDisabled();
-        expect(downvoteButton).not.toBeDisabled();
+        // Add reaction button should be hidden when interactions are frozen
+        const addReactionButton = screen.queryByRole('button', { name: '+' });
+        expect(addReactionButton).not.toBeInTheDocument(); // Changed: button should be hidden when frozen
 
-        // Add reaction button should be enabled when revealed
-        const addReactionButton = screen.getByRole('button', { name: '+' });
-        expect(addReactionButton).not.toBeDisabled();
-
-        // Existing reaction should NOT have disabled class
+        // Existing reaction should NOT have disabled class when frozen (should look normal but not be clickable)
         const emojiReaction = screen.getByTestId('emoji-reaction');
-        expect(emojiReaction).not.toHaveClass('disabled');
+        expect(emojiReaction).not.toHaveClass('disabled'); // Changed: no disabled class when frozen
     });
 
     test('disables editing for non-creators when cards are obfuscated', () => {

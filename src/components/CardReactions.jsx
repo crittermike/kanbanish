@@ -14,9 +14,32 @@ const CardReactions = React.memo(({
   toggleComments,
   emojiPickerPosition,
   setEmojiPickerPosition,
-  disabled = false
+  disabled = false,
+  disabledReason = 'cards-not-revealed',
+  revealMode = false,
+  cardsRevealed = false
 }) => {
   const emojiButtonRef = useRef(null);
+
+  // Determine if comments button should be shown
+  // Hide comments button only in Phase 1 of reveal mode (reveal mode on, cards not revealed)
+  const shouldShowCommentsButton = !(revealMode && !cardsRevealed);
+
+  // Determine the appropriate disabled message based on the reason
+  const getDisabledMessage = () => {
+    switch (disabledReason) {
+      case 'frozen':
+        return 'Interactions are now frozen - no more changes allowed';
+      case 'cards-not-revealed':
+      default:
+        return 'Reactions disabled until cards are revealed';
+    }
+  };
+
+  // Determine styling approach based on disabled reason
+  // In frozen state (Phase 3), keep normal appearance but disable interactions
+  // In cards-not-revealed state (Phase 1), use disabled styling
+  const shouldUseDisabledStyling = disabled && disabledReason !== 'frozen';
 
   return (
     <div className="emoji-reactions">
@@ -28,11 +51,12 @@ const CardReactions = React.memo(({
 
           return (
             <div
-              className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+              className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${shouldUseDisabledStyling ? 'disabled' : ''} ${disabledReason === 'frozen' ? 'frozen' : ''}`}
               key={emoji}
               data-testid="emoji-reaction"
               onClick={disabled ? undefined : (e) => addReaction(e, emoji)}
-              title={disabled ? "Reactions disabled until cards are revealed" : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
+              title={disabled ? getDisabledMessage() : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
+              style={disabledReason === 'frozen' ? { pointerEvents: 'none', cursor: 'default' } : undefined}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>
@@ -47,26 +71,29 @@ const CardReactions = React.memo(({
             hasUserReactedWithEmoji={hasUserReactedWithEmoji}
           />
         )}
-        <button
-          className={`add-reaction-button ${disabled ? 'disabled' : ''}`}
-          onClick={disabled ? undefined : (e) => {
-            e.stopPropagation();
-            if (emojiButtonRef.current) {
-              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-              setEmojiPickerPosition({
-                top: buttonRect.bottom + window.scrollY + 5,
-                left: buttonRect.left + window.scrollX
-              });
-            }
-            setShowEmojiPicker(!showEmojiPicker);
-            setShowComments(false);
-          }}
-          title={disabled ? "Reactions disabled until cards are revealed" : "Add reaction"}
-          ref={emojiButtonRef}
-          disabled={disabled}
-        >+</button>
+        {/* Hide add reaction button when interactions are frozen */}
+        {disabledReason !== 'frozen' && (
+          <button
+            className={`add-reaction-button ${shouldUseDisabledStyling ? 'disabled' : ''}`}
+            onClick={disabled ? undefined : (e) => {
+              e.stopPropagation();
+              if (emojiButtonRef.current) {
+                const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+                setEmojiPickerPosition({
+                  top: buttonRect.bottom + window.scrollY + 5,
+                  left: buttonRect.left + window.scrollX
+                });
+              }
+              setShowEmojiPicker(!showEmojiPicker);
+              setShowComments(false);
+            }}
+            title={disabled ? getDisabledMessage() : "Add reaction"}
+            ref={emojiButtonRef}
+            disabled={shouldUseDisabledStyling}
+          >+</button>
+        )}
       </div>
-      {!disabled && (
+      {shouldShowCommentsButton && (
         <div className="reactions-right">
           <button
             className="comments-btn"

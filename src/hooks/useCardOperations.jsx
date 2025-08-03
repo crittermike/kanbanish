@@ -37,8 +37,11 @@ export function useCardOperations({
 
   // Helper to check if interactions should be disabled due to reveal mode
   const isInteractionDisabled = useCallback(() => {
-    return revealMode && !cardsRevealed;
-  }, [revealMode, cardsRevealed]);
+    // Disable interactions if:
+    // 1. Reveal mode is on and cards haven't been revealed yet, OR
+    // 2. Interactions have been revealed (freeze state after reveal)
+    return (revealMode && !cardsRevealed) || interactionsRevealed;
+  }, [revealMode, cardsRevealed, interactionsRevealed]);
 
   // Memoized database reference
   const cardRef = useMemo(() => 
@@ -116,6 +119,16 @@ export function useCardOperations({
     
     if (!boardId || !user) return;
     
+    // Check if interactions are disabled
+    if (isInteractionDisabled()) {
+      if (interactionsRevealed) {
+        showNotification('Voting is now frozen - no more changes allowed');
+      } else {
+        showNotification('Voting is disabled until cards are revealed');
+      }
+      return;
+    }
+    
     const currentVotes = cardData.votes || 0;
     
     // Prevent negative votes
@@ -182,7 +195,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error updating votes:', error);
     }
-  }, [boardId, columnId, cardId, cardData.votes, showNotification]);
+  }, [boardId, columnId, cardId, cardData.votes, showNotification, multipleVotesAllowed, user, isInteractionDisabled, interactionsRevealed]);
 
   const upvoteCard = useCallback((e) => {
     updateVotes(1, e, 'Upvoted card');
@@ -233,7 +246,11 @@ export function useCardOperations({
     
     // Check if interactions are disabled due to reveal mode
     if (isInteractionDisabled()) {
-      showNotification('Reactions are disabled until cards are revealed');
+      if (interactionsRevealed) {
+        showNotification('Interactions are now frozen - no more changes allowed');
+      } else {
+        showNotification('Reactions are disabled until cards are revealed');
+      }
       return;
     }
     
@@ -255,11 +272,21 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error managing reaction:', error);
     }
-  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled]);
+  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled, interactionsRevealed]);
 
   // Comment operations
   const addComment = useCallback(async () => {
     if (!boardId || !newComment.trim()) return;
+
+    // Check if interactions are disabled
+    if (isInteractionDisabled()) {
+      if (interactionsRevealed) {
+        showNotification('Comments are now frozen - no more changes allowed');
+      } else {
+        showNotification('Comments are disabled until cards are revealed');
+      }
+      return;
+    }
 
     try {
       const commentId = `comment_${Date.now()}`;
@@ -276,10 +303,20 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error adding comment:', error);
     }
-  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid]);
+  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid, isInteractionDisabled, interactionsRevealed]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !commentId || !newContent.trim()) return;
+
+    // Check if interactions are disabled
+    if (isInteractionDisabled()) {
+      if (interactionsRevealed) {
+        showNotification('Comments are now frozen - no more changes allowed');
+      } else {
+        showNotification('Comment editing is disabled until cards are revealed');
+      }
+      return;
+    }
 
     try {
       // Get current comment data to check authorship
@@ -303,10 +340,20 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error updating comment:', error);
     }
-  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor]);
+  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor, isInteractionDisabled, interactionsRevealed]);
 
   const deleteComment = useCallback(async (commentId) => {
     if (!boardId || !commentId) return;
+
+    // Check if interactions are disabled
+    if (isInteractionDisabled()) {
+      if (interactionsRevealed) {
+        showNotification('Comments are now frozen - no more changes allowed');
+      } else {
+        showNotification('Comment deletion is disabled until cards are revealed');
+      }
+      return;
+    }
 
     try {
       // Get current comment data to check authorship
@@ -325,7 +372,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
-  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor]);
+  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor, isInteractionDisabled, interactionsRevealed]);
 
   const toggleComments = useCallback(() => {
     setShowComments(!showComments);

@@ -44,7 +44,10 @@ const CardContent = ({
   userId,
   revealMode,
   cardsRevealed,
-  groupId
+  groupId,
+  isInteractionDisabled,
+  interactionsRevealed,
+  getDisabledReason
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -69,8 +72,8 @@ const CardContent = ({
   const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
   const showObfuscatedText = shouldObfuscate && !isCreator; // Don't obfuscate for the creator
 
-  // Disable interactions for ALL users when reveal mode is active and cards haven't been revealed yet
-  const interactionsDisabled = shouldObfuscate; // This affects everyone, not just non-creators
+  // For now, calculate interactions disabled directly based on reveal mode and cards revealed status
+  const interactionsDisabled = (revealMode && !cardsRevealed) || interactionsRevealed;
 
   const displayContent = showObfuscatedText ?
     generateObfuscatedText(cardData.content) :
@@ -85,6 +88,7 @@ const CardContent = ({
           onDownvote={interactionsDisabled ? () => { } : downvoteCard}
           showDownvoteButton={showDownvoteButton}
           disabled={interactionsDisabled}
+          disabledReason={getDisabledReason()}
         />
       )}
       <div className={`card-content ${!votingEnabled || groupId ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
@@ -167,6 +171,14 @@ function Card({
   // Get comment count
   const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
 
+  // Determine the reason for disabled interactions
+  const getDisabledReason = () => {
+    const disabled = isInteractionDisabled();
+    if (!disabled) return null;
+    if (interactionsRevealed) return 'frozen';
+    return 'cards-not-revealed';
+  };
+
   // Determine if editing should be disabled for this user
   const shouldObfuscate = revealMode && !cardsRevealed;
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
@@ -187,7 +199,7 @@ function Card({
         data.users && user?.uid && data.users[user.uid]
       ).map(([emoji, data]) => [emoji, { count: 1, users: { [user.uid]: true } }])
     ) : {},
-    // Filter comments to only show user's own
+    // Filter comments to only show user's own when interactions are hidden
     comments: cardData.comments ? Object.fromEntries(
       Object.entries(cardData.comments).filter(([commentId, comment]) => 
         comment.createdBy === user?.uid
@@ -273,6 +285,9 @@ function Card({
             revealMode={revealMode}
             cardsRevealed={cardsRevealed}
             groupId={groupId}
+            isInteractionDisabled={isInteractionDisabled}
+            interactionsRevealed={interactionsRevealed}
+            getDisabledReason={getDisabledReason}
           />
 
           <CardReactions
@@ -288,6 +303,9 @@ function Card({
             emojiPickerPosition={emojiPickerPosition}
             setEmojiPickerPosition={setEmojiPickerPosition}
             disabled={isInteractionDisabled()}
+            disabledReason={getDisabledReason()}
+            revealMode={revealMode}
+            cardsRevealed={cardsRevealed}
           />
 
           {showComments && (
@@ -299,6 +317,8 @@ function Card({
               onEditComment={editComment}
               onDeleteComment={deleteComment}
               isCommentAuthor={isCommentAuthor}
+              interactionsDisabled={isInteractionDisabled()}
+              disabledReason={getDisabledReason()}
             />
           )}
         </>
