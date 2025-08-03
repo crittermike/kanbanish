@@ -18,8 +18,10 @@ export default defineConfig({
     include: /src\/.*\.jsx?$/,
     exclude: [],
   },
-  // Configure to support GitHub Pages deployment with custom domain
-  base: '/',
+  // Configure to support GitHub Pages deployment with custom domain or regular pages depending on environment variable
+  base: process.env.NODE_ENV === 'production' 
+    ? (process.env.GITHUB_PAGES ? '/kanbanish/' : '/')
+    : '/',
   build: {
     outDir: 'build',  // Same output directory as Create React App for consistency
   },
