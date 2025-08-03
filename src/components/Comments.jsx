@@ -36,7 +36,8 @@ const Comments = React.memo(({
   newComment, 
   onCommentChange,
   onEditComment,
-  onDeleteComment
+  onDeleteComment,
+  isCommentAuthor
 }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
@@ -80,11 +81,14 @@ const Comments = React.memo(({
               />
             ) : (
               <div 
-                className="comment-content"
+                className={`comment-content ${isCommentAuthor(comment) ? 'editable' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  startEditing(commentId, comment.content);
+                  if (isCommentAuthor(comment)) {
+                    startEditing(commentId, comment.content);
+                  }
                 }}
+                title={isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment'}
               >
                 {comment.content}
               </div>

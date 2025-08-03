@@ -19,18 +19,37 @@ export function useCardOperations({
   const [newComment, setNewComment] = useState('');
   const [emojiPickerPosition, setEmojiPickerPosition] = useState({ top: 0, left: 0 });
 
+  // Authorship checking functions
+  const isCardAuthor = useCallback(() => {
+    // Allow editing if no createdBy field exists (for backward compatibility)
+    if (!cardData.createdBy) return true;
+    return cardData.createdBy && user?.uid && cardData.createdBy === user.uid;
+  }, [cardData.createdBy, user?.uid]);
+
+  const isCommentAuthor = useCallback((comment) => {
+    // Allow editing if no createdBy field exists (for backward compatibility)
+    if (!comment.createdBy) return true;
+    return comment.createdBy && user?.uid && comment.createdBy === user.uid;
+  }, [user?.uid]);
+
   // Memoized database reference
   const cardRef = useMemo(() => 
     ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`),
     [boardId, columnId, cardId]
   );
 
-  // Toggle edit mode
+  // Toggle edit mode (only allow if user is the author)
   const toggleEditMode = useCallback((e) => {
     if (e) e.stopPropagation();
+    
+    if (!isCardAuthor()) {
+      showNotification('Only the author can edit this card');
+      return;
+    }
+    
     setIsEditing(!isEditing);
     setEditedContent(cardData.content || '');
-  }, [isEditing, cardData.content]);
+  }, [isEditing, cardData.content, isCardAuthor, showNotification]);
 
   // Save card changes
   const saveCardChanges = useCallback(async () => {
@@ -232,7 +251,8 @@ export function useCardOperations({
       const commentId = `comment_${Date.now()}`;
       const commentData = {
         content: newComment,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        createdBy: user?.uid || null // Add creator information
       };
 
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
@@ -242,17 +262,23 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error adding comment:', error);
     }
-  }, [boardId, columnId, cardId, newComment, showNotification]);
+  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !commentId || !newContent.trim()) return;
 
     try {
-      const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
-      
-      // Get current comment data to preserve timestamp
+      // Get current comment data to check authorship
       const existingComment = cardData.comments?.[commentId];
       if (!existingComment) return;
+      
+      // Check if user is the author of this comment
+      if (!isCommentAuthor(existingComment)) {
+        showNotification('Only the author can edit this comment');
+        return;
+      }
+      
+      const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       
       await set(commentRef, {
         ...existingComment,
@@ -263,19 +289,29 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error updating comment:', error);
     }
-  }, [boardId, columnId, cardId, cardData.comments, showNotification]);
+  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor]);
 
   const deleteComment = useCallback(async (commentId) => {
     if (!boardId || !commentId) return;
 
     try {
+      // Get current comment data to check authorship
+      const existingComment = cardData.comments?.[commentId];
+      if (!existingComment) return;
+      
+      // Check if user is the author of this comment
+      if (!isCommentAuthor(existingComment)) {
+        showNotification('Only the author can delete this comment');
+        return;
+      }
+      
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       await remove(commentRef);
       showNotification('Comment deleted');
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
-  }, [boardId, columnId, cardId, showNotification]);
+  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor]);
 
   const toggleComments = useCallback(() => {
     setShowComments(!showComments);
@@ -336,6 +372,10 @@ export function useCardOperations({
     addComment,
     editComment,
     deleteComment,
-    toggleComments
+    toggleComments,
+    
+    // Authorship checking
+    isCardAuthor,
+    isCommentAuthor
   };
 }

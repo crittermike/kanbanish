@@ -52,6 +52,22 @@
     cursor: pointer !important;
 }
 
+.card.author-editable {
+    position: relative;
+}
+
+.card.author-editable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0.7;
+}
+
 .card-selection-indicator {
     position: absolute;
     top: var(--space-xs);
@@ -235,6 +251,17 @@
     color: var(--text-color);
     word-break: break-word;
     line-height: 1.4;
+}
+
+.comment-content.editable {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+}
+
+.comment-content.editable:hover {
+    background-color: var(--bg-secondary);
 }
 
 /* Empty column placeholder */

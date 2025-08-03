@@ -143,7 +143,11 @@ function Card({
     addComment,
     editComment,
     deleteComment,
-    toggleComments
+    toggleComments,
+    
+    // Authorship checking
+    isCardAuthor,
+    isCommentAuthor
   } = useCardOperations({
     boardId,
     columnId,
@@ -211,7 +215,7 @@ function Card({
   return (
     <div
       ref={combinedRef}
-      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled && !canDropOnCard ? 'drag-disabled' : ''} ${isOver ? 'drop-target' : ''} ${canDropOnCard ? 'groupable' : ''}`}
+      className={`card ${isDragging ? 'dragging' : ''} ${editingDisabled ? 'editing-disabled' : ''} ${dragDisabled && !canDropOnCard ? 'drag-disabled' : ''} ${isOver ? 'drop-target' : ''} ${canDropOnCard ? 'groupable' : ''} ${isCardAuthor() ? 'author-editable' : ''}`}
       onClick={handleCardClick}
       style={{
         opacity: isDragging ? 0.5 : 1,
@@ -265,6 +269,7 @@ function Card({
               onCommentChange={setNewComment}
               onEditComment={editComment}
               onDeleteComment={deleteComment}
+              isCommentAuthor={isCommentAuthor}
             />
           )}
         </>
