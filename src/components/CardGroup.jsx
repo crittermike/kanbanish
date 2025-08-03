@@ -12,6 +12,7 @@ function CardGroup({
   groupId, 
   groupData, 
   columnId, 
+  columnData, // Add columnData to access all cards
   showNotification,
   sortByVotes 
 }) {
@@ -35,15 +36,19 @@ function CardGroup({
     accept: 'CARD',
     drop: (item) => {
       // Only allow dropping if the card is not already in this group
-      if (item.columnId === columnId && !groupData.cards[item.cardId]) {
+      // AND the card is not coming from this same group
+      if (item.columnId === columnId && 
+          !groupData.cardIds?.includes(item.cardId) &&
+          item.groupId !== groupId) {
         moveCard(item.cardId, item.columnId, columnId, groupId);
         showNotification('Card added to group');
+        return { handled: true }; // Signal that this drop was handled
       }
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
-  }), [columnId, groupId, groupData.cards, moveCard, showNotification]);
+  }), [columnId, groupId, groupData.cardIds, moveCard, showNotification]);
 
   // Apply the drop ref to group element
   drop(groupRef);
@@ -61,12 +66,15 @@ function CardGroup({
 
   // Sort cards within the group
   const sortedCards = () => {
-    if (!groupData.cards) return [];
+    if (!groupData.cardIds || !columnData.cards) return [];
 
-    const cardsArray = Object.entries(groupData.cards).map(([id, data]) => ({
-      id,
-      ...data
-    }));
+    // Get actual card data from column for cards in this group
+    const cardsArray = groupData.cardIds
+      .map(cardId => {
+        const cardData = columnData.cards[cardId];
+        return cardData ? { id: cardId, ...cardData } : null;
+      })
+      .filter(Boolean); // Remove null entries
 
     if (sortByVotes) {
       return cardsArray.sort((a, b) => (b.votes || 0) - (a.votes || 0));
@@ -104,7 +112,7 @@ function CardGroup({
     }
   };
 
-  const cardCount = Object.keys(groupData.cards || {}).length;
+  const cardCount = groupData.cardIds ? groupData.cardIds.length : 0;
 
   return (
     <div 
@@ -131,15 +139,27 @@ function CardGroup({
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <h3 
-              className="card-group-name"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditingName(true);
-              }}
-            >
-              {groupData.name || 'Unnamed Group'}
-            </h3>
+            <div className="group-name-container">
+              <h3 
+                className="card-group-name"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingName(true);
+                }}
+              >
+                {groupData.name || 'Unnamed Group'}
+              </h3>
+              <button
+                className="edit-group-name-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingName(true);
+                }}
+                title="Edit group name"
+              >
+                <Edit2 size={12} />
+              </button>
+            </div>
           )}
         </div>
 

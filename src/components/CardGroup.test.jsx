@@ -38,16 +38,22 @@ describe('CardGroup Component', () => {
     name: 'Test Group',
     expanded: true,
     created: Date.now(),
+    cardIds: ['card1', 'card2'] // New structure: just store card IDs
+  };
+
+  const mockColumnData = {
     cards: {
       'card1': {
         content: 'First card',
         votes: 3,
-        created: Date.now() - 1000
+        created: Date.now() - 1000,
+        groupId: 'group123'
       },
       'card2': {
         content: 'Second card',
         votes: 1,
-        created: Date.now()
+        created: Date.now(),
+        groupId: 'group123'
       }
     }
   };
@@ -56,6 +62,7 @@ describe('CardGroup Component', () => {
     groupId: 'group123',
     groupData: mockGroupData,
     columnId: 'column1',
+    columnData: mockColumnData, // Add columnData
     showNotification: vi.fn(),
     sortByVotes: false
   };
@@ -156,7 +163,7 @@ describe('CardGroup Component', () => {
   });
 
   test('shows empty state when no cards in group', () => {
-    const emptyGroupData = { ...mockGroupData, cards: {} };
+    const emptyGroupData = { ...mockGroupData, cardIds: [] };
     render(<CardGroup {...mockProps} groupData={emptyGroupData} />);
     
     expect(screen.getByText('No cards in this group')).toBeInTheDocument();
@@ -217,5 +224,43 @@ describe('CardGroup Component', () => {
     const upvoteButton = voteButtons.find(button => button.title === 'Upvote');
     
     expect(upvoteButton).toBeUndefined();
+  });
+
+  test('handles moving card from one group to another without duplication', async () => {
+    const { useDrop } = await import('react-dnd');
+    
+    // Mock a card being dragged from another group
+    const draggedCard = {
+      cardId: 'card3',
+      columnId: 'column1',
+      groupId: 'other-group',
+      cardData: { content: 'Dragged card', groupId: 'other-group' }
+    };
+
+    // Mock useDrop to simulate dropping a card from another group
+    useDrop.mockReturnValueOnce([
+      { isOver: false },
+      vi.fn().mockImplementation((ref) => {
+        // Simulate the drop event
+        const dropHandlers = useDrop.mock.calls[useDrop.mock.calls.length - 1][0];
+        dropHandlers().drop(draggedCard);
+        return ref;
+      })
+    ]);
+
+    render(<CardGroup {...mockProps} />);
+    
+    // Verify that moveCard was called correctly to move from other-group to this group
+    await waitFor(() => {
+      expect(mockBoardContext.moveCard).toHaveBeenCalledWith(
+        'card3', // cardId
+        'column1', // sourceColumnId (same column)
+        'column1', // targetColumnId (same column) 
+        'group123' // targetGroupId (this group)
+      );
+    });
+    
+    // Verify success notification
+    expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
   });
 });

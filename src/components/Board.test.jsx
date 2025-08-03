@@ -682,7 +682,8 @@ describe('Board Component', () => {
         title: 'To Do',
         cards: {
           'card1': { content: 'Low vote card', votes: 1, created: 1000 },
-          'card2': { content: 'High vote card', votes: 10, created: 3000 }
+          'card2': { content: 'High vote card', votes: 10, created: 3000 },
+          'card3': { content: 'Grouped card', votes: 0, created: 4000, groupId: 'group1' }
         },
         groups: {
           'group1': { 
@@ -690,9 +691,7 @@ describe('Board Component', () => {
             votes: 5, 
             created: 2000,
             expanded: true,
-            cards: {
-              'card3': { content: 'Grouped card', votes: 0, created: 4000 }
-            }
+            cardIds: ['card3'] // New structure: just store card IDs
           }
         }
       }

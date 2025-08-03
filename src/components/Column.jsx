@@ -38,7 +38,12 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
-    drop: (item) => {
+    drop: (item, monitor) => {
+      // Only handle the drop if it wasn't handled by a child component (like CardGroup)
+      if (monitor.didDrop()) {
+        return; // Child component already handled the drop
+      }
+      
       if (item.columnId !== columnId) {
         // Moving card between different columns
         moveCard(item.cardId, item.columnId, columnId);
@@ -145,14 +150,16 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     }
   };
 
-  // Sort cards by votes or creation time
+  // Sort cards by votes or creation time - only ungrouped cards
   const sortedCards = () => {
     if (!columnData.cards) return [];
 
-    const cardsArray = Object.entries(columnData.cards).map(([id, data]) => ({
-      id,
-      ...data
-    }));
+    const cardsArray = Object.entries(columnData.cards)
+      .filter(([id, data]) => !data.groupId) // Only include cards not in groups
+      .map(([id, data]) => ({
+        id,
+        ...data
+      }));
 
     if (sortByVotes) {
       return cardsArray.sort((a, b) => (b.votes || 0) - (a.votes || 0));
@@ -276,6 +283,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 groupId={item.data.id}
                 groupData={item.data}
                 columnId={columnId}
+                columnData={columnData}
                 sortByVotes={sortByVotes}
                 showNotification={showNotification}
               />

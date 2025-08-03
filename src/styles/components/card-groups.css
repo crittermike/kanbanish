@@ -11,7 +11,7 @@
     border: 2px solid var(--border-color);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-md);
-    overflow: hidden;
+    overflow: visible;
     transition: all var(--transition-speed);
     position: relative;
 }
@@ -68,6 +68,36 @@
 
 .card-group-name:hover {
     background: var(--input-bg);
+}
+
+.group-name-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex: 1;
+}
+
+.edit-group-name-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: all var(--transition-speed);
+}
+
+.group-name-container:hover .edit-group-name-btn {
+    opacity: 1;
+}
+
+.edit-group-name-btn:hover {
+    background: var(--surface-3);
+    color: var(--text-color);
 }
 
 .group-name-input {
@@ -127,6 +157,8 @@
 /* Group Content */
 .card-group-content {
     padding: var(--space-sm);
+    max-height: none;
+    overflow: visible;
 }
 
 .card-group-content .card {
