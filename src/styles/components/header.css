@@ -200,6 +200,7 @@ h1 {
     font-size: 12px;
     color: var(--text-muted);
     margin-top: 4px;
+    padding: 0 var(--space-sm);
 }
 
 .settings-full-width-btn {
