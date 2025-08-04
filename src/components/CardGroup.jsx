@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Layers, Edit2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import Card from './Card';
 import VotingControls from './VotingControls';
-import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed } from '../utils/workflowUtils';
+import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 
 /**
  * CardGroup component renders a group of cards with expand/collapse functionality
@@ -153,17 +153,17 @@ function CardGroup({
           ) : (
             <div className="group-name-container">
               <h3 
-                className={`card-group-name ${!areInteractionsAllowed(workflowPhase, retrospectiveMode) ? 'non-editable' : ''}`}
+                className={`card-group-name ${!isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'non-editable' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (areInteractionsAllowed(workflowPhase, retrospectiveMode)) {
+                  if (isGroupingAllowed(workflowPhase, retrospectiveMode)) {
                     setIsEditingName(true);
                   }
                 }}
               >
                 {groupData.name || 'Unnamed Group'}
               </h3>
-              {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
+              {isGroupingAllowed(workflowPhase, retrospectiveMode) && (
                 <button
                   className="edit-group-name-btn"
                   onClick={(e) => {
