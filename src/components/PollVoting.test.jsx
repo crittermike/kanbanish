@@ -17,7 +17,8 @@ describe('PollVoting Component', () => {
     userPollVote: null,
     submitPollVote: mockSubmitPollVote,
     getPollStats: mockGetPollStats,
-    activeUsers: 5
+    activeUsers: 5,
+    pollVotes: {}
   };
 
   beforeEach(() => {

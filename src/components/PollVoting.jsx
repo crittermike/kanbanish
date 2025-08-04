@@ -3,7 +3,7 @@ import { useBoardContext } from '../context/BoardContext';
 import { Star, Users } from 'react-feather';
 
 const PollVoting = () => {
-  const { userPollVote, submitPollVote, getPollStats, activeUsers } = useBoardContext();
+  const { userPollVote, submitPollVote, getPollStats, activeUsers, pollVotes } = useBoardContext();
   const [hoveredRating, setHoveredRating] = useState(0);
 
   const handleVote = (rating) => {
