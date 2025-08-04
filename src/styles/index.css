@@ -18,6 +18,7 @@
 @import 'components/template-select.css';
 @import 'components/results.css';
 @import 'components/workflow.css';
+@import 'components/poll.css';
 
 /* Utility classes and notifications */
 .notification {

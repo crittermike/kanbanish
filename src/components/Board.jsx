@@ -4,6 +4,8 @@ import Column from './Column';
 import UserCounter from './UserCounter';
 import WorkflowControls from './WorkflowControls';
 import ResultsView from './ResultsView';
+import PollVoting from './PollVoting';
+import PollResults from './PollResults';
 import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -468,6 +470,10 @@ function Board({ showNotification }) {
       <main>
         {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView showNotification={showNotification} />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
+          <PollVoting />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
+          <PollResults />
         ) : (
           <ColumnsContainer
             columns={columns}

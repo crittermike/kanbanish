@@ -32,6 +32,10 @@ export const BoardProvider = ({ children }) => {
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
   const [resultsViewIndex, setResultsViewIndex] = useState(0); // For navigating results
   
+  // Poll state for retrospective effectiveness rating
+  const [pollVotes, setPollVotes] = useState({}); // { userId: rating }
+  const [userPollVote, setUserPollVote] = useState(null); // Current user's vote
+  
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
@@ -111,6 +115,19 @@ export const BoardProvider = ({ children }) => {
             if (boardData.settings.resultsViewIndex !== undefined) {
               setResultsViewIndex(boardData.settings.resultsViewIndex);
             }
+          }
+
+          // Load poll data
+          if (boardData.poll) {
+            setPollVotes(boardData.poll.votes || {});
+            if (user && boardData.poll.votes && boardData.poll.votes[user.uid]) {
+              setUserPollVote(boardData.poll.votes[user.uid]);
+            } else {
+              setUserPollVote(null);
+            }
+          } else {
+            setPollVotes({});
+            setUserPollVote(null);
           }
         }
       });
@@ -368,12 +385,56 @@ export const BoardProvider = ({ children }) => {
     });
   };
 
+  const startPollPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.POLL
+    });
+  };
+
+  const startPollResultsPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
+    });
+  };
+
   const goToCreationPhase = () => {
     updateBoardSettings({ 
       workflowPhase: WORKFLOW_PHASES.CREATION,
       retrospectiveMode: false,
       resultsViewIndex: 0
     });
+  };
+
+  // Poll functionality for retrospective effectiveness rating
+  const submitPollVote = (rating) => {
+    if (!boardId || !user || rating < 1 || rating > 5) return;
+
+    const pollRef = ref(database, `boards/${boardId}/poll/votes/${user.uid}`);
+    set(pollRef, rating).then(() => {
+      setUserPollVote(rating);
+    }).catch((error) => {
+      console.error('Error submitting poll vote:', error);
+    });
+  };
+
+  const getPollStats = () => {
+    const votes = Object.values(pollVotes);
+    if (votes.length === 0) {
+      return { average: 0, distribution: [0, 0, 0, 0, 0], totalVotes: 0 };
+    }
+
+    const distribution = [0, 0, 0, 0, 0]; // Index 0 = rating 1, Index 4 = rating 5
+    let sum = 0;
+
+    votes.forEach(vote => {
+      if (vote >= 1 && vote <= 5) {
+        distribution[vote - 1]++;
+        sum += vote;
+      }
+    });
+
+    const average = sum / votes.length;
+    return { average, distribution, totalVotes: votes.length };
   };
 
   // Remove all grouping from the board
@@ -455,6 +516,16 @@ export const BoardProvider = ({ children }) => {
       case WORKFLOW_PHASES.RESULTS:
         updateBoardSettings({ 
           workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
+        });
+        break;
+      case WORKFLOW_PHASES.POLL:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.RESULTS
+        });
+        break;
+      case WORKFLOW_PHASES.POLL_RESULTS:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.POLL
         });
         break;
       default:
@@ -884,10 +955,17 @@ export const BoardProvider = ({ children }) => {
     startInteractionsPhase,
     startInteractionRevealPhase,
     startResultsPhase,
+    startPollPhase,
+    startPollResultsPhase,
     goToCreationPhase,
     goToPreviousPhase,
     navigateResults,
     getSortedItemsForResults,
+    // Poll system
+    pollVotes,
+    userPollVote,
+    submitPollVote,
+    getPollStats,
     // Card grouping functions
     createCardGroup,
     ungroupCards,
