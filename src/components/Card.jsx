@@ -12,7 +12,8 @@ import {
   areOthersInteractionsVisible,
   shouldObfuscateCards,
   isCardEditingAllowed,
-  isCardDraggingAllowed
+  isCardDraggingAllowed,
+  WORKFLOW_PHASES
 } from '../utils/workflowUtils';
 // Import modularized components
 import CardReactions from './CardReactions';
@@ -303,7 +304,8 @@ function Card({
     if (canDropOnCard) {
       classes.push('groupable');
     }
-    if (isCardAuthor()) {
+    // Only show author indicator during creation phase to maintain anonymity in later phases
+    if (isCardAuthor() && workflowPhase === WORKFLOW_PHASES.CREATION) {
       classes.push('author-editable');
     }
 

@@ -186,4 +186,49 @@ describe('Card Authorship Tests', () => {
     expect(commentContent).not.toHaveClass('editable');
     expect(commentContent).toHaveAttribute('title', 'Only the author can edit this comment');
   });
+
+  it('hides author indicator in all phases beyond creation to maintain anonymity', () => {
+    // Test grouping phase
+    const groupingPhaseContext = {
+      ...defaultMockContext,
+      workflowPhase: 'GROUPING',
+      retrospectiveMode: true
+    };
+    useBoardContext.mockReturnValue(groupingPhaseContext);
+
+    const { unmount } = render(<Card {...baseProps} />);
+
+    // Card should NOT have author-editable class during grouping phase
+    const card = screen.getByTestId('card-content').closest('.card');
+    expect(card).not.toHaveClass('author-editable');
+    
+    unmount();
+
+    // Test interactions phase as well
+    const interactionsPhaseContext = {
+      ...defaultMockContext,
+      workflowPhase: 'INTERACTIONS',
+      retrospectiveMode: true
+    };
+    useBoardContext.mockReturnValue(interactionsPhaseContext);
+    
+    render(<Card {...baseProps} />);
+    const cardInteractions = screen.getByTestId('card-content').closest('.card');
+    expect(cardInteractions).not.toHaveClass('author-editable');
+  });
+
+  it('shows author indicator only in creation phase', () => {
+    const creationPhaseContext = {
+      ...defaultMockContext,
+      workflowPhase: 'CREATION',
+      retrospectiveMode: true
+    };
+    useBoardContext.mockReturnValue(creationPhaseContext);
+
+    render(<Card {...baseProps} />);
+
+    // Card should have author-editable class in creation phase
+    const card = screen.getByTestId('card-content').closest('.card');
+    expect(card).toHaveClass('author-editable');
+  });
 });
