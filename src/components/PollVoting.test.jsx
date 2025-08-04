@@ -11,14 +11,22 @@ vi.mock('../context/BoardContext', () => ({
 
 describe('PollVoting Component', () => {
   const mockSubmitPollVote = vi.fn();
+  const mockGetPollStats = vi.fn();
 
   const defaultMockContext = {
     userPollVote: null,
-    submitPollVote: mockSubmitPollVote
+    submitPollVote: mockSubmitPollVote,
+    getPollStats: mockGetPollStats,
+    activeUsers: 5
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetPollStats.mockReturnValue({
+      average: 0,
+      distribution: [0, 0, 0, 0, 0],
+      totalVotes: 0
+    });
     useBoardContext.mockReturnValue(defaultMockContext);
   });
 
@@ -102,5 +110,40 @@ describe('PollVoting Component', () => {
     fireEvent.click(starButtons[4]); // Change vote to 5 stars
     
     expect(mockSubmitPollVote).toHaveBeenCalledWith(5);
+  });
+
+  test('displays voting progress indicator', () => {
+    mockGetPollStats.mockReturnValue({
+      average: 3.5,
+      distribution: [1, 0, 2, 1, 1],
+      totalVotes: 5
+    });
+
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      activeUsers: 8
+    });
+
+    render(<PollVoting />);
+    
+    expect(screen.getByText('Voting Progress')).toBeInTheDocument();
+    expect(screen.getByText('5 of 8 participants have voted (63%)')).toBeInTheDocument();
+  });
+
+  test('shows completion message when all participants have voted', () => {
+    mockGetPollStats.mockReturnValue({
+      average: 4.0,
+      distribution: [0, 1, 2, 2, 0],
+      totalVotes: 5
+    });
+
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      activeUsers: 5
+    });
+
+    render(<PollVoting />);
+    
+    expect(screen.getByText('✓ All participants have voted! Ready to view results.')).toBeInTheDocument();
   });
 });

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useBoardContext } from '../context/BoardContext';
-import { Star } from 'react-feather';
+import { Star, Users } from 'react-feather';
 
 const PollVoting = () => {
-  const { userPollVote, submitPollVote } = useBoardContext();
+  const { userPollVote, submitPollVote, getPollStats, activeUsers } = useBoardContext();
   const [hoveredRating, setHoveredRating] = useState(0);
 
   const handleVote = (rating) => {
@@ -33,11 +33,38 @@ const PollVoting = () => {
     return hoveredRating || userPollVote || 0;
   };
 
+  const pollStats = getPollStats();
+  const votedCount = pollStats.totalVotes;
+  const progressPercentage = activeUsers > 0 ? Math.round((votedCount / activeUsers) * 100) : 0;
+
   return (
     <div className="poll-voting">
       <div className="poll-question">
         <h3>How effective was this retrospective?</h3>
         <p>Rate from 1 (not effective) to 5 (extremely effective)</p>
+      </div>
+
+      <div className="voting-progress">
+        <div className="progress-header">
+          <div className="progress-title">
+            <Users size={16} />
+            <span>Voting Progress</span>
+          </div>
+          <div className="progress-stats">
+            {votedCount} of {activeUsers} participants have voted ({progressPercentage}%)
+          </div>
+        </div>
+        <div className="progress-bar">
+          <div 
+            className="progress-fill" 
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+        {progressPercentage === 100 && activeUsers > 0 && (
+          <div className="progress-complete">
+            ✓ All participants have voted! Ready to view results.
+          </div>
+        )}
       </div>
 
       <div className="rating-container">

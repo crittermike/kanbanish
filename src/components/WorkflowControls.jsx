@@ -112,8 +112,8 @@ const WorkflowControls = ({ showNotification }) => {
         return (
           <div className="workflow-phase">
             <div className="phase-info">
-              <h3>Interactions Phase</h3>
-              <p>Add comments, votes, and reactions to cards and groups. Interactions are hidden from other users.</p>
+              <h3>Voting Phase</h3>
+              <p>Add comments, votes, and reactions to cards and groups. Activity is hidden from other users.</p>
             </div>
             <div className="phase-controls">
               <button 
@@ -138,8 +138,8 @@ const WorkflowControls = ({ showNotification }) => {
         return (
           <div className="workflow-phase">
             <div className="phase-info">
-              <h3>Interaction Reveal Phase</h3>
-              <p>All interactions are now visible. Review the feedback and votes.</p>
+              <h3>Voting Results Phase</h3>
+              <p>All votes are now visible. Review the feedback and votes.</p>
             </div>
             <div className="phase-controls">
               <button 
