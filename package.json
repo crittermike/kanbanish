@@ -2,6 +2,7 @@
   "name": "kanban-react",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "homepage": "https://www.kanbanish.com",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -20,11 +21,20 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint . --max-warnings 0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.32.0",
     "@testing-library/react": "^16.3.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.32.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "jsdom": "^26.1.0",
     "vite": "^6.3.3",
     "vitest": "^3.1.2"

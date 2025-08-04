@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
+import Card from './Card';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -81,11 +81,11 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(creationPhaseContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Interactions should not be visible at all in creation phase
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
@@ -111,11 +111,11 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(groupingPhaseContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Interactions should not be visible at all in grouping phase
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
@@ -141,21 +141,21 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(interactionsPhaseContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Interactions should be visible and enabled
     expect(screen.getByText('👍')).toBeInTheDocument();
     expect(screen.getByText('+')).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.getByTitle('Upvote')).toBeInTheDocument();
-    
+
     // Reactions should be enabled (not disabled)
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
-    
+
     // Add reaction button should be enabled
     const addReactionButton = screen.getByText('+');
     expect(addReactionButton).not.toBeDisabled();
@@ -178,16 +178,16 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(interactionRevealPhaseContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Interactions should be visible but disabled (frozen)
     expect(screen.getByText('👍')).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(2);
-    
+
     // Reactions should exist but be disabled for frozen state
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).toBeInTheDocument();
@@ -211,21 +211,21 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(normalModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // When reveal mode is disabled, interactions should always be visible and enabled
     expect(screen.getByText('👍')).toBeInTheDocument();
     expect(screen.getByText('+')).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.getByTitle('Upvote')).toBeInTheDocument();
-    
+
     // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
-    
+
     // Add reaction button should be enabled
     const addReactionButton = screen.getByText('+');
     expect(addReactionButton).not.toBeDisabled();

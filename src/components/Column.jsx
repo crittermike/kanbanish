@@ -1,17 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
 import { ref, set, remove } from 'firebase/database';
-import { useBoardContext } from '../context/BoardContext';
-import { database } from '../utils/firebase';
-import Card from './Card';
-import CardGroup from './CardGroup';
-import { generateId } from '../utils/helpers';
-import { addCard } from '../utils/boardUtils';
+import { useState, useRef, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
-import { isGroupingAllowed, isCardEditingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
+import { useBoardContext } from '../context/BoardContext';
+import { addCard } from '../utils/boardUtils';
+import { database } from '../utils/firebase';
+import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
+import Card from './Card';
+import CardGroup from './CardGroup';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled, user, createCardGroup, retrospectiveMode, workflowPhase, columns } = useBoardContext();
+  const { boardId, moveCard, user, createCardGroup, retrospectiveMode, workflowPhase, columns } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -43,7 +42,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
       if (monitor.didDrop()) {
         return; // Child component already handled the drop
       }
-      
+
       if (item.columnId !== columnId) {
         // Moving card between different columns
         moveCard(item.cardId, item.columnId, columnId);
@@ -54,16 +53,16 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         showNotification('Card removed from group');
       }
     },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
+    collect: monitor => ({
+      isOver: !!monitor.isOver()
+    })
   }), [columnId, moveCard, showNotification]);
 
   // Apply the drop ref to column content
   drop(columnRef);
 
   // Handle column title change
-  const handleTitleChange = (e) => {
+  const handleTitleChange = e => {
     setTitle(e.target.value);
   };
 
@@ -76,17 +75,17 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
       set(titleRef, title)
         .then(() => {
-          console.log('Column title updated');
+          // Column title updated successfully
           setIsEditing(false);
         })
-        .catch((error) => {
-          console.error('Error updating column title:', error);
+        .catch(() => {
+          // Error updating column title - silent fallback
         });
     }
   };
 
   // Handle key press (save on Enter)
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter') {
       saveColumnTitle();
     }
@@ -100,8 +99,8 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         .then(() => {
           showNotification('Column deleted');
         })
-        .catch((error) => {
-          console.error('Error deleting column:', error);
+        .catch(() => {
+          // Error deleting column - silent fallback
         });
     }
   };
@@ -126,8 +125,8 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           showNotification('Card added');
           hideAddCardForm();
         })
-        .catch((error) => {
-          console.error('Error adding card:', error);
+        .catch(error => {
+          // Error adding card - handle user feedback
           if (error.message === 'Card content is required') {
             hideAddCardForm();
             showNotification('Empty cards are not allowed');
@@ -141,7 +140,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   };
 
   // Handle key press for new card
-  const handleNewCardKeyPress = (e) => {
+  const handleNewCardKeyPress = e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       saveNewCard();
@@ -152,10 +151,12 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
   // Sort cards by votes or creation time - only ungrouped cards
   const sortedCards = () => {
-    if (!columnData.cards) return [];
+    if (!columnData.cards) {
+      return [];
+    }
 
     const cardsArray = Object.entries(columnData.cards)
-      .filter(([id, data]) => !data.groupId) // Only include cards not in groups
+      .filter(([_id, data]) => !data.groupId) // Only include cards not in groups
       .map(([id, data]) => ({
         id,
         ...data
@@ -170,7 +171,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
   // Sort groups by votes or creation time
   const sortedGroups = () => {
-    if (!columnData.groups) return [];
+    if (!columnData.groups) {
+      return [];
+    }
 
     const groupsArray = Object.entries(columnData.groups).map(([id, data]) => ({ id, ...data }));
 
@@ -185,7 +188,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const getSortedItems = () => {
     const cards = sortedCards().map(card => ({ type: 'card', data: card }));
     const groups = sortedGroups().map(group => ({ type: 'group', data: group }));
-    
+
     if (sortByVotes) {
       // Combine all items and sort by votes
       return [...cards, ...groups].sort((a, b) => (b.data.votes || 0) - (a.data.votes || 0));
@@ -199,9 +202,13 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   // Handle creating a group when a card is dropped onto another card after "Reveal All Cards" is clicked
   // Handle creating a group when a card is dropped onto another card during grouping phase
   const handleCardDropOnCard = (draggedCardId, targetCardId) => {
-    if (!isGroupingAllowed(workflowPhase, retrospectiveMode)) return; // Only allow grouping during GROUPING phase
-    if (draggedCardId === targetCardId) return; // Can't group with itself
-    
+    if (!isGroupingAllowed(workflowPhase, retrospectiveMode)) {
+      return;
+    } // Only allow grouping during GROUPING phase
+    if (draggedCardId === targetCardId) {
+      return;
+    } // Can't group with itself
+
     // Find which column the dragged card belongs to
     let draggedCardColumn = null;
     Object.keys(columns || {}).forEach(colId => {
@@ -209,16 +216,16 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         draggedCardColumn = colId;
       }
     });
-    
+
     if (!draggedCardColumn) {
       showNotification('Error: Could not find dragged card');
       return;
     }
-    
+
     // Store both the card IDs and column info for group creation
-    setDraggedCardForGrouping({ 
-      draggedCardId, 
-      targetCardId, 
+    setDraggedCardForGrouping({
+      draggedCardId,
+      targetCardId,
       draggedCardColumn,
       targetCardColumn: columnId
     });
@@ -235,11 +242,11 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
     if (draggedCardForGrouping) {
       const { draggedCardId, targetCardId, draggedCardColumn, targetCardColumn } = draggedCardForGrouping;
-      
+
       // Get the target card's created timestamp to maintain sort position
       const targetCard = columnData.cards?.[targetCardId];
       const targetCreatedTime = targetCard?.created;
-      
+
       if (draggedCardColumn === targetCardColumn) {
         // Same column - create group directly
         createCardGroup(columnId, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
@@ -252,8 +259,8 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             createCardGroup(targetCardColumn, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
             showNotification(`Card moved and group "${newGroupName.trim()}" created`);
           })
-          .catch((error) => {
-            console.error('Error moving card for group creation:', error);
+          .catch(() => {
+            // Error moving card for group creation
             showNotification('Error creating group across columns');
           });
       }
@@ -309,7 +316,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         )}
 
         {/* Render card groups and individual cards in sorted order */}
-        {getSortedItems().map((item) => {
+        {getSortedItems().map(item => {
           if (item.type === 'group') {
             return (
               <CardGroup
@@ -341,7 +348,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             <textarea
               placeholder="Enter card content..."
               value={newCardContent}
-              onChange={(e) => setNewCardContent(e.target.value)}
+              onChange={e => setNewCardContent(e.target.value)}
               onKeyDown={handleNewCardKeyPress}
               className="inline-card-textarea"
               autoFocus
@@ -363,17 +370,21 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         {/* Group creation modal */}
         {showGroupModal && (
           <div className="group-modal-overlay" onClick={cancelCreateGroup}>
-            <div className="group-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="group-modal" onClick={e => e.stopPropagation()}>
               <h3>Create Card Group</h3>
               <p>Creating a group with 2 cards</p>
               <input
                 type="text"
                 placeholder="Enter group name..."
                 value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') confirmCreateGroup();
-                  if (e.key === 'Escape') cancelCreateGroup();
+                onChange={e => setNewGroupName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    confirmCreateGroup();
+                  }
+                  if (e.key === 'Escape') {
+                    cancelCreateGroup();
+                  }
                 }}
                 className="group-name-input"
                 autoFocus

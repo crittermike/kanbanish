@@ -1,12 +1,10 @@
-import React from 'react';
+import { Eye, MessageCircle, Award, ArrowLeft, BarChart } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { Eye, Users, MessageCircle, Award, ArrowLeft, BarChart } from 'react-feather';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 const WorkflowControls = ({ showNotification }) => {
   const {
     workflowPhase,
-    retrospectiveMode,
     startGroupingPhase,
     startInteractionsPhase,
     startInteractionRevealPhase,
@@ -71,7 +69,7 @@ const WorkflowControls = ({ showNotification }) => {
               <p>Add cards to the board. When ready, reveal cards and start grouping.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleStartGrouping}
               >
@@ -90,14 +88,14 @@ const WorkflowControls = ({ showNotification }) => {
               <p>Cards are revealed. Group related cards together by dragging them onto each other.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleStartInteractions}
               >
                 <MessageCircle size={16} />
                 Start Voting
               </button>
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >
@@ -116,14 +114,14 @@ const WorkflowControls = ({ showNotification }) => {
               <p>Add comments, votes, and reactions to cards and groups. Activity is hidden from other users.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleRevealInteractions}
               >
                 <Eye size={16} />
                 Reveal Votes
               </button>
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >
@@ -142,14 +140,14 @@ const WorkflowControls = ({ showNotification }) => {
               <p>All votes are now visible. Review the feedback and votes.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleStartResults}
               >
                 <Award size={16} />
                 View Results
               </button>
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >
@@ -168,14 +166,14 @@ const WorkflowControls = ({ showNotification }) => {
               <p>Viewing the top-voted cards and groups. Use navigation to browse all results.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleStartPoll}
               >
                 <BarChart size={16} />
                 Start Effectiveness Poll
               </button>
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >
@@ -194,14 +192,14 @@ const WorkflowControls = ({ showNotification }) => {
               <p>Rate the effectiveness of this retrospective on a scale of 1-5. Your vote is private.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn primary-btn"
                 onClick={handleStartPollResults}
               >
                 <BarChart size={16} />
                 View Poll Results
               </button>
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >
@@ -220,7 +218,7 @@ const WorkflowControls = ({ showNotification }) => {
               <p>View the distribution of effectiveness ratings and overall retrospective score.</p>
             </div>
             <div className="phase-controls">
-              <button 
+              <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
               >

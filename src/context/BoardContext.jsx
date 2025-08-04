@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { ref, onValue, off, set, remove } from 'firebase/database';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -27,42 +27,42 @@ export const BoardProvider = ({ children }) => {
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
-  
+
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
   const [resultsViewIndex, setResultsViewIndex] = useState(0); // For navigating results
-  
+
   // Poll state for retrospective effectiveness rating
   const [pollVotes, setPollVotes] = useState({}); // { userId: rating }
   const [userPollVote, setUserPollVote] = useState(null); // Current user's vote
-  
+
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
 
   // Firebase authentication
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
         console.log('User authenticated:', user.uid);
         setUser(user);
 
         // Load user preferences including theme
         const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-        get(userPrefsRef).then((snapshot) => {
+        get(userPrefsRef).then(snapshot => {
           if (snapshot.exists()) {
             const prefs = snapshot.val();
             if (prefs.darkMode !== undefined) {
               setDarkMode(prefs.darkMode);
             }
           }
-        }).catch((error) => {
+        }).catch(error => {
           console.error('Error loading user preferences:', error);
         });
       } else {
         console.log('No user, signing in anonymously');
         signInAnonymously(auth)
-          .catch((error) => {
+          .catch(error => {
             console.error('Error signing in:', error);
           });
       }
@@ -87,7 +87,7 @@ export const BoardProvider = ({ children }) => {
       setBoardRef(newBoardRef);
 
       // Listen for changes to the board
-      onValue(newBoardRef, (snapshot) => {
+      onValue(newBoardRef, snapshot => {
         const boardData = snapshot.val();
         if (boardData) {
           if (boardData.title) {
@@ -143,7 +143,7 @@ export const BoardProvider = ({ children }) => {
     if (boardId && user) {
       const presenceRef = ref(database, `boards/${boardId}/presence/${user.uid}`);
       const presenceCountRef = ref(database, `boards/${boardId}/presence`);
-      
+
       // Set this user as active
       set(presenceRef, {
         lastSeen: Date.now(),
@@ -151,17 +151,17 @@ export const BoardProvider = ({ children }) => {
       });
 
       // Listen to all active users
-      const handlePresenceChange = (snapshot) => {
+      const handlePresenceChange = snapshot => {
         if (snapshot.exists()) {
           const presenceData = snapshot.val();
           const now = Date.now();
           const activeThreshold = 30000; // Consider users active if seen within last 30 seconds
-          
+
           // Count users who were active recently
-          const activeUserCount = Object.values(presenceData).filter(userData => 
+          const activeUserCount = Object.values(presenceData).filter(userData =>
             userData.lastSeen && (now - userData.lastSeen < activeThreshold)
           ).length;
-          
+
           setActiveUsers(activeUserCount);
         } else {
           setActiveUsers(0);
@@ -190,7 +190,9 @@ export const BoardProvider = ({ children }) => {
 
   // Create a new board with specified template columns and title
   const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board') => {
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     const newBoardId = generateId();
     const newBoardRef = ref(database, `boards/${newBoardId}`);
@@ -234,7 +236,7 @@ export const BoardProvider = ({ children }) => {
         setBoardId(newBoardId);
         setBoardTitle('Untitled Board');
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error creating board:', error);
       });
 
@@ -242,13 +244,13 @@ export const BoardProvider = ({ children }) => {
   };
 
   // Open an existing board
-  const openExistingBoard = (boardIdToOpen) => {
+  const openExistingBoard = boardIdToOpen => {
     console.log('Opening board with ID:', boardIdToOpen);
     setBoardId(boardIdToOpen);
   };
 
   // Update board title
-  const updateBoardTitle = (newTitle) => {
+  const updateBoardTitle = newTitle => {
     // Optimistically update the local state first for better UI responsiveness
     setBoardTitle(newTitle);
 
@@ -258,24 +260,24 @@ export const BoardProvider = ({ children }) => {
         .then(() => {
           console.log('Board title updated');
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error updating board title:', error);
         });
     }
   };
 
   // Update board settings with merged values
-  const updateBoardSettings = (newSettings) => {
+  const updateBoardSettings = newSettings => {
     if (boardId && user) {
       const settingsRef = ref(database, `boards/${boardId}/settings`);
       // Merge new settings with existing state
       const updatedSettings = {
-        votingEnabled: votingEnabled,
-        downvotingEnabled: downvotingEnabled,
-        multipleVotesAllowed: multipleVotesAllowed,
-        retrospectiveMode: retrospectiveMode,
-        workflowPhase: workflowPhase,
-        resultsViewIndex: resultsViewIndex,
+        votingEnabled,
+        downvotingEnabled,
+        multipleVotesAllowed,
+        retrospectiveMode,
+        workflowPhase,
+        resultsViewIndex,
         ...newSettings
       };
 
@@ -302,7 +304,7 @@ export const BoardProvider = ({ children }) => {
             setResultsViewIndex(newSettings.resultsViewIndex);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error updating board settings:', error);
         });
     } else {
@@ -329,29 +331,29 @@ export const BoardProvider = ({ children }) => {
   };
 
   // Update voting enabled setting
-  const updateVotingEnabled = (enabled) => {
+  const updateVotingEnabled = enabled => {
     updateBoardSettings({ votingEnabled: enabled });
   };
 
   // Update downvoting enabled setting
-  const updateDownvotingEnabled = (enabled) => {
+  const updateDownvotingEnabled = enabled => {
     updateBoardSettings({ downvotingEnabled: enabled });
   };
 
   // Update multiple votes allowed setting
-  const updateMultipleVotesAllowed = (allowed) => {
+  const updateMultipleVotesAllowed = allowed => {
     updateBoardSettings({ multipleVotesAllowed: allowed });
   };
 
   // Update reveal mode setting
-  const updateRetrospectiveMode = (enabled) => {
+  const updateRetrospectiveMode = enabled => {
     if (enabled) {
       // When enabling reveal mode, just update that setting
       updateBoardSettings({ retrospectiveMode: enabled });
     } else {
       // When disabling reveal mode, also reset workflow to creation phase
-      updateBoardSettings({ 
-        retrospectiveMode: enabled, 
+      updateBoardSettings({
+        retrospectiveMode: enabled,
         workflowPhase: WORKFLOW_PHASES.CREATION,
         resultsViewIndex: 0
       });
@@ -360,45 +362,45 @@ export const BoardProvider = ({ children }) => {
 
   // Workflow phase transition functions
   const startGroupingPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.GROUPING,
       retrospectiveMode: true
     });
   };
 
   const startInteractionsPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.INTERACTIONS
     });
   };
 
   const startInteractionRevealPhase = () => {
-    updateBoardSettings({ 
-      workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL 
+    updateBoardSettings({
+      workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
     });
   };
 
   const startResultsPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.RESULTS,
-      resultsViewIndex: 0 
+      resultsViewIndex: 0
     });
   };
 
   const startPollPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.POLL
     });
   };
 
   const startPollResultsPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
     });
   };
 
   const goToCreationPhase = () => {
-    updateBoardSettings({ 
+    updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.CREATION,
       retrospectiveMode: false,
       resultsViewIndex: 0
@@ -406,13 +408,15 @@ export const BoardProvider = ({ children }) => {
   };
 
   // Poll functionality for retrospective effectiveness rating
-  const submitPollVote = (rating) => {
-    if (!boardId || !user || rating < 1 || rating > 5) return;
+  const submitPollVote = rating => {
+    if (!boardId || !user || rating < 1 || rating > 5) {
+      return;
+    }
 
     const pollRef = ref(database, `boards/${boardId}/poll/votes/${user.uid}`);
     set(pollRef, rating).then(() => {
       setUserPollVote(rating);
-    }).catch((error) => {
+    }).catch(error => {
       console.error('Error submitting poll vote:', error);
     });
   };
@@ -439,7 +443,9 @@ export const BoardProvider = ({ children }) => {
 
   // Remove all grouping from the board
   const removeAllGrouping = () => {
-    if (!boardId || !user) return Promise.resolve();
+    if (!boardId || !user) {
+      return Promise.resolve();
+    }
 
     const promises = [];
 
@@ -466,7 +472,7 @@ export const BoardProvider = ({ children }) => {
       .then(() => {
         console.log('All grouping removed from board');
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error removing all grouping:', error);
         throw error;
       });
@@ -474,57 +480,58 @@ export const BoardProvider = ({ children }) => {
 
   const goToPreviousPhase = () => {
     switch (workflowPhase) {
-      case WORKFLOW_PHASES.GROUPING:
+      case WORKFLOW_PHASES.GROUPING: {
         // When going back to CREATION from GROUPING, warn about losing group data
-        const hasGroups = Object.values(columns).some(column => 
+        const hasGroups = Object.values(columns).some(column =>
           column.groups && Object.keys(column.groups).length > 0
         );
-        
+
         if (hasGroups) {
           const confirmMessage = 'Going back to the creation phase will remove all card grouping. This cannot be undone. Are you sure you want to continue?';
           if (!window.confirm(confirmMessage)) {
             return; // User cancelled
           }
-          
+
           // Remove all grouping before transitioning
           removeAllGrouping()
             .then(() => {
-              updateBoardSettings({ 
+              updateBoardSettings({
                 workflowPhase: WORKFLOW_PHASES.CREATION
               });
             })
-            .catch((error) => {
+            .catch(error => {
               console.error('Failed to remove grouping:', error);
             });
         } else {
           // No groups to remove, just transition
-          updateBoardSettings({ 
+          updateBoardSettings({
             workflowPhase: WORKFLOW_PHASES.CREATION
           });
         }
         break;
+      }
       case WORKFLOW_PHASES.INTERACTIONS:
-        updateBoardSettings({ 
+        updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.GROUPING
         });
         break;
       case WORKFLOW_PHASES.INTERACTION_REVEAL:
-        updateBoardSettings({ 
+        updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.INTERACTIONS
         });
         break;
       case WORKFLOW_PHASES.RESULTS:
-        updateBoardSettings({ 
+        updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
         });
         break;
       case WORKFLOW_PHASES.POLL:
-        updateBoardSettings({ 
+        updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.RESULTS
         });
         break;
       case WORKFLOW_PHASES.POLL_RESULTS:
-        updateBoardSettings({ 
+        updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.POLL
         });
         break;
@@ -535,29 +542,31 @@ export const BoardProvider = ({ children }) => {
   };
 
   // Results navigation functions
-  const navigateResults = (direction) => {
-    if (workflowPhase !== WORKFLOW_PHASES.RESULTS) return;
-    
+  const navigateResults = direction => {
+    if (workflowPhase !== WORKFLOW_PHASES.RESULTS) {
+      return;
+    }
+
     const sortedItems = getSortedItemsForResults();
     const maxIndex = sortedItems.length - 1;
-    
+
     let newIndex = resultsViewIndex;
     if (direction === 'next' && resultsViewIndex < maxIndex) {
       newIndex = resultsViewIndex + 1;
     } else if (direction === 'prev' && resultsViewIndex > 0) {
       newIndex = resultsViewIndex - 1;
     }
-    
+
     updateBoardSettings({ resultsViewIndex: newIndex });
   };
 
   // Get sorted items (cards and groups) for results view
   const getSortedItemsForResults = () => {
     const allItems = [];
-    
+
     Object.keys(columns).forEach(columnId => {
       const columnData = columns[columnId];
-      
+
       // Add individual cards (not in groups)
       Object.keys(columnData.cards || {}).forEach(cardId => {
         const card = columnData.cards[cardId];
@@ -565,33 +574,35 @@ export const BoardProvider = ({ children }) => {
           allItems.push({
             type: 'card',
             id: cardId,
-            columnId: columnId,
+            columnId,
             data: card,
             votes: card.votes || 0
           });
         }
       });
-      
+
       // Add groups
       Object.keys(columnData.groups || {}).forEach(groupId => {
         const group = columnData.groups[groupId];
         allItems.push({
           type: 'group',
           id: groupId,
-          columnId: columnId,
+          columnId,
           data: group,
           votes: group.votes || 0
         });
       });
     });
-    
+
     // Sort by votes (descending)
     return allItems.sort((a, b) => b.votes - a.votes);
   };
 
   // Reset all votes in the board
   const resetAllVotes = () => {
-    if (!boardId || !user) return false;
+    if (!boardId || !user) {
+      return false;
+    }
 
     // Confirm before proceeding
     const confirmMessage = 'Are you sure you want to reset all votes to zero? This cannot be undone.';
@@ -633,7 +644,7 @@ export const BoardProvider = ({ children }) => {
   // Calculate total votes across all cards and groups
   const getTotalVotes = () => {
     let totalVotes = 0;
-    
+
     Object.values(columns).forEach(column => {
       // Sum votes from all cards
       if (column.cards) {
@@ -641,7 +652,7 @@ export const BoardProvider = ({ children }) => {
           totalVotes += card.votes || 0;
         });
       }
-      
+
       // Sum votes from all groups
       if (column.groups) {
         Object.values(column.groups).forEach(group => {
@@ -649,13 +660,15 @@ export const BoardProvider = ({ children }) => {
         });
       }
     });
-    
+
     return totalVotes;
   };
 
   // Move a card between columns or into/out of groups
   const moveCard = (cardId, sourceColumnId, targetColumnId, targetGroupId = null) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     // Get card data from source column (cards always live in column now)
     const cardData = columns[sourceColumnId]?.cards?.[cardId];
@@ -669,7 +682,7 @@ export const BoardProvider = ({ children }) => {
     // Handle moving within the same column (grouping/ungrouping)
     if (sourceColumnId === targetColumnId) {
       const currentGroupId = cardData.groupId;
-      
+
       // If moving to the same group state, do nothing
       if (currentGroupId === targetGroupId) {
         return;
@@ -677,11 +690,11 @@ export const BoardProvider = ({ children }) => {
 
       // Update the card's groupId
       const cardGroupRef = ref(database, `boards/${boardId}/columns/${sourceColumnId}/cards/${cardId}/groupId`);
-      
+
       if (targetGroupId) {
         // Adding to a group
         promises.push(set(cardGroupRef, targetGroupId));
-        
+
         // Add card ID to the target group's cardIds array (only if not already there)
         const targetGroup = columns[targetColumnId]?.groups?.[targetGroupId];
         if (targetGroup) {
@@ -712,11 +725,11 @@ export const BoardProvider = ({ children }) => {
       const targetCardRef = ref(database, `boards/${boardId}/columns/${targetColumnId}/cards/${cardId}`);
 
       // Create new card data, setting groupId if moving into a group
-      const { groupId, ...cardDataWithoutGroup } = cardData;
-      const newCardData = targetGroupId 
+      const { groupId: _groupId, ...cardDataWithoutGroup } = cardData;
+      const newCardData = targetGroupId
         ? { ...cardDataWithoutGroup, groupId: targetGroupId }
         : cardDataWithoutGroup;
-      
+
       promises.push(remove(sourceCardRef));
       promises.push(set(targetCardRef, newCardData));
 
@@ -749,7 +762,7 @@ export const BoardProvider = ({ children }) => {
       .then(() => {
         console.log(`Card ${cardId} moved from ${sourceColumnId} to ${targetColumnId}${targetGroupId ? ` (group ${targetGroupId})` : ''}`);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error moving card:', error);
         throw error; // Re-throw so caller can handle it
       });
@@ -757,7 +770,9 @@ export const BoardProvider = ({ children }) => {
 
   // Create a new group with selected cards
   const createCardGroup = (columnId, cardIds, groupName = 'New Group', targetCreatedTime = null) => {
-    if (!boardId || !user || !cardIds.length) return;
+    if (!boardId || !user || !cardIds.length) {
+      return;
+    }
 
     const groupId = generateId();
     const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
@@ -772,7 +787,7 @@ export const BoardProvider = ({ children }) => {
       expanded: true,
       votes: 0,
       voters: {},
-      cardIds: cardIds // Just store the card IDs, not the card data
+      cardIds // Just store the card IDs, not the card data
     };
 
     // Update each card to reference this group
@@ -789,17 +804,21 @@ export const BoardProvider = ({ children }) => {
       .then(() => {
         console.log(`Group ${groupId} created with ${cardIds.length} cards`);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error creating group:', error);
       });
   };
 
   // Ungroup cards (remove group and clear groupId from cards)
   const ungroupCards = (columnId, groupId) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     const groupData = columns[columnId]?.groups?.[groupId];
-    if (!groupData || !groupData.cardIds) return;
+    if (!groupData || !groupData.cardIds) {
+      return;
+    }
 
     const updatePromises = [];
 
@@ -819,42 +838,50 @@ export const BoardProvider = ({ children }) => {
       .then(() => {
         console.log(`Group ${groupId} ungrouped`);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error ungrouping cards:', error);
       });
   };
 
   // Update group name
   const updateGroupName = (columnId, groupId, newName) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     const nameRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/name`);
     set(nameRef, newName)
       .then(() => {
         console.log('Group name updated');
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error updating group name:', error);
       });
   };
 
   // Toggle group expanded state
   const toggleGroupExpanded = (columnId, groupId, expanded) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     const expandedRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/expanded`);
     set(expandedRef, expanded)
-      .catch((error) => {
+      .catch(error => {
         console.error('Error updating group expanded state:', error);
       });
   };
 
   // Upvote a group
   const upvoteGroup = (columnId, groupId, currentVotes = 0, showNotification) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     const currentGroup = columns[columnId]?.groups?.[groupId];
-    if (!currentGroup) return;
+    if (!currentGroup) {
+      return;
+    }
 
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
@@ -879,17 +906,21 @@ export const BoardProvider = ({ children }) => {
       set(groupVotersRef, newVoters)
     ]).then(() => {
       showNotification('Upvoted group');
-    }).catch((error) => {
+    }).catch(error => {
       console.error('Error updating group votes:', error);
     });
   };
 
   // Downvote a group
   const downvoteGroup = (columnId, groupId, currentVotes = 0, showNotification) => {
-    if (!boardId || !user) return;
+    if (!boardId || !user) {
+      return;
+    }
 
     const currentGroup = columns[columnId]?.groups?.[groupId];
-    if (!currentGroup) return;
+    if (!currentGroup) {
+      return;
+    }
 
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
@@ -914,13 +945,13 @@ export const BoardProvider = ({ children }) => {
       set(groupVotersRef, newVoters)
     ]).then(() => {
       showNotification('Downvoted group');
-    }).catch((error) => {
+    }).catch(error => {
       console.error('Error updating group votes:', error);
     });
   };
 
   // Update dark mode preference
-  const updateDarkMode = (enabled) => {
+  const updateDarkMode = enabled => {
     if (user) {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
       set(userPrefsRef, { darkMode: enabled })
@@ -928,7 +959,7 @@ export const BoardProvider = ({ children }) => {
           console.log('Dark mode preference updated:', enabled);
           setDarkMode(enabled);
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error updating dark mode preference:', error);
         });
     } else {

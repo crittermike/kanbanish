@@ -1,24 +1,23 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
-import Board from './Board';
-import { useBoardContext } from '../context/BoardContext';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
+import { useBoardContext } from '../context/BoardContext';
+import Board from './Board';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext');
 
 // Mock the NewBoardTemplateModal component
 vi.mock('./modals/NewBoardTemplateModal', () => ({
-  default: ({ isOpen, onClose, onSelectTemplate }) =>
+  default: ({ isOpen, _onClose, _onSelectTemplate }) =>
     isOpen ? <div data-testid="template-modal">Template Modal</div> : null
 }));
 
 // Mock the ExportBoardModal component
 vi.mock('./modals/ExportBoardModal', () => ({
-  default: ({ isOpen, onClose }) =>
+  default: ({ isOpen, _onClose }) =>
     isOpen ? <div data-testid="export-modal">Export Modal</div> : null
 }));
 
@@ -199,10 +198,10 @@ describe('Board Component', () => {
   });
 
   test('opens template modal when New Board button is clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -223,10 +222,10 @@ describe('Board Component', () => {
   });
 
   test('opens sort dropdown when dropdown button is clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -246,10 +245,10 @@ describe('Board Component', () => {
   });
 
   test('selects sort by votes when that option is clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -271,10 +270,10 @@ describe('Board Component', () => {
   });
 
   test('toggles voting enabled setting when clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -303,10 +302,10 @@ describe('Board Component', () => {
   });
 
   test('toggles multiple votes allowed setting when clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -344,10 +343,10 @@ describe('Board Component', () => {
 
     useBoardContext.mockReturnValue(contextWithRetrospectiveMode);
 
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -427,7 +426,7 @@ describe('Board Component', () => {
   test('automatically opens template modal when no board ID is in URL', () => {
     // Mock URL with no board ID
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => null
+      get: _param => null
     }));
 
     render(
@@ -446,7 +445,7 @@ describe('Board Component', () => {
   test('handles template selection with failed board creation', () => {
     // Mock URL with a board ID to prevent auto-opening the template modal
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     // Mock createNewBoard to return null (failed creation)
@@ -473,10 +472,10 @@ describe('Board Component', () => {
   });
 
   test('toggles downvoting enabled setting when clicked', () => {
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -513,7 +512,7 @@ describe('Board Component', () => {
 
     // Simulate having a board ID in the URL
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -544,10 +543,10 @@ describe('Board Component', () => {
       resetAllVotes: mockResetAllVotes
     });
 
-    // For this test, let's simulate having a board ID in the URL 
+    // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -565,7 +564,7 @@ describe('Board Component', () => {
     expect(resetVotesButton).toBeInTheDocument();
     fireEvent.click(resetVotesButton);
 
-    // Verify resetAllVotes was called 
+    // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
 
     // Verify notification was shown
@@ -589,7 +588,7 @@ describe('Board Component', () => {
 
     // Simulate having a board ID in the URL
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -625,7 +624,7 @@ describe('Board Component', () => {
 
     // Simulate having a board ID in the URL
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -655,7 +654,7 @@ describe('Board Component', () => {
 
     // Simulate having a board ID in the URL
     mockURLSearchParams.mockImplementation(() => ({
-      get: (param) => param === 'board' ? 'existing-board-id' : null
+      get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
     render(
@@ -685,9 +684,9 @@ describe('Board Component', () => {
           'card3': { content: 'Grouped card', votes: 0, created: 4000, groupId: 'group1' }
         },
         groups: {
-          'group1': { 
-            name: 'Medium vote group', 
-            votes: 5, 
+          'group1': {
+            name: 'Medium vote group',
+            votes: 5,
             created: 2000,
             expanded: true,
             cardIds: ['card3'] // New structure: just store card IDs
@@ -712,7 +711,7 @@ describe('Board Component', () => {
     // This is verified by checking the DOM structure, but since we can't easily test the exact order without more
     // detailed DOM inspection, we at least verify that all items are rendered
     expect(screen.getByText('High vote card')).toBeInTheDocument();
-    expect(screen.getByText('Medium vote group')).toBeInTheDocument(); 
+    expect(screen.getByText('Medium vote group')).toBeInTheDocument();
     expect(screen.getByText('Low vote card')).toBeInTheDocument();
     expect(screen.getByText('Grouped card')).toBeInTheDocument();
   });

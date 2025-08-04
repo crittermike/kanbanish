@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
+import Card from './Card';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -80,11 +80,11 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(retrospectiveModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Reactions should be completely hidden during CREATION phase
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
@@ -108,11 +108,11 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(retrospectiveModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Comment button should be hidden
     const commentsButton = screen.queryByTitle('Toggle comments');
     expect(commentsButton).not.toBeInTheDocument();
@@ -135,15 +135,15 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(retrospectiveModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
-    
+
     // Add reaction button should be enabled
     const addReactionButton = screen.getByTitle('Add reaction');
     expect(addReactionButton).not.toBeDisabled();
@@ -166,19 +166,19 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(retrospectiveModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
-    
+
     // Add reaction button should be enabled
     const addReactionButton = screen.getByTitle('Add reaction');
     expect(addReactionButton).not.toBeDisabled();
-    
+
     // Comment button should be visible
     const commentsButton = screen.getByTitle('Toggle comments');
     expect(commentsButton).toBeInTheDocument();
@@ -201,15 +201,15 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(normalModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
-    
+
     // Comment button should be visible
     const commentsButton = screen.getByTitle('Toggle comments');
     expect(commentsButton).toBeInTheDocument();
@@ -232,16 +232,16 @@ describe('Card Reveal Mode Interactions', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(retrospectiveModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // During CREATION phase, interactions should be completely hidden
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
     expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
-    
+
     // No notification should be needed since elements are not present
     expect(mockShowNotification).not.toHaveBeenCalled();
   });

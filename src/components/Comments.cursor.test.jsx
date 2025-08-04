@@ -31,7 +31,7 @@ describe('Comments Cursor Behavior', () => {
     const isCommentAuthor = vi.fn().mockReturnValue(true);
 
     render(
-      <Comments 
+      <Comments
         {...baseProps}
         comments={comments}
         isCommentAuthor={isCommentAuthor}
@@ -55,7 +55,7 @@ describe('Comments Cursor Behavior', () => {
     const isCommentAuthor = vi.fn().mockReturnValue(false);
 
     render(
-      <Comments 
+      <Comments
         {...baseProps}
         comments={comments}
         isCommentAuthor={isCommentAuthor}

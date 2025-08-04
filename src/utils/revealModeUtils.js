@@ -11,13 +11,19 @@ import { areCardsRevealed, areInteractionsRevealed } from './workflowUtils';
  * @returns {string} - 'normal' | 'hidden' | 'interactive' | 'frozen'
  */
 export const getRevealPhase = (retrospectiveMode, workflowPhase) => {
-  if (!retrospectiveMode) return 'normal';
-  
+  if (!retrospectiveMode) {
+    return 'normal';
+  }
+
   const cardsRevealed = areCardsRevealed(workflowPhase, retrospectiveMode);
   const interactionsRevealed = areInteractionsRevealed(workflowPhase, retrospectiveMode);
-  
-  if (!cardsRevealed) return 'hidden';
-  if (!interactionsRevealed) return 'interactive';
+
+  if (!cardsRevealed) {
+    return 'hidden';
+  }
+  if (!interactionsRevealed) {
+    return 'interactive';
+  }
   return 'frozen';
 };
 
@@ -74,7 +80,7 @@ export const shouldUseDisabledStyling = (disabled, disabledReason) => {
  * @param {string} disabledReason - The reason for being disabled
  * @returns {boolean}
  */
-export const shouldHideFeature = (disabledReason) => {
+export const shouldHideFeature = disabledReason => {
   return disabledReason === 'frozen';
 };
 
@@ -83,7 +89,7 @@ export const shouldHideFeature = (disabledReason) => {
  * @param {string} disabledReason - The reason for being disabled
  * @returns {string}
  */
-export const getReactionDisabledMessage = (disabledReason) => {
+export const getReactionDisabledMessage = disabledReason => {
   switch (disabledReason) {
     case 'frozen':
       return 'Interactions are now frozen - no more changes allowed';
@@ -98,7 +104,7 @@ export const getReactionDisabledMessage = (disabledReason) => {
  * @param {string} disabledReason - The reason for being disabled
  * @returns {string|null} - null for frozen state to maintain silent behavior
  */
-export const getCommentDisabledMessage = (disabledReason) => {
+export const getCommentDisabledMessage = disabledReason => {
   switch (disabledReason) {
     case 'frozen':
       return null; // Silent behavior in frozen state

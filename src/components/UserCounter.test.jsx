@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import UserCounter from './UserCounter';
 import { useBoardContext } from '../context/BoardContext';
+import UserCounter from './UserCounter';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -16,7 +16,7 @@ describe('UserCounter Component', () => {
     });
 
     render(<UserCounter />);
-    
+
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByTitle('3 users viewing this board')).toBeInTheDocument();
   });
@@ -28,7 +28,7 @@ describe('UserCounter Component', () => {
     });
 
     render(<UserCounter />);
-    
+
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByTitle('1 user viewing this board')).toBeInTheDocument();
   });
@@ -40,7 +40,7 @@ describe('UserCounter Component', () => {
     });
 
     const { container } = render(<UserCounter />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -51,7 +51,7 @@ describe('UserCounter Component', () => {
     });
 
     render(<UserCounter />);
-    
+
     expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByTitle('0 users viewing this board')).toBeInTheDocument();
   });

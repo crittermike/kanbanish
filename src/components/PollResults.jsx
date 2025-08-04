@@ -1,21 +1,30 @@
-import React from 'react';
-import { useBoardContext } from '../context/BoardContext';
 import { Star, Users } from 'react-feather';
+import { useBoardContext } from '../context/BoardContext';
 
 const PollResults = () => {
   const { getPollStats } = useBoardContext();
   const stats = getPollStats();
 
-  const getBarWidth = (count) => {
-    if (stats.totalVotes === 0) return 0;
+  const getBarWidth = count => {
+    if (stats.totalVotes === 0) {
+      return 0;
+    }
     return (count / stats.totalVotes) * 100;
   };
 
-  const getEffectivenessLevel = (average) => {
-    if (average >= 4.5) return { text: 'Extremely Effective', color: '#22c55e' };
-    if (average >= 3.5) return { text: 'Very Effective', color: '#84cc16' };
-    if (average >= 2.5) return { text: 'Moderately Effective', color: '#eab308' };
-    if (average >= 1.5) return { text: 'Slightly Effective', color: '#f97316' };
+  const getEffectivenessLevel = average => {
+    if (average >= 4.5) {
+      return { text: 'Extremely Effective', color: '#22c55e' };
+    }
+    if (average >= 3.5) {
+      return { text: 'Very Effective', color: '#84cc16' };
+    }
+    if (average >= 2.5) {
+      return { text: 'Moderately Effective', color: '#eab308' };
+    }
+    if (average >= 1.5) {
+      return { text: 'Slightly Effective', color: '#f97316' };
+    }
     return { text: 'Not Effective', color: '#ef4444' };
   };
 
@@ -41,7 +50,7 @@ const PollResults = () => {
                 <span className="score-max">5.0</span>
               </div>
               <div className="stars-display">
-                {[1, 2, 3, 4, 5].map((rating) => (
+                {[1, 2, 3, 4, 5].map(rating => (
                   <Star
                     key={rating}
                     size={20}
@@ -51,7 +60,7 @@ const PollResults = () => {
                 ))}
               </div>
             </div>
-            <div 
+            <div
               className="effectiveness-label"
               style={{ color: effectiveness.color }}
             >
@@ -72,13 +81,13 @@ const PollResults = () => {
                       <span>{rating}</span>
                     </div>
                     <div className="bar-container">
-                      <div 
+                      <div
                         className="bar"
-                        style={{ 
+                        style={{
                           width: `${getBarWidth(count)}%`,
-                          backgroundColor: rating >= 4 ? '#22c55e' : 
-                                          rating >= 3 ? '#84cc16' : 
-                                          rating >= 2 ? '#eab308' : '#ef4444'
+                          backgroundColor: rating >= 4 ? '#22c55e' :
+                            rating >= 3 ? '#84cc16' :
+                              rating >= 2 ? '#eab308' : '#ef4444'
                         }}
                       />
                     </div>

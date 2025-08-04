@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
+import Card from './Card';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -77,15 +77,15 @@ describe('Card Comment Revealing and Freezing', () => {
       retrospectiveMode: true,
       workflowPhase: 'INTERACTION_REVEAL' // All interactions revealed and frozen
     };
-    
+
     useBoardContext.mockReturnValue(revealedContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Click comments button to show comments
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     // Both comments should be visible
     expect(screen.getByText('My comment')).toBeInTheDocument();
     expect(screen.getByText('Other user comment')).toBeInTheDocument();
@@ -101,19 +101,19 @@ describe('Card Comment Revealing and Freezing', () => {
       retrospectiveMode: true,
       workflowPhase: 'INTERACTION_REVEAL' // Interactions revealed = frozen
     };
-    
+
     useBoardContext.mockReturnValue(frozenContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Click comments button to show comments
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     // Try to click on the user's own comment to edit it
     const myComment = screen.getByText('My comment');
     fireEvent.click(myComment);
-    
+
     // Should NOT show alert when frozen (silent behavior)
     // Comment form should be completely hidden when frozen
     expect(screen.queryByPlaceholderText('Add a comment...')).not.toBeInTheDocument();
@@ -137,15 +137,15 @@ describe('Card Comment Revealing and Freezing', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(normalModeContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Click comments button to show comments
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     // Verify comments section appears (which means editing would be possible)
     expect(screen.getByText('Comments')).toBeInTheDocument();
     expect(screen.getByText('My comment')).toBeInTheDocument();
@@ -168,20 +168,20 @@ describe('Card Comment Revealing and Freezing', () => {
       isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
-    
+
     useBoardContext.mockReturnValue(frozenInteractionsContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Find the emoji reaction
     const emojiReaction = screen.getByTestId('emoji-reaction');
-    
+
     // Should not have disabled class when frozen (should look normal but not be clickable)
     expect(emojiReaction).not.toHaveClass('disabled');
-    
+
     // Should have a tooltip indicating it's frozen
     expect(emojiReaction).toHaveAttribute('title', 'Interactions are now frozen - no more changes allowed');
-    
+
     // Add reaction button should be hidden when interactions are frozen
     const addReactionButton = screen.queryByRole('button', { name: '+' });
     expect(addReactionButton).not.toBeInTheDocument();

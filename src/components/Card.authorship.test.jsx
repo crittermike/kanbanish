@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import Card from './Card';
 import { useBoardContext } from '../context/BoardContext';
+import Card from './Card';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -83,11 +83,11 @@ describe('Card Authorship Tests', () => {
 
   it('allows card author to edit their card', () => {
     render(<Card {...baseProps} />);
-    
+
     // Click to edit the card
     const cardContent = screen.getByTestId('card-content');
     fireEvent.click(cardContent);
-    
+
     // Should enter edit mode (textarea appears)
     const textarea = screen.getByRole('textbox');
     expect(textarea).toBeInTheDocument();
@@ -100,13 +100,13 @@ describe('Card Authorship Tests', () => {
       user: { uid: 'different-user' }
     };
     useBoardContext.mockReturnValue(nonAuthorContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Click to edit the card
     const cardContent = screen.getByTestId('card-content');
     fireEvent.click(cardContent);
-    
+
     // Should NOT enter edit mode and show notification
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(mockShowNotification).toHaveBeenCalledWith('Only the author can edit this card');
@@ -114,15 +114,15 @@ describe('Card Authorship Tests', () => {
 
   it('allows comment author to edit their comment', () => {
     render(<Card {...baseProps} />);
-    
+
     // Open comments
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     // Click on the comment to edit it
     const commentContent = screen.getByText('Test comment');
     fireEvent.click(commentContent);
-    
+
     // Should enter edit mode
     const editInput = screen.getByDisplayValue('Test comment');
     expect(editInput).toBeInTheDocument();
@@ -134,32 +134,32 @@ describe('Card Authorship Tests', () => {
       user: { uid: 'different-user' }
     };
     useBoardContext.mockReturnValue(nonAuthorContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Open comments
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     // Click on the comment - should not enter edit mode
     const commentContent = screen.getByText('Test comment');
     fireEvent.click(commentContent);
-    
+
     // Should NOT enter edit mode
     expect(screen.queryByDisplayValue('Test comment')).not.toBeInTheDocument();
   });
 
   it('shows visual indicators for editable content', () => {
     render(<Card {...baseProps} />);
-    
+
     // Card should have author-editable class
     const card = screen.getByTestId('card-content').closest('.card');
     expect(card).toHaveClass('author-editable');
-    
+
     // Open comments to check comment editability indicators
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     const commentContent = screen.getByText('Test comment');
     expect(commentContent).toHaveClass('editable');
     expect(commentContent).toHaveAttribute('title', 'Click to edit');
@@ -171,17 +171,17 @@ describe('Card Authorship Tests', () => {
       user: { uid: 'different-user' }
     };
     useBoardContext.mockReturnValue(nonAuthorContext);
-    
+
     render(<Card {...baseProps} />);
-    
+
     // Card should NOT have author-editable class
     const card = screen.getByTestId('card-content').closest('.card');
     expect(card).not.toHaveClass('author-editable');
-    
+
     // Open comments to check comment editability indicators
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
-    
+
     const commentContent = screen.getByText('Test comment');
     expect(commentContent).not.toHaveClass('editable');
     expect(commentContent).toHaveAttribute('title', 'Only the author can edit this comment');

@@ -3,11 +3,11 @@ import { ChevronUp, ChevronDown } from 'react-feather';
 
 const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteButton = true, disabled = false, disabledReason = 'voting-disabled' }) => {
   // Determine the appropriate title based on the disabled reason
-  const getButtonTitle = (action) => {
+  const getButtonTitle = action => {
     if (!disabled) {
       return action === 'upvote' ? 'Upvote' : 'Downvote';
     }
-    
+
     switch (disabledReason) {
       case 'frozen':
         return 'Voting is frozen - no more changes allowed';

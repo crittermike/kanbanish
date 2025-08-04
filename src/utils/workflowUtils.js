@@ -5,7 +5,7 @@
 // Workflow phase constants
 export const WORKFLOW_PHASES = {
   CREATION: 'CREATION',
-  GROUPING: 'GROUPING', 
+  GROUPING: 'GROUPING',
   INTERACTIONS: 'INTERACTIONS',
   INTERACTION_REVEAL: 'INTERACTION_REVEAL',
   RESULTS: 'RESULTS',
@@ -20,7 +20,9 @@ export const WORKFLOW_PHASES = {
  * @returns {boolean}
  */
 export const isGroupingAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return false; // Only allow when retrospective mode is active
+  if (!retrospectiveMode) {
+    return false;
+  } // Only allow when retrospective mode is active
   return workflowPhase === WORKFLOW_PHASES.GROUPING;
 };
 
@@ -31,7 +33,9 @@ export const isGroupingAllowed = (workflowPhase, retrospectiveMode = false) => {
  * @returns {boolean}
  */
 export const areInteractionsAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Allow when retrospective mode is disabled (normal behavior)
+  if (!retrospectiveMode) {
+    return true;
+  } // Allow when retrospective mode is disabled (normal behavior)
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS;
 };
 
@@ -42,9 +46,11 @@ export const areInteractionsAllowed = (workflowPhase, retrospectiveMode = false)
  * @returns {boolean}
  */
 export const areInteractionsVisible = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always visible when retrospective mode is disabled
+  if (!retrospectiveMode) {
+    return true;
+  } // Always visible when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
-         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL || 
+         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -55,8 +61,10 @@ export const areInteractionsVisible = (workflowPhase, retrospectiveMode = false)
  * @returns {boolean}
  */
 export const areOthersInteractionsVisible = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always visible when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL || 
+  if (!retrospectiveMode) {
+    return true;
+  } // Always visible when retrospective mode is disabled
+  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -67,7 +75,9 @@ export const areOthersInteractionsVisible = (workflowPhase, retrospectiveMode = 
  * @returns {boolean}
  */
 export const shouldObfuscateCards = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return false; // Never obfuscate when retrospective mode is disabled
+  if (!retrospectiveMode) {
+    return false;
+  } // Never obfuscate when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.CREATION;
 };
 
@@ -78,10 +88,12 @@ export const shouldObfuscateCards = (workflowPhase, retrospectiveMode = false) =
  * @returns {boolean}
  */
 export const areCardsRevealed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always revealed when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.GROUPING || 
-         workflowPhase === WORKFLOW_PHASES.INTERACTIONS || 
-         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL || 
+  if (!retrospectiveMode) {
+    return true;
+  } // Always revealed when retrospective mode is disabled
+  return workflowPhase === WORKFLOW_PHASES.GROUPING ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -92,8 +104,10 @@ export const areCardsRevealed = (workflowPhase, retrospectiveMode = false) => {
  * @returns {boolean}
  */
 export const areInteractionsRevealed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return false; // Never revealed when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL || 
+  if (!retrospectiveMode) {
+    return false;
+  } // Never revealed when retrospective mode is disabled
+  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -104,8 +118,10 @@ export const areInteractionsRevealed = (workflowPhase, retrospectiveMode = false
  * @returns {boolean}
  */
 export const isCardEditingAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always allow when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.CREATION || 
+  if (!retrospectiveMode) {
+    return true;
+  } // Always allow when retrospective mode is disabled
+  return workflowPhase === WORKFLOW_PHASES.CREATION ||
          workflowPhase === WORKFLOW_PHASES.GROUPING;
 };
 
@@ -116,7 +132,9 @@ export const isCardEditingAllowed = (workflowPhase, retrospectiveMode = false) =
  * @returns {boolean}
  */
 export const isCardCreationAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always allow when retrospective mode is disabled
+  if (!retrospectiveMode) {
+    return true;
+  } // Always allow when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.CREATION;
 };
 
@@ -127,7 +145,9 @@ export const isCardCreationAllowed = (workflowPhase, retrospectiveMode = false) 
  * @returns {boolean}
  */
 export const isCardDraggingAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return true; // Always allow when retrospective mode is disabled
+  if (!retrospectiveMode) {
+    return true;
+  } // Always allow when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.GROUPING;
 };
 
@@ -170,7 +190,7 @@ export const getWorkflowDisabledReason = (action, workflowPhase) => {
  * @param {string} workflowPhase - Current workflow phase
  * @returns {string}
  */
-export const getPhaseDescription = (workflowPhase) => {
+export const getPhaseDescription = workflowPhase => {
   switch (workflowPhase) {
     case WORKFLOW_PHASES.CREATION:
       return 'Create and add cards to the board';
@@ -198,7 +218,9 @@ export const getPhaseDescription = (workflowPhase) => {
  * @returns {boolean}
  */
 export const isPollAllowed = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return false; // Only allow when retrospective mode is active
+  if (!retrospectiveMode) {
+    return false;
+  } // Only allow when retrospective mode is active
   return workflowPhase === WORKFLOW_PHASES.POLL;
 };
 
@@ -209,6 +231,8 @@ export const isPollAllowed = (workflowPhase, retrospectiveMode = false) => {
  * @returns {boolean}
  */
 export const arePollResultsVisible = (workflowPhase, retrospectiveMode = false) => {
-  if (!retrospectiveMode) return false; // Only visible when retrospective mode is active
+  if (!retrospectiveMode) {
+    return false;
+  } // Only visible when retrospective mode is active
   return workflowPhase === WORKFLOW_PHASES.POLL_RESULTS;
 };

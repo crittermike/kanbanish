@@ -1,15 +1,14 @@
-import React from 'react';
-import { useBoardContext } from '../context/BoardContext';
 import { ChevronLeft, ChevronRight } from 'react-feather';
+import { useBoardContext } from '../context/BoardContext';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 const ResultsView = ({ showNotification }) => {
-  const { 
-    workflowPhase, 
-    resultsViewIndex, 
-    navigateResults, 
+  const {
+    workflowPhase,
+    resultsViewIndex,
+    navigateResults,
     getSortedItemsForResults,
     columns,
     getTotalVotes
@@ -62,7 +61,7 @@ const ResultsView = ({ showNotification }) => {
       </div>
 
       <div className="results-navigation">
-        <button 
+        <button
           className="btn navigation-btn"
           onClick={() => navigateResults('prev')}
           disabled={resultsViewIndex === 0}
@@ -71,14 +70,14 @@ const ResultsView = ({ showNotification }) => {
           <ChevronLeft size={20} />
           Previous
         </button>
-        
+
         <div className="results-counter">
           <span className="current-position">{resultsViewIndex + 1}</span>
           <span className="divider"> / </span>
           <span className="total-count">{totalItems}</span>
         </div>
-        
-        <button 
+
+        <button
           className="btn navigation-btn"
           onClick={() => navigateResults('next')}
           disabled={resultsViewIndex === totalItems - 1}
@@ -99,10 +98,10 @@ const ResultsView = ({ showNotification }) => {
               {currentItem.votes} out of {getTotalVotes()} total vote{getTotalVotes() !== 1 ? 's' : ''}
             </div>
             <div className="result-column">
-              from "{columnData?.title || 'Unknown Column'}"
+              from {columnData?.title || 'Unknown Column'}
             </div>
           </div>
-          
+
           <div className="result-display">
             {currentItem.type === 'group' ? (
               <CardGroup

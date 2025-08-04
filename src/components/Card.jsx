@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import {
+  getDisabledReason
+} from '../utils/retrospectiveModeUtils';
 import {
   isGroupingAllowed,
   areInteractionsAllowed,
@@ -9,18 +12,12 @@ import {
   areOthersInteractionsVisible,
   shouldObfuscateCards,
   isCardEditingAllowed,
-  isCardDraggingAllowed,
-  getWorkflowDisabledReason
+  isCardDraggingAllowed
 } from '../utils/workflowUtils';
-import { 
-  areInteractionsDisabled,
-  getDisabledReason 
-} from '../utils/retrospectiveModeUtils';
-
 // Import modularized components
+import CardReactions from './CardReactions';
 import Comments from './Comments';
 import VotingControls from './VotingControls';
-import CardReactions from './CardReactions';
 
 // Card Editor component for editing mode
 const CardEditor = ({
@@ -31,10 +28,10 @@ const CardEditor = ({
   toggleEditMode,
   deleteCard
 }) => (
-  <div className="card-edit" onClick={(e) => e.stopPropagation()}>
+  <div className="card-edit" onClick={e => e.stopPropagation()}>
     <textarea
       value={editedContent}
-      onChange={(e) => setEditedContent(e.target.value)}
+      onChange={e => setEditedContent(e.target.value)}
       onKeyDown={handleKeyPress}
       className="card-edit-textarea"
       autoFocus
@@ -69,13 +66,19 @@ const CardContent = ({
   const showDownvoteButton = downvotingEnabled || userVotes > 0;
 
   // Generate obfuscated text that matches the length of the original content
-  const generateObfuscatedText = (text) => {
-    if (!text) return '';
+  const generateObfuscatedText = text => {
+    if (!text) {
+      return '';
+    }
 
     // Replace each character with appropriate obfuscation
     return text.split('').map(char => {
-      if (char === ' ') return ' ';
-      if (char === '\n') return '\n';
+      if (char === ' ') {
+        return ' ';
+      }
+      if (char === '\n') {
+        return '\n';
+      }
       return '█';
     }).join('');
   };
@@ -87,7 +90,7 @@ const CardContent = ({
 
   // Determine if interactions are disabled based on workflow phase
   const interactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
-  
+
   // Determine if interactions should be visible
   const interactionsVisible = areInteractionsVisible(workflowPhase, retrospectiveMode);
 
@@ -114,10 +117,10 @@ const CardContent = ({
   );
 };
 
-function Card({ 
-  cardId, 
-  cardData, 
-  columnId, 
+function Card({
+  cardId,
+  cardData,
+  columnId,
   groupId = null,
   showNotification,
   onCardDropOnCard = null
@@ -164,7 +167,7 @@ function Card({
     editComment,
     deleteComment,
     toggleComments,
-    
+
     // Authorship checking
     isCardAuthor,
     isCommentAuthor
@@ -180,23 +183,20 @@ function Card({
     workflowPhase
   });
 
-  // Get comment count
-  const commentCount = cardData.comments ? Object.keys(cardData.comments).length : 0;
-
   // Calculate disabled reason for interactions
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
 
   // Determine if editing should be disabled for this user
   const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
-  
+
   // Use the utility function to determine editing permissions
   let editingDisabled = false;
-  
+
   // Only restrict editing when we have explicit workflow management
   if (workflowPhase && user) { // Only apply restrictions when we have a user context
     // Use the workflow utility function for consistent logic
     const editingAllowed = isCardEditingAllowed(workflowPhase, retrospectiveMode);
-    
+
     if (workflowPhase === 'CREATION') {
       // During CREATION phase, only creators can edit their cards (regardless of editingAllowed)
       editingDisabled = !isCreator;
@@ -211,7 +211,7 @@ function Card({
 
   // When retrospective mode is enabled, hide others' interactions based on workflow phase
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
-  
+
   // Create filtered card data for display
   const displayCardData = shouldHideOthersInteractions ? {
     ...cardData,
@@ -220,13 +220,13 @@ function Card({
     voters: cardData.voters && user?.uid ? { [user.uid]: cardData.voters[user.uid] } : {},
     // Filter reactions to only show user's own
     reactions: cardData.reactions ? Object.fromEntries(
-      Object.entries(cardData.reactions).filter(([emoji, data]) => 
+      Object.entries(cardData.reactions).filter(([_emoji, data]) =>
         data.users && user?.uid && data.users[user.uid]
-      ).map(([emoji, data]) => [emoji, { count: 1, users: { [user.uid]: true } }])
+      ).map(([emoji, _data]) => [emoji, { count: 1, users: { [user.uid]: true } }])
     ) : {},
     // Filter comments to only show user's own when interactions are hidden
     comments: cardData.comments ? Object.fromEntries(
-      Object.entries(cardData.comments).filter(([commentId, comment]) => 
+      Object.entries(cardData.comments).filter(([_commentId, comment]) =>
         comment.createdBy === user?.uid
       )
     ) : {}
@@ -241,7 +241,7 @@ function Card({
     type: 'CARD',
     item: { cardId, columnId, cardData, groupId },
     canDrag: !dragDisabled || canDropOnCard, // Allow drag when not obfuscated OR when grouping is available
-    collect: (monitor) => ({
+    collect: monitor => ({
       isDragging: monitor.isDragging()
     })
   }), [cardId, columnId, cardData, dragDisabled, groupId, canDropOnCard]);
@@ -249,15 +249,15 @@ function Card({
   // Configure drop functionality - allow cards to be dropped on this card after "Reveal All Cards" is clicked
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
-    drop: (item) => {
+    drop: item => {
       if (canDropOnCard && onCardDropOnCard && item.cardId !== cardId) {
         onCardDropOnCard(item.cardId, cardId);
       }
     },
     canDrop: () => canDropOnCard,
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver() && !!monitor.canDrop(),
-    }),
+    collect: monitor => ({
+      isOver: !!monitor.isOver() && !!monitor.canDrop()
+    })
   }), [canDropOnCard, onCardDropOnCard, cardId]);
 
   // Handle card click - enter edit mode when appropriate
@@ -270,7 +270,7 @@ function Card({
   };
 
   // Combine drag and drop refs
-  const combinedRef = (element) => {
+  const combinedRef = element => {
     cardElementRef.current = element;
     if (!dragDisabled || canDropOnCard) {
       drag(element);
@@ -283,14 +283,26 @@ function Card({
   // Determine dynamic classes based on state
   const getDynamicClasses = () => {
     const classes = [];
-    
-    if (isDragging) classes.push('dragging');
-    if (editingDisabled) classes.push('editing-disabled');
-    if (dragDisabled && !canDropOnCard) classes.push('drag-disabled');
-    if (isOver) classes.push('drop-target');
-    if (canDropOnCard) classes.push('groupable');
-    if (isCardAuthor()) classes.push('author-editable');
-    
+
+    if (isDragging) {
+      classes.push('dragging');
+    }
+    if (editingDisabled) {
+      classes.push('editing-disabled');
+    }
+    if (dragDisabled && !canDropOnCard) {
+      classes.push('drag-disabled');
+    }
+    if (isOver) {
+      classes.push('drop-target');
+    }
+    if (canDropOnCard) {
+      classes.push('groupable');
+    }
+    if (isCardAuthor()) {
+      classes.push('author-editable');
+    }
+
     // Cursor classes - prioritize based on user capabilities
     if (canDropOnCard) {
       // Grouping mode - show grab cursor
@@ -305,7 +317,7 @@ function Card({
       // Cannot edit - show not-allowed cursor
       classes.push('cursor-not-allowed');
     }
-    
+
     return classes.join(' ');
   };
 
@@ -326,20 +338,20 @@ function Card({
         />
       ) : (
         <>
-        <CardContent
-          cardData={displayCardData}
-          formatContentWithEmojis={formatContentWithEmojis}
-          upvoteCard={upvoteCard}
-          downvoteCard={downvoteCard}
-          votingEnabled={votingEnabled}
-          downvotingEnabled={downvotingEnabled}
-          userId={user?.uid}
-          retrospectiveMode={retrospectiveMode}
-          groupId={groupId}
-          workflowPhase={workflowPhase}
-          user={user}
-          disabledReason={disabledReason}
-        />          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+          <CardContent
+            cardData={displayCardData}
+            formatContentWithEmojis={formatContentWithEmojis}
+            upvoteCard={upvoteCard}
+            downvoteCard={downvoteCard}
+            votingEnabled={votingEnabled}
+            downvotingEnabled={downvotingEnabled}
+            userId={user?.uid}
+            retrospectiveMode={retrospectiveMode}
+            groupId={groupId}
+            workflowPhase={workflowPhase}
+            user={user}
+            disabledReason={disabledReason}
+          />          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
             <CardReactions
               reactions={displayCardData.reactions}
               userId={user?.uid}

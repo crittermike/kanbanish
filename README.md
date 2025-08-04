@@ -25,6 +25,7 @@ Try Kanbanish at: [https://crittermike.github.io/kanbanish](https://crittermike.
 - **Backend/Database**: Firebase Realtime Database
 - **Authentication**: Firebase Anonymous Auth
 - **Testing**: Vitest and React Testing Library
+- **Code Quality**: ESLint with React, Accessibility, and Import plugins
 
 ## 🛠️ Development
 
@@ -79,6 +80,11 @@ VITE_FIREBASE_APP_ID=your_app_id
 - **Run Tests**: `npm test`
   - Executes the test suite with Vitest
 
+- **Code Linting**: `npm run lint`
+  - Checks code for style and quality issues using ESLint
+  - Use `npm run lint:fix` to automatically fix fixable issues
+  - Use `npm run lint:check` to enforce zero warnings (useful for CI)
+
 ## 📱 Using Kanbanish
 
 1. **Creating a Board**:
@@ -112,11 +118,22 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
+### Development Guidelines
+
+1. **Code Quality**: Run `npm run lint` before committing to ensure code follows the project's style guidelines
+2. **Testing**: Run `npm test` to ensure all tests pass
+3. **Type Safety**: Follow TypeScript-like patterns even in JavaScript (proper prop types, clear function signatures)
+4. **Accessibility**: Ensure new components follow accessibility best practices
+
+### Contributing Process
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Make your changes and ensure they follow the style guide (`npm run lint:fix`)
+4. Add or update tests as needed
+5. Commit your changes (`git commit -m 'Add some amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
 ## 📄 License
 

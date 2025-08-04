@@ -1,31 +1,31 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight, Layers, Edit2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import VotingControls from './VotingControls';
-import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 
 /**
  * CardGroup component renders a group of cards with expand/collapse functionality
  */
-function CardGroup({ 
-  groupId, 
-  groupData, 
-  columnId, 
+function CardGroup({
+  groupId,
+  groupData,
+  columnId,
   columnData, // Add columnData to access all cards
   showNotification,
-  sortByVotes 
+  sortByVotes
 }) {
-  const { 
-    boardId, 
+  const {
+    boardId,
     user,
-    moveCard, 
-    ungroupCards, 
-    updateGroupName, 
-    votingEnabled, 
-    downvotingEnabled, 
-    upvoteGroup, 
+    moveCard,
+    ungroupCards,
+    updateGroupName,
+    votingEnabled,
+    downvotingEnabled,
+    upvoteGroup,
     downvoteGroup,
     retrospectiveMode,
     workflowPhase
@@ -37,7 +37,7 @@ function CardGroup({
 
   // When retrospective mode is enabled, hide others' interactions based on workflow phase
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
-  
+
   // Create filtered group data for display
   const displayGroupData = shouldHideOthersInteractions ? {
     ...groupData,
@@ -49,7 +49,7 @@ function CardGroup({
   // Set up drop target for cards to be added to this group
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
-    drop: (item) => {
+    drop: item => {
       // Allow dropping cards from any column, as long as the card is not already in this group
       if (!groupData.cardIds?.includes(item.cardId) && item.groupId !== groupId) {
         moveCard(item.cardId, item.columnId, columnId, groupId);
@@ -57,28 +57,30 @@ function CardGroup({
         return { handled: true }; // Signal that this drop was handled
       }
     },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
+    collect: monitor => ({
+      isOver: !!monitor.isOver()
+    })
   }), [columnId, groupId, groupData.cardIds, moveCard, showNotification]);
 
   // Apply the drop ref to group element
   drop(groupRef);
 
   // Voting handlers
-  const handleUpvoteGroup = (e) => {
+  const handleUpvoteGroup = e => {
     e.stopPropagation();
     upvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
   };
 
-  const handleDownvoteGroup = (e) => {
+  const handleDownvoteGroup = e => {
     e.stopPropagation();
     downvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
   };
 
   // Sort cards within the group
   const sortedCards = () => {
-    if (!groupData.cardIds || !columnData.cards) return [];
+    if (!groupData.cardIds || !columnData.cards) {
+      return [];
+    }
 
     // Get actual card data from column for cards in this group
     const cardsArray = groupData.cardIds
@@ -96,7 +98,7 @@ function CardGroup({
   };
 
   // Handle group name editing
-  const handleNameChange = (e) => {
+  const handleNameChange = e => {
     setEditedName(e.target.value);
   };
 
@@ -107,7 +109,7 @@ function CardGroup({
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = e => {
     if (e.key === 'Enter') {
       saveGroupName();
     } else if (e.key === 'Escape') {
@@ -127,7 +129,7 @@ function CardGroup({
   const cardCount = groupData.cardIds ? groupData.cardIds.length : 0;
 
   return (
-    <div 
+    <div
       ref={groupRef}
       className={`card-group ${isOver ? 'drag-over' : ''}`}
     >
@@ -138,7 +140,7 @@ function CardGroup({
           ) : (
             <ChevronRight size={16} className="expand-icon" />
           )}
-          
+
           {isEditingName ? (
             <input
               type="text"
@@ -148,13 +150,13 @@ function CardGroup({
               onKeyDown={handleKeyPress}
               className="group-name-input"
               autoFocus
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             />
           ) : (
             <div className="group-name-container">
-              <h3 
+              <h3
                 className={`card-group-name ${!isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'non-editable' : ''}`}
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   if (isGroupingAllowed(workflowPhase, retrospectiveMode)) {
                     setIsEditingName(true);
@@ -166,7 +168,7 @@ function CardGroup({
               {isGroupingAllowed(workflowPhase, retrospectiveMode) && (
                 <button
                   className="edit-group-name-btn"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     setIsEditingName(true);
                   }}
@@ -189,13 +191,13 @@ function CardGroup({
               disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
             />
           )}
-          
+
           <div className="card-group-info">
             <span className="card-count">{cardCount} card{cardCount !== 1 ? 's' : ''}</span>
             {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
               <button
                 className="group-action-btn"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   handleUngroup();
                 }}
@@ -216,7 +218,7 @@ function CardGroup({
               <span>Drag cards here to add them</span>
             </div>
           ) : (
-            sortedCards().map((card) => (
+            sortedCards().map(card => (
               <Card
                 key={card.id}
                 cardId={card.id}

@@ -4,17 +4,19 @@ import { generateId } from './helpers';
 
 /**
  * Adds a new column to the board
- * 
+ *
  * @param {string} boardId - The ID of the board
  * @param {string} title - The title of the column (default: 'New Column')
  * @returns {Promise} - A promise that resolves when the column is added
  */
 export function addColumn(boardId, title = 'New Column') {
-  if (!boardId) return Promise.reject(new Error('Board ID is required'));
+  if (!boardId) {
+    return Promise.reject(new Error('Board ID is required'));
+  }
 
   const columnId = generateId();
   const columnData = {
-    title: title,
+    title,
     cards: {}
   };
 
@@ -27,7 +29,7 @@ export function addColumn(boardId, title = 'New Column') {
 
 /**
  * Adds a new card to a column
- * 
+ *
  * @param {string} boardId - The ID of the board
  * @param {string} columnId - The ID of the column
  * @param {string} content - The content of the card
@@ -35,9 +37,15 @@ export function addColumn(boardId, title = 'New Column') {
  * @returns {Promise} - A promise that resolves when the card is added
  */
 export function addCard(boardId, columnId, content, user = null) {
-  if (!boardId) return Promise.reject(new Error('Board ID is required'));
-  if (!columnId) return Promise.reject(new Error('Column ID is required'));
-  if (!content || !content.trim()) return Promise.reject(new Error('Card content is required'));
+  if (!boardId) {
+    return Promise.reject(new Error('Board ID is required'));
+  }
+  if (!columnId) {
+    return Promise.reject(new Error('Column ID is required'));
+  }
+  if (!content || !content.trim()) {
+    return Promise.reject(new Error('Card content is required'));
+  }
 
   const cardId = generateId();
   const cardData = {

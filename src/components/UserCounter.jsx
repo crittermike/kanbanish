@@ -1,4 +1,3 @@
-import React from 'react';
 import { Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 

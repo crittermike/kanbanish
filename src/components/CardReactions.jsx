@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
-import EmojiPicker from './EmojiPicker';
 import { MessageSquare } from 'react-feather';
-import { 
-  shouldUseDisabledStyling, 
-  shouldHideFeature, 
-  getReactionDisabledMessage 
+import {
+  shouldUseDisabledStyling,
+  shouldHideFeature,
+  getReactionDisabledMessage
 } from '../utils/retrospectiveModeUtils';
 import { areInteractionsVisible } from '../utils/workflowUtils';
+import EmojiPicker from './EmojiPicker';
 
 const CardReactions = React.memo(({
   reactions,
@@ -40,7 +40,9 @@ const CardReactions = React.memo(({
     <div className="emoji-reactions">
       <div className="reactions-left">
         {reactions && Object.entries(reactions).map(([emoji, reactionData]) => {
-          if (reactionData.count <= 0) return null;
+          if (reactionData.count <= 0) {
+            return null;
+          }
 
           const hasUserReacted = reactionData.users && reactionData.users[userId];
 
@@ -49,8 +51,8 @@ const CardReactions = React.memo(({
               className={`emoji-reaction ${hasUserReacted ? 'active' : ''} ${useDisabledStyling ? 'disabled' : ''} ${isFrozen ? 'frozen' : ''}`}
               key={emoji}
               data-testid="emoji-reaction"
-              onClick={disabled ? undefined : (e) => addReaction(e, emoji)}
-              title={disabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? "Click to remove your reaction" : "Click to add your reaction")}
+              onClick={disabled ? undefined : e => addReaction(e, emoji)}
+              title={disabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
             >
               <span className="emoji">{emoji}</span>
               <span className="count">{reactionData.count}</span>
@@ -69,7 +71,7 @@ const CardReactions = React.memo(({
         {!hideAddButton && (
           <button
             className={`add-reaction-button ${useDisabledStyling ? 'disabled' : ''}`}
-            onClick={disabled ? undefined : (e) => {
+            onClick={disabled ? undefined : e => {
               e.stopPropagation();
               if (emojiButtonRef.current) {
                 const buttonRect = emojiButtonRef.current.getBoundingClientRect();
@@ -81,7 +83,7 @@ const CardReactions = React.memo(({
               setShowEmojiPicker(!showEmojiPicker);
               setShowComments(false);
             }}
-            title={disabled ? getReactionDisabledMessage(disabledReason) : "Add reaction"}
+            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
             ref={emojiButtonRef}
             disabled={useDisabledStyling}
           >+</button>
@@ -91,7 +93,7 @@ const CardReactions = React.memo(({
         <div className="reactions-right">
           <button
             className="comments-btn"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               toggleComments();
             }}

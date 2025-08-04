@@ -1,8 +1,7 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import PollResults from './PollResults';
 import { useBoardContext } from '../context/BoardContext';
+import PollResults from './PollResults';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
@@ -29,7 +28,7 @@ describe('PollResults Component', () => {
     });
 
     render(<PollResults />);
-    
+
     expect(screen.getByText('Retrospective Effectiveness Results')).toBeInTheDocument();
     expect(screen.getByText('7 participants')).toBeInTheDocument();
   });
@@ -42,7 +41,7 @@ describe('PollResults Component', () => {
     });
 
     render(<PollResults />);
-    
+
     expect(screen.getByText('4.2')).toBeInTheDocument();
     expect(screen.getByText('5.0')).toBeInTheDocument();
     expect(screen.getByText('Very Effective')).toBeInTheDocument();
@@ -56,9 +55,9 @@ describe('PollResults Component', () => {
     });
 
     render(<PollResults />);
-    
+
     expect(screen.getByText('Vote Distribution')).toBeInTheDocument();
-    
+
     // Check that different chart elements exist using getAllByText for duplicate percentages
     expect(screen.getAllByText('(14.3%)')).toHaveLength(3); // 3 ratings have 14.3%
     expect(screen.getAllByText('(28.6%)')).toHaveLength(2); // 2 ratings have 28.6%
@@ -72,7 +71,7 @@ describe('PollResults Component', () => {
     });
 
     render(<PollResults />);
-    
+
     expect(screen.getByText('No votes have been submitted yet.')).toBeInTheDocument();
     expect(screen.getByText('Participants need to complete the poll phase first.')).toBeInTheDocument();
   });

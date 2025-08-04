@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useBoardContext } from '../context/BoardContext';
+import { useState } from 'react';
 import { Star, Users } from 'react-feather';
+import { useBoardContext } from '../context/BoardContext';
 
 const PollVoting = () => {
-  const { userPollVote, submitPollVote, getPollStats, activeUsers, pollVotes } = useBoardContext();
+  const { userPollVote, submitPollVote, getPollStats, activeUsers } = useBoardContext();
   const [hoveredRating, setHoveredRating] = useState(0);
 
-  const handleVote = (rating) => {
+  const handleVote = rating => {
     submitPollVote(rating);
   };
 
-  const handleMouseEnter = (rating) => {
+  const handleMouseEnter = rating => {
     setHoveredRating(rating);
   };
 
@@ -18,7 +18,7 @@ const PollVoting = () => {
     setHoveredRating(0);
   };
 
-  const getRatingDescription = (rating) => {
+  const getRatingDescription = rating => {
     const descriptions = {
       1: 'Not effective at all',
       2: 'Slightly effective',
@@ -55,8 +55,8 @@ const PollVoting = () => {
           </div>
         </div>
         <div className="progress-bar">
-          <div 
-            className="progress-fill" 
+          <div
+            className="progress-fill"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -69,7 +69,7 @@ const PollVoting = () => {
 
       <div className="rating-container">
         <div className="stars">
-          {[1, 2, 3, 4, 5].map((rating) => (
+          {[1, 2, 3, 4, 5].map(rating => (
             <button
               key={rating}
               className={`star-button ${getDisplayRating() >= rating ? 'active' : ''}`}
@@ -78,15 +78,15 @@ const PollVoting = () => {
               onMouseLeave={handleMouseLeave}
               disabled={false}
             >
-              <Star 
-                size={32} 
+              <Star
+                size={32}
                 fill={getDisplayRating() >= rating ? '#ffd700' : 'none'}
                 color={getDisplayRating() >= rating ? '#ffd700' : '#ccc'}
               />
             </button>
           ))}
         </div>
-        
+
         <div className="rating-info">
           <div className="rating-number">
             {getDisplayRating() > 0 && (

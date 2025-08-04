@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 
-const CommentEditor = ({ 
-  editedComment, 
-  setEditedComment, 
-  saveComment, 
-  cancelEdit, 
-  deleteComment 
+const CommentEditor = ({
+  editedComment,
+  setEditedComment,
+  saveComment,
+  cancelEdit,
+  deleteComment
 }) => (
-  <div className="comment-edit" onClick={(e) => e.stopPropagation()}>
+  <div className="comment-edit" onClick={e => e.stopPropagation()}>
     <input
       type="text"
       value={editedComment}
-      onChange={(e) => setEditedComment(e.target.value)}
+      onChange={e => setEditedComment(e.target.value)}
       className="comment-edit-input"
       autoFocus
-      onKeyPress={(e) => {
+      onKeyPress={e => {
         if (e.key === 'Enter' && editedComment.trim()) {
           saveComment();
         } else if (e.key === 'Escape') {
@@ -31,10 +31,10 @@ const CommentEditor = ({
   </div>
 );
 
-const Comments = React.memo(({ 
-  comments, 
-  onAddComment, 
-  newComment, 
+const Comments = React.memo(({
+  comments,
+  onAddComment,
+  newComment,
   onCommentChange,
   onEditComment,
   onDeleteComment,
@@ -44,11 +44,11 @@ const Comments = React.memo(({
 }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
-  
+
   // Use utility functions for consistent logic
   const shouldShowAlert = !shouldHideFeature(disabledReason);
   const hideCommentForm = shouldHideFeature(disabledReason);
-  
+
   const startEditing = (commentId, content) => {
     // Don't allow editing if interactions are disabled
     if (interactionsDisabled) {
@@ -59,23 +59,23 @@ const Comments = React.memo(({
       }
       return;
     }
-    
+
     setEditingCommentId(commentId);
     setEditedContent(content);
   };
-  
+
   const cancelEdit = () => {
     setEditingCommentId(null);
     setEditedContent('');
   };
-  
+
   const saveComment = () => {
     if (editedContent.trim()) {
       onEditComment(editingCommentId, editedContent);
       cancelEdit();
     }
   };
-  
+
   // Get appropriate disabled message for comments
   const commentDisabledMessage = getCommentDisabledMessage(disabledReason);
 
@@ -92,7 +92,7 @@ const Comments = React.memo(({
     }
   };
 
-  const confirmDelete = (commentId) => {
+  const confirmDelete = commentId => {
     if (window.confirm('Are you sure you want to delete this comment?')) {
       onDeleteComment(commentId);
     }
@@ -113,9 +113,9 @@ const Comments = React.memo(({
                 deleteComment={() => confirmDelete(commentId)}
               />
             ) : (
-              <div 
+              <div
                 className={`comment-content ${isCommentAuthor(comment) && !interactionsDisabled ? 'editable' : ''}`}
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   if (isCommentAuthor(comment)) {
                     startEditing(commentId, comment.content);
@@ -142,15 +142,15 @@ const Comments = React.memo(({
           <input
             type="text"
             placeholder={
-              interactionsDisabled && shouldShowAlert 
-                ? commentDisabledMessage 
-                : "Add a comment..."
+              interactionsDisabled && shouldShowAlert
+                ? commentDisabledMessage
+                : 'Add a comment...'
             }
             className="comment-input"
             value={newComment}
-            onChange={(e) => onCommentChange(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            onKeyPress={(e) => {
+            onChange={e => onCommentChange(e.target.value)}
+            onClick={e => e.stopPropagation()}
+            onKeyPress={e => {
               if (e.key === 'Enter' && newComment.trim()) {
                 e.preventDefault();
                 handleAddComment();
@@ -158,9 +158,9 @@ const Comments = React.memo(({
             }}
             disabled={interactionsDisabled}
             title={
-              interactionsDisabled && shouldShowAlert 
-                ? commentDisabledMessage 
-                : ""
+              interactionsDisabled && shouldShowAlert
+                ? commentDisabledMessage
+                : ''
             }
           />
         </div>
