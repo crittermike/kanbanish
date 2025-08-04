@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBoardContext } from '../context/BoardContext';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'react-feather';
+import { ChevronLeft, ChevronRight } from 'react-feather';
 import Card from './Card';
 import CardGroup from './CardGroup';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -11,7 +11,6 @@ const ResultsView = ({ showNotification }) => {
     resultsViewIndex, 
     navigateResults, 
     getSortedItemsForResults,
-    goToCreationPhase,
     columns
   } = useBoardContext();
 
@@ -28,16 +27,6 @@ const ResultsView = ({ showNotification }) => {
       <div className="results-view">
         <div className="results-header">
           <h2>Results</h2>
-          <div className="results-controls">
-            <button 
-              className="btn secondary-btn"
-              onClick={goToCreationPhase}
-              title="Start over"
-            >
-              <RotateCcw size={16} />
-              Start Over
-            </button>
-          </div>
         </div>
         <div className="results-content">
           <div className="no-results">
@@ -69,16 +58,6 @@ const ResultsView = ({ showNotification }) => {
     <div className="results-view">
       <div className="results-header">
         <h2>Results</h2>
-        <div className="results-controls">
-          <button 
-            className="btn secondary-btn"
-            onClick={goToCreationPhase}
-            title="Start over"
-          >
-            <RotateCcw size={16} />
-            Start Over
-          </button>
-        </div>
       </div>
 
       <div className="results-navigation">

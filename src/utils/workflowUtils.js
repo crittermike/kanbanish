@@ -66,8 +66,7 @@ export const areOthersInteractionsVisible = (workflowPhase, retrospectiveMode = 
  */
 export const shouldObfuscateCards = (workflowPhase, retrospectiveMode = false) => {
   if (!retrospectiveMode) return false; // Never obfuscate when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.CREATION || 
-         workflowPhase === WORKFLOW_PHASES.GROUPING;
+  return workflowPhase === WORKFLOW_PHASES.CREATION;
 };
 
 /**
@@ -78,7 +77,8 @@ export const shouldObfuscateCards = (workflowPhase, retrospectiveMode = false) =
  */
 export const areCardsRevealed = (workflowPhase, retrospectiveMode = false) => {
   if (!retrospectiveMode) return true; // Always revealed when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.INTERACTIONS || 
+  return workflowPhase === WORKFLOW_PHASES.GROUPING || 
+         workflowPhase === WORKFLOW_PHASES.INTERACTIONS || 
          workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL || 
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };

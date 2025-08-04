@@ -376,14 +376,71 @@ export const BoardProvider = ({ children }) => {
     });
   };
 
+  // Remove all grouping from the board
+  const removeAllGrouping = () => {
+    if (!boardId || !user) return Promise.resolve();
+
+    const promises = [];
+
+    // Loop through all columns and ungroup all groups
+    Object.entries(columns).forEach(([columnId, column]) => {
+      if (column.groups) {
+        Object.entries(column.groups).forEach(([groupId, group]) => {
+          if (group.cardIds) {
+            // Clear groupId from each card in the group
+            group.cardIds.forEach(cardId => {
+              const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/groupId`);
+              promises.push(remove(cardRef));
+            });
+          }
+
+          // Remove the group itself
+          const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
+          promises.push(remove(groupRef));
+        });
+      }
+    });
+
+    return Promise.all(promises)
+      .then(() => {
+        console.log('All grouping removed from board');
+      })
+      .catch((error) => {
+        console.error('Error removing all grouping:', error);
+        throw error;
+      });
+  };
+
   const goToPreviousPhase = () => {
     switch (workflowPhase) {
       case WORKFLOW_PHASES.GROUPING:
-        updateBoardSettings({ 
-          workflowPhase: WORKFLOW_PHASES.CREATION,
-          retrospectiveMode: false,
-          resultsViewIndex: 0
-        });
+        // When going back to CREATION from GROUPING, warn about losing group data
+        const hasGroups = Object.values(columns).some(column => 
+          column.groups && Object.keys(column.groups).length > 0
+        );
+        
+        if (hasGroups) {
+          const confirmMessage = 'Going back to the creation phase will remove all card grouping. This cannot be undone. Are you sure you want to continue?';
+          if (!window.confirm(confirmMessage)) {
+            return; // User cancelled
+          }
+          
+          // Remove all grouping before transitioning
+          removeAllGrouping()
+            .then(() => {
+              updateBoardSettings({ 
+                workflowPhase: WORKFLOW_PHASES.CREATION
+              });
+            })
+            .catch((error) => {
+              console.error('Failed to remove grouping:', error);
+            });
+        } else {
+          // No groups to remove, just transition
+          updateBoardSettings({ 
+            workflowPhase: WORKFLOW_PHASES.CREATION
+          });
+        }
         break;
       case WORKFLOW_PHASES.INTERACTIONS:
         updateBoardSettings({ 
@@ -834,6 +891,7 @@ export const BoardProvider = ({ children }) => {
     // Card grouping functions
     createCardGroup,
     ungroupCards,
+    removeAllGrouping,
     updateGroupName,
     toggleGroupExpanded,
     upvoteGroup,
