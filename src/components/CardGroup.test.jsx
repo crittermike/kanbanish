@@ -106,9 +106,11 @@ describe('CardGroup Component', () => {
     const collapsedGroupData = { ...mockGroupData, expanded: false };
     render(<CardGroup {...mockProps} groupData={collapsedGroupData} />);
 
-    // Cards should show in preview mode (truncated content)
+    // Only the first card should show in preview mode (single card with stacking effect)
     expect(screen.getByText(/First card/)).toBeInTheDocument();
-    expect(screen.getByText(/Second card/)).toBeInTheDocument();
+    
+    // The second card should NOT be visible in preview mode
+    expect(screen.queryByText(/Second card/)).not.toBeInTheDocument();
 
     // But the full card components (with testid) should not be present
     expect(screen.queryByTestId('card-content')).not.toBeInTheDocument();
