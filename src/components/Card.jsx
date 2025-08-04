@@ -187,7 +187,7 @@ function Card({
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
 
   // Determine if editing should be disabled for this user
-  const isCreator = cardData.createdBy && user?.uid && cardData.createdBy === user?.uid;
+  const isCreator = isCardAuthor();
 
   // Use the utility function to determine editing permissions
   let editingDisabled = false;
