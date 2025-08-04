@@ -81,7 +81,7 @@ const WorkflowControls = ({ showNotification }) => {
                 onClick={handleStartInteractions}
               >
                 <MessageCircle size={16} />
-                Start Interactions Phase
+                Start Voting
               </button>
               <button 
                 className="btn secondary-btn"
@@ -107,7 +107,7 @@ const WorkflowControls = ({ showNotification }) => {
                 onClick={handleRevealInteractions}
               >
                 <Eye size={16} />
-                Reveal All Interactions
+                Reveal Votes
               </button>
               <button 
                 className="btn secondary-btn"
