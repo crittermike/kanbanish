@@ -235,16 +235,20 @@ function Card({
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
   const canDropOnCard = isGroupingAllowed(workflowPhase, retrospectiveMode);
+  
+  // In creation mode, allow authors to drag their cards between columns
+  const isCreationMode = workflowPhase === 'CREATION';
+  const canDragBetweenColumns = !dragDisabled || (isCreationMode && isCreator);
 
   // Configure drag functionality - allow drag for normal column movement or grouping after reveal
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
     item: { cardId, columnId, cardData, groupId },
-    canDrag: !dragDisabled || canDropOnCard, // Allow drag when not obfuscated OR when grouping is available
+    canDrag: canDragBetweenColumns || canDropOnCard,
     collect: monitor => ({
       isDragging: monitor.isDragging()
     })
-  }), [cardId, columnId, cardData, dragDisabled, groupId, canDropOnCard]);
+  }), [cardId, columnId, cardData, dragDisabled, groupId, canDropOnCard, canDragBetweenColumns]);
 
   // Configure drop functionality - allow cards to be dropped on this card after "Reveal All Cards" is clicked
   const [{ isOver }, drop] = useDrop(() => ({
@@ -272,7 +276,7 @@ function Card({
   // Combine drag and drop refs
   const combinedRef = element => {
     cardElementRef.current = element;
-    if (!dragDisabled || canDropOnCard) {
+    if (canDragBetweenColumns || canDropOnCard) {
       drag(element);
     }
     if (canDropOnCard) {
@@ -290,7 +294,7 @@ function Card({
     if (editingDisabled) {
       classes.push('editing-disabled');
     }
-    if (dragDisabled && !canDropOnCard) {
+    if (!canDragBetweenColumns && !canDropOnCard) {
       classes.push('drag-disabled');
     }
     if (isOver) {
@@ -314,8 +318,17 @@ function Card({
       // Can edit - show pointer cursor (this covers CREATION phase for creators)
       classes.push('cursor-pointer');
     } else {
-      // Cannot edit - show not-allowed cursor
-      classes.push('cursor-not-allowed');
+      // For creation mode, show grab cursor if you're the author (can drag between columns)
+      // For non-retrospective mode, always show grab cursor
+      const isCreationMode = workflowPhase === 'CREATION';
+      const isNonRetrospectiveMode = !retrospectiveMode;
+      
+      if ((isCreationMode && isCreator) || isNonRetrospectiveMode) {
+        classes.push('cursor-grab');
+      } else {
+        // Show not-allowed cursor for non-authors in creation mode or other retrospective phases
+        classes.push('cursor-not-allowed');
+      }
     }
 
     return classes.join(' ');

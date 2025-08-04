@@ -385,7 +385,7 @@ describe('Card Reveal Mode', () => {
     const cardContent = screen.getByTestId('card-content');
     const cardElement = cardContent.closest('.card');
 
-    // Card should have editing-disabled class and normal drag (no grouping yet)
+    // Card should have editing-disabled class and show not-allowed cursor for non-authors in creation mode
     expect(cardElement).toHaveClass('editing-disabled');
     expect(cardElement).not.toHaveClass('groupable');
     expect(cardElement).toHaveClass('cursor-not-allowed');
@@ -454,7 +454,7 @@ describe('Card Reveal Mode', () => {
     const cardContent = screen.getByTestId('card-content');
     const cardElement = cardContent.closest('.card');
 
-    // Card should have drag disabled when obfuscated for non-creators
+    // Card should have drag disabled and show not-allowed cursor for non-authors in creation mode
     expect(cardElement).toHaveClass('drag-disabled');
     expect(cardElement).toHaveClass('cursor-not-allowed');
   });
