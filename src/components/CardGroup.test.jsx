@@ -68,17 +68,23 @@ describe('CardGroup Component', () => {
   };
 
   const mockBoardContext = {
-    boardId: 'board123',
-    moveCard: vi.fn(),
-    ungroupCards: vi.fn(),
+    user: { uid: 'user1', displayName: 'Test User' },
+    boardId: 'test-board-123',
+    retrospectiveMode: true,
+    workflowPhase: 'GROUPING',
     updateGroupName: vi.fn(),
-    votingEnabled: true,
-    downvotingEnabled: true,
+    deleteGroup: vi.fn(),
+    ungroupCards: vi.fn(),
     upvoteGroup: vi.fn(),
-    downvoteGroup: vi.fn()
-  };
-
-  beforeEach(() => {
+    downvoteGroup: vi.fn(),
+    moveCard: vi.fn(),
+    addCardToGroup: vi.fn(),
+    removeCardFromGroup: vi.fn(),
+    moveCardWithinGroup: vi.fn(),
+    moveCardBetweenGroups: vi.fn(),
+    votingEnabled: true,
+    downvotingEnabled: true
+  };  beforeEach(() => {
     vi.clearAllMocks();
     useBoardContext.mockReturnValue(mockBoardContext);
   });
@@ -152,6 +158,10 @@ describe('CardGroup Component', () => {
     // Mock window.confirm to return true
     window.confirm = vi.fn().mockReturnValue(true);
     
+    // Override context for interactions phase
+    const interactionsContext = { ...mockBoardContext, workflowPhase: 'INTERACTIONS' };
+    useBoardContext.mockReturnValue(interactionsContext);
+    
     render(<CardGroup {...mockProps} />);
     
     const ungroupButton = screen.getByTitle('Ungroup cards');
@@ -180,7 +190,15 @@ describe('CardGroup Component', () => {
   });
 
   test('shows voting controls for groups when voting is enabled', () => {
-    const groupDataWithVotes = { ...mockGroupData, votes: 5 };
+    // Override context for interactions phase
+    const interactionsContext = { ...mockBoardContext, workflowPhase: 'INTERACTIONS' };
+    useBoardContext.mockReturnValue(interactionsContext);
+    
+    const groupDataWithVotes = { 
+      ...mockGroupData, 
+      votes: 5,
+      voters: { 'user1': 5 } // Add voter data for the test user
+    };
     render(<CardGroup {...mockProps} groupData={groupDataWithVotes} />);
     
     // Should show vote count
@@ -196,6 +214,10 @@ describe('CardGroup Component', () => {
   });
 
   test('calls upvoteGroup when upvote button is clicked', () => {
+    // Override context for interactions phase
+    const interactionsContext = { ...mockBoardContext, workflowPhase: 'INTERACTIONS' };
+    useBoardContext.mockReturnValue(interactionsContext);
+    
     const groupDataWithVotes = { ...mockGroupData, votes: 3 };
     render(<CardGroup {...mockProps} groupData={groupDataWithVotes} />);
     
