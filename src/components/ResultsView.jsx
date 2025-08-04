@@ -11,7 +11,8 @@ const ResultsView = ({ showNotification }) => {
     resultsViewIndex, 
     navigateResults, 
     getSortedItemsForResults,
-    columns
+    columns,
+    getTotalVotes
   } = useBoardContext();
 
   if (workflowPhase !== WORKFLOW_PHASES.RESULTS) {
@@ -95,7 +96,7 @@ const ResultsView = ({ showNotification }) => {
               {currentItem.type === 'group' ? 'Group' : 'Card'}
             </div>
             <div className="result-votes">
-              {currentItem.votes} vote{currentItem.votes !== 1 ? 's' : ''}
+              {currentItem.votes} out of {getTotalVotes()} total vote{getTotalVotes() !== 1 ? 's' : ''}
             </div>
             <div className="result-column">
               from "{columnData?.title || 'Unknown Column'}"

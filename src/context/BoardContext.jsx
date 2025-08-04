@@ -630,6 +630,29 @@ export const BoardProvider = ({ children }) => {
     return true;
   };
 
+  // Calculate total votes across all cards and groups
+  const getTotalVotes = () => {
+    let totalVotes = 0;
+    
+    Object.values(columns).forEach(column => {
+      // Sum votes from all cards
+      if (column.cards) {
+        Object.values(column.cards).forEach(card => {
+          totalVotes += card.votes || 0;
+        });
+      }
+      
+      // Sum votes from all groups
+      if (column.groups) {
+        Object.values(column.groups).forEach(group => {
+          totalVotes += group.votes || 0;
+        });
+      }
+    });
+    
+    return totalVotes;
+  };
+
   // Move a card between columns or into/out of groups
   const moveCard = (cardId, sourceColumnId, targetColumnId, targetGroupId = null) => {
     if (!boardId || !user) return;
@@ -943,6 +966,7 @@ export const BoardProvider = ({ children }) => {
     openExistingBoard,
     moveCard,
     resetAllVotes,
+    getTotalVotes,
     darkMode,
     updateDarkMode,
     activeUsers,
