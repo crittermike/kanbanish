@@ -234,26 +234,24 @@ function CardGroup({
 
       {!isExpanded && cardCount > 0 && (
         <div className="card-group-preview">
-          {sortedCards().slice(0, 3).map((card, index) => (
-            <div
-              key={card.id}
-              className="card-preview"
-              style={{
-                transform: `translateX(${index * 4}px) translateY(${index * 2}px)`,
-                zIndex: 3 - index
-              }}
-            >
-              <div className="card-preview-content">
-                {card.content?.substring(0, 30)}
-                {card.content?.length > 30 ? '...' : ''}
-              </div>
+          {/* Main card with multiple box-shadows to simulate stack */}
+          <div 
+            className={`card-preview main-card ${cardCount > 1 ? 'with-stack-shadow' : ''}`}
+            style={{
+              boxShadow: cardCount > 1 ? 
+                `0 2px 8px rgba(0, 0, 0, 0.15), 
+                 0 1px 3px rgba(0, 0, 0, 0.1),
+                 3px 3px 0 0 var(--card-bg),
+                 3px 3px 0 1px var(--border-color),
+                 6px 6px 0 0 var(--card-bg),
+                 6px 6px 0 1px var(--border-color)` : 
+                '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <div className="card-preview-content">
+              {sortedCards()[0]?.content}
             </div>
-          ))}
-          {cardCount > 3 && (
-            <div className="more-cards-indicator">
-              +{cardCount - 3} more
-            </div>
-          )}
+          </div>
         </div>
       )}
     </div>
