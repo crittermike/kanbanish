@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { shouldHideFeature, getCommentDisabledMessage } from '../utils/revealModeUtils';
+import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 
 const CommentEditor = ({ 
   editedComment, 

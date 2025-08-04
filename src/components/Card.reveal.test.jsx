@@ -70,8 +70,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: false,
-            cardsRevealed: false
+            retrospectiveMode: false,
+            workflowPhase: 'CREATION'
         });
 
         renderCard();
@@ -91,8 +91,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: false
+            retrospectiveMode: true,
+            workflowPhase: 'CREATION'
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
@@ -113,7 +113,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: true
         });
 
@@ -139,7 +139,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: false
         });
 
@@ -167,7 +167,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: false
         });
 
@@ -193,7 +193,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: false
         });
 
@@ -208,7 +208,7 @@ describe('Card Reveal Mode', () => {
         expect(cardContent).toHaveClass('obfuscated');
     });
 
-    test('disables voting when cards are obfuscated for non-creators', () => {
+    test('hides voting when cards are obfuscated for non-creators', () => {
         const cardDataFromOtherUser = {
             ...mockCardData,
             createdBy: 'other-user-456' // Different creator
@@ -220,26 +220,23 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: false
+            retrospectiveMode: true,
+            workflowPhase: 'CREATION' // Cards not revealed yet
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
 
-        // Find voting buttons by their exact disabled titles
-        const voteButtons = screen.getAllByTitle('Voting disabled until cards are revealed');
-        expect(voteButtons).toHaveLength(2); // Should be upvote and downvote
-
-        const upvoteButton = voteButtons[0];
-        const downvoteButton = voteButtons[1];
-
-        expect(upvoteButton).toBeDisabled();
-        expect(downvoteButton).toBeDisabled();
-        expect(upvoteButton.title).toBe('Voting disabled until cards are revealed');
-        expect(downvoteButton.title).toBe('Voting disabled until cards are revealed');
+        // Voting should be completely hidden during CREATION phase in reveal mode
+        expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Voting disabled until cards are revealed')).not.toBeInTheDocument();
+        
+        // Card content should have full-width class since voting is hidden
+        const cardContent = screen.getByTestId('card-content');
+        expect(cardContent).toHaveClass('full-width');
     });
 
-    test('disables reactions when cards are obfuscated for non-creators', () => {
+    test('hides reactions when cards are obfuscated for non-creators', () => {
         const cardDataFromOtherUser = {
             ...mockCardData,
             createdBy: 'other-user-456', // Different creator
@@ -254,49 +251,46 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: false
+            retrospectiveMode: true,
+            workflowPhase: 'CREATION' // Cards not revealed yet
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
 
-        // Find add reaction button specifically by role and text
-        const addReactionButton = screen.getByRole('button', { name: '+' });
-        expect(addReactionButton).toBeDisabled();
-        expect(addReactionButton.title).toContain('Reactions disabled until cards are revealed');
-
-        // Existing reaction should be disabled
-        const emojiReaction = screen.getByTestId('emoji-reaction');
-        expect(emojiReaction).toHaveClass('disabled');
+        // Reactions should be completely hidden during CREATION phase in reveal mode
+        expect(screen.queryByRole('button', { name: '+' })).not.toBeInTheDocument();
+        expect(screen.queryByText('😄')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
+        
+        // No emoji reactions section should be present
+        expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
     });
 
-    test('disables voting and reactions for ALL users (including creators) when cards not revealed', () => {
+    test('hides voting and reactions for ALL users (including creators) when cards not revealed', () => {
         useBoardContext.mockReturnValue({
             boardId: 'board123',
             user: { uid: 'user123' }, // Same as card creator
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: false
+            retrospectiveMode: true,
+            workflowPhase: 'CREATION' // Cards not revealed yet
         });
 
         renderCard(); // Uses default mockCardData with createdBy: 'user123'
 
-        // Even for creators, voting buttons should be disabled when cards aren't revealed
-        const voteButtons = screen.getAllByTitle('Voting disabled until cards are revealed');
-        expect(voteButtons).toHaveLength(2);
-
-        const upvoteButton = voteButtons[0];
-        const downvoteButton = voteButtons[1];
-
-        expect(upvoteButton).toBeDisabled();
-        expect(downvoteButton).toBeDisabled();
-
-        // Add reaction button should also be disabled for creators
-        const addReactionButton = screen.getByRole('button', { name: '+' });
-        expect(addReactionButton).toBeDisabled();
-        expect(addReactionButton.title).toContain('Reactions disabled until cards are revealed');
+        // Even for creators, voting and reactions should be hidden during CREATION phase
+        expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Voting disabled until cards are revealed')).not.toBeInTheDocument();
+        
+        // Reactions should also be hidden
+        expect(screen.queryByRole('button', { name: '+' })).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
+        
+        // Card content should have full-width class since voting is hidden
+        const cardContent = screen.getByTestId('card-content');
+        expect(cardContent).toHaveClass('full-width');
     });
 
     test('enables voting and reactions when cards are revealed but interactions not revealed', () => {
@@ -304,7 +298,7 @@ describe('Card Reveal Mode', () => {
             ...mockCardData,
             createdBy: 'other-user-456', // Different creator
             reactions: {
-                '😄': { count: 2, users: { 'other-user': true, 'user123': true } } // Include current user's reaction
+                '😄': { count: 1, users: { 'other-user': true } }
             }
         };
 
@@ -314,9 +308,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: true, // Cards are revealed
-            interactionsRevealed: false // Interactions NOT revealed yet (phase 2)
+            retrospectiveMode: true,
+            workflowPhase: 'INTERACTIONS' // Cards revealed, interactions allowed
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
@@ -332,9 +325,9 @@ describe('Card Reveal Mode', () => {
         const addReactionButton = screen.getByRole('button', { name: '+' });
         expect(addReactionButton).not.toBeDisabled();
 
-        // Since the test data includes reactions, check for existing reaction
-        const emojiReaction = screen.getByTestId('emoji-reaction');
-        expect(emojiReaction).not.toHaveClass('disabled');
+        // In INTERACTIONS phase, others' interactions should NOT be visible
+        // The reaction from 'other-user' should be hidden
+        expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
     });
 
     test('freezes interactions when interactions are revealed', () => {
@@ -352,9 +345,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: true, // Cards are revealed
-            interactionsRevealed: true // Interactions revealed (phase 3 - frozen)
+            retrospectiveMode: true,
+            workflowPhase: 'INTERACTION_REVEAL' // Interactions revealed (frozen)
         });
 
         renderCard({ cardData: cardDataFromOtherUser });
@@ -387,7 +379,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: false
         });
 
@@ -410,8 +402,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: false
+            retrospectiveMode: true,
+            workflowPhase: 'CREATION' // Cards not revealed yet
         });
 
         renderCard(); // Uses default mockCardData with createdBy: 'user123'
@@ -422,7 +414,7 @@ describe('Card Reveal Mode', () => {
         // Card should NOT have editing-disabled class (creator can edit)
         expect(cardElement).not.toHaveClass('editing-disabled');
 
-        // Card should NOT be groupable yet (cards not revealed)
+        // Card should NOT be groupable yet (still in CREATION phase)
         expect(cardElement).not.toHaveClass('groupable');
         expect(cardElement).toHaveClass('cursor-pointer'); // Creator can still edit
     });
@@ -434,8 +426,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: true // Cards have been revealed - NOW grouping is available
+            retrospectiveMode: true,
+            workflowPhase: 'GROUPING' // Grouping phase - cards revealed and grouping enabled
         });
 
         renderCard(); // Uses default mockCardData with createdBy: 'user123'
@@ -444,7 +436,7 @@ describe('Card Reveal Mode', () => {
         const cardContent = screen.getByTestId('card-content');
         const cardElement = cardContent.closest('.card');
 
-        // Card should be groupable for drag-onto-card functionality after cards are revealed
+        // Card should be groupable for drag-onto-card functionality during GROUPING phase
         expect(cardElement).toHaveClass('groupable');
         expect(cardElement).toHaveClass('cursor-grab');
     });
@@ -456,7 +448,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
+            retrospectiveMode: true,
             cardsRevealed: false // Cards are obfuscated
         });
 
@@ -478,8 +470,8 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: true,
-            cardsRevealed: true // Cards are revealed
+            retrospectiveMode: true,
+            workflowPhase: 'GROUPING' // Grouping phase - cards revealed and dragging enabled
         });
 
         renderCard();
@@ -488,7 +480,7 @@ describe('Card Reveal Mode', () => {
         const cardContent = screen.getByTestId('card-content');
         const cardElement = cardContent.closest('.card');
 
-        // Card should NOT have drag-disabled class when revealed
+        // Card should NOT have drag-disabled class during GROUPING phase
         expect(cardElement).not.toHaveClass('drag-disabled');
         expect(cardElement).toHaveClass('cursor-grab'); // Grouping mode cursor
     });
@@ -500,7 +492,7 @@ describe('Card Reveal Mode', () => {
             votingEnabled: true,
             downvotingEnabled: true,
             multipleVotesAllowed: false,
-            revealMode: false, // Reveal mode is off
+            retrospectiveMode: false, // Reveal mode is off
             cardsRevealed: false
         });
 

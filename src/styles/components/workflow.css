@@ -1,0 +1,94 @@
+/* Workflow Controls Styles */
+.workflow-controls {
+  background: var(--background-color);
+  border-bottom: 2px solid var(--border-color);
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.workflow-phase {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.phase-info {
+  flex: 1;
+}
+
+.phase-info h3 {
+  margin: 0 0 8px 0;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.phase-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.phase-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.phase-controls .btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  min-width: auto;
+}
+
+/* Phase-specific styling */
+.workflow-phase[data-phase="CREATION"] .phase-info h3 {
+  color: var(--info-color, #3b82f6);
+}
+
+.workflow-phase[data-phase="GROUPING"] .phase-info h3 {
+  color: var(--warning-color, #f59e0b);
+}
+
+.workflow-phase[data-phase="INTERACTIONS"] .phase-info h3 {
+  color: var(--primary-color);
+}
+
+.workflow-phase[data-phase="INTERACTION_REVEAL"] .phase-info h3 {
+  color: var(--success-color, #22c55e);
+}
+
+.workflow-phase[data-phase="RESULTS"] .phase-info h3 {
+  color: var(--accent-color, #8b5cf6);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .workflow-controls {
+    padding: 12px 15px;
+  }
+  
+  .workflow-phase {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .phase-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .phase-controls .btn {
+    flex: 1;
+    min-width: 140px;
+  }
+}

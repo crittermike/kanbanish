@@ -1,0 +1,180 @@
+import React from 'react';
+import { useBoardContext } from '../context/BoardContext';
+import { Eye, Users, MessageCircle, Award, ArrowLeft } from 'react-feather';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+
+const WorkflowControls = ({ showNotification }) => {
+  const {
+    workflowPhase,
+    retrospectiveMode,
+    startGroupingPhase,
+    startInteractionsPhase,
+    startInteractionRevealPhase,
+    startResultsPhase,
+    goToPreviousPhase
+  } = useBoardContext();
+
+  const handleStartGrouping = () => {
+    startGroupingPhase();
+    showNotification('Grouping phase started - cards revealed, grouping enabled');
+  };
+
+  const handleStartInteractions = () => {
+    startInteractionsPhase();
+    showNotification('Interactions phase started - add comments, votes, and reactions');
+  };
+
+  const handleRevealInteractions = () => {
+    startInteractionRevealPhase();
+    showNotification('Interactions revealed!');
+  };
+
+  const handleStartResults = () => {
+    startResultsPhase();
+    showNotification('Results phase started - view top items by votes');
+  };
+
+  const handleGoToPreviousPhase = () => {
+    const phaseMessages = {
+      [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
+      [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
+      [WORKFLOW_PHASES.INTERACTION_REVEAL]: 'Returned to interactions phase',
+      [WORKFLOW_PHASES.RESULTS]: 'Returned to interaction reveal phase'
+    };
+
+    goToPreviousPhase();
+    const message = phaseMessages[workflowPhase] || 'Moved to previous phase';
+    showNotification(message);
+  };
+
+  const renderPhaseControls = () => {
+    switch (workflowPhase) {
+      case WORKFLOW_PHASES.CREATION:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Card Creation Phase</h3>
+              <p>Add cards to the board. When ready, reveal cards and start grouping.</p>
+            </div>
+            <div className="phase-controls">
+              <button 
+                className="btn primary-btn"
+                onClick={handleStartGrouping}
+              >
+                <Eye size={16} />
+                Reveal Cards & Start Grouping
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.GROUPING:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Grouping Phase</h3>
+              <p>Cards are revealed. Group related cards together by dragging them onto each other.</p>
+            </div>
+            <div className="phase-controls">
+              <button 
+                className="btn primary-btn"
+                onClick={handleStartInteractions}
+              >
+                <MessageCircle size={16} />
+                Start Interactions Phase
+              </button>
+              <button 
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.INTERACTIONS:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Interactions Phase</h3>
+              <p>Add comments, votes, and reactions to cards and groups. Interactions are hidden from other users.</p>
+            </div>
+            <div className="phase-controls">
+              <button 
+                className="btn primary-btn"
+                onClick={handleRevealInteractions}
+              >
+                <Eye size={16} />
+                Reveal All Interactions
+              </button>
+              <button 
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.INTERACTION_REVEAL:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Interaction Reveal Phase</h3>
+              <p>All interactions are now visible. Review the feedback and votes.</p>
+            </div>
+            <div className="phase-controls">
+              <button 
+                className="btn primary-btn"
+                onClick={handleStartResults}
+              >
+                <Award size={16} />
+                View Results
+              </button>
+              <button 
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.RESULTS:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Results Phase</h3>
+              <p>Viewing the top-voted cards and groups. Use navigation to browse all results.</p>
+            </div>
+            <div className="phase-controls">
+              <button 
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="workflow-controls">
+      {renderPhaseControls()}
+    </div>
+  );
+};
+
+export default WorkflowControls;

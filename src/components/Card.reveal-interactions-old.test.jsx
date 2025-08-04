@@ -30,7 +30,7 @@ vi.mock('../utils/boardUtils', () => ({
   addCard: vi.fn()
 }));
 
-describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
+describe('Card Reveal Mode Interactions', () => {
   const mockShowNotification = vi.fn();
   const mockUpdateCard = vi.fn();
   const mockDeleteCard = vi.fn();
@@ -48,31 +48,30 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       reactions: { '👍': { count: 2, users: { user1: true, user2: true } } },
       comments: {
         comment1: {
-          id: 'comment1',
-          text: 'Test comment',
-          createdBy: 'user1',
-          created: Date.now()
+          content: 'Test comment',
+          timestamp: Date.now(),
+          createdBy: 'user1'
         }
       },
-      createdBy: 'user1',
-      created: Date.now()
+      createdBy: 'user1'
     },
-    showNotification: mockShowNotification
+    showNotification: mockShowNotification,
+    user: { uid: 'user1' }
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('hides interactions in CREATION phase', () => {
-    const creationPhaseContext = {
+  it('hides reactions when in reveal mode and cards not revealed', () => {
+    const retrospectiveModeContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      retrospectiveMode: true,
-      workflowPhase: 'CREATION',
+      retrospectiveMode: true,  // Reveal mode is on
+      workflowPhase: 'CREATION', // In creation phase (cards not revealed)
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,
@@ -82,27 +81,25 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
     
-    useBoardContext.mockReturnValue(creationPhaseContext);
+    useBoardContext.mockReturnValue(retrospectiveModeContext);
     
     render(<Card {...baseProps} />);
     
-    // Interactions should not be visible at all in creation phase
+    // Reactions should be completely hidden during CREATION phase
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
   });
 
-  it('hides interactions in GROUPING phase', () => {
-    const groupingPhaseContext = {
+  it('hides comment button when in reveal mode and cards not revealed', () => {
+    const retrospectiveModeContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      retrospectiveMode: true,
-      workflowPhase: 'GROUPING',
+      retrospectiveMode: true,  // Reveal mode is on
+      workflowPhase: 'CREATION', // In creation phase (cards not revealed)
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,
@@ -112,27 +109,24 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
     
-    useBoardContext.mockReturnValue(groupingPhaseContext);
+    useBoardContext.mockReturnValue(retrospectiveModeContext);
     
     render(<Card {...baseProps} />);
     
-    // Interactions should not be visible at all in grouping phase
-    expect(screen.queryByText('👍')).not.toBeInTheDocument();
-    expect(screen.queryByText('+')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
+    // Comment button should be hidden
+    const commentsButton = screen.queryByTitle('Toggle comments');
+    expect(commentsButton).not.toBeInTheDocument();
   });
 
-  it('shows and enables interactions in INTERACTIONS phase', () => {
-    const interactionsPhaseContext = {
+  it('enables reactions when in reveal mode and cards are revealed', () => {
+    const retrospectiveModeContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      retrospectiveMode: true,
-      workflowPhase: 'INTERACTIONS',
+      retrospectiveMode: true,  // Reveal mode is on
+      workflowPhase: 'INTERACTIONS', // In interactions phase (cards revealed)
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,
@@ -142,34 +136,28 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
     
-    useBoardContext.mockReturnValue(interactionsPhaseContext);
+    useBoardContext.mockReturnValue(retrospectiveModeContext);
     
     render(<Card {...baseProps} />);
     
-    // Interactions should be visible and enabled
-    expect(screen.getByText('👍')).toBeInTheDocument();
-    expect(screen.getByText('+')).toBeInTheDocument();
-    expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
-    expect(screen.getByTitle('Upvote')).toBeInTheDocument();
-    
-    // Reactions should be enabled (not disabled)
+    // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
     
     // Add reaction button should be enabled
-    const addReactionButton = screen.getByText('+');
+    const addReactionButton = screen.getByTitle('Add reaction');
     expect(addReactionButton).not.toBeDisabled();
   });
 
-  it('shows but disables interactions in INTERACTION_REVEAL phase', () => {
-    const interactionRevealPhaseContext = {
+  it('shows comment button when in reveal mode and cards are revealed', () => {
+    const retrospectiveModeContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL',
+      retrospectiveMode: true,  // Reveal mode is on
+      workflowPhase: 'INTERACTIONS', // In interactions phase (cards revealed)
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,
@@ -179,23 +167,24 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
     };
     
-    useBoardContext.mockReturnValue(interactionRevealPhaseContext);
+    useBoardContext.mockReturnValue(retrospectiveModeContext);
     
     render(<Card {...baseProps} />);
     
-    // Interactions should be visible but disabled (frozen)
-    expect(screen.getByText('👍')).toBeInTheDocument();
-    expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
-    // Check that voting buttons show the frozen message
-    expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(2);
-    
-    // Reactions should exist but be disabled for frozen state
+    // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
-    expect(existingReaction).toBeInTheDocument();
-    // In frozen state, reactions don't get disabled styling but are not clickable
+    expect(existingReaction).not.toHaveClass('disabled');
+    
+    // Add reaction button should be enabled
+    const addReactionButton = screen.getByTitle('Add reaction');
+    expect(addReactionButton).not.toBeDisabled();
+    
+    // Comment button should be visible
+    const commentsButton = screen.getByTitle('Toggle comments');
+    expect(commentsButton).toBeInTheDocument();
   });
 
-  it('shows interactions when reveal mode is disabled (normal mode)', () => {
+  it('shows comment button when reveal mode is disabled', () => {
     const normalModeContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
@@ -203,7 +192,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       downvotingEnabled: false,
       multipleVotesAllowed: false,
       retrospectiveMode: false, // Reveal mode is off
-      workflowPhase: 'CREATION', // Phase doesn't matter when reveal mode is off
+      workflowPhase: 'CREATION',
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,
@@ -217,18 +206,43 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     
     render(<Card {...baseProps} />);
     
-    // When reveal mode is disabled, interactions should always be visible and enabled
-    expect(screen.getByText('👍')).toBeInTheDocument();
-    expect(screen.getByText('+')).toBeInTheDocument();
-    expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
-    expect(screen.getByTitle('Upvote')).toBeInTheDocument();
-    
     // Reactions should be enabled
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).not.toHaveClass('disabled');
     
-    // Add reaction button should be enabled
-    const addReactionButton = screen.getByText('+');
-    expect(addReactionButton).not.toBeDisabled();
+    // Comment button should be visible
+    const commentsButton = screen.getByTitle('Toggle comments');
+    expect(commentsButton).toBeInTheDocument();
+  });
+
+  it('shows no interaction elements when in creation phase', () => {
+    const retrospectiveModeContext = {
+      boardId: 'test-board',
+      user: { uid: 'user1' },
+      votingEnabled: true,
+      downvotingEnabled: false,
+      multipleVotesAllowed: false,
+      retrospectiveMode: true,
+      workflowPhase: 'CREATION', // In creation phase (cards not revealed)
+      updateCard: mockUpdateCard,
+      deleteCard: mockDeleteCard,
+      addComment: mockAddComment,
+      updateComment: mockUpdateComment,
+      deleteComment: mockDeleteComment,
+      isCardAuthor: (cardData, user) => cardData?.createdBy === user?.uid,
+      isCommentAuthor: (comment, user) => comment?.createdBy === user?.uid
+    };
+    
+    useBoardContext.mockReturnValue(retrospectiveModeContext);
+    
+    render(<Card {...baseProps} />);
+    
+    // During CREATION phase, interactions should be completely hidden
+    expect(screen.queryByText('👍')).not.toBeInTheDocument();
+    expect(screen.queryByText('+')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
+    
+    // No notification should be needed since elements are not present
+    expect(mockShowNotification).not.toHaveBeenCalled();
   });
 });

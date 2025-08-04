@@ -16,6 +16,8 @@
 @import 'components/modals.css';
 @import 'components/emoji-reactions.css';
 @import 'components/template-select.css';
+@import 'components/results.css';
+@import 'components/workflow.css';
 
 /* Utility classes and notifications */
 .notification {

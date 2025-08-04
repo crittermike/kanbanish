@@ -8,9 +8,10 @@ import { generateId } from '../utils/helpers';
 import { addCard } from '../utils/boardUtils';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
+import { isGroupingAllowed, isCardEditingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, votingEnabled, user, createCardGroup, revealMode, cardsRevealed, columns } = useBoardContext();
+  const { boardId, moveCard, votingEnabled, user, createCardGroup, retrospectiveMode, workflowPhase, columns } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -27,13 +28,12 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     }
   }, [columnData, isEditing, title]);
 
-  // Hide add card form when cards are revealed
+  // Hide add card form when card creation is no longer allowed
   useEffect(() => {
-    if (cardsRevealed && isAddingCard) {
+    if (retrospectiveMode && !isCardCreationAllowed(workflowPhase, retrospectiveMode) && isAddingCard) {
       setIsAddingCard(false);
-      setNewCardContent('');
     }
-  }, [cardsRevealed, isAddingCard]);
+  }, [workflowPhase, retrospectiveMode, isAddingCard]);
 
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({
@@ -197,8 +197,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   };
 
   // Handle creating a group when a card is dropped onto another card after "Reveal All Cards" is clicked
+  // Handle creating a group when a card is dropped onto another card during grouping phase
   const handleCardDropOnCard = (draggedCardId, targetCardId) => {
-    if (!revealMode || !cardsRevealed) return; // Only allow grouping after cards are revealed
+    if (!isGroupingAllowed(workflowPhase, retrospectiveMode)) return; // Only allow grouping during GROUPING phase
     if (draggedCardId === targetCardId) return; // Can't group with itself
     
     // Find which column the dragged card belongs to
@@ -289,7 +290,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </h2>
         )}
         <div className="column-actions">
-          {!cardsRevealed && (
+          {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="icon-button" title="Delete Column" onClick={deleteColumn}>
               <Trash2 />
             </button>
@@ -351,7 +352,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             </div>
           </div>
         ) : (
-          !cardsRevealed && (
+          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="add-card" onClick={showAddCardForm}>
               <Plus />
               Add Card

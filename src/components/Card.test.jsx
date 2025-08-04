@@ -70,7 +70,9 @@ describe('Card Component', () => {
     user: { uid: 'user123' },
     votingEnabled: true,
     downvotingEnabled: true,
-    multipleVotesAllowed: false
+    multipleVotesAllowed: false,
+    workflowPhase: 'INTERACTIONS', // Allow interactions for testing
+    retrospectiveMode: false // Allow editing for testing
   };
 
   beforeEach(() => {

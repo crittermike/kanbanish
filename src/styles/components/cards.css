@@ -199,19 +199,19 @@
 }
 
 .card.cursor-grab {
-    cursor: grab;
+    cursor: grab !important;
 }
 
 .card.cursor-not-allowed {
-    cursor: not-allowed;
+    cursor: not-allowed !important;
 }
 
 .card.cursor-default {
-    cursor: default;
+    cursor: default !important;
 }
 
 .card.cursor-pointer {
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 .vote-count {

@@ -186,7 +186,6 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     // Interactions should be visible but disabled (frozen)
     expect(screen.getByText('👍')).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
-    // Check that voting buttons show the frozen message
     expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(2);
     
     // Reactions should exist but be disabled for frozen state

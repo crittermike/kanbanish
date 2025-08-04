@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { ref, onValue, off, set, remove } from 'firebase/database';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 // Create the context
 const BoardContext = createContext();
@@ -25,9 +26,12 @@ export const BoardProvider = ({ children }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
-  const [revealMode, setRevealMode] = useState(false); // Default to disabled (cards are visible)
-  const [cardsRevealed, setCardsRevealed] = useState(false); // Track if cards have been revealed
-  const [interactionsRevealed, setInteractionsRevealed] = useState(false); // Track if interactions have been revealed
+  const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
+  
+  // New workflow phase system
+  const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
+  const [resultsViewIndex, setResultsViewIndex] = useState(0); // For navigating results
+  
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
@@ -98,14 +102,14 @@ export const BoardProvider = ({ children }) => {
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
             }
-            if (boardData.settings.revealMode !== undefined) {
-              setRevealMode(boardData.settings.revealMode);
+            if (boardData.settings.retrospectiveMode !== undefined) {
+              setRetrospectiveMode(boardData.settings.retrospectiveMode);
             }
-            if (boardData.settings.cardsRevealed !== undefined) {
-              setCardsRevealed(boardData.settings.cardsRevealed);
+            if (boardData.settings.workflowPhase !== undefined) {
+              setWorkflowPhase(boardData.settings.workflowPhase);
             }
-            if (boardData.settings.interactionsRevealed !== undefined) {
-              setInteractionsRevealed(boardData.settings.interactionsRevealed);
+            if (boardData.settings.resultsViewIndex !== undefined) {
+              setResultsViewIndex(boardData.settings.resultsViewIndex);
             }
           }
         }
@@ -201,9 +205,9 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
         multipleVotesAllowed: false, // Default to not allowing multiple votes
-        revealMode: false, // Default to disabled (cards are visible)
-        cardsRevealed: false, // Default to cards not revealed
-        interactionsRevealed: false // Default to interactions not revealed
+        retrospectiveMode: false, // Default to disabled (cards are visible)
+        workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
+        resultsViewIndex: 0 // Default to first result
       }
     };
 
@@ -252,9 +256,9 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: votingEnabled,
         downvotingEnabled: downvotingEnabled,
         multipleVotesAllowed: multipleVotesAllowed,
-        revealMode: revealMode,
-        cardsRevealed: cardsRevealed,
-        interactionsRevealed: interactionsRevealed,
+        retrospectiveMode: retrospectiveMode,
+        workflowPhase: workflowPhase,
+        resultsViewIndex: resultsViewIndex,
         ...newSettings
       };
 
@@ -271,14 +275,14 @@ export const BoardProvider = ({ children }) => {
           if (newSettings.multipleVotesAllowed !== undefined) {
             setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
           }
-          if (newSettings.revealMode !== undefined) {
-            setRevealMode(newSettings.revealMode);
+          if (newSettings.retrospectiveMode !== undefined) {
+            setRetrospectiveMode(newSettings.retrospectiveMode);
           }
-          if (newSettings.cardsRevealed !== undefined) {
-            setCardsRevealed(newSettings.cardsRevealed);
+          if (newSettings.workflowPhase !== undefined) {
+            setWorkflowPhase(newSettings.workflowPhase);
           }
-          if (newSettings.interactionsRevealed !== undefined) {
-            setInteractionsRevealed(newSettings.interactionsRevealed);
+          if (newSettings.resultsViewIndex !== undefined) {
+            setResultsViewIndex(newSettings.resultsViewIndex);
           }
         })
         .catch((error) => {
@@ -295,24 +299,14 @@ export const BoardProvider = ({ children }) => {
       if (newSettings.multipleVotesAllowed !== undefined) {
         setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
       }
-      if (newSettings.revealMode !== undefined) {
-        const newRevealMode = newSettings.revealMode;
-        const currentRevealMode = revealModeRef.current;
-        
-        // Only reset cardsRevealed if revealMode actually changes
-        if (currentRevealMode !== newRevealMode) {
-          setRevealMode(newRevealMode);
-          setCardsRevealed(!newRevealMode);
-        } else {
-          // Just update revealMode without affecting cardsRevealed
-          setRevealMode(newRevealMode);
-        }
+      if (newSettings.retrospectiveMode !== undefined) {
+        setRetrospectiveMode(newSettings.retrospectiveMode);
       }
-      if (newSettings.cardsRevealed !== undefined) {
-        setCardsRevealed(newSettings.cardsRevealed);
+      if (newSettings.workflowPhase !== undefined) {
+        setWorkflowPhase(newSettings.workflowPhase);
       }
-      if (newSettings.interactionsRevealed !== undefined) {
-        setInteractionsRevealed(newSettings.interactionsRevealed);
+      if (newSettings.resultsViewIndex !== undefined) {
+        setResultsViewIndex(newSettings.resultsViewIndex);
       }
     }
   };
@@ -333,24 +327,138 @@ export const BoardProvider = ({ children }) => {
   };
 
   // Update reveal mode setting
-  const updateRevealMode = (enabled) => {
+  const updateRetrospectiveMode = (enabled) => {
     if (enabled) {
       // When enabling reveal mode, just update that setting
-      updateBoardSettings({ revealMode: enabled });
+      updateBoardSettings({ retrospectiveMode: enabled });
     } else {
-      // When disabling reveal mode, also reset cardsRevealed and interactionsRevealed to false
-      updateBoardSettings({ revealMode: enabled, cardsRevealed: false, interactionsRevealed: false });
+      // When disabling reveal mode, also reset workflow to creation phase
+      updateBoardSettings({ 
+        retrospectiveMode: enabled, 
+        workflowPhase: WORKFLOW_PHASES.CREATION,
+        resultsViewIndex: 0
+      });
     }
   };
 
-  // Reveal all cards (persist to Firebase)
-  const revealAllCards = () => {
-    updateBoardSettings({ cardsRevealed: true });
+  // Workflow phase transition functions
+  const startGroupingPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.GROUPING,
+      retrospectiveMode: true
+    });
   };
 
-  // Reveal all interactions (persist to Firebase)
-  const revealAllInteractions = () => {
-    updateBoardSettings({ interactionsRevealed: true });
+  const startInteractionsPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.INTERACTIONS
+    });
+  };
+
+  const startInteractionRevealPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL 
+    });
+  };
+
+  const startResultsPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.RESULTS,
+      resultsViewIndex: 0 
+    });
+  };
+
+  const goToCreationPhase = () => {
+    updateBoardSettings({ 
+      workflowPhase: WORKFLOW_PHASES.CREATION,
+      retrospectiveMode: false,
+      resultsViewIndex: 0
+    });
+  };
+
+  const goToPreviousPhase = () => {
+    switch (workflowPhase) {
+      case WORKFLOW_PHASES.GROUPING:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.CREATION,
+          retrospectiveMode: false,
+          resultsViewIndex: 0
+        });
+        break;
+      case WORKFLOW_PHASES.INTERACTIONS:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.GROUPING
+        });
+        break;
+      case WORKFLOW_PHASES.INTERACTION_REVEAL:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.INTERACTIONS
+        });
+        break;
+      case WORKFLOW_PHASES.RESULTS:
+        updateBoardSettings({ 
+          workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
+        });
+        break;
+      default:
+        // If we're in CREATION or any unknown phase, do nothing
+        break;
+    }
+  };
+
+  // Results navigation functions
+  const navigateResults = (direction) => {
+    if (workflowPhase !== WORKFLOW_PHASES.RESULTS) return;
+    
+    const sortedItems = getSortedItemsForResults();
+    const maxIndex = sortedItems.length - 1;
+    
+    let newIndex = resultsViewIndex;
+    if (direction === 'next' && resultsViewIndex < maxIndex) {
+      newIndex = resultsViewIndex + 1;
+    } else if (direction === 'prev' && resultsViewIndex > 0) {
+      newIndex = resultsViewIndex - 1;
+    }
+    
+    updateBoardSettings({ resultsViewIndex: newIndex });
+  };
+
+  // Get sorted items (cards and groups) for results view
+  const getSortedItemsForResults = () => {
+    const allItems = [];
+    
+    Object.keys(columns).forEach(columnId => {
+      const columnData = columns[columnId];
+      
+      // Add individual cards (not in groups)
+      Object.keys(columnData.cards || {}).forEach(cardId => {
+        const card = columnData.cards[cardId];
+        if (!card.groupId) {
+          allItems.push({
+            type: 'card',
+            id: cardId,
+            columnId: columnId,
+            data: card,
+            votes: card.votes || 0
+          });
+        }
+      });
+      
+      // Add groups
+      Object.keys(columnData.groups || {}).forEach(groupId => {
+        const group = columnData.groups[groupId];
+        allItems.push({
+          type: 'group',
+          id: groupId,
+          columnId: columnId,
+          data: group,
+          votes: group.votes || 0
+        });
+      });
+    });
+    
+    // Sort by votes (descending)
+    return allItems.sort((a, b) => b.votes - a.votes);
   };
 
   // Reset all votes in the board
@@ -698,15 +806,9 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
-    revealMode,
-    setRevealMode,
-    updateRevealMode,
-    cardsRevealed,
-    setCardsRevealed,
-    revealAllCards,
-    interactionsRevealed,
-    setInteractionsRevealed,
-    revealAllInteractions,
+    retrospectiveMode,
+    setRetrospectiveMode,
+    updateRetrospectiveMode,
     updateBoardSettings,
     boardRef,
     createNewBoard,
@@ -716,6 +818,19 @@ export const BoardProvider = ({ children }) => {
     darkMode,
     updateDarkMode,
     activeUsers,
+    // Workflow phase system
+    workflowPhase,
+    setWorkflowPhase,
+    resultsViewIndex,
+    setResultsViewIndex,
+    startGroupingPhase,
+    startInteractionsPhase,
+    startInteractionRevealPhase,
+    startResultsPhase,
+    goToCreationPhase,
+    goToPreviousPhase,
+    navigateResults,
+    getSortedItemsForResults,
     // Card grouping functions
     createCardGroup,
     ungroupCards,

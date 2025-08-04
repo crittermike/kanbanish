@@ -5,7 +5,8 @@ import {
   shouldUseDisabledStyling, 
   shouldHideFeature, 
   getReactionDisabledMessage 
-} from '../utils/revealModeUtils';
+} from '../utils/retrospectiveModeUtils';
+import { areInteractionsVisible } from '../utils/workflowUtils';
 
 const CardReactions = React.memo(({
   reactions,
@@ -21,14 +22,14 @@ const CardReactions = React.memo(({
   setEmojiPickerPosition,
   disabled = false,
   disabledReason = 'cards-not-revealed',
-  revealMode = false,
-  cardsRevealed = false
+  retrospectiveMode = false,
+  workflowPhase = 'CREATION'
 }) => {
   const emojiButtonRef = useRef(null);
 
-  // Determine if comments button should be shown
-  // Hide comments button only in Phase 1 of reveal mode (reveal mode on, cards not revealed)
-  const shouldShowCommentsButton = !(revealMode && !cardsRevealed);
+  // Determine if comments button should be shown based on workflow phase
+  // Comments are visible when interactions are visible
+  const shouldShowCommentsButton = areInteractionsVisible(workflowPhase, retrospectiveMode);
 
   // Use utility functions for consistent logic
   const useDisabledStyling = shouldUseDisabledStyling(disabled, disabledReason);

@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useBoardContext } from '../context/BoardContext';
 import Column from './Column';
 import UserCounter from './UserCounter';
+import WorkflowControls from './WorkflowControls';
+import ResultsView from './ResultsView';
 import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 // Import Feather icons
@@ -56,12 +59,8 @@ const ActionButtons = ({
   updateDownvotingEnabled,
   multipleVotesAllowed,
   updateMultipleVotesAllowed,
-  revealMode,
-  updateRevealMode,
-  cardsRevealed,
-  revealAllCards,
-  interactionsRevealed,
-  revealAllInteractions,
+  retrospectiveMode,
+  updateRetrospectiveMode,
   sortDropdownOpen,
   setSortDropdownOpen,
   resetAllVotes,
@@ -87,39 +86,6 @@ const ActionButtons = ({
 
   return (
     <div className="action-buttons">
-      {/* Show reveal button or indicator when reveal mode is enabled */}
-      {revealMode && (
-        <button
-          id="reveal-cards"
-          className={`btn primary-btn reveal-button ${cardsRevealed ? 'active' : 'pending'}`}
-          onClick={() => {
-            if (!cardsRevealed) {
-              revealAllCards();
-              showNotification('All cards revealed!');
-            }
-          }}
-          disabled={cardsRevealed}
-        >
-          {cardsRevealed ? '✅ Cards Revealed' : '👁️ Reveal All Cards'}
-        </button>
-      )}
-
-      {revealMode && cardsRevealed && (
-        <button
-          id="reveal-interactions"
-          className={`btn primary-btn reveal-button ${interactionsRevealed ? 'active' : 'pending'}`}
-          onClick={() => {
-            if (!interactionsRevealed) {
-              revealAllInteractions();
-              showNotification('Interactions revealed! You can now see all votes, comments, and reactions.');
-            }
-          }}
-          disabled={interactionsRevealed}
-        >
-          {interactionsRevealed ? '✅ Interactions Revealed' : '🗣️ Reveal Interactions'}
-        </button>
-      )}
-
       <button
         id="create-board"
         className="btn btn-with-icon"
@@ -224,17 +190,17 @@ const ActionButtons = ({
                 </div>
                 <div className="settings-divider"></div>
                 <div className="settings-section">
-                  <h4 className="settings-section-title">Reveal Mode (for retrospectives)</h4>
+                  <h4 className="settings-section-title">Retrospective Mode</h4>
                   <div className="settings-boolean-option">
                     <button
-                      className={`boolean-option ${revealMode ? 'selected' : ''}`}
-                      onClick={() => { updateRevealMode(true); }}
+                      className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
+                      onClick={() => { updateRetrospectiveMode(true); }}
                     >
                       On
                     </button>
                     <button
-                      className={`boolean-option ${!revealMode ? 'selected' : ''}`}
-                      onClick={() => { updateRevealMode(false); }}
+                      className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
+                      onClick={() => { updateRetrospectiveMode(false); }}
                     >
                       Off
                     </button>
@@ -275,7 +241,9 @@ const ActionButtons = ({
 };
 
 // UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn, cardsRevealed }) => {
+const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+  const { retrospectiveMode, workflowPhase } = useBoardContext();
+  
   // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
     // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
@@ -284,6 +252,9 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
       return a[0].localeCompare(b[0]); // Sort by column ID
     });
   };
+
+  // Hide add column button during reveal phases when board structure should be stable
+  const shouldShowAddColumn = !retrospectiveMode || workflowPhase === WORKFLOW_PHASES.CREATION;
 
   return (
     <div className="board-container">
@@ -299,8 +270,8 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
           />
         ))}
 
-        {/* Add column button - hidden when cards are revealed */}
-        {!cardsRevealed && (
+        {/* Add column button - hidden during interaction/results phases */}
+        {shouldShowAddColumn && (
           <div className="add-column-container">
             <button id="add-column" className="add-column" onClick={addNewColumn}>
               <Plus size={16} />
@@ -336,19 +307,16 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
-    revealMode,
-    updateRevealMode,
-    cardsRevealed,
-    revealAllCards,
-    interactionsRevealed,
-    revealAllInteractions,
+    retrospectiveMode,
+    updateRetrospectiveMode,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
     updateBoardTitle,
     user, // Include user from context
     darkMode,
-    updateDarkMode
+    updateDarkMode,
+    workflowPhase // Add workflow phase
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -480,12 +448,8 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
-            revealMode={revealMode}
-            updateRevealMode={updateRevealMode}
-            cardsRevealed={cardsRevealed}
-            revealAllCards={revealAllCards}
-            interactionsRevealed={interactionsRevealed}
-            revealAllInteractions={revealAllInteractions}
+            retrospectiveMode={retrospectiveMode}
+            updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
@@ -496,14 +460,22 @@ function Board({ showNotification }) {
         </div>
       </header>
 
+      {/* Workflow Controls - Only show when retrospective mode is enabled */}
+      {retrospectiveMode && (
+        <WorkflowControls showNotification={showNotification} />
+      )}
+
       <main>
-        <ColumnsContainer
-          columns={columns}
-          sortByVotes={sortByVotes}
-          showNotification={showNotification}
-          addNewColumn={addNewColumn}
-          cardsRevealed={cardsRevealed}
-        />
+        {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
+          <ResultsView showNotification={showNotification} />
+        ) : (
+          <ColumnsContainer
+            columns={columns}
+            sortByVotes={sortByVotes}
+            showNotification={showNotification}
+            addNewColumn={addNewColumn}
+          />
+        )}
       </main>
 
       {/* Export Board Modal */}

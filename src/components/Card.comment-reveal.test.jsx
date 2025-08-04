@@ -74,9 +74,8 @@ describe('Card Comment Revealing and Freezing', () => {
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      revealMode: true,
-      cardsRevealed: true,
-      interactionsRevealed: true // All interactions revealed
+      retrospectiveMode: true,
+      workflowPhase: 'INTERACTION_REVEAL' // All interactions revealed and frozen
     };
     
     useBoardContext.mockReturnValue(revealedContext);
@@ -99,9 +98,8 @@ describe('Card Comment Revealing and Freezing', () => {
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      revealMode: true,
-      cardsRevealed: true,
-      interactionsRevealed: true // Interactions revealed = frozen
+      retrospectiveMode: true,
+      workflowPhase: 'INTERACTION_REVEAL' // Interactions revealed = frozen
     };
     
     useBoardContext.mockReturnValue(frozenContext);
@@ -128,7 +126,7 @@ describe('Card Comment Revealing and Freezing', () => {
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      revealMode: false, // No reveal mode restrictions
+      retrospectiveMode: false, // No reveal mode restrictions
       cardsRevealed: false,
       interactionsRevealed: false,
       updateCard: mockUpdateCard,
@@ -160,9 +158,8 @@ describe('Card Comment Revealing and Freezing', () => {
       votingEnabled: true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
-      revealMode: true,
-      cardsRevealed: true,
-      interactionsRevealed: true, // Frozen state
+      retrospectiveMode: true,
+      workflowPhase: 'INTERACTION_REVEAL', // Frozen state
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,

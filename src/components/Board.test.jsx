@@ -63,12 +63,11 @@ describe('Board Component', () => {
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
-    revealMode: false,
-    setRevealMode: vi.fn(),
-    updateRevealMode: vi.fn(),
-    cardsRevealed: true,
-    setCardsRevealed: vi.fn(),
-    revealAllCards: vi.fn(),
+    retrospectiveMode: true,
+    setRetrospectiveMode: vi.fn(),
+    updateRetrospectiveMode: vi.fn(),
+    workflowPhase: 'INTERACTION_REVEAL', // Cards revealed, interactions frozen
+    setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
@@ -335,15 +334,15 @@ describe('Board Component', () => {
     expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
   });
 
-  test('does not reset reveal mode when changing other settings', () => {
-    // Start with reveal mode enabled
-    const contextWithRevealMode = {
+  test('does not reset retrospective mode when changing other settings', () => {
+    // Start with retrospective mode enabled
+    const contextWithRetrospectiveMode = {
       ...mockContextValue,
-      revealMode: true,
-      cardsRevealed: false
+      retrospectiveMode: true,
+      workflowPhase: 'INTERACTION_REVEAL'
     };
 
-    useBoardContext.mockReturnValue(contextWithRevealMode);
+    useBoardContext.mockReturnValue(contextWithRetrospectiveMode);
 
     // For this test, let's simulate having a board ID in the URL 
     // so the template modal doesn't open automatically
@@ -367,10 +366,10 @@ describe('Board Component', () => {
     const yesOption = within(multipleVotesSection).getByText('Yes');
     fireEvent.click(yesOption);
 
-    // Verify that only updateMultipleVotesAllowed was called, not updateRevealMode
-    expect(contextWithRevealMode.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
-    expect(contextWithRevealMode.updateRevealMode).not.toHaveBeenCalled();
-    expect(contextWithRevealMode.setCardsRevealed).not.toHaveBeenCalled();
+    // Verify that only updateMultipleVotesAllowed was called, not updateRetrospectiveMode
+    expect(contextWithRetrospectiveMode.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
+    expect(contextWithRetrospectiveMode.updateRetrospectiveMode).not.toHaveBeenCalled();
+    expect(contextWithRetrospectiveMode.setWorkflowPhase).not.toHaveBeenCalled();
   });
 
   test('updates document title when board title changes', () => {

@@ -70,6 +70,14 @@
     background: var(--input-bg);
 }
 
+.card-group-name.non-editable {
+    cursor: not-allowed;
+}
+
+.card-group-name.non-editable:hover {
+    background: transparent;
+}
+
 .group-name-container {
     display: flex;
     align-items: center;

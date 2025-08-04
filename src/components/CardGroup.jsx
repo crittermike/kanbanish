@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Layers, Edit2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import Card from './Card';
 import VotingControls from './VotingControls';
+import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed } from '../utils/workflowUtils';
 
 /**
  * CardGroup component renders a group of cards with expand/collapse functionality
@@ -18,18 +19,32 @@ function CardGroup({
 }) {
   const { 
     boardId, 
+    user,
     moveCard, 
     ungroupCards, 
     updateGroupName, 
     votingEnabled, 
     downvotingEnabled, 
     upvoteGroup, 
-    downvoteGroup 
+    downvoteGroup,
+    retrospectiveMode,
+    workflowPhase
   } = useBoardContext();
   const [isExpanded, setIsExpanded] = useState(groupData.expanded !== false); // Default to expanded
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(groupData.name || 'Unnamed Group');
   const groupRef = useRef(null);
+
+  // When retrospective mode is enabled, hide others' interactions based on workflow phase
+  const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
+  
+  // Create filtered group data for display
+  const displayGroupData = shouldHideOthersInteractions ? {
+    ...groupData,
+    // Filter votes to only show user's own vote count
+    votes: groupData.voters && user?.uid && groupData.voters[user.uid] ? Math.abs(groupData.voters[user.uid]) : 0,
+    voters: groupData.voters && user?.uid ? { [user.uid]: groupData.voters[user.uid] } : {}
+  } : groupData;
 
   // Set up drop target for cards to be added to this group
   const [{ isOver }, drop] = useDrop(() => ({
@@ -138,51 +153,57 @@ function CardGroup({
           ) : (
             <div className="group-name-container">
               <h3 
-                className="card-group-name"
+                className={`card-group-name ${!areInteractionsAllowed(workflowPhase, retrospectiveMode) ? 'non-editable' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsEditingName(true);
+                  if (areInteractionsAllowed(workflowPhase, retrospectiveMode)) {
+                    setIsEditingName(true);
+                  }
                 }}
               >
                 {groupData.name || 'Unnamed Group'}
               </h3>
-              <button
-                className="edit-group-name-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditingName(true);
-                }}
-                title="Edit group name"
-              >
-                <Edit2 size={12} />
-              </button>
+              {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
+                <button
+                  className="edit-group-name-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingName(true);
+                  }}
+                  title="Edit group name"
+                >
+                  <Edit2 size={12} />
+                </button>
+              )}
             </div>
           )}
         </div>
 
         <div className="card-group-actions">
-          {votingEnabled && (
+          {votingEnabled && areInteractionsVisible(workflowPhase, retrospectiveMode) && (
             <VotingControls
-              votes={groupData.votes || 0}
+              votes={displayGroupData.votes || 0}
               onUpvote={handleUpvoteGroup}
               onDownvote={handleDownvoteGroup}
               showDownvoteButton={downvotingEnabled}
-              disabled={false}
+              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
             />
           )}
           
           <div className="card-group-info">
             <span className="card-count">{cardCount} card{cardCount !== 1 ? 's' : ''}</span>
-            <button
-              className="group-action-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUngroup();
-              }}
-              title="Ungroup cards"
-            >
-              <Layers size={14} />
-            </button>
+            {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
+              <button
+                className="group-action-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUngroup();
+                }}
+                title="Ungroup cards"
+              >
+                <Layers size={14} />
+              </button>
+            )}
           </div>
         </div>
       </div>
