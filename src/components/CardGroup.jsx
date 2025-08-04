@@ -241,10 +241,10 @@ function CardGroup({
               boxShadow: cardCount > 1 ? 
                 `0 2px 8px rgba(0, 0, 0, 0.15), 
                  0 1px 3px rgba(0, 0, 0, 0.1),
-                 3px 3px 0 0 var(--card-bg),
-                 3px 3px 0 1px var(--border-color),
-                 6px 6px 0 0 var(--card-bg),
-                 6px 6px 0 1px var(--border-color)` : 
+                 ${Array.from({ length: Math.min(cardCount - 1, 5) }, (_, i) => {
+                   const offset = (i + 1) * 3;
+                   return `${offset}px ${offset}px 0 0 var(--card-bg), ${offset}px ${offset}px 0 1px var(--border-color)`;
+                 }).join(', ')}` : 
                 '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           >
