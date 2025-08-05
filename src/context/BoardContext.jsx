@@ -26,6 +26,7 @@ export const BoardProvider = ({ children }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
+  const [votesPerUser, setVotesPerUser] = useState(3); // Default to 3 votes per user
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
 
   // New workflow phase system
@@ -105,6 +106,9 @@ export const BoardProvider = ({ children }) => {
             }
             if (boardData.settings.multipleVotesAllowed !== undefined) {
               setMultipleVotesAllowed(boardData.settings.multipleVotesAllowed);
+            }
+            if (boardData.settings.votesPerUser !== undefined) {
+              setVotesPerUser(boardData.settings.votesPerUser);
             }
             if (boardData.settings.retrospectiveMode !== undefined) {
               setRetrospectiveMode(boardData.settings.retrospectiveMode);
@@ -275,6 +279,7 @@ export const BoardProvider = ({ children }) => {
         votingEnabled,
         downvotingEnabled,
         multipleVotesAllowed,
+        votesPerUser,
         retrospectiveMode,
         workflowPhase,
         resultsViewIndex,
@@ -293,6 +298,9 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.multipleVotesAllowed !== undefined) {
             setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+          }
+          if (newSettings.votesPerUser !== undefined) {
+            setVotesPerUser(newSettings.votesPerUser);
           }
           if (newSettings.retrospectiveMode !== undefined) {
             setRetrospectiveMode(newSettings.retrospectiveMode);
@@ -317,6 +325,9 @@ export const BoardProvider = ({ children }) => {
       }
       if (newSettings.multipleVotesAllowed !== undefined) {
         setMultipleVotesAllowed(newSettings.multipleVotesAllowed);
+      }
+      if (newSettings.votesPerUser !== undefined) {
+        setVotesPerUser(newSettings.votesPerUser);
       }
       if (newSettings.retrospectiveMode !== undefined) {
         setRetrospectiveMode(newSettings.retrospectiveMode);
@@ -343,6 +354,11 @@ export const BoardProvider = ({ children }) => {
   // Update multiple votes allowed setting
   const updateMultipleVotesAllowed = allowed => {
     updateBoardSettings({ multipleVotesAllowed: allowed });
+  };
+
+  // Update votes per user setting
+  const updateVotesPerUser = limit => {
+    updateBoardSettings({ votesPerUser: limit });
   };
 
   // Update reveal mode setting
@@ -664,6 +680,45 @@ export const BoardProvider = ({ children }) => {
     return totalVotes;
   };
 
+  // Calculate total votes cast by a specific user across all cards and groups
+  const getUserVoteCount = (userId) => {
+    if (!userId) return 0;
+    
+    let userVotes = 0;
+
+    Object.values(columns).forEach(column => {
+      // Count votes from all cards
+      if (column.cards) {
+        Object.values(column.cards).forEach(card => {
+          if (card.voters && card.voters[userId]) {
+            userVotes += Math.abs(card.voters[userId]); // Use absolute value to count both upvotes and downvotes
+          }
+        });
+      }
+
+      // Count votes from all groups
+      if (column.groups) {
+        Object.values(column.groups).forEach(group => {
+          if (group.voters && group.voters[userId]) {
+            userVotes += Math.abs(group.voters[userId]); // Use absolute value to count both upvotes and downvotes
+          }
+        });
+      }
+    });
+
+    return userVotes;
+  };
+
+  // Calculate total votes remaining across all active users
+  const getTotalVotesRemaining = () => {
+    if (!activeUsers || activeUsers === 0) return 0;
+    
+    const totalPossibleVotes = activeUsers * votesPerUser;
+    const totalVotesCast = getTotalVotes();
+    
+    return Math.max(0, totalPossibleVotes - totalVotesCast);
+  };
+
   // Move a card between columns or into/out of groups
   const moveCard = (cardId, sourceColumnId, targetColumnId, targetGroupId = null) => {
     if (!boardId || !user) {
@@ -886,6 +941,24 @@ export const BoardProvider = ({ children }) => {
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
 
+    // Check vote limit
+    const currentUserVotes = getUserVoteCount(userId);
+    
+    // For multiple votes allowed, check if adding this vote would exceed the limit
+    if (multipleVotesAllowed) {
+      if (currentUserVotes >= votesPerUser) {
+        showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+        return;
+      }
+    } else {
+      // For single votes, check if user has already cast the maximum votes
+      const userCurrentVote = currentVoters[userId] || 0;
+      if (userCurrentVote === 0 && currentUserVotes >= votesPerUser) {
+        showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+        return;
+      }
+    }
+
     // Check if multiple votes are allowed
     if (!multipleVotesAllowed && currentVoters[userId] && currentVoters[userId] > 0) {
       showNotification('You have already voted on this group');
@@ -988,6 +1061,9 @@ export const BoardProvider = ({ children }) => {
     multipleVotesAllowed,
     setMultipleVotesAllowed,
     updateMultipleVotesAllowed,
+    votesPerUser,
+    setVotesPerUser,
+    updateVotesPerUser,
     retrospectiveMode,
     setRetrospectiveMode,
     updateRetrospectiveMode,
@@ -998,6 +1074,8 @@ export const BoardProvider = ({ children }) => {
     moveCard,
     resetAllVotes,
     getTotalVotes,
+    getUserVoteCount,
+    getTotalVotesRemaining,
     darkMode,
     updateDarkMode,
     activeUsers,

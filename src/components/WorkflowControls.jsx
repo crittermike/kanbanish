@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { Eye, MessageCircle, Award, ArrowLeft, BarChart } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import VoteLimitModal from './modals/VoteLimitModal';
 
 const WorkflowControls = ({ showNotification }) => {
+  const [showVoteLimitModal, setShowVoteLimitModal] = useState(false);
+  
   const {
     workflowPhase,
+    votesPerUser,
+    updateVotesPerUser,
     startGroupingPhase,
     startInteractionsPhase,
     startInteractionRevealPhase,
@@ -20,8 +26,13 @@ const WorkflowControls = ({ showNotification }) => {
   };
 
   const handleStartInteractions = () => {
+    setShowVoteLimitModal(true);
+  };
+
+  const handleVoteLimitConfirm = (newVotesPerUser) => {
+    updateVotesPerUser(newVotesPerUser);
     startInteractionsPhase();
-    showNotification('Interactions phase started - add comments, votes, and reactions');
+    showNotification(`Voting phase started - each user can cast ${newVotesPerUser} votes`);
   };
 
   const handleRevealInteractions = () => {
@@ -237,6 +248,12 @@ const WorkflowControls = ({ showNotification }) => {
   return (
     <div className="workflow-controls">
       {renderPhaseControls()}
+      <VoteLimitModal
+        isOpen={showVoteLimitModal}
+        onClose={() => setShowVoteLimitModal(false)}
+        onConfirm={handleVoteLimitConfirm}
+        currentLimit={votesPerUser}
+      />
     </div>
   );
 };

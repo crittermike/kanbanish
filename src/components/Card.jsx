@@ -126,7 +126,17 @@ function Card({
   showNotification,
   onCardDropOnCard = null
 }) {
-  const { boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed, retrospectiveMode, workflowPhase = 'CREATION' } = useBoardContext();
+  const { 
+    boardId, 
+    user, 
+    votingEnabled, 
+    downvotingEnabled, 
+    multipleVotesAllowed, 
+    votesPerUser, 
+    getUserVoteCount, 
+    retrospectiveMode, 
+    workflowPhase = 'CREATION' 
+  } = useBoardContext();
   const cardElementRef = useRef(null);
 
   // Use the custom hook for card operations
@@ -181,7 +191,9 @@ function Card({
     showNotification,
     multipleVotesAllowed,
     retrospectiveMode,
-    workflowPhase
+    workflowPhase,
+    votesPerUser,
+    getUserVoteCount
   });
 
   // Calculate disabled reason for interactions

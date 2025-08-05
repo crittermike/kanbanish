@@ -9,7 +9,9 @@ import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
+import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
+import VoteCounter from './VoteCounter';
 import WorkflowControls from './WorkflowControls';
 // Import Feather icons
 
@@ -27,6 +29,8 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     />
     <div className="action-buttons">
       <UserCounter />
+      <VoteCounter />
+      <TotalVoteCounter />
       <button
         id="copy-share-url"
         className="btn secondary-btn btn-with-icon"

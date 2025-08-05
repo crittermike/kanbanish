@@ -13,7 +13,9 @@ export function useCardOperations({
   showNotification,
   multipleVotesAllowed = false, // pass this from the Card component
   retrospectiveMode = false,
-  workflowPhase = 'CREATION'
+  workflowPhase = 'CREATION',
+  votesPerUser = 3, // maximum votes per user
+  getUserVoteCount = () => 0 // function to get current user vote count
 }) {
   // State
   const [isEditing, setIsEditing] = useState(false);
@@ -157,6 +159,25 @@ export function useCardOperations({
     // Get the user's current vote if any
     const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
 
+    // Check vote limit (only for positive votes)
+    if (delta > 0) {
+      const currentUserVotes = getUserVoteCount(user.uid);
+      
+      // For multiple votes allowed, check if adding this vote would exceed the limit
+      if (multipleVotesAllowed) {
+        if (currentUserVotes >= votesPerUser) {
+          showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+          return;
+        }
+      } else {
+        // For single votes, check if user has already cast the maximum votes
+        if (userCurrentVote === 0 && currentUserVotes >= votesPerUser) {
+          showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+          return;
+        }
+      }
+    }
+
     // If multiple votes are not allowed
     if (!multipleVotesAllowed) {
       // If the user is trying to vote in the same direction they already voted
@@ -212,7 +233,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error updating votes:', error);
     }
-  }, [boardId, columnId, cardId, cardData.votes, cardData.voters, showNotification, multipleVotesAllowed, user, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, cardId, cardData.votes, cardData.voters, showNotification, multipleVotesAllowed, user, isInteractionDisabled, workflowPhase, retrospectiveMode, votesPerUser, getUserVoteCount]);
 
   const upvoteCard = useCallback(e => {
     updateVotes(1, e, 'Upvoted card');

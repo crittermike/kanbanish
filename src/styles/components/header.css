@@ -365,3 +365,95 @@ h1 {
         font-size: var(--font-size-xs);
     }
 }
+
+/* Vote Counter Styles */
+.vote-counter {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.vote-counter-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.vote-counter-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.vote-counter-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.vote-counter-value.vote-counter-depleted {
+    color: var(--warning-color, #f59e0b);
+}
+
+/* Responsive adjustments for vote counter */
+@media (max-width: 767px) {
+    .vote-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .vote-counter-value {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Total Vote Counter Styles */
+.total-vote-counter {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.total-vote-counter-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.total-vote-counter-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.total-vote-counter-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.total-vote-counter-value.total-vote-counter-depleted {
+    color: var(--success-color, #22c55e);
+}
+
+/* Responsive adjustments for total vote counter */
+@media (max-width: 767px) {
+    .total-vote-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .total-vote-counter-value {
+        font-size: var(--font-size-sm);
+    }
+}
