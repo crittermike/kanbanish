@@ -9,7 +9,7 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
 
   /**
    * Get a normalized structure of the board data for export
-   * @returns {object} Normalized board data with sorted columns and cards
+   * @returns {object} Normalized board data with sorted columns, groups, and cards
    */
   const getBoardStructure = useCallback(() => {
     const boardData = {
@@ -37,42 +37,106 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
         cards: []
       };
 
-      // Process cards in the column
-      if (column.cards) {
-        Object.entries(column.cards).forEach(([_cardId, card]) => {
-          // Process card data
-          const processedCard = {
-            content: card.content || 'Empty Card',
-            votes: card.votes || 0,
-            comments: [],
-            reactions: []
+      // Process groups first, then ungrouped cards
+      const processedGroups = [];
+      const ungroupedCards = [];
+
+      // Process groups
+      if (column.groups) {
+        Object.entries(column.groups).forEach(([_groupId, group]) => {
+          if (!group || !group.cardIds) {
+            return;
+          }
+
+          const processedGroup = {
+            name: group.name,
+            votes: group.votes || 0,
+            cards: []
           };
 
-          // Process comments
-          if (card.comments && Object.keys(card.comments).length > 0) {
-            Object.entries(card.comments).forEach(([_commentId, comment]) => {
-              if (comment && comment.content) {
-                processedCard.comments.push(comment.content);
+          // Process cards in this group
+          group.cardIds.forEach(cardId => {
+            const card = column.cards?.[cardId];
+            if (card) {
+              const processedCard = {
+                content: card.content,
+                votes: card.votes || 0,
+                comments: [],
+                reactions: []
+              };
+
+              // Process comments
+              if (card.comments && Object.keys(card.comments).length > 0) {
+                Object.entries(card.comments).forEach(([_commentId, comment]) => {
+                  if (comment && comment.content) {
+                    processedCard.comments.push(comment.content);
+                  }
+                });
               }
-            });
-          }
 
-          // Process reactions
-          if (card.reactions && Object.keys(card.reactions).length > 0) {
-            const validReactions = Object.entries(card.reactions)
-              .filter(([_emoji, reactionData]) => (reactionData?.count || 0) > 0);
+              // Process reactions
+              if (card.reactions && Object.keys(card.reactions).length > 0) {
+                const validReactions = Object.entries(card.reactions)
+                  .filter(([_emoji, reactionData]) => (reactionData?.count || 0) > 0);
 
-            validReactions.forEach(([emoji, reactionData]) => {
-              if (emoji) {
-                const count = reactionData?.count || 0;
-                processedCard.reactions.push({ emoji, count });
+                validReactions.forEach(([emoji, reactionData]) => {
+                  if (emoji) {
+                    const count = reactionData?.count || 0;
+                    processedCard.reactions.push({ emoji, count });
+                  }
+                });
               }
-            });
-          }
 
-          processedColumn.cards.push(processedCard);
+              processedGroup.cards.push(processedCard);
+            }
+          });
+
+          processedGroups.push(processedGroup);
         });
       }
+
+      // Process ungrouped cards
+      if (column.cards) {
+        Object.entries(column.cards).forEach(([_cardId, card]) => {
+          // Only include cards that are not in any group
+          if (!card.groupId) {
+            const processedCard = {
+              content: card.content,
+              votes: card.votes || 0,
+              comments: [],
+              reactions: []
+            };
+
+            // Process comments
+            if (card.comments && Object.keys(card.comments).length > 0) {
+              Object.entries(card.comments).forEach(([_commentId, comment]) => {
+                if (comment && comment.content) {
+                  processedCard.comments.push(comment.content);
+                }
+              });
+            }
+
+            // Process reactions
+            if (card.reactions && Object.keys(card.reactions).length > 0) {
+              const validReactions = Object.entries(card.reactions)
+                .filter(([_emoji, reactionData]) => (reactionData?.count || 0) > 0);
+
+              validReactions.forEach(([emoji, reactionData]) => {
+                if (emoji) {
+                  const count = reactionData?.count || 0;
+                  processedCard.reactions.push({ emoji, count });
+                }
+              });
+            }
+
+            ungroupedCards.push(processedCard);
+          }
+        });
+      }
+
+      // Store both groups and ungrouped cards
+      processedColumn.groups = processedGroups;
+      processedColumn.cards = ungroupedCards;
 
       boardData.columns.push(processedColumn);
     });
@@ -91,6 +155,43 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
     boardData.columns.forEach(column => {
       markdown += `## ${column.title}\n\n`;
 
+      // Export groups first
+      if (column.groups && column.groups.length > 0) {
+        column.groups.forEach(group => {
+          // Group heading with vote count
+          const groupVoteCount = group.votes;
+          markdown += `### 📁 ${group.name} ${groupVoteCount > 0 ? `(${groupVoteCount} votes)` : ''}\n\n`;
+
+          // Cards within the group as list items
+          group.cards.forEach(card => {
+            const voteCount = card.votes;
+            markdown += `- **${card.content}** ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n`;
+
+            // Comments - indented under the list item
+            if (card.comments.length > 0) {
+              markdown += '  - **Comments:**\n';
+              card.comments.forEach(comment => {
+                markdown += `    - ${comment}\n`;
+              });
+            }
+
+            // Reactions - indented under the list item
+            if (card.reactions.length > 0) {
+              markdown += '  - **Reactions:** ';
+              card.reactions.forEach((reaction, index, array) => {
+                markdown += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+              });
+              markdown += '\n';
+            }
+
+            markdown += '\n';
+          });
+
+          markdown += '\n';
+        });
+      }
+
+      // Export ungrouped cards
       column.cards.forEach(card => {
         // Card content as heading with vote count
         const voteCount = card.votes;
@@ -135,6 +236,45 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
       const title = column.title;
       text += `${title}\n${'='.repeat(title.length)}\n\n`;
 
+      // Export groups first
+      if (column.groups && column.groups.length > 0) {
+        column.groups.forEach(group => {
+          // Group heading with vote count
+          const groupVoteCount = group.votes;
+          const groupTitle = `📁 ${group.name} ${groupVoteCount > 0 ? `(${groupVoteCount} votes)` : ''}`;
+          text += `${groupTitle}\n${'-'.repeat(groupTitle.length)}\n\n`;
+
+          // Cards within the group
+          group.cards.forEach(card => {
+            const voteCount = card.votes;
+            const content = `  • ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}`;
+            text += `${content}\n`;
+
+            // Comments
+            if (card.comments.length > 0) {
+              text += '    Comments:\n';
+              card.comments.forEach(comment => {
+                text += `    - ${comment}\n`;
+              });
+            }
+
+            // Reactions
+            if (card.reactions.length > 0) {
+              text += '    Reactions: ';
+              card.reactions.forEach((reaction, index, array) => {
+                text += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+              });
+              text += '\n';
+            }
+
+            text += '\n';
+          });
+
+          text += '\n';
+        });
+      }
+
+      // Export ungrouped cards
       column.cards.forEach(card => {
         // Card content as heading with vote count
         const voteCount = card.votes;
@@ -183,13 +323,20 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   }, [isOpen, format, columns, boardTitle, generateMarkdownExport, generatePlainTextExport]);
 
   /**
-   * Note on column ordering:
+   * Note on column ordering and card grouping:
    *
    * We rely on the natural ordering of column IDs to determine export order.
    * When columns are created via templates or manually, they receive IDs with
    * alphabetical prefixes (a_, b_, c_, etc.) to ensure consistent ordering.
    *
-   * This approach ensures that the export order matches what users see on the board.
+   * For card grouping, the export respects the grouping structure by:
+   * 1. Exporting all card groups first within each column
+   * 2. Then exporting any ungrouped individual cards
+   * 3. Groups are identified by the 📁 emoji prefix in the export
+   * 4. Cards within groups are indented/nested under the group heading
+   *
+   * This approach ensures that the export order matches what users see on the board
+   * and preserves the organizational structure created through card grouping.
    */
 
   const copyToClipboard = () => {
