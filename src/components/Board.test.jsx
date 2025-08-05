@@ -62,6 +62,9 @@ describe('Board Component', () => {
     multipleVotesAllowed: false,
     setMultipleVotesAllowed: vi.fn(),
     updateMultipleVotesAllowed: vi.fn(),
+    votesPerUser: 3,
+    setVotesPerUser: vi.fn(),
+    updateVotesPerUser: vi.fn(),
     retrospectiveMode: true,
     setRetrospectiveMode: vi.fn(),
     updateRetrospectiveMode: vi.fn(),
@@ -71,6 +74,9 @@ describe('Board Component', () => {
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
+    getUserVoteCount: vi.fn().mockReturnValue(0),
+    getTotalVotes: vi.fn().mockReturnValue(0),
+    getTotalVotesRemaining: vi.fn().mockReturnValue(0),
     user: { uid: 'test-user-123' } // Default user state for most tests
   };
 
