@@ -1,9 +1,12 @@
-import { useState, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useDrop } from 'react-dnd';
-import { ChevronDown, ChevronRight, Layers, Edit2 } from 'react-feather';
+import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useGroupOperations } from '../hooks/useGroupOperations';
 import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 import Card from './Card';
+import Comments from './Comments';
+import EmojiPicker from './EmojiPicker';
 import VotingControls from './VotingControls';
 
 /**
@@ -30,6 +33,19 @@ function CardGroup({
     retrospectiveMode,
     workflowPhase
   } = useBoardContext();
+
+  // Initialize group operations hook
+  const groupOperations = useGroupOperations({
+    boardId,
+    columnId,
+    groupId,
+    groupData,
+    user,
+    showNotification,
+    retrospectiveMode,
+    workflowPhase
+  });
+
   const [isExpanded, setIsExpanded] = useState(groupData.expanded !== false); // Default to expanded
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(groupData.name || 'Unnamed Group');
@@ -43,7 +59,25 @@ function CardGroup({
     ...groupData,
     // Filter votes to only show user's own vote count
     votes: groupData.voters && user?.uid && groupData.voters[user.uid] ? Math.abs(groupData.voters[user.uid]) : 0,
-    voters: groupData.voters && user?.uid ? { [user.uid]: groupData.voters[user.uid] } : {}
+    voters: groupData.voters && user?.uid ? { [user.uid]: groupData.voters[user.uid] } : {},
+    // Filter reactions to only show user's own reactions
+    reactions: groupData.reactions ? Object.fromEntries(
+      Object.entries(groupData.reactions).filter(([_emoji, reactionData]) => 
+        reactionData.users && user?.uid && reactionData.users[user.uid]
+      ).map(([emoji, _reactionData]) => [
+        emoji,
+        {
+          count: 1, // Only show count of 1 for user's own reactions
+          users: { [user.uid]: true }
+        }
+      ])
+    ) : {},
+    // Filter comments to only show user's own comments
+    comments: groupData.comments ? Object.fromEntries(
+      Object.entries(groupData.comments).filter(([_commentId, comment]) => 
+        comment.createdBy === user?.uid
+      )
+    ) : {}
   } : groupData;
 
   // Set up drop target for cards to be added to this group
@@ -193,7 +227,9 @@ function CardGroup({
           )}
 
           <div className="card-group-info">
-            <span className="card-count">{cardCount} card{cardCount !== 1 ? 's' : ''}</span>
+            <span className="card-count-badge" title={`${cardCount} card${cardCount !== 1 ? 's' : ''}`}>
+              {cardCount}
+            </span>
             {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
               <button
                 className="group-action-btn"
@@ -209,6 +245,97 @@ function CardGroup({
           </div>
         </div>
       </div>
+
+      {/* Group Interactions Section - Comments and Reactions buttons */}
+      {areInteractionsVisible(workflowPhase, retrospectiveMode) && (
+        <div className="group-interactions-section">
+          <div className="group-interactions-left">
+            {/* Existing Group Reactions - inline like cards */}
+            {displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
+              if (reactionData.count <= 0) return null;
+              const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
+              return (
+                <span 
+                  key={emoji} 
+                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (hasUserReacted) {
+                      groupOperations.addReaction(e, emoji); // This will remove it
+                    } else {
+                      groupOperations.addReaction(e, emoji);
+                    }
+                  }}
+                >
+                  {emoji} {reactionData.count}
+                </span>
+              );
+            })}
+            
+            {/* Group Reactions Button - add button like cards */}
+            <button
+              className="interaction-btn reactions-btn"
+              onClick={e => {
+                e.stopPropagation();
+                if (groupOperations.emojiButtonRef?.current) {
+                  const buttonRect = groupOperations.emojiButtonRef.current.getBoundingClientRect();
+                  groupOperations.setEmojiPickerPosition({
+                    top: buttonRect.bottom + window.scrollY + 5,
+                    left: buttonRect.left + window.scrollX
+                  });
+                }
+                groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
+              }}
+              title="Add reaction"
+              ref={groupOperations.emojiButtonRef}
+            >
+              +
+            </button>
+          </div>
+          <div className="group-interactions-right">
+            {/* Group Comments Button - right aligned like cards */}
+            <button
+              className="interaction-btn comments-btn"
+              onClick={e => {
+                e.stopPropagation();
+                groupOperations.toggleComments();
+              }}
+              title="Toggle comments"
+            >
+              <MessageSquare size={16} />
+              {Object.keys(displayGroupData.comments || {}).length > 0 && (
+                <span className="interaction-count">{Object.keys(displayGroupData.comments || {}).length}</span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Emoji Picker */}
+      {groupOperations.showEmojiPicker && (
+        <EmojiPicker
+          onEmojiSelect={groupOperations.addReaction}
+          position={groupOperations.emojiPickerPosition}
+          onClose={() => groupOperations.setShowEmojiPicker(false)}
+          hasUserReactedWithEmoji={groupOperations.hasUserReactedWithEmoji}
+        />
+      )}
+
+      {/* Group Comments Section - only show when comments are toggled on */}
+      {areInteractionsVisible(workflowPhase, retrospectiveMode) && groupOperations.showComments && (
+        <div className="group-comments-section">
+          <Comments
+            comments={displayGroupData.comments}
+            onAddComment={groupOperations.addComment}
+            newComment={groupOperations.newComment}
+            onCommentChange={groupOperations.setNewComment}
+            onEditComment={groupOperations.editComment}
+            onDeleteComment={groupOperations.deleteComment}
+            isCommentAuthor={groupOperations.isCommentAuthor}
+            interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+          />
+        </div>
+      )}
 
       {isExpanded && (
         <div className="card-group-content">

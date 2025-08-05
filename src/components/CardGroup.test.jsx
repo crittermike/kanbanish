@@ -27,6 +27,44 @@ vi.mock('./VotingControls', () => ({
   )
 }));
 
+// Mock CardReactions component
+vi.mock('./CardReactions', () => ({
+  default: ({ reactions, disabled }) => (
+    <div className="reactions">
+      {reactions && Object.entries(reactions).map(([emoji, data]) => (
+        <div key={emoji}>
+          <span>{emoji}</span>
+          <span>{data.count}</span>
+        </div>
+      ))}
+      {!disabled && <button title="Add reaction">+</button>}
+    </div>
+  )
+}));
+
+// Mock Comments component
+vi.mock('./Comments', () => ({
+  default: ({ comments }) => (
+    <div>
+      <h4>Comments</h4>
+      {comments && Object.entries(comments).map(([id, comment]) => (
+        <div key={id}>{comment.content}</div>
+      ))}
+    </div>
+  )
+}));
+
+// Mock EmojiPicker component
+vi.mock('./EmojiPicker', () => ({
+  default: () => <div>Emoji Picker</div>
+}));
+
+// Mock useGroupOperations hook
+const mockUseGroupOperations = vi.fn();
+vi.mock('../hooks/useGroupOperations', () => ({
+  useGroupOperations: () => mockUseGroupOperations()
+}));
+
 // Mock BoardContext
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
@@ -69,8 +107,8 @@ describe('CardGroup Component', () => {
   const mockBoardContext = {
     user: { uid: 'user1', displayName: 'Test User' },
     boardId: 'test-board-123',
-    retrospectiveMode: true,
-    workflowPhase: 'GROUPING',
+    retrospectiveMode: false, // Change to false to allow interactions
+    workflowPhase: 'CREATION', // Change to CREATION to allow interactions
     updateGroupName: vi.fn(),
     deleteGroup: vi.fn(),
     ungroupCards: vi.fn(),
@@ -86,13 +124,32 @@ describe('CardGroup Component', () => {
   };  beforeEach(() => {
     vi.clearAllMocks();
     useBoardContext.mockReturnValue(mockBoardContext);
+    
+    // Set up default mock for useGroupOperations
+    mockUseGroupOperations.mockReturnValue({
+      showEmojiPicker: false,
+      showComments: false,
+      toggleComments: vi.fn(),
+      hasUserReactedWithEmoji: vi.fn(() => false),
+      addReaction: vi.fn(),
+      setShowEmojiPicker: vi.fn(),
+      emojiPickerPosition: { top: 0, left: 0 },
+      setEmojiPickerPosition: vi.fn(),
+      newComment: '',
+      setNewComment: vi.fn(),
+      addComment: vi.fn(),
+      editComment: vi.fn(),
+      deleteComment: vi.fn(),
+      isCommentAuthor: vi.fn(() => true)
+    });
   });
 
   test('renders group with correct name and card count', () => {
     render(<CardGroup {...mockProps} />);
 
     expect(screen.getByText('Test Group')).toBeInTheDocument();
-    expect(screen.getByText('2 cards')).toBeInTheDocument();
+    // Check for the card count badge with title instead of direct text
+    expect(screen.getByTitle('2 cards')).toBeInTheDocument();
   });
 
   test('shows cards when expanded', () => {
@@ -132,6 +189,14 @@ describe('CardGroup Component', () => {
   });
 
   test('handles group name editing', async () => {
+    // Override context for grouping phase with retrospective mode enabled
+    const groupingContext = { 
+      ...mockBoardContext, 
+      workflowPhase: 'GROUPING',
+      retrospectiveMode: true 
+    };
+    useBoardContext.mockReturnValue(groupingContext);
+
     render(<CardGroup {...mockProps} />);
 
     const groupName = screen.getByText('Test Group');
@@ -147,7 +212,7 @@ describe('CardGroup Component', () => {
     fireEvent.keyDown(input, { key: 'Enter' });
 
     await waitFor(() => {
-      expect(mockBoardContext.updateGroupName).toHaveBeenCalledWith(
+      expect(groupingContext.updateGroupName).toHaveBeenCalledWith(
         'column1',
         'group123',
         'Updated Group Name'
@@ -323,5 +388,137 @@ describe('CardGroup Component', () => {
 
     // Verify success notification
     expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
+  });
+
+  test('displays comment toggle button with correct count', () => {
+    const groupWithComments = {
+      ...mockGroupData,
+      comments: {
+        'comment1': { content: 'First comment', createdBy: 'user1' },
+        'comment2': { content: 'Second comment', createdBy: 'user2' }
+      }
+    };
+
+    render(<CardGroup {...mockProps} groupData={groupWithComments} />);
+
+    // Find the comments toggle button
+    const commentsButton = screen.getByTitle('Toggle comments');
+    expect(commentsButton).toBeInTheDocument();
+
+    // Should show correct comment count
+    // Verify it's specifically the comment count badge, not the card count badge
+    const commentsButtonWithCount = screen.getByTitle('Toggle comments');
+    expect(commentsButtonWithCount.querySelector('.interaction-count')).toHaveTextContent('2');
+  });
+
+  test('toggles comments section when comment button is clicked', () => {
+    // Need to create a custom mock for this test that tracks state
+    const mockToggleComments = vi.fn();
+
+    // Re-mock the hook for this specific test
+    mockUseGroupOperations.mockReturnValueOnce({
+      showEmojiPicker: false,
+      showComments: false,
+      toggleComments: mockToggleComments,
+      hasUserReactedWithEmoji: vi.fn(() => false),
+      addReaction: vi.fn(),
+      setShowEmojiPicker: vi.fn(),
+      emojiPickerPosition: { top: 0, left: 0 },
+      setEmojiPickerPosition: vi.fn(),
+      newComment: '',
+      setNewComment: vi.fn(),
+      addComment: vi.fn(),
+      editComment: vi.fn(),
+      deleteComment: vi.fn(),
+      isCommentAuthor: vi.fn(() => true)
+    });
+
+    const groupWithComments = {
+      ...mockGroupData,
+      comments: {
+        'comment1': { content: 'Test comment', createdBy: 'user1' }
+      }
+    };
+
+    const { rerender } = render(<CardGroup {...mockProps} groupData={groupWithComments} />);
+
+    // Comments section should not be visible initially
+    expect(screen.queryByText('Comments')).not.toBeInTheDocument();
+
+    // Click the comments toggle button
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+
+    // Verify toggleComments was called
+    expect(mockToggleComments).toHaveBeenCalled();
+
+    // Now re-mock with showComments: true and re-render
+    mockUseGroupOperations.mockReturnValueOnce({
+      showEmojiPicker: false,
+      showComments: true, // Now comments are shown
+      toggleComments: mockToggleComments,
+      hasUserReactedWithEmoji: vi.fn(() => false),
+      addReaction: vi.fn(),
+      setShowEmojiPicker: vi.fn(),
+      emojiPickerPosition: { top: 0, left: 0 },
+      setEmojiPickerPosition: vi.fn(),
+      newComment: '',
+      setNewComment: vi.fn(),
+      addComment: vi.fn(),
+      editComment: vi.fn(),
+      deleteComment: vi.fn(),
+      isCommentAuthor: vi.fn(() => true)
+    });
+
+    rerender(<CardGroup {...mockProps} groupData={groupWithComments} />);
+
+    // Comments section should now be visible
+    expect(screen.getByText('Comments')).toBeInTheDocument();
+    expect(screen.getByText('Test comment')).toBeInTheDocument();
+  });
+
+  test('displays reactions when they exist', () => {
+    const groupWithReactions = {
+      ...mockGroupData,
+      reactions: {
+        '👍': { count: 3, users: { 'user1': true, 'user2': true, 'user3': true } },
+        '😄': { count: 1, users: { 'user1': true } }
+      }
+    };
+
+    render(<CardGroup {...mockProps} groupData={groupWithReactions} />);
+
+    // Should display the reactions - use more flexible matchers due to whitespace
+    expect(screen.getByText(/👍/)).toBeInTheDocument();
+    expect(screen.getByText((content, element) => {
+      return element?.tagName.toLowerCase() === 'span' && element?.textContent?.includes('👍') && element?.textContent?.includes('3');
+    })).toBeInTheDocument();
+    expect(screen.getByText(/😄/)).toBeInTheDocument();
+    expect(screen.getByText((content, element) => {
+      return element?.tagName.toLowerCase() === 'span' && element?.textContent?.includes('😄') && element?.textContent?.includes('1');
+    })).toBeInTheDocument();
+  });
+
+  test('shows reactions section with add button when no reactions exist', () => {
+    const { container } = render(<CardGroup {...mockProps} />);
+
+    // Should not display any specific reactions
+    expect(screen.queryByText('👍')).not.toBeInTheDocument();
+    // But the interactions section should be present with add button
+    expect(container.querySelector('.group-interactions-section')).toBeInTheDocument();
+    // Should show the add reaction button
+    expect(screen.getByTitle('Add reaction')).toBeInTheDocument();
+  });
+
+  test('shows zero comment count when no comments exist', () => {
+    render(<CardGroup {...mockProps} />);
+
+    // Should show comments button 
+    const commentsButton = screen.getByTitle('Toggle comments');
+    expect(commentsButton).toBeInTheDocument();
+    
+    // When there are no comments, the count span should not be rendered
+    const commentCount = commentsButton.querySelector('.interaction-count');
+    expect(commentCount).toBeNull();
   });
 });

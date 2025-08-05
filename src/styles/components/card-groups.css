@@ -132,16 +132,53 @@
     padding: var(--space-xs);
 }
 
-.card-group-info {
+/* Group action buttons (comments, reactions) */
+.card-group-actions .comments-btn,
+.card-group-actions .reactions-btn {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-xxs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed);
+}
+
+.card-group-actions .comments-btn:hover,
+.card-group-actions .reactions-btn:hover {
+    color: var(--text-color);
+    background: var(--hover-bg);
+}
+
+.card-group-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
 }
 
 .card-count {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
     white-space: nowrap;
+}
+
+.card-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    padding: 0 var(--space-xxs);
 }
 
 .group-action-btn {
@@ -237,10 +274,184 @@
     text-overflow: ellipsis;
 }
 
+/* Group Interactions Section */
+.group-interactions-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-interactions-left {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.group-interactions-left .reaction-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    background: var(--hover-bg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed);
+    border: 1px solid transparent;
+}
+
+.group-interactions-left .reaction-item:hover {
+    background: var(--accent-transparent);
+    border-color: var(--accent-light);
+}
+
+.group-interactions-left .reaction-item.user-reacted {
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.group-interactions-right {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.interaction-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+/* Style the reactions button like cards */
+.interaction-btn.reactions-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--emoji-reaction-radius, var(--radius-sm));
+    width: 2.05rem;
+    height: 2.05rem;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity var(--transition-speed) var(--transition-ease),
+        background-color var(--transition-speed) var(--transition-ease);
+    line-height: 1;
+    padding: 0;
+    gap: 0;
+}
+
+.interaction-btn.reactions-btn:hover {
+    opacity: 1;
+    background-color: var(--hover-bg);
+}
+
+.interaction-count {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+}
+
 /* Group Selection and Multi-select */
 .card-group.selected {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Group Reactions Section */
+.group-reactions-section {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-reactions-section:last-child {
+    border-bottom: none;
+}
+
+/* Inline Group Reactions */
+.group-reactions-inline {
+    padding: var(--space-xs) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.group-reactions-inline:last-child {
+    border-bottom: none;
+}
+
+.reaction-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    background: var(--hover-bg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed);
+    border: 1px solid transparent;
+}
+
+.reaction-item:hover {
+    background: var(--accent-transparent);
+    border-color: var(--accent-light);
+}
+
+.reaction-item.user-reacted {
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Group Comments Section */
+.group-comments-section {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-comments-section:last-child {
+    border-bottom: none;
+}
+
+/* Override comment section styles when inside group */
+.group-comments-section .comments-section {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
 }
 
 /* Responsive adjustments */
@@ -253,8 +464,27 @@
         font-size: var(--font-size-sm);
     }
     
-    .card-count {
+    .card-count,
+    .card-count-badge {
         font-size: var(--font-size-xs);
+    }
+    
+    .card-count-badge {
+        min-width: 20px;
+        height: 20px;
+    }
+    
+    .group-interactions-section {
+        padding: var(--space-xs) var(--space-sm);
+    }
+    
+    .group-interactions-left,
+    .group-interactions-right {
+        gap: var(--space-xxs);
+    }
+    
+    .interaction-btn {
+        padding: var(--space-xxs);
     }
     
     .group-action-btn {

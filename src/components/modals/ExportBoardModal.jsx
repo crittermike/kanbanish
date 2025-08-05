@@ -51,8 +51,32 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           const processedGroup = {
             name: group.name,
             votes: group.votes || 0,
+            comments: [],
+            reactions: [],
             cards: []
           };
+
+          // Process group comments
+          if (group.comments && Object.keys(group.comments).length > 0) {
+            Object.entries(group.comments).forEach(([_commentId, comment]) => {
+              if (comment && comment.content) {
+                processedGroup.comments.push(comment.content);
+              }
+            });
+          }
+
+          // Process group reactions
+          if (group.reactions && Object.keys(group.reactions).length > 0) {
+            const validReactions = Object.entries(group.reactions)
+              .filter(([_emoji, reactionData]) => (reactionData?.count || 0) > 0);
+
+            validReactions.forEach(([emoji, reactionData]) => {
+              if (emoji) {
+                const count = reactionData?.count || 0;
+                processedGroup.reactions.push({ emoji, count });
+              }
+            });
+          }
 
           // Process cards in this group
           group.cardIds.forEach(cardId => {
@@ -162,6 +186,24 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           const groupVoteCount = group.votes;
           markdown += `### 📁 ${group.name} ${groupVoteCount > 0 ? `(${groupVoteCount} votes)` : ''}\n\n`;
 
+          // Group comments
+          if (group.comments.length > 0) {
+            markdown += '**Group Comments:**\n';
+            group.comments.forEach(comment => {
+              markdown += `- ${comment}\n`;
+            });
+            markdown += '\n';
+          }
+
+          // Group reactions
+          if (group.reactions.length > 0) {
+            markdown += '**Group Reactions:** ';
+            group.reactions.forEach((reaction, index, array) => {
+              markdown += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+            });
+            markdown += '\n\n';
+          }
+
           // Cards within the group as list items
           group.cards.forEach(card => {
             const voteCount = card.votes;
@@ -243,6 +285,24 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
           const groupVoteCount = group.votes;
           const groupTitle = `📁 ${group.name} ${groupVoteCount > 0 ? `(${groupVoteCount} votes)` : ''}`;
           text += `${groupTitle}\n${'-'.repeat(groupTitle.length)}\n\n`;
+
+          // Group comments
+          if (group.comments.length > 0) {
+            text += 'Group Comments:\n';
+            group.comments.forEach(comment => {
+              text += `- ${comment}\n`;
+            });
+            text += '\n';
+          }
+
+          // Group reactions
+          if (group.reactions.length > 0) {
+            text += 'Group Reactions: ';
+            group.reactions.forEach((reaction, index, array) => {
+              text += `${reaction.emoji} (${reaction.count})${index < array.length - 1 ? ', ' : ''}`;
+            });
+            text += '\n\n';
+          }
 
           // Cards within the group
           group.cards.forEach(card => {
