@@ -1,18 +1,12 @@
 import { useBoardContext } from '../context/BoardContext';
-import { areInteractionsVisible } from '../utils/workflowUtils';
+import { useVoteCounterVisibility } from '../hooks/useVoteCounterVisibility';
+import BaseVoteCounter from './BaseVoteCounter';
 
 const VoteCounter = () => {
-  const { 
-    user, 
-    votesPerUser, 
-    getUserVoteCount, 
-    workflowPhase, 
-    retrospectiveMode, 
-    votingEnabled 
-  } = useBoardContext();
+  const { isUserVoteCounterVisible } = useVoteCounterVisibility();
+  const { user, votesPerUser, getUserVoteCount } = useBoardContext();
 
-  // Don't show if voting is disabled or interactions aren't visible
-  if (!votingEnabled || !areInteractionsVisible(workflowPhase, retrospectiveMode) || !user) {
+  if (!isUserVoteCounterVisible) {
     return null;
   }
 
@@ -20,14 +14,13 @@ const VoteCounter = () => {
   const remainingVotes = Math.max(0, votesPerUser - usedVotes);
 
   return (
-    <div className="vote-counter">
-      <div className="vote-counter-content">
-        <span className="vote-counter-label">Your votes remaining:</span>
-        <span className={`vote-counter-value ${remainingVotes === 0 ? 'vote-counter-depleted' : ''}`}>
-          {remainingVotes}/{votesPerUser}
-        </span>
-      </div>
-    </div>
+    <BaseVoteCounter
+      className="vote-counter"
+      label="Your votes remaining:"
+      value={remainingVotes}
+      total={votesPerUser}
+      isDepleted={remainingVotes === 0}
+    />
   );
 };
 

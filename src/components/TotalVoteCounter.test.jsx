@@ -84,6 +84,21 @@ describe('TotalVoteCounter', () => {
     expect(screen.queryByText('Total votes remaining:')).not.toBeInTheDocument();
   });
 
+  it('does not render when retrospective mode is disabled', () => {
+    useBoardContext.mockReturnValue({
+      votesPerUser: 5,
+      getTotalVotesRemaining: mockGetTotalVotesRemaining,
+      activeUsers: 3,
+      workflowPhase: 'INTERACTIONS',
+      retrospectiveMode: false,
+      votingEnabled: true
+    });
+
+    render(<TotalVoteCounter />);
+
+    expect(screen.queryByText('Total votes remaining:')).not.toBeInTheDocument();
+  });
+
   it('calculates total possible votes correctly', () => {
     mockGetTotalVotesRemaining.mockReturnValue(8);
     

@@ -85,6 +85,21 @@ describe('VoteCounter', () => {
     expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
   });
 
+  it('does not render when retrospective mode is disabled', () => {
+    useBoardContext.mockReturnValue({
+      user: mockUser,
+      votesPerUser: 5,
+      getUserVoteCount: mockGetUserVoteCount,
+      workflowPhase: 'INTERACTIONS',
+      retrospectiveMode: false,
+      votingEnabled: true
+    });
+
+    render(<VoteCounter />);
+
+    expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
+  });
+
   it('handles zero used votes correctly', () => {
     mockGetUserVoteCount.mockReturnValue(0);
 
