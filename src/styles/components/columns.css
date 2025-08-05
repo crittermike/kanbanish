@@ -31,7 +31,6 @@ main {
     min-width: var(--column-width);
     max-width: var(--column-width);
     height: fit-content;
-    max-height: calc(100vh - 150px);
     display: flex;
     flex-direction: column;
 }
@@ -90,7 +89,7 @@ main {
 
 .column-content {
     padding: var(--space-sm);
-    overflow-y: auto;
+    overflow-y: visible;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
