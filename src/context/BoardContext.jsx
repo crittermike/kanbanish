@@ -941,21 +941,23 @@ export const BoardProvider = ({ children }) => {
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
 
-    // Check vote limit
-    const currentUserVotes = getUserVoteCount(userId);
-    
-    // For multiple votes allowed, check if adding this vote would exceed the limit
-    if (multipleVotesAllowed) {
-      if (currentUserVotes >= votesPerUser) {
-        showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
-        return;
-      }
-    } else {
-      // For single votes, check if user has already cast the maximum votes
-      const userCurrentVote = currentVoters[userId] || 0;
-      if (userCurrentVote === 0 && currentUserVotes >= votesPerUser) {
-        showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
-        return;
+    // Check vote limit - skip if not in retrospective mode
+    if (retrospectiveMode) {
+      const currentUserVotes = getUserVoteCount(userId);
+      
+      // For multiple votes allowed, check if adding this vote would exceed the limit
+      if (multipleVotesAllowed) {
+        if (currentUserVotes >= votesPerUser) {
+          showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+          return;
+        }
+      } else {
+        // For single votes, check if user has already cast the maximum votes
+        const userCurrentVote = currentVoters[userId] || 0;
+        if (userCurrentVote === 0 && currentUserVotes >= votesPerUser) {
+          showNotification(`You've reached your vote limit (${votesPerUser} votes)`);
+          return;
+        }
       }
     }
 

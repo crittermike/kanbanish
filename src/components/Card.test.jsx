@@ -696,4 +696,60 @@ describe('Card Component', () => {
       expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
     });
   });
+
+  test('does not enforce vote limit when not in retrospective mode', async () => {
+    // Mock the context with retrospective mode disabled and a low vote limit
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      retrospectiveMode: false, // Key: not in retrospective mode
+      votesPerUser: 1, // Low limit to test
+      getUserVoteCount: vi.fn(() => 1) // User already at limit
+    });
+
+    // Reset mocks to track calls
+    set.mockClear();
+    mockProps.showNotification.mockClear();
+
+    render(<Card {...mockProps} />);
+
+    // Try to upvote even though user is at limit
+    const upvoteButton = screen.getByTitle('Upvote');
+    fireEvent.click(upvoteButton);
+
+    // Verify vote was allowed (not blocked by limit)
+    await waitFor(() => {
+      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+    });
+
+    // Verify the vote was actually recorded (set was called)
+    expect(set).toHaveBeenCalled();
+  });
+
+  test('enforces vote limit when in retrospective mode', async () => {
+    // Mock the context with retrospective mode enabled and a low vote limit
+    useBoardContext.mockReturnValue({
+      ...mockBoardContext,
+      retrospectiveMode: true, // Key: in retrospective mode
+      votesPerUser: 1, // Low limit to test
+      getUserVoteCount: vi.fn(() => 1) // User already at limit
+    });
+
+    // Reset mocks to track calls
+    set.mockClear();
+    mockProps.showNotification.mockClear();
+
+    render(<Card {...mockProps} />);
+
+    // Try to upvote when user is at limit
+    const upvoteButton = screen.getByTitle('Upvote');
+    fireEvent.click(upvoteButton);
+
+    // Verify vote was blocked by limit
+    await waitFor(() => {
+      expect(mockProps.showNotification).toHaveBeenCalledWith("You've reached your vote limit (1 votes)");
+    });
+
+    // Verify the vote was NOT recorded (set was not called)
+    expect(set).not.toHaveBeenCalled();
+  });
 });

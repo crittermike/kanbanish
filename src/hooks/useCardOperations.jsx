@@ -159,8 +159,8 @@ export function useCardOperations({
     // Get the user's current vote if any
     const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
 
-    // Check vote limit (only for positive votes)
-    if (delta > 0) {
+    // Check vote limit (only for positive votes) - skip if not in retrospective mode
+    if (delta > 0 && retrospectiveMode) {
       const currentUserVotes = getUserVoteCount(user.uid);
       
       // For multiple votes allowed, check if adding this vote would exceed the limit
