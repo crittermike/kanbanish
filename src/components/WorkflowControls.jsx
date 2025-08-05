@@ -37,7 +37,7 @@ const WorkflowControls = ({ showNotification }) => {
 
   const handleRevealInteractions = () => {
     startInteractionRevealPhase();
-    showNotification('Interactions revealed!');
+    showNotification('Votes revealed! Voting is now frozen.');
   };
 
   const handleStartResults = () => {
@@ -59,8 +59,8 @@ const WorkflowControls = ({ showNotification }) => {
     const phaseMessages = {
       [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
       [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
-      [WORKFLOW_PHASES.INTERACTION_REVEAL]: 'Returned to interactions phase',
-      [WORKFLOW_PHASES.RESULTS]: 'Returned to interaction reveal phase',
+      [WORKFLOW_PHASES.INTERACTION_REVEAL]: 'Returned to voting phase',
+      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting results phase',
       [WORKFLOW_PHASES.POLL]: 'Returned to results phase',
       [WORKFLOW_PHASES.POLL_RESULTS]: 'Returned to poll phase'
     };
