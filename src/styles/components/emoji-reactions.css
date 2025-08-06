@@ -59,6 +59,26 @@
     background-color: var(--emoji-reaction-active-bg);
 }
 
+.emoji-reaction.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.emoji-reaction.disabled:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Frozen state: no hover effects but normal appearance */
+.emoji-reaction.frozen {
+    pointer-events: none;
+    cursor: default;
+}
+
+.emoji-reaction.frozen:hover {
+    background-color: transparent;
+}
+
 .emoji-reaction .emoji {
     margin-right: var(--space-xxs);
     font-size: var(--font-size-base);
@@ -82,7 +102,7 @@
     color: var(--text-color);
     opacity: 0.7;
     transition: opacity var(--transition-speed) var(--transition-ease),
-                background-color var(--transition-speed) var(--transition-ease);
+        background-color var(--transition-speed) var(--transition-ease);
     line-height: 1;
     padding-bottom: 2px;
 }
@@ -90,6 +110,19 @@
 .add-reaction-button:hover {
     opacity: 1;
     background-color: var(--hover-bg);
+}
+
+.add-reaction-button.disabled,
+.add-reaction-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.add-reaction-button.disabled:hover,
+.add-reaction-button:disabled:hover {
+    opacity: 0.3;
+    background-color: transparent;
 }
 
 /* Emoji picker */

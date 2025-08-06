@@ -23,6 +23,78 @@
     border-color: var(--accent);
 }
 
+/* Card selection styles */
+.card.selected {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Card grouping styles for reveal mode */
+.card.groupable {
+    cursor: grab !important;
+    transition: all var(--transition-speed);
+}
+
+.card.groupable:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card.drop-target {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+    box-shadow: 0 0 0 3px var(--accent-transparent);
+    transform: scale(1.02);
+}
+
+.card.multi-select-mode {
+    cursor: pointer !important;
+}
+
+.card.author-editable {
+    position: relative;
+}
+
+.card.author-editable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0.7;
+}
+
+.card-selection-indicator {
+    position: absolute;
+    top: var(--space-xs);
+    right: var(--space-xs);
+    z-index: 10;
+}
+
+.selection-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: bold;
+    color: var(--accent);
+    transition: all var(--transition-speed);
+}
+
+.selection-checkbox.checked {
+    background: var(--accent);
+    color: white;
+}
+
 /* Drag and drop styling */
 .card.dragging {
     cursor: grabbing;
@@ -39,13 +111,20 @@
 .card-content {
     flex: 1;
     word-break: break-word;
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    padding-left: var(--space-sm);
+    color: var(--text-color);
+    line-height: 1.4;
+    margin-left: var(--space-sm);
+}
+
+.card-content.obfuscated {
+    font-family: monospace;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 .card-content.full-width {
-    padding-left: 0;
+    margin-left: 0;
 }
 
 .card-footer {
@@ -82,6 +161,57 @@
 
 .vote-button:hover {
     color: var(--text-color);
+}
+
+.vote-button.disabled,
+.vote-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.vote-button.disabled:hover,
+.vote-button:disabled:hover {
+    color: var(--text-muted);
+}
+
+.card.editing-disabled {
+    cursor: not-allowed !important;
+}
+
+.card.editing-disabled:hover {
+    background-color: var(--card-bg);
+    transform: none;
+}
+
+.card.drag-disabled {
+    cursor: not-allowed !important;
+}
+
+.card.drag-disabled:hover {
+    background-color: var(--card-bg);
+    transform: none;
+}
+
+/* Dynamic card states */
+.card.dragging {
+    opacity: 0.5;
+}
+
+.card.cursor-grab {
+    cursor: grab !important;
+}
+
+.card.cursor-not-allowed {
+    cursor: not-allowed !important;
+}
+
+.card.cursor-default {
+    cursor: default !important;
+}
+
+.card.cursor-pointer {
+    cursor: pointer !important;
 }
 
 .vote-count {
@@ -142,6 +272,17 @@
     color: var(--text-color);
     word-break: break-word;
     line-height: 1.4;
+}
+
+.comment-content.editable {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+}
+
+.comment-content.editable:hover {
+    background-color: var(--bg-secondary);
 }
 
 /* Empty column placeholder */
@@ -243,10 +384,6 @@
     font-size: var(--font-size-xs);
 }
 
-.comment-content {
-    cursor: pointer;
-}
-
 /* Inline Card Creation and Editing */
 .inline-card-form {
     background: var(--card-bg);
@@ -315,100 +452,101 @@
 
 /* Mobile responsive adjustments for cards */
 @media (max-width: 768px) {
+
     /* Enhance touch targets for card actions */
     .card {
         padding: var(--space-md);
     }
-    
+
     /* Better spacing for action buttons on mobile */
     .card-edit-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .card-edit-actions .btn {
         padding: var(--space-md);
         min-height: 50px;
         font-size: var(--font-size-base);
     }
-    
+
     /* Make Save button more prominent */
     .card-edit-actions .primary-btn {
         order: -3;
     }
-    
+
     /* Put Cancel second */
     .card-edit-actions .secondary-btn {
         order: -2;
     }
-    
+
     /* Put Delete last */
     .card-edit-actions .danger-btn {
         order: -1;
     }
-    
+
     /* Better spacing for inline card actions */
     .inline-card-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .inline-card-actions .btn {
         padding: var(--space-md);
         min-height: 50px;
     }
-    
+
     /* Improve comment editing on mobile */
     .comment-edit-actions {
         flex-direction: column;
         gap: var(--space-md);
     }
-    
+
     .comment-edit-actions .btn-sm {
         flex: 1;
         padding: var(--space-sm);
         font-size: var(--font-size-sm);
         min-height: 40px;
     }
-    
+
     /* Order the comment edit buttons properly on mobile */
     .comment-edit-actions .primary-btn {
         order: -3;
     }
-    
+
     .comment-edit-actions .secondary-btn {
         order: -2;
     }
-    
+
     .comment-edit-actions .danger-btn {
         order: -1;
     }
-    
+
     /* Make comment inputs easier to use on mobile */
     .comment-input {
         padding: var(--space-sm);
         min-height: 40px;
         font-size: var(--font-size-base);
     }
-    
+
     .comment-edit-input {
         padding: var(--space-sm);
         min-height: 40px;
         font-size: var(--font-size-base);
         margin-bottom: var(--space-sm);
     }
-    
+
     /* Increase touch area for voting buttons */
     .vote-button {
         height: 30px;
         width: 30px;
         padding: 6px;
     }
-    
+
     .votes {
         min-width: 40px;
     }
-    
+
     /* Make comments button easier to tap */
     .comments-btn {
         padding: 8px;

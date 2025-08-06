@@ -17,11 +17,11 @@ export function generateId() {
 export function showNotification(message) {
   const notification = document.getElementById('notification');
   const notificationMessage = document.getElementById('notification-message');
-  
+
   if (notification && notificationMessage) {
     notificationMessage.textContent = message;
     notification.classList.add('show');
-    
+
     setTimeout(() => {
       notification.classList.remove('show');
     }, 3000);
@@ -33,7 +33,7 @@ export function showNotification(message) {
  */
 export const COMMON_EMOJIS = [
   // Faces & expressions
-  '😄', '😍', '🤩', '😎', '🤔', '😂', '😭', '😅', '😬', '😲', '😱', '💀', 
+  '😄', '😍', '🤩', '😎', '🤔', '😂', '😭', '😅', '😬', '😲', '😱', '💀',
 
   // Hands & gestures
   '👍', '👎', '👏', '🙌', '💪', '🤝', '🙏', '🫡',

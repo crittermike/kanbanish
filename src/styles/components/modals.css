@@ -193,6 +193,7 @@
   font-size: 24px;
   font-weight: 600;
   color: var(--text-color);
+  border-bottom: none; /* Remove border when h2 is inside modal-header */
 }
 
 .modal-body {
@@ -372,4 +373,119 @@
     min-height: 48px;
     padding: var(--space-md);
   }
+}
+
+/* Vote Limit Modal specific styles */
+.vote-limit-modal {
+  max-width: 450px;
+}
+
+.vote-limit-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.vote-limit-description {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.vote-limit-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.vote-limit-input-section label {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+}
+
+.vote-limit-input-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vote-limit-input {
+  width: 80px;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: var(--font-size-base);
+  text-align: center;
+}
+
+.vote-limit-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-alpha);
+}
+
+.vote-limit-input-suffix {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.vote-limit-examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.vote-limit-examples-title {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.vote-limit-preset-buttons {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.vote-limit-preset {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+}
+
+.vote-limit-preset:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-color-alpha);
+}
+
+.vote-limit-preset.active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+}
+
+.vote-limit-info {
+  padding: var(--space-md);
+  background: var(--info-bg, rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--info-border, rgba(59, 130, 246, 0.2));
+  border-radius: var(--radius-sm);
+}
+
+.vote-limit-info p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
 }

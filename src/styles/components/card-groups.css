@@ -1,0 +1,521 @@
+/**
+ * Card Group Styles
+ * 
+ * Styles for card grouping functionality including visual stacking,
+ * expand/collapse, and drag-and-drop interactions.
+ */
+
+/* Card Group Container */
+.card-group {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-md);
+    overflow: visible;
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.card-group.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+}
+
+.card-group:hover {
+    border-color: var(--accent-light);
+}
+
+/* Group Header */
+.card-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface-2);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed);
+}
+
+.card-group-header:hover {
+    background: var(--surface-3);
+}
+
+.card-group-title-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 1;
+}
+
+.expand-icon {
+    color: var(--text-secondary);
+    transition: transform var(--transition-speed);
+    flex-shrink: 0;
+}
+
+.card-group-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-speed);
+}
+
+.card-group-name:hover {
+    background: var(--input-bg);
+}
+
+.card-group-name.non-editable {
+    cursor: not-allowed;
+}
+
+.card-group-name.non-editable:hover {
+    background: transparent;
+}
+
+.group-name-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex: 1;
+}
+
+.edit-group-name-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: all var(--transition-speed);
+}
+
+.group-name-container:hover .edit-group-name-btn {
+    opacity: 1;
+}
+
+.edit-group-name-btn:hover {
+    background: var(--surface-3);
+    color: var(--text-color);
+}
+
+.group-name-input {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    background: var(--input-bg);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    color: var(--text-color);
+    outline: none;
+    font-family: inherit;
+}
+
+.card-group-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.card-group-actions .votes {
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
+}
+
+/* Group action buttons (comments, reactions) */
+.card-group-actions .comments-btn,
+.card-group-actions .reactions-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed);
+}
+
+.card-group-actions .comments-btn:hover,
+.card-group-actions .reactions-btn:hover {
+    color: var(--text-color);
+    background: var(--hover-bg);
+}
+
+.card-group-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.card-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.card-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    padding: 0 var(--space-xxs);
+}
+
+.group-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-speed);
+}
+
+.group-action-btn:hover {
+    background: var(--danger-transparent);
+    color: var(--danger);
+}
+
+/* Group Content */
+.card-group-content {
+    padding: var(--space-sm);
+    max-height: none;
+    overflow: visible;
+}
+
+.card-group-content .card {
+    margin-bottom: var(--space-sm);
+}
+
+.card-group-content .card:last-child {
+    margin-bottom: 0;
+}
+
+.empty-group-placeholder {
+    text-align: center;
+    padding: var(--space-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.empty-group-placeholder span {
+    display: block;
+    margin-bottom: var(--space-xs);
+}
+
+.empty-group-placeholder span:last-child {
+    margin-bottom: 0;
+    font-size: var(--font-size-xs);
+    opacity: 0.7;
+}
+
+/* Card Preview for Collapsed Groups - Simple Stack */
+.card-group-preview {
+    position: relative;
+    padding: var(--space-md);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.card-preview {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    display: flex;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+}
+
+.card-preview.main-card {
+    z-index: 10;
+    position: relative;
+}
+
+.card-preview.main-card:hover {
+    border-color: var(--accent);
+}
+
+.card-preview-content {
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    line-height: 1.4;
+    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Group Interactions Section */
+.group-interactions-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-interactions-left {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.group-interactions-left .reaction-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    background: var(--hover-bg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed);
+    border: 1px solid transparent;
+}
+
+.group-interactions-left .reaction-item:hover {
+    background: var(--accent-transparent);
+    border-color: var(--accent-light);
+}
+
+.group-interactions-left .reaction-item.user-reacted {
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.group-interactions-right {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed);
+    position: relative;
+}
+
+.interaction-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-color);
+}
+
+/* Style the reactions button like cards */
+.interaction-btn.reactions-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--emoji-reaction-radius, var(--radius-sm));
+    width: 2.05rem;
+    height: 2.05rem;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity var(--transition-speed) var(--transition-ease),
+        background-color var(--transition-speed) var(--transition-ease);
+    line-height: 1;
+    padding: 0;
+    gap: 0;
+}
+
+.interaction-btn.reactions-btn:hover {
+    opacity: 1;
+    background-color: var(--hover-bg);
+}
+
+.interaction-count {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+}
+
+/* Group Selection and Multi-select */
+.card-group.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Group Reactions Section */
+.group-reactions-section {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-reactions-section:last-child {
+    border-bottom: none;
+}
+
+/* Inline Group Reactions */
+.group-reactions-inline {
+    padding: var(--space-xs) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.group-reactions-inline:last-child {
+    border-bottom: none;
+}
+
+.reaction-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    background: var(--hover-bg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed);
+    border: 1px solid transparent;
+}
+
+.reaction-item:hover {
+    background: var(--accent-transparent);
+    border-color: var(--accent-light);
+}
+
+.reaction-item.user-reacted {
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Group Comments Section */
+.group-comments-section {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-1);
+}
+
+.group-comments-section:last-child {
+    border-bottom: none;
+}
+
+/* Override comment section styles when inside group */
+.group-comments-section .comments-section {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-group-header {
+        padding: var(--space-md);
+    }
+    
+    .card-group-name {
+        font-size: var(--font-size-sm);
+    }
+    
+    .card-count,
+    .card-count-badge {
+        font-size: var(--font-size-xs);
+    }
+    
+    .card-count-badge {
+        min-width: 20px;
+        height: 20px;
+    }
+    
+    .group-interactions-section {
+        padding: var(--space-xs) var(--space-sm);
+    }
+    
+    .group-interactions-left,
+    .group-interactions-right {
+        gap: var(--space-xxs);
+    }
+    
+    .interaction-btn {
+        padding: var(--space-xxs);
+    }
+    
+    .group-action-btn {
+        padding: var(--space-sm);
+    }
+    
+    .card-group-preview {
+        padding: var(--space-sm);
+        min-height: 50px;
+    }
+    
+    .card-preview {
+        height: 35px;
+        left: var(--space-sm);
+        width: calc(100% - var(--space-lg));
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .card-group {
+        border-color: var(--border-color-dark);
+    }
+    
+    .card-group-header {
+        background: var(--surface-2-dark);
+        border-bottom-color: var(--border-color-dark);
+    }
+    
+    .card-preview {
+        background: var(--card-bg-dark);
+        border-color: var(--border-color-dark);
+    }
+}

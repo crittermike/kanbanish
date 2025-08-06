@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import Column from './Column';
-import { generateId } from '../utils/helpers';
 import { addColumn } from '../utils/boardUtils';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import Column from './Column';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
+import PollResults from './PollResults';
+import PollVoting from './PollVoting';
+import ResultsView from './ResultsView';
+import TotalVoteCounter from './TotalVoteCounter';
+import UserCounter from './UserCounter';
+import VoteCounter from './VoteCounter';
+import WorkflowControls from './WorkflowControls';
 // Import Feather icons
-import { Link, ArrowDown, ChevronDown, PlusCircle, Plus, ThumbsUp, BarChart2, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 
 // UI Component for the board header with title input and share button
 const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard }) => (
@@ -21,21 +28,22 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       className="header-input"
     />
     <div className="action-buttons">
+      <UserCounter />
+      <VoteCounter />
+      <TotalVoteCounter />
       <button
         id="copy-share-url"
-        className="btn secondary-btn"
+        className="btn secondary-btn btn-with-icon"
         title="Copy Share URL"
         onClick={copyShareUrl}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
         <Link size={16} />
         Share
       </button>
       <button
         id="export-board"
-        className="btn secondary-btn"
+        className="btn secondary-btn btn-with-icon"
         onClick={handleExportBoard}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}
       >
         <FileText size={16} />
         Export
@@ -46,19 +54,21 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
 );
 
 // UI Component for the action buttons in the header
-const ActionButtons = ({ 
-  handleCreateNewBoard, 
-  sortByVotes, 
-  setSortByVotes, 
-  votingEnabled, 
-  updateVotingEnabled, 
-  downvotingEnabled, 
-  updateDownvotingEnabled, 
-  multipleVotesAllowed, 
-  updateMultipleVotesAllowed, 
-  sortDropdownOpen, 
-  setSortDropdownOpen, 
-  resetAllVotes, 
+const ActionButtons = ({
+  handleCreateNewBoard,
+  sortByVotes,
+  setSortByVotes,
+  votingEnabled,
+  updateVotingEnabled,
+  downvotingEnabled,
+  updateDownvotingEnabled,
+  multipleVotesAllowed,
+  updateMultipleVotesAllowed,
+  retrospectiveMode,
+  updateRetrospectiveMode,
+  sortDropdownOpen,
+  setSortDropdownOpen,
+  resetAllVotes,
   showNotification,
   darkMode,
   updateDarkMode
@@ -67,7 +77,7 @@ const ActionButtons = ({
   const dropdownRef = React.useRef(null);
 
   React.useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setSortDropdownOpen(false);
       }
@@ -83,9 +93,8 @@ const ActionButtons = ({
     <div className="action-buttons">
       <button
         id="create-board"
-        className="btn"
+        className="btn btn-with-icon"
         onClick={handleCreateNewBoard}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
         <PlusSquare size={16} />
         New Board
@@ -113,7 +122,9 @@ const ActionButtons = ({
               <h4 className="settings-section-title">Sort Cards</h4>
               <button
                 className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
-                onClick={() => { setSortByVotes(false); }}
+                onClick={() => {
+                  setSortByVotes(false);
+                }}
               >
                 <ArrowDown size={14} />
                 Chronological
@@ -121,7 +132,9 @@ const ActionButtons = ({
               </button>
               <button
                 className={`sort-option ${sortByVotes ? 'selected' : ''}`}
-                onClick={() => { setSortByVotes(true); }}
+                onClick={() => {
+                  setSortByVotes(true);
+                }}
               >
                 <ThumbsUp size={14} />
                 By Votes
@@ -134,13 +147,17 @@ const ActionButtons = ({
               <div className="settings-boolean-option">
                 <button
                   className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
-                  onClick={() => { updateVotingEnabled(true); }}
+                  onClick={() => {
+                    updateVotingEnabled(true);
+                  }}
                 >
                   Yes
                 </button>
                 <button
                   className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
-                  onClick={() => { updateVotingEnabled(false); }}
+                  onClick={() => {
+                    updateVotingEnabled(false);
+                  }}
                 >
                   No
                 </button>
@@ -154,13 +171,17 @@ const ActionButtons = ({
                   <div className="settings-boolean-option">
                     <button
                       className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => { updateDownvotingEnabled(true); }}
+                      onClick={() => {
+                        updateDownvotingEnabled(true);
+                      }}
                     >
                       Yes
                     </button>
                     <button
                       className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => { updateDownvotingEnabled(false); }}
+                      onClick={() => {
+                        updateDownvotingEnabled(false);
+                      }}
                     >
                       No
                     </button>
@@ -172,23 +193,51 @@ const ActionButtons = ({
                   <div className="settings-boolean-option">
                     <button
                       className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => { updateMultipleVotesAllowed(true); }}
+                      onClick={() => {
+                        updateMultipleVotesAllowed(true);
+                      }}
                     >
                       Yes
                     </button>
                     <button
                       className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => { updateMultipleVotesAllowed(false); }}
+                      onClick={() => {
+                        updateMultipleVotesAllowed(false);
+                      }}
                     >
                       No
                     </button>
                   </div>
                 </div>
                 <div className="settings-divider"></div>
-                <div className="settings-section" style={{ padding: '0 var(--space-sm)' }}>
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Retrospective Mode</h4>
+                  <div className="settings-boolean-option">
+                    <button
+                      className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
+                      onClick={() => {
+                        updateRetrospectiveMode(true);
+                      }}
+                    >
+                      On
+                    </button>
+                    <button
+                      className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
+                      onClick={() => {
+                        updateRetrospectiveMode(false);
+                      }}
+                    >
+                      Off
+                    </button>
+                  </div>
+                  <p className="settings-hint">
+                    When enabled, new cards appear with hidden text until revealed
+                  </p>
+                </div>
+                <div className="settings-divider"></div>
+                <div className="settings-section settings-section-padded">
                   <button
-                    className="btn danger-btn"
-                    style={{ width: '100%', margin: 'var(--space-xs) 0' }}
+                    className="btn danger-btn settings-full-width-btn"
                     onClick={() => {
                       if (resetAllVotes()) {
                         showNotification('All votes reset to zero');
@@ -207,8 +256,10 @@ const ActionButtons = ({
       <button
         id="theme-toggle"
         className="btn icon-btn"
-        onClick={() => { updateDarkMode(!darkMode); }}
-        title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        onClick={() => {
+          updateDarkMode(!darkMode);
+        }}
+        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
       >
         {darkMode ? <Sun size={16} /> : <Moon size={16} />}
       </button>
@@ -218,6 +269,8 @@ const ActionButtons = ({
 
 // UI Component for the columns container including the add column button
 const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+  const { retrospectiveMode, workflowPhase } = useBoardContext();
+
   // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
     // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
@@ -226,6 +279,9 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
       return a[0].localeCompare(b[0]); // Sort by column ID
     });
   };
+
+  // Hide add column button during reveal phases when board structure should be stable
+  const shouldShowAddColumn = !retrospectiveMode || workflowPhase === WORKFLOW_PHASES.CREATION;
 
   return (
     <div className="board-container">
@@ -241,13 +297,15 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
           />
         ))}
 
-        {/* Add column button */}
-        <div className="add-column-container">
-          <button id="add-column" className="add-column" onClick={addNewColumn}>
-            <Plus size={16} />
-            Add Column
-          </button>
-        </div>
+        {/* Add column button - hidden during interaction/results phases */}
+        {shouldShowAddColumn && (
+          <div className="add-column-container">
+            <button id="add-column" className="add-column" onClick={addNewColumn}>
+              <Plus size={16} />
+              Add Column
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -276,13 +334,16 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    retrospectiveMode,
+    updateRetrospectiveMode,
     createNewBoard,
     openExistingBoard,
     resetAllVotes,
     updateBoardTitle,
     user, // Include user from context
     darkMode,
-    updateDarkMode
+    updateDarkMode,
+    workflowPhase // Add workflow phase
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -316,11 +377,11 @@ function Board({ showNotification }) {
    */
 
   // Handle board title change (update local state only)
-  const handleBoardTitleChange = (e) => {
+  const handleBoardTitleChange = e => {
     const newTitle = e.target.value;
     setBoardTitle(newTitle);
   };
-  
+
   // Handle board title blur (update Firebase)
   const handleBoardTitleBlur = () => {
     updateBoardTitle(boardTitle);
@@ -344,7 +405,7 @@ function Board({ showNotification }) {
       showNotification('New board created');
       setIsTemplateModalOpen(false);
     } else {
-      console.error('Failed to create new board - user may not be authenticated yet');
+      // Silent fallback when user authentication is not ready
     }
   };
 
@@ -356,14 +417,16 @@ function Board({ showNotification }) {
 
   // Add a new column
   const addNewColumn = () => {
-    if (!boardRef || !boardId) return;
+    if (!boardRef || !boardId) {
+      return;
+    }
 
     addColumn(boardId)
       .then(() => {
         showNotification('Column added');
       })
-      .catch((error) => {
-        console.error('Error adding column:', error);
+      .catch(() => {
+        // Error adding column - notification system will handle user feedback
       });
   };
 
@@ -381,8 +444,8 @@ function Board({ showNotification }) {
         .then(() => {
           showNotification('Share URL copied to clipboard');
         })
-        .catch(err => {
-          console.error('Could not copy text: ', err);
+        .catch(() => {
+          // Could not copy text - silent fallback
         });
     }
   };
@@ -414,6 +477,8 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
+            retrospectiveMode={retrospectiveMode}
+            updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
@@ -424,13 +489,26 @@ function Board({ showNotification }) {
         </div>
       </header>
 
+      {/* Workflow Controls - Only show when retrospective mode is enabled */}
+      {retrospectiveMode && (
+        <WorkflowControls showNotification={showNotification} />
+      )}
+
       <main>
-        <ColumnsContainer
-          columns={columns}
-          sortByVotes={sortByVotes}
-          showNotification={showNotification}
-          addNewColumn={addNewColumn}
-        />
+        {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
+          <ResultsView showNotification={showNotification} />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
+          <PollVoting />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
+          <PollResults />
+        ) : (
+          <ColumnsContainer
+            columns={columns}
+            sortByVotes={sortByVotes}
+            showNotification={showNotification}
+            addNewColumn={addNewColumn}
+          />
+        )}
       </main>
 
       {/* Export Board Modal */}

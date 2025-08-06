@@ -255,17 +255,17 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
 
     const query = searchQuery.toLowerCase().trim();
     // Keep searching in tags (for backend filtering) even though we don't display them
-    const filtered = BOARD_TEMPLATES.filter(template => 
-      template.name.toLowerCase().includes(query) || 
+    const filtered = BOARD_TEMPLATES.filter(template =>
+      template.name.toLowerCase().includes(query) ||
       template.description.toLowerCase().includes(query) ||
       template.tags.some(tag => tag.toLowerCase().includes(query)) ||
       template.columns.some(column => column.toLowerCase().includes(query))
     );
-    
+
     setFilteredTemplates(filtered);
   }, [searchQuery]);
 
-  const handleTemplateSelect = (templateId) => {
+  const handleTemplateSelect = templateId => {
     setSelectedTemplate(templateId);
   };
 
@@ -275,17 +275,17 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
       onSelectTemplate(template.columns, template.name);
     }
   };
-  
-  const handleSearchChange = (e) => {
+
+  const handleSearchChange = e => {
     setSearchQuery(e.target.value);
   };
 
   // Create refs for the search input and create button
   const searchInputRef = React.useRef(null);
   const createButtonRef = React.useRef(null);
-  
+
   // Enhanced keyboard navigation
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (e.key === 'Enter' && e.target.classList.contains('template-search-input')) {
       // If Enter pressed in search and we have results, select first one
       if (filteredTemplates.length > 0) {
@@ -334,20 +334,24 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     }
   }, [isOpen, selectedTemplate, searchQuery, filteredTemplates]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   // Function to highlight matching text
   const highlightMatch = (text, query) => {
-    if (!query.trim()) return text;
-    
+    if (!query.trim()) {
+      return text;
+    }
+
     try {
       const regex = new RegExp(`(${query.trim()})`, 'gi');
       return text.replace(regex, '<mark>$1</mark>');
-    } catch (e) {
+    } catch {
       return text; // In case of invalid regex
     }
   };
-  
+
   return (
     <div className="modal-overlay">
       <div className="modal-container template-modal">
@@ -355,11 +359,11 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
           <h2>Choose a Board Template</h2>
           <button className="close-button" onClick={onClose}>&times;</button>
         </div>
-        
+
         <div className="modal-body template-selector">
           <div className="template-search">
             <div className="search-input-container">
-              <input 
+              <input
                 type="text"
                 placeholder="Search templates by name, description, or columns... (Press / to focus)"
                 value={searchQuery}
@@ -369,8 +373,8 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                 ref={searchInputRef}
               />
               {searchQuery && (
-                <button 
-                  className="clear-search" 
+                <button
+                  className="clear-search"
                   onClick={() => setSearchQuery('')}
                   title="Clear search"
                 >
@@ -378,7 +382,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                 </button>
               )}
             </div>
-            
+
             <div className="search-results-count">
               {searchQuery ? (
                 filteredTemplates.length === 0 ? (
@@ -393,20 +397,20 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
               ) : null}
             </div>
           </div>
-          
+
           <div className="template-grid">
             {filteredTemplates.map(template => {
               // Prepare highlighted content if we're searching
-              const highlightedName = searchQuery ? 
-                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.name, searchQuery) }} /> : 
+              const highlightedName = searchQuery ?
+                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.name, searchQuery) }} /> :
                 template.name;
-              
-              const highlightedDesc = searchQuery ? 
-                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.description, searchQuery) }} /> : 
+
+              const highlightedDesc = searchQuery ?
+                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.description, searchQuery) }} /> :
                 template.description;
-                
+
               return (
-                <div 
+                <div
                   key={template.id}
                   className={`template-card ${selectedTemplate === template.id ? 'selected' : ''} ${searchQuery ? 'search-active' : ''}`}
                   onClick={() => handleTemplateSelect(template.id)}
@@ -420,8 +424,8 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                     <div className="template-columns">
                       {template.columns.map((col, idx) => (
                         <span key={idx} className="template-column-pill">
-                          {searchQuery ? 
-                            <span dangerouslySetInnerHTML={{ __html: highlightMatch(col, searchQuery) }} /> : 
+                          {searchQuery ?
+                            <span dangerouslySetInnerHTML={{ __html: highlightMatch(col, searchQuery) }} /> :
                             col
                           }
                         </span>
@@ -429,8 +433,8 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                     </div>
                     <div className="template-tags">
                       {template.tags.map((tag, idx) => (
-                        <span 
-                          key={idx} 
+                        <span
+                          key={idx}
                           className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
                         >
                           {tag}
@@ -443,16 +447,16 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
             })}
           </div>
         </div>
-        
+
         <div className="modal-footer">
-          <button 
+          <button
             className="primary-button"
             onClick={handleConfirm}
             ref={createButtonRef}
           >
             Create Board
           </button>
-          <button 
+          <button
             className="secondary-button"
             onClick={onClose}
           >

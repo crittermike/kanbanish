@@ -192,6 +192,22 @@ h1 {
     padding: var(--space-xs) 0;
 }
 
+.settings-section.settings-section-padded {
+    padding: 0 var(--space-sm);
+}
+
+.settings-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding: 0 var(--space-sm);
+}
+
+.settings-full-width-btn {
+    width: 100%;
+    margin: var(--space-xs) 0;
+}
+
 .settings-section-title {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
@@ -306,5 +322,138 @@ h1 {
     .sort-option {
         padding: 16px;
         min-height: 48px;
+    }
+}
+
+/* User Counter Styles */
+.user-counter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+
+.user-counter:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+}
+
+.user-count {
+    color: var(--text-primary);
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* User counter icon color */
+.user-counter svg {
+    color: var(--text-secondary);
+}
+
+/* Responsive adjustments for user counter */
+@media (max-width: 767px) {
+    .user-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* Vote Counter Styles */
+.vote-counter {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.vote-counter-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.vote-counter-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.vote-counter-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.vote-counter-value.vote-counter-depleted {
+    color: var(--warning-color, #f59e0b);
+}
+
+/* Responsive adjustments for vote counter */
+@media (max-width: 767px) {
+    .vote-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .vote-counter-value {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Total Vote Counter Styles */
+.total-vote-counter {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.total-vote-counter-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.total-vote-counter-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.total-vote-counter-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.total-vote-counter-value.total-vote-counter-depleted {
+    color: var(--success-color, #22c55e);
+}
+
+/* Responsive adjustments for total vote counter */
+@media (max-width: 767px) {
+    .total-vote-counter {
+        padding: 8px 12px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .total-vote-counter-value {
+        font-size: var(--font-size-sm);
     }
 }
