@@ -6,7 +6,7 @@ import { parseUrlSettings } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Column from './Column';
 import ExportBoardModal from './modals/ExportBoardModal';
-import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
+import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
@@ -367,8 +367,27 @@ function Board({ showNotification }) {
   if (boardIdFromUrl) {
       openExistingBoard(boardIdFromUrl);
     } else if (user) {
-      // Show template selection instead of immediately creating a board
-      setIsTemplateModalOpen(true);
+      // If a template is provided via URL, create board immediately
+      const templateId = urlParams.get('template');
+      if (templateId) {
+        const template = BOARD_TEMPLATES.find(t => t.id === templateId);
+        if (template) {
+          const newBoardId = createNewBoard(template.columns, `${template.name} Board`, parsed.boardSettings);
+          if (newBoardId) {
+            // Clean up URL and add board id
+            cleanUpUrlAfterCreation(newBoardId);
+            // Do not open template modal
+          } else {
+            setIsTemplateModalOpen(true);
+          }
+        } else {
+          // Unknown template id, show template selector
+          setIsTemplateModalOpen(true);
+        }
+      } else {
+        // Show template selection instead of immediately creating a board
+        setIsTemplateModalOpen(true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]); // Depend on user so this effect reruns when user authentication completes
@@ -410,14 +429,8 @@ function Board({ showNotification }) {
 
     // Only update URL and show notification if we got a valid board ID
     if (newBoardId) {
-  // Build a clean URL: preserve non-setting params, add board=id, drop applied settings
-  const removeKeys = ['voting', 'downvotes', 'multivote', 'votes', 'retro', 'sort', 'theme'];
-  const currentUrl = new URL(window.location.href);
-  const qs = currentUrl.searchParams;
-  removeKeys.forEach(k => qs.delete(k));
-  qs.set('board', newBoardId);
-  currentUrl.search = qs.toString();
-  window.history.pushState({}, '', currentUrl.toString());
+      // Build a clean URL: preserve non-setting params, add board=id, drop applied settings
+      cleanUpUrlAfterCreation(newBoardId);
       showNotification('New board created');
       setIsTemplateModalOpen(false);
     } else {
@@ -451,6 +464,21 @@ function Board({ showNotification }) {
    */
 
   // We no longer need toggleSortByVotes since we directly set the sort type from dropdown
+
+  // Clean up URL params after board creation and set board id
+  const cleanUpUrlAfterCreation = (newBoardId) => {
+    try {
+      const removeKeys = ['voting', 'downvotes', 'multivote', 'votes', 'retro', 'sort', 'theme', 'template'];
+      const currentUrl = new URL(window.location.href);
+      const qs = currentUrl.searchParams;
+      removeKeys.forEach(k => qs.delete(k));
+      if (newBoardId) qs.set('board', newBoardId);
+      currentUrl.search = qs.toString();
+      window.history.pushState({}, '', currentUrl.toString());
+    } catch {
+      // no-op if URL manipulation fails
+    }
+  };
 
   // Copy share URL to clipboard
   const copyShareUrl = () => {
