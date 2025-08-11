@@ -110,6 +110,9 @@ export const BoardProvider = ({ children }) => {
             if (boardData.settings.votesPerUser !== undefined) {
               setVotesPerUser(boardData.settings.votesPerUser);
             }
+            if (boardData.settings.sortByVotes !== undefined) {
+              setSortByVotes(boardData.settings.sortByVotes);
+            }
             if (boardData.settings.retrospectiveMode !== undefined) {
               setRetrospectiveMode(boardData.settings.retrospectiveMode);
             }
@@ -192,8 +195,8 @@ export const BoardProvider = ({ children }) => {
     }
   }, [boardId, user]);
 
-  // Create a new board with specified template columns and title
-  const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board') => {
+  // Create a new board with specified template columns, title, and optional settings overrides
+  const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board', settingsOverride = null) => {
     if (!user) {
       return null;
     }
@@ -219,6 +222,17 @@ export const BoardProvider = ({ children }) => {
       };
     });
 
+    // Only allow a safe subset of settings to be overridden on creation
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+    const sanitizedOverrides = {};
+    if (settingsOverride && typeof settingsOverride === 'object') {
+      allowedOverrideKeys.forEach(k => {
+        if (settingsOverride[k] !== undefined) {
+          sanitizedOverrides[k] = settingsOverride[k];
+        }
+      });
+    }
+
     const initialData = {
       title: boardTitle,
       created: Date.now(),
@@ -228,9 +242,12 @@ export const BoardProvider = ({ children }) => {
         votingEnabled: true, // Default to enabled for new boards
         downvotingEnabled: true, // Default to enabled for new boards
         multipleVotesAllowed: false, // Default to not allowing multiple votes
+  sortByVotes: false, // Default to chronological
         retrospectiveMode: false, // Default to disabled (cards are visible)
         workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
-        resultsViewIndex: 0 // Default to first result
+        resultsViewIndex: 0, // Default to first result
+        // Apply any overrides parsed from URL (validated/whitelisted)
+        ...sanitizedOverrides
       }
     };
 
@@ -280,6 +297,7 @@ export const BoardProvider = ({ children }) => {
         downvotingEnabled,
         multipleVotesAllowed,
         votesPerUser,
+  sortByVotes,
         retrospectiveMode,
         workflowPhase,
         resultsViewIndex,
@@ -301,6 +319,9 @@ export const BoardProvider = ({ children }) => {
           }
           if (newSettings.votesPerUser !== undefined) {
             setVotesPerUser(newSettings.votesPerUser);
+          }
+          if (newSettings.sortByVotes !== undefined) {
+            setSortByVotes(newSettings.sortByVotes);
           }
           if (newSettings.retrospectiveMode !== undefined) {
             setRetrospectiveMode(newSettings.retrospectiveMode);
@@ -328,6 +349,9 @@ export const BoardProvider = ({ children }) => {
       }
       if (newSettings.votesPerUser !== undefined) {
         setVotesPerUser(newSettings.votesPerUser);
+      }
+      if (newSettings.sortByVotes !== undefined) {
+        setSortByVotes(newSettings.sortByVotes);
       }
       if (newSettings.retrospectiveMode !== undefined) {
         setRetrospectiveMode(newSettings.retrospectiveMode);

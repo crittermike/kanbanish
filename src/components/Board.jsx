@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
+import { parseUrlSettings } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Column from './Column';
 import ExportBoardModal from './modals/ExportBoardModal';
@@ -357,8 +358,13 @@ function Board({ showNotification }) {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const boardIdFromUrl = urlParams.get('board');
+  // Parse URL settings and apply theme preference immediately (persisted in user prefs)
+  const parsed = parseUrlSettings(window.location.search);
+  if (parsed.uiPrefs && parsed.uiPrefs.darkMode !== undefined) {
+    updateDarkMode(parsed.uiPrefs.darkMode);
+  }
 
-    if (boardIdFromUrl) {
+  if (boardIdFromUrl) {
       openExistingBoard(boardIdFromUrl);
     } else if (user) {
       // Show template selection instead of immediately creating a board
@@ -397,11 +403,21 @@ function Board({ showNotification }) {
     // Create a title based on the template
     const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
 
-    const newBoardId = createNewBoard(templateColumns, boardTitle);
+    // Pass URL-derived board settings so they persist on new board
+  const parsed = parseUrlSettings(window.location.search);
+  // sortByVotes (from URL sort=) lives in boardSettings now and will be persisted on creation
+  const newBoardId = createNewBoard(templateColumns, boardTitle, parsed.boardSettings);
 
     // Only update URL and show notification if we got a valid board ID
     if (newBoardId) {
-      window.history.pushState({}, '', `?board=${newBoardId}`);
+  // Build a clean URL: preserve non-setting params, add board=id, drop applied settings
+  const removeKeys = ['voting', 'downvotes', 'multivote', 'votes', 'retro', 'sort', 'theme'];
+  const currentUrl = new URL(window.location.href);
+  const qs = currentUrl.searchParams;
+  removeKeys.forEach(k => qs.delete(k));
+  qs.set('board', newBoardId);
+  currentUrl.search = qs.toString();
+  window.history.pushState({}, '', currentUrl.toString());
       showNotification('New board created');
       setIsTemplateModalOpen(false);
     } else {
