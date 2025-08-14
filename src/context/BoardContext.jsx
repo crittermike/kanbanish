@@ -385,6 +385,11 @@ export const BoardProvider = ({ children }) => {
     updateBoardSettings({ votesPerUser: limit });
   };
 
+  // Update sort by votes setting
+  const updateSortByVotes = enabled => {
+    updateBoardSettings({ sortByVotes: enabled });
+  };
+
   // Update reveal mode setting
   const updateRetrospectiveMode = enabled => {
     if (enabled) {
@@ -1078,6 +1083,7 @@ export const BoardProvider = ({ children }) => {
     updateBoardTitle,
     sortByVotes,
     setSortByVotes,
+    updateSortByVotes,
     votingEnabled,
     setVotingEnabled,
     updateVotingEnabled,
