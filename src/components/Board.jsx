@@ -58,7 +58,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
 const ActionButtons = ({
   handleCreateNewBoard,
   sortByVotes,
-  updateSortByVotes,
+  setSortByVotes,
   votingEnabled,
   updateVotingEnabled,
   downvotingEnabled,
@@ -124,7 +124,7 @@ const ActionButtons = ({
               <button
                 className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
                 onClick={() => {
-                  updateSortByVotes(false);
+                  setSortByVotes(false);
                 }}
               >
                 <ArrowDown size={14} />
@@ -134,7 +134,7 @@ const ActionButtons = ({
               <button
                 className={`sort-option ${sortByVotes ? 'selected' : ''}`}
                 onClick={() => {
-                  updateSortByVotes(true);
+                  setSortByVotes(true);
                 }}
               >
                 <ThumbsUp size={14} />
@@ -328,7 +328,7 @@ function Board({ showNotification }) {
     setBoardTitle,
     columns,
     sortByVotes,
-    updateSortByVotes,
+    setSortByVotes,
     votingEnabled,
     updateVotingEnabled,
     downvotingEnabled,
@@ -514,7 +514,7 @@ function Board({ showNotification }) {
           <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}
             sortByVotes={sortByVotes}
-            updateSortByVotes={updateSortByVotes}
+            setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
             updateVotingEnabled={updateVotingEnabled}
             downvotingEnabled={downvotingEnabled}

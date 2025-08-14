@@ -53,7 +53,6 @@ describe('Board Component', () => {
     },
     sortByVotes: false,
     setSortByVotes: vi.fn(),
-    updateSortByVotes: vi.fn(),
     votingEnabled: true,
     setVotingEnabled: vi.fn(),
     updateVotingEnabled: vi.fn(),
@@ -272,8 +271,8 @@ describe('Board Component', () => {
     const byVotesOption = screen.getByText('By Votes');
     fireEvent.click(byVotesOption);
 
-    // Check that updateSortByVotes was called with true
-    expect(mockContextValue.updateSortByVotes).toHaveBeenCalledWith(true);
+    // Check that setSortByVotes was called with true
+    expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
   });
 
   test('toggles voting enabled setting when clicked', () => {

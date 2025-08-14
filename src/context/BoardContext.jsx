@@ -22,7 +22,7 @@ export const BoardProvider = ({ children }) => {
   const [boardId, setBoardId] = useState(null);
   const [boardTitle, setBoardTitle] = useState('Untitled Board');
   const [columns, setColumns] = useState({});
-  const [sortByVotes, setSortByVotes] = useState(false);
+  const [sortByVotes, setSortByVotesState] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
@@ -111,7 +111,7 @@ export const BoardProvider = ({ children }) => {
               setVotesPerUser(boardData.settings.votesPerUser);
             }
             if (boardData.settings.sortByVotes !== undefined) {
-              setSortByVotes(boardData.settings.sortByVotes);
+              setSortByVotesState(boardData.settings.sortByVotes);
             }
             if (boardData.settings.retrospectiveMode !== undefined) {
               setRetrospectiveMode(boardData.settings.retrospectiveMode);
@@ -321,7 +321,7 @@ export const BoardProvider = ({ children }) => {
             setVotesPerUser(newSettings.votesPerUser);
           }
           if (newSettings.sortByVotes !== undefined) {
-            setSortByVotes(newSettings.sortByVotes);
+            setSortByVotesState(newSettings.sortByVotes);
           }
           if (newSettings.retrospectiveMode !== undefined) {
             setRetrospectiveMode(newSettings.retrospectiveMode);
@@ -351,7 +351,7 @@ export const BoardProvider = ({ children }) => {
         setVotesPerUser(newSettings.votesPerUser);
       }
       if (newSettings.sortByVotes !== undefined) {
-        setSortByVotes(newSettings.sortByVotes);
+        setSortByVotesState(newSettings.sortByVotes);
       }
       if (newSettings.retrospectiveMode !== undefined) {
         setRetrospectiveMode(newSettings.retrospectiveMode);
@@ -385,8 +385,8 @@ export const BoardProvider = ({ children }) => {
     updateBoardSettings({ votesPerUser: limit });
   };
 
-  // Update sort by votes setting
-  const updateSortByVotes = enabled => {
+  // Set sort by votes setting (persists to Firebase)
+  const setSortByVotes = enabled => {
     updateBoardSettings({ sortByVotes: enabled });
   };
 
@@ -1083,7 +1083,6 @@ export const BoardProvider = ({ children }) => {
     updateBoardTitle,
     sortByVotes,
     setSortByVotes,
-    updateSortByVotes,
     votingEnabled,
     setVotingEnabled,
     updateVotingEnabled,

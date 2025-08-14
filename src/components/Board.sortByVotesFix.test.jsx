@@ -20,7 +20,7 @@ vi.mock('../utils/firebase', () => ({
 describe('Board Component - Sort By Votes Fix', () => {
   const mockShowNotification = vi.fn();
   
-  // Mock a complete context with the updateSortByVotes function
+  // Mock a complete context with the setSortByVotes function
   const mockContextValue = {
     boardId: 'test-board-123',
     boardRef: {},
@@ -28,7 +28,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     setBoardTitle: vi.fn(),
     columns: {},
     sortByVotes: false,
-    updateSortByVotes: vi.fn(), // This is the new function we added
+    setSortByVotes: vi.fn(), // This now persists to Firebase
     votingEnabled: true,
     updateVotingEnabled: vi.fn(),
     downvotingEnabled: true,
@@ -70,7 +70,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     window.URLSearchParams = originalURLSearchParams;
   });
 
-  it('calls updateSortByVotes instead of setSortByVotes when sort by votes is clicked', () => {
+  it('calls setSortByVotes when sort by votes is clicked', () => {
     render(
       <DndProvider backend={HTML5Backend}>
         <Board showNotification={mockShowNotification} />
@@ -85,14 +85,14 @@ describe('Board Component - Sort By Votes Fix', () => {
     const byVotesOption = screen.getByText('By Votes');
     fireEvent.click(byVotesOption);
 
-    // Verify that updateSortByVotes was called with true (this persists to Firebase)
-    expect(mockContextValue.updateSortByVotes).toHaveBeenCalledWith(true);
+    // Verify that setSortByVotes was called with true (this persists to Firebase)
+    expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
     
     // Verify that we're NOT relying on just local state
-    expect(mockContextValue.updateSortByVotes).toHaveBeenCalledTimes(1);
+    expect(mockContextValue.setSortByVotes).toHaveBeenCalledTimes(1);
   });
 
-  it('calls updateSortByVotes when switching back to chronological', () => {
+  it('calls setSortByVotes when switching back to chronological', () => {
     // Start with sort by votes enabled
     const contextWithSortByVotes = {
       ...mockContextValue,
@@ -115,7 +115,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     const chronologicalOption = screen.getByText('Chronological');
     fireEvent.click(chronologicalOption);
 
-    // Verify that updateSortByVotes was called with false (this persists to Firebase)
-    expect(contextWithSortByVotes.updateSortByVotes).toHaveBeenCalledWith(false);
+    // Verify that setSortByVotes was called with false (this persists to Firebase)
+    expect(contextWithSortByVotes.setSortByVotes).toHaveBeenCalledWith(false);
   });
 });
