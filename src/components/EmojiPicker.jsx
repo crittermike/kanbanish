@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { COMMON_EMOJIS } from '../utils/helpers';
+import { COMMON_EMOJIS, getEmojiKeywords } from '../utils/helpers';
 
 const EmojiPicker = React.memo(({
   position,
@@ -8,6 +8,22 @@ const EmojiPicker = React.memo(({
   onClose,
   hasUserReactedWithEmoji
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredEmojis = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return COMMON_EMOJIS;
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    return COMMON_EMOJIS.filter(emoji => {
+      const keywords = getEmojiKeywords(emoji);
+      return keywords.some(keyword => 
+        keyword.toLowerCase().includes(lowerSearchTerm)
+      );
+    });
+  }, [searchTerm]);
+
   return ReactDOM.createPortal(
     <div
       className="emoji-picker"
@@ -18,20 +34,38 @@ const EmojiPicker = React.memo(({
         left: position.left
       }}
     >
-      {COMMON_EMOJIS.map(emoji => (
-        <button
-          key={emoji}
-          className={`emoji-option ${hasUserReactedWithEmoji(emoji) ? 'selected' : ''}`}
-          data-testid="emoji-option"
-          onClick={e => {
-            e.stopPropagation();
-            onEmojiSelect(e, emoji);
-            onClose();
-          }}
-        >
-          {emoji}
-        </button>
-      ))}
+      <div className="emoji-picker-search">
+        <input
+          type="text"
+          placeholder="Search emojis..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          data-testid="emoji-search-input"
+          className="emoji-search-input"
+          autoFocus
+        />
+      </div>
+      <div className="emoji-picker-grid">
+        {filteredEmojis.map(emoji => (
+          <button
+            key={emoji}
+            className={`emoji-option ${hasUserReactedWithEmoji(emoji) ? 'selected' : ''}`}
+            data-testid="emoji-option"
+            onClick={e => {
+              e.stopPropagation();
+              onEmojiSelect(e, emoji);
+              onClose();
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+        {filteredEmojis.length === 0 && searchTerm.trim() && (
+          <div className="emoji-picker-no-results" data-testid="emoji-no-results">
+            No emojis found for &ldquo;{searchTerm}&rdquo;
+          </div>
+        )}
+      </div>
     </div>,
     document.body
   );
