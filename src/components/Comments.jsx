@@ -24,9 +24,9 @@ const CommentEditor = ({
       }}
     />
     <div className="comment-edit-actions">
-      <button className="btn primary-btn btn-sm" onClick={saveComment}>Save</button>
-      <button className="btn secondary-btn btn-sm" onClick={cancelEdit}>Cancel</button>
       <button className="btn danger-btn btn-sm" onClick={deleteComment}>Delete</button>
+      <button className="btn secondary-btn btn-sm" onClick={cancelEdit}>Cancel</button>
+      <button className="btn success-btn btn-sm" onClick={saveComment}>Save</button>
     </div>
   </div>
 );
