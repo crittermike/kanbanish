@@ -40,6 +40,7 @@ export const BoardProvider = ({ children }) => {
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
+  const [usersAddingCards, setUsersAddingCards] = useState({}); // Track users currently adding cards
 
   // Firebase authentication
   useEffect(() => {
@@ -191,6 +192,52 @@ export const BoardProvider = ({ children }) => {
         clearInterval(presenceInterval);
         // Remove user from presence when they leave
         remove(presenceRef);
+        // Also remove any card creation activity
+        if (user?.uid) {
+          const cardCreationRef = ref(database, `boards/${boardId}/cardCreationActivity/${user.uid}`);
+          remove(cardCreationRef);
+        }
+      };
+    }
+  }, [boardId, user]);
+
+  // Track users adding cards
+  useEffect(() => {
+    if (boardId) {
+      const cardCreationRef = ref(database, `boards/${boardId}/cardCreationActivity`);
+
+      // Listen for changes to card creation activity
+      const handleCardCreationChange = snapshot => {
+        if (snapshot.exists()) {
+          const activityData = snapshot.val();
+          // Show all active card creation activity without time-based filtering
+          setUsersAddingCards(activityData);
+        } else {
+          setUsersAddingCards({});
+        }
+      };
+
+      onValue(cardCreationRef, handleCardCreationChange);
+
+      return () => {
+        off(cardCreationRef, handleCardCreationChange);
+      };
+    }
+  }, [boardId]);
+
+  // Cleanup card creation activity on page unload
+  useEffect(() => {
+    if (boardId && user) {
+      const handleBeforeUnload = () => {
+        // Remove card creation activity when user leaves the page
+        const cardCreationRef = ref(database, `boards/${boardId}/cardCreationActivity/${user.uid}`);
+        remove(cardCreationRef);
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }
   }, [boardId, user]);
@@ -1067,6 +1114,47 @@ export const BoardProvider = ({ children }) => {
     }
   };
 
+  // Start tracking card creation activity for current user
+  const startCardCreation = (columnId) => {
+    if (!boardId || !user) {
+      return;
+    }
+
+    const activityRef = ref(database, `boards/${boardId}/cardCreationActivity/${user.uid}`);
+    set(activityRef, {
+      columnId,
+      lastUpdated: Date.now(),
+      uid: user.uid
+    }).catch(error => {
+      console.error('Error starting card creation tracking:', error);
+    });
+  };
+
+  // Stop tracking card creation activity for current user
+  const stopCardCreation = () => {
+    if (!boardId || !user) {
+      return;
+    }
+
+    const activityRef = ref(database, `boards/${boardId}/cardCreationActivity/${user.uid}`);
+    remove(activityRef).catch(error => {
+      console.error('Error stopping card creation tracking:', error);
+    });
+  };
+
+  // Get users currently adding cards for a specific column
+  const getUsersAddingCardsInColumn = (columnId) => {
+    return Object.entries(usersAddingCards)
+      .filter(([_userId, activity]) => activity.columnId === columnId)
+      .map(([userId, activity]) => ({ userId, ...activity }));
+  };
+
+  // Get all users currently adding cards (across all columns)
+  const getAllUsersAddingCards = () => {
+    return Object.entries(usersAddingCards)
+      .map(([userId, activity]) => ({ userId, ...activity }));
+  };
+
   // Context value
   const value = {
     user,
@@ -1132,7 +1220,13 @@ export const BoardProvider = ({ children }) => {
     updateGroupName,
     toggleGroupExpanded,
     upvoteGroup,
-    downvoteGroup
+    downvoteGroup,
+    // Card creation activity tracking
+    usersAddingCards,
+    startCardCreation,
+    stopCardCreation,
+    getUsersAddingCardsInColumn,
+    getAllUsersAddingCards
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

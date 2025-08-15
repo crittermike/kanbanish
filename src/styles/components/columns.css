@@ -375,3 +375,186 @@ main {
         width: 100%;
     }
 }
+
+/* Card Creation Activity Indicator */
+.card-creation-indicator {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+/* Typing Card Styles */
+.typing-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm);
+    opacity: 0;
+    animation: fadeInCard 0.5s ease-out forwards;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.typing-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+.typing-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.typing-user {
+    font-style: italic;
+    font-weight: 500;
+}
+
+.typing-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.typing-line {
+    display: flex;
+    align-items: center;
+    height: 16px;
+    position: relative;
+}
+
+.typing-line.short {
+    width: 70%;
+}
+
+.typing-text {
+    background: var(--text-primary);
+    height: 2px;
+    border-radius: 1px;
+    animation: typeText 3s ease-in-out infinite;
+    opacity: 0.3;
+}
+
+.typing-cursor {
+    color: var(--accent-color);
+    font-weight: bold;
+    animation: blink 1s step-start infinite;
+    margin-left: 2px;
+    font-size: var(--font-size-sm);
+}
+
+.more-users-indicator {
+    padding: var(--space-xs);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background-secondary);
+}
+
+/* Animations */
+@keyframes fadeInCard {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(100%);
+        opacity: 1;
+    }
+}
+
+@keyframes typeText {
+    0% {
+        width: 0;
+        opacity: 0.3;
+    }
+    50% {
+        width: 80%;
+        opacity: 0.6;
+    }
+    100% {
+        width: 90%;
+        opacity: 0.4;
+    }
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Legacy styles for backwards compatibility - can be removed if not needed */
+.creation-activity {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.activity-text {
+    font-style: italic;
+}
+
+.activity-dots {
+    display: flex;
+    gap: 2px;
+}
+
+.activity-dots .dot {
+    width: 4px;
+    height: 4px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.activity-dots .dot:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.activity-dots .dot:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}

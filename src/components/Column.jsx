@@ -7,10 +7,22 @@ import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
+import CardCreationIndicator from './CardCreationIndicator';
 import CardGroup from './CardGroup';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
-  const { boardId, moveCard, user, createCardGroup, retrospectiveMode, workflowPhase, columns } = useBoardContext();
+  const { 
+    boardId, 
+    moveCard, 
+    user, 
+    createCardGroup, 
+    retrospectiveMode, 
+    workflowPhase, 
+    columns,
+    startCardCreation,
+    stopCardCreation,
+    getUsersAddingCardsInColumn
+  } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -31,8 +43,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   useEffect(() => {
     if (retrospectiveMode && !isCardCreationAllowed(workflowPhase, retrospectiveMode) && isAddingCard) {
       setIsAddingCard(false);
+      stopCardCreation(); // Also stop tracking when form is hidden due to phase change
     }
-  }, [workflowPhase, retrospectiveMode, isAddingCard]);
+  }, [workflowPhase, retrospectiveMode, isAddingCard, stopCardCreation, columnId]);
 
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({
@@ -109,12 +122,14 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const showAddCardForm = () => {
     setIsAddingCard(true);
     setNewCardContent('');
+    startCardCreation(columnId);
   };
 
   // Hide the inline card form
   const hideAddCardForm = () => {
     setIsAddingCard(false);
     setNewCardContent('');
+    stopCardCreation();
   };
 
   // Add a new card inline
@@ -342,6 +357,14 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             );
           }
         })}
+
+        {/* Show card creation activity indicator where new cards would appear */}
+        {workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+          <CardCreationIndicator 
+            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
+            currentUserId={user?.uid}
+          />
+        )}
 
         {isAddingCard ? (
           <div className="inline-card-form">
