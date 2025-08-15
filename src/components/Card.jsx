@@ -38,9 +38,9 @@ const CardEditor = ({
       autoFocus
     />
     <div className="card-edit-actions">
-      <button className="btn primary-btn" onClick={saveCardChanges}>Save</button>
-      <button className="btn secondary-btn" onClick={toggleEditMode}>Cancel</button>
       <button className="btn danger-btn" onClick={deleteCard}>Delete</button>
+      <button className="btn secondary-btn" onClick={toggleEditMode}>Cancel</button>
+      <button className="btn success-btn" onClick={saveCardChanges}>Save</button>
     </div>
   </div>
 );
