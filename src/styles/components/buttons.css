@@ -44,25 +44,25 @@
 
 /* Reveal button variants */
 .reveal-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: white;
-  font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: 600;
 }
 
 .reveal-button.active {
-  background-color: var(--success);
-  cursor: default;
-  opacity: 0.9;
-  animation: none;
+    background-color: var(--success);
+    cursor: default;
+    opacity: 0.9;
+    animation: none;
 }
 
 .reveal-button.pending {
-  background-color: var(--accent);
-  cursor: pointer;
-  opacity: 1;
-  animation: pulse 2s infinite;
+    background-color: var(--accent);
+    cursor: pointer;
+    opacity: 1;
+    animation: pulse 2s infinite;
 }
 
 .reveal-button.active {
@@ -108,6 +108,16 @@
 }
 
 .danger-btn:hover {
+    opacity: 0.9;
+}
+
+.success-btn {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+
+.success-btn:hover {
     opacity: 0.9;
 }
 
