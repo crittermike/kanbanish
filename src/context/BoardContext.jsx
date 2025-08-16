@@ -203,7 +203,7 @@ export const BoardProvider = ({ children }) => {
 
   // Track users adding cards
   useEffect(() => {
-    if (boardId) {
+    if (boardId && user) {
       const cardCreationRef = ref(database, `boards/${boardId}/cardCreationActivity`);
 
       // Listen for changes to card creation activity
@@ -223,7 +223,7 @@ export const BoardProvider = ({ children }) => {
         off(cardCreationRef, handleCardCreationChange);
       };
     }
-  }, [boardId]);
+  }, [boardId, user]);
 
   // Cleanup card creation activity on page unload
   useEffect(() => {

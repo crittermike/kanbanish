@@ -23,8 +23,9 @@ describe('CardCreationIndicator', () => {
     ];
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
-    expect(screen.getByText('Adding card...')).toBeInTheDocument();
+    expect(screen.getByText('Someone is adding a card')).toBeInTheDocument();
     expect(document.querySelector('.typing-card')).toBeInTheDocument();
+    expect(document.querySelector('.user-avatar')).toBeInTheDocument();
   });
 
   it('shows multiple typing cards when multiple other users are adding cards', () => {
@@ -55,7 +56,7 @@ describe('CardCreationIndicator', () => {
     expect(typingCards).toHaveLength(3); // Only 3 cards shown
     
     // Should show +2 more (5 other users - 3 shown = 2 more)
-    expect(screen.getByText('+2 more adding cards...')).toBeInTheDocument();
+    expect(screen.getByText('+2 more people adding cards...')).toBeInTheDocument();
   });
 
   it('displays the edit icon and typing animations', () => {
@@ -71,6 +72,10 @@ describe('CardCreationIndicator', () => {
     // Check for typing elements
     expect(document.querySelector('.typing-content')).toBeInTheDocument();
     expect(document.querySelector('.typing-cursor')).toBeInTheDocument();
-    expect(document.querySelectorAll('.typing-line')).toHaveLength(2);
+    expect(document.querySelectorAll('.typing-line')).toHaveLength(3); // Now we have 3 lines
+    
+    // Check for user avatar and typing dots
+    expect(document.querySelector('.user-avatar')).toBeInTheDocument();
+    expect(document.querySelector('.typing-dots')).toBeInTheDocument();
   });
 });
