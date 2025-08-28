@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import CardCreationIndicator from './CardCreationIndicator';
+
+// Mock the BoardContext for integration test
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
 
 describe('CardCreationIndicator', () => {
   it('renders nothing when no users are adding cards', () => {
