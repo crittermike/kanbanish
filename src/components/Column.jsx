@@ -330,6 +330,38 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </div>
         )}
 
+        {isAddingCard ? (
+          <div className="inline-card-form">
+            <textarea
+              placeholder="Enter card content..."
+              value={newCardContent}
+              onChange={e => setNewCardContent(e.target.value)}
+              onKeyDown={handleNewCardKeyPress}
+              className="inline-card-textarea"
+              autoFocus
+            />
+            <div className="inline-card-actions">
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+            <button className="add-card" onClick={showAddCardForm}>
+              <Plus />
+              Add Card
+            </button>
+          )
+        )}
+
+        {/* Show card creation activity indicator where new cards would appear */}
+        {workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+          <CardCreationIndicator 
+            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
+            currentUserId={user?.uid}
+          />
+        )}
+
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
           if (item.type === 'group') {
@@ -357,38 +389,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             );
           }
         })}
-
-        {/* Show card creation activity indicator where new cards would appear */}
-        {workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-          <CardCreationIndicator 
-            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
-            currentUserId={user?.uid}
-          />
-        )}
-
-        {isAddingCard ? (
-          <div className="inline-card-form">
-            <textarea
-              placeholder="Enter card content..."
-              value={newCardContent}
-              onChange={e => setNewCardContent(e.target.value)}
-              onKeyDown={handleNewCardKeyPress}
-              className="inline-card-textarea"
-              autoFocus
-            />
-            <div className="inline-card-actions">
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
-              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
-            </div>
-          </div>
-        ) : (
-          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="add-card" onClick={showAddCardForm}>
-              <Plus />
-              Add Card
-            </button>
-          )
-        )}
 
         {/* Group creation modal */}
         {showGroupModal && (
