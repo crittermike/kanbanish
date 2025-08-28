@@ -92,7 +92,7 @@ const CardReactions = React.memo(({
       {shouldShowCommentsButton && (
         <div className="reactions-right">
           <button
-            className="comments-btn"
+            className={`comments-btn ${commentCount > 0 ? 'has-comments' : ''}`}
             onClick={e => {
               e.stopPropagation();
               toggleComments();

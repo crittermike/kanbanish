@@ -295,7 +295,7 @@ function CardGroup({
           <div className="group-interactions-right">
             {/* Group Comments Button - right aligned like cards */}
             <button
-              className="interaction-btn comments-btn"
+              className={`interaction-btn comments-btn ${Object.keys(displayGroupData.comments || {}).length > 0 ? 'has-comments' : ''}`}
               onClick={e => {
                 e.stopPropagation();
                 groupOperations.toggleComments();

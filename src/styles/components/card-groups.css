@@ -340,6 +340,16 @@
     color: var(--text-color);
 }
 
+.interaction-btn.comments-btn.has-comments {
+    background: var(--accent-transparent);
+    color: var(--accent);
+}
+
+.interaction-btn.comments-btn.has-comments:hover {
+    background: var(--accent-transparent-light);
+    color: var(--accent-hover);
+}
+
 /* Style the reactions button like cards */
 .interaction-btn.reactions-btn {
     display: inline-flex;
