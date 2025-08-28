@@ -238,6 +238,17 @@
     color: var(--text-color);
 }
 
+.comments-btn.has-comments {
+    background: var(--accent-transparent);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+}
+
+.comments-btn.has-comments:hover {
+    background: var(--accent-transparent-light);
+    color: var(--accent-hover);
+}
+
 .comments-section {
     margin-top: var(--space-sm);
     padding-top: var(--space-xs);

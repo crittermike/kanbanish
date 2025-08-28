@@ -371,7 +371,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         )}
 
         {/* Show card creation activity indicator where new cards would appear */}
-        {workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
           <CardCreationIndicator 
             usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
             currentUserId={user?.uid}

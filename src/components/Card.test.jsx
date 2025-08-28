@@ -136,6 +136,34 @@ describe('Card Component', () => {
     expect(screen.getByText('Test comment')).toBeInTheDocument();
   });
 
+  test('comments button has special styling when comments exist', () => {
+    render(<Card {...mockProps} />);
+
+    // Find the comments button
+    const commentsButton = screen.getByTitle('Toggle comments');
+    
+    // Check that it has the 'has-comments' class when there are comments
+    expect(commentsButton).toHaveClass('has-comments');
+  });
+
+  test('comments button does not have special styling when no comments exist', () => {
+    const mockPropsNoComments = {
+      ...mockProps,
+      cardData: {
+        ...mockProps.cardData,
+        comments: {}
+      }
+    };
+    
+    render(<Card {...mockPropsNoComments} />);
+
+    // Find the comments button
+    const commentsButton = screen.getByTitle('Toggle comments');
+    
+    // Check that it does not have the 'has-comments' class when there are no comments
+    expect(commentsButton).not.toHaveClass('has-comments');
+  });
+
   test('allows adding upvotes', async () => {
     render(<Card {...mockProps} />);
 
