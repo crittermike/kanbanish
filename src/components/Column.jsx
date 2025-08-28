@@ -136,9 +136,25 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
       addCard(boardId, columnId, newCardContent, user)
-        .then(() => {
+        .then((cardId) => {
           showNotification('Card added');
           hideAddCardForm();
+          
+          // Auto-scroll to the newly added card after a brief delay to allow DOM update
+          setTimeout(() => {
+            const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (newCardElement) {
+              newCardElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              // Add a brief highlight effect
+              newCardElement.style.boxShadow = '0 0 10px rgba(74, 144, 226, 0.6)';
+              setTimeout(() => {
+                newCardElement.style.boxShadow = '';
+              }, 2000);
+            }
+          }, 100);
         })
         .catch(error => {
           // Error adding card - handle user feedback
@@ -330,6 +346,38 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </div>
         )}
 
+        {isAddingCard ? (
+          <div className="inline-card-form">
+            <textarea
+              placeholder="Enter card content..."
+              value={newCardContent}
+              onChange={e => setNewCardContent(e.target.value)}
+              onKeyDown={handleNewCardKeyPress}
+              className="inline-card-textarea"
+              autoFocus
+            />
+            <div className="inline-card-actions">
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+            <button className="add-card" onClick={showAddCardForm}>
+              <Plus />
+              Add Card
+            </button>
+          )
+        )}
+
+        {/* Show card creation activity indicator where new cards would appear */}
+        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+          <CardCreationIndicator 
+            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
+            currentUserId={user?.uid}
+          />
+        )}
+
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
           if (item.type === 'group') {
@@ -357,38 +405,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             );
           }
         })}
-
-        {/* Show card creation activity indicator where new cards would appear */}
-        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-          <CardCreationIndicator 
-            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
-            currentUserId={user?.uid}
-          />
-        )}
-
-        {isAddingCard ? (
-          <div className="inline-card-form">
-            <textarea
-              placeholder="Enter card content..."
-              value={newCardContent}
-              onChange={e => setNewCardContent(e.target.value)}
-              onKeyDown={handleNewCardKeyPress}
-              className="inline-card-textarea"
-              autoFocus
-            />
-            <div className="inline-card-actions">
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
-              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
-            </div>
-          </div>
-        ) : (
-          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="add-card" onClick={showAddCardForm}>
-              <Plus />
-              Add Card
-            </button>
-          )
-        )}
 
         {/* Group creation modal */}
         {showGroupModal && (
