@@ -136,9 +136,25 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
       addCard(boardId, columnId, newCardContent, user)
-        .then(() => {
+        .then((cardId) => {
           showNotification('Card added');
           hideAddCardForm();
+          
+          // Auto-scroll to the newly added card after a brief delay to allow DOM update
+          setTimeout(() => {
+            const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (newCardElement) {
+              newCardElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              // Add a brief highlight effect
+              newCardElement.style.boxShadow = '0 0 10px rgba(74, 144, 226, 0.6)';
+              setTimeout(() => {
+                newCardElement.style.boxShadow = '';
+              }, 2000);
+            }
+          }, 100);
         })
         .catch(error => {
           // Error adding card - handle user feedback

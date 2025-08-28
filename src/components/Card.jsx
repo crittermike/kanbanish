@@ -353,6 +353,7 @@ function Card({
       ref={combinedRef}
       className={`card ${getDynamicClasses()}`}
       onClick={handleCardClick}
+      data-card-id={cardId}
     >
       {isEditing ? (
         <CardEditor
