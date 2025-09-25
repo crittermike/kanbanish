@@ -1,6 +1,4 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import * as userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import EmojiPicker from './EmojiPicker';
 
