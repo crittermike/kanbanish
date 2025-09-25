@@ -136,9 +136,22 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
       addCard(boardId, columnId, newCardContent, user)
-        .then(() => {
+        .then((cardId) => {
           showNotification('Card added');
           hideAddCardForm();
+          
+          // Add a brief highlight effect to the newly added card
+          setTimeout(() => {
+            const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (newCardElement) {
+              // Add a subtle fading highlight effect
+              newCardElement.style.boxShadow = '0 0 10px rgba(74, 144, 226, 0.6)';
+              newCardElement.style.transition = 'box-shadow 2s ease-out';
+              setTimeout(() => {
+                newCardElement.style.boxShadow = '';
+              }, 2000);
+            }
+          }, 100);
         })
         .catch(error => {
           // Error adding card - handle user feedback
@@ -180,7 +193,8 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     if (sortByVotes) {
       return cardsArray.sort((a, b) => (b.votes || 0) - (a.votes || 0));
     } else {
-      return cardsArray.sort((a, b) => (a.created || 0) - (b.created || 0));
+      // Sort by creation time - newest first (reverse chronological order)
+      return cardsArray.sort((a, b) => (b.created || 0) - (a.created || 0));
     }
   };
 
@@ -195,7 +209,8 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     if (sortByVotes) {
       return groupsArray.sort((a, b) => (b.votes || 0) - (a.votes || 0));
     } else {
-      return groupsArray.sort((a, b) => (a.created || 0) - (b.created || 0));
+      // Sort by creation time - newest first (reverse chronological order)
+      return groupsArray.sort((a, b) => (b.created || 0) - (a.created || 0));
     }
   };
 
@@ -208,9 +223,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
       // Combine all items and sort by votes
       return [...cards, ...groups].sort((a, b) => (b.data.votes || 0) - (a.data.votes || 0));
     } else {
-      // Sort by creation time - groups first, then cards
+      // Sort by creation time - newest first, with groups and cards intermixed
       const allItems = [...groups, ...cards];
-      return allItems.sort((a, b) => (a.data.created || 0) - (b.data.created || 0));
+      return allItems.sort((a, b) => (b.data.created || 0) - (a.data.created || 0));
     }
   };
 
@@ -330,6 +345,38 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           </div>
         )}
 
+        {isAddingCard ? (
+          <div className="inline-card-form">
+            <textarea
+              placeholder="Enter card content..."
+              value={newCardContent}
+              onChange={e => setNewCardContent(e.target.value)}
+              onKeyDown={handleNewCardKeyPress}
+              className="inline-card-textarea"
+              autoFocus
+            />
+            <div className="inline-card-actions">
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+            <button className="add-card" onClick={showAddCardForm}>
+              <Plus />
+              Add Card
+            </button>
+          )
+        )}
+
+        {/* Show card creation activity indicator where new cards would appear */}
+        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+          <CardCreationIndicator 
+            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
+            currentUserId={user?.uid}
+          />
+        )}
+
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
           if (item.type === 'group') {
@@ -357,38 +404,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             );
           }
         })}
-
-        {/* Show card creation activity indicator where new cards would appear */}
-        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-          <CardCreationIndicator 
-            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
-            currentUserId={user?.uid}
-          />
-        )}
-
-        {isAddingCard ? (
-          <div className="inline-card-form">
-            <textarea
-              placeholder="Enter card content..."
-              value={newCardContent}
-              onChange={e => setNewCardContent(e.target.value)}
-              onKeyDown={handleNewCardKeyPress}
-              className="inline-card-textarea"
-              autoFocus
-            />
-            <div className="inline-card-actions">
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
-              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
-            </div>
-          </div>
-        ) : (
-          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="add-card" onClick={showAddCardForm}>
-              <Plus />
-              Add Card
-            </button>
-          )
-        )}
 
         {/* Group creation modal */}
         {showGroupModal && (

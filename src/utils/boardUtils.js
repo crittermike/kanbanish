@@ -34,7 +34,7 @@ export function addColumn(boardId, title = 'New Column') {
  * @param {string} columnId - The ID of the column
  * @param {string} content - The content of the card
  * @param {object} user - The user object who created the card
- * @returns {Promise} - A promise that resolves when the card is added
+ * @returns {Promise<string>} - A promise that resolves with the new card ID when the card is added
  */
 export function addCard(boardId, columnId, content, user = null) {
   if (!boardId) {
@@ -58,6 +58,6 @@ export function addCard(boardId, columnId, content, user = null) {
   // Create a direct reference to the card path
   const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
 
-  // Return the promise for the caller to handle notifications
-  return set(cardRef, cardData);
+  // Return the promise for the caller to handle notifications, and include the cardId
+  return set(cardRef, cardData).then(() => cardId);
 }
