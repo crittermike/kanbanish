@@ -96,3 +96,21 @@
         display: none;
     }
 }
+
+/* Auto-generated link styles */
+.auto-link {
+    color: var(--accent);
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.auto-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.auto-link:visited {
+    color: var(--accent);
+}
+
+/* Links work consistently with the existing theme system */

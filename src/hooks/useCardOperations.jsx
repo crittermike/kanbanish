@@ -1,6 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useCallback, useMemo, useEffect, Fragment } from 'react';
 import { database } from '../utils/firebase';
+import { linkifyText } from '../utils/helpers';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
 import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
 
@@ -251,7 +252,7 @@ export function useCardOperations({
 
     return content.split('\n').map((line, i) => (
       <Fragment key={i}>
-        {line}
+        {linkifyText(line)}
         {i < content.split('\n').length - 1 && <br />}
       </Fragment>
     ));

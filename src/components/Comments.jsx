@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { linkifyText } from '../utils/helpers';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 
 const CommentEditor = ({
@@ -127,7 +128,7 @@ const Comments = React.memo(({
                     : (isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment')
                 }
               >
-                {comment.content}
+                {linkifyText(comment.content)}
               </div>
             )}
           </div>
