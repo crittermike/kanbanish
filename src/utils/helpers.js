@@ -529,6 +529,9 @@ export function parseUrlSettings(queryString) {
   }
 }
 
+// URL regex for detecting HTTP/HTTPS URLs
+const URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&=/]*)/;
+
 /**
  * Converts URLs in text to clickable links
  * @param {string} text The text that may contain URLs
@@ -539,25 +542,20 @@ export function linkifyText(text) {
     return text;
   }
 
-  // Enhanced URL regex that handles more URL formats including query params and fragments
-  const urlRegex = /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&=/]*))/g;
-  
   // Check if text contains any URLs
-  if (!urlRegex.test(text)) {
+  if (!URL_REGEX.test(text)) {
     return text;
   }
 
-  // Reset regex for splitting
-  urlRegex.lastIndex = 0;
-  const parts = text.split(urlRegex);
+  // Split using global capturing regex
+  const globalRegex = new RegExp(`(${URL_REGEX.source})`, 'g');
+  const parts = text.split(globalRegex);
   
-  // Filter out empty strings
+  // Filter out empty strings that can occur from split
   const filteredParts = parts.filter(part => part !== '');
   
   return filteredParts.map((part, index) => {
-    // Reset regex for testing each part
-    urlRegex.lastIndex = 0;
-    if (urlRegex.test(part)) {
+    if (URL_REGEX.test(part)) {
       return React.createElement('a', {
         key: index,
         href: part,

@@ -113,11 +113,4 @@
     color: var(--accent);
 }
 
-/* Make sure links are readable in dark mode */
-:root[data-theme="dark"] .auto-link {
-    color: var(--accent-light, #64b5f6);
-}
-
-:root[data-theme="dark"] .auto-link:hover {
-    color: var(--accent-light-hover, #90caf9);
-}
+/* Links work consistently with the existing theme system */
