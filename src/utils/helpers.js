@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * Helper functions for the Kanban application
  */
@@ -525,4 +527,45 @@ export function parseUrlSettings(queryString) {
   } catch {
     return { boardSettings: {}, uiPrefs: {} };
   }
+}
+
+/**
+ * Converts URLs in text to clickable links
+ * @param {string} text The text that may contain URLs
+ * @returns {React.ReactNode|React.ReactNode[]} Text with URLs converted to links
+ */
+export function linkifyText(text) {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+
+  // Enhanced URL regex that handles more URL formats including query params and fragments
+  const urlRegex = /(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&=/]*))/g;
+  
+  // Check if text contains any URLs
+  if (!urlRegex.test(text)) {
+    return text;
+  }
+
+  // Reset regex for splitting
+  urlRegex.lastIndex = 0;
+  const parts = text.split(urlRegex);
+  
+  // Filter out empty strings
+  const filteredParts = parts.filter(part => part !== '');
+  
+  return filteredParts.map((part, index) => {
+    // Reset regex for testing each part
+    urlRegex.lastIndex = 0;
+    if (urlRegex.test(part)) {
+      return React.createElement('a', {
+        key: index,
+        href: part,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        className: 'auto-link'
+      }, part);
+    }
+    return part;
+  });
 }
