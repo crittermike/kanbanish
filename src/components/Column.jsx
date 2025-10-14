@@ -370,12 +370,10 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
         )}
 
         {/* Show card creation activity indicator where new cards would appear */}
-        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-          <CardCreationIndicator 
-            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
-            currentUserId={user?.uid}
-          />
-        )}
+        <CardCreationIndicator 
+          usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
+          currentUserId={user?.uid}
+        />
 
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
