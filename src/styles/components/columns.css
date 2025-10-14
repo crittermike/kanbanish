@@ -95,7 +95,6 @@ main {
     flex-direction: column;
     gap: var(--space-sm);
     min-height: 100px;
-    position: relative;
 }
 
 .column-content:empty {
@@ -377,10 +376,10 @@ main {
     }
 }
 
-/* Card Creation Activity Indicator */
+/* Global Card Creation Activity Indicator */
 .card-creation-indicator {
-    position: absolute;
-    top: 8px;
+    position: fixed;
+    top: 70px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -392,7 +391,7 @@ main {
     border-radius: var(--radius-sm);
     font-size: var(--font-size-xs);
     color: var(--text-muted);
-    z-index: 10;
+    z-index: 1000;
     pointer-events: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

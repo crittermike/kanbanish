@@ -4,6 +4,7 @@ import { useBoardContext } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import CardCreationIndicator from './CardCreationIndicator';
 import Column from './Column';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplateModal';
@@ -344,7 +345,8 @@ function Board({ showNotification }) {
     user, // Include user from context
     darkMode,
     updateDarkMode,
-    workflowPhase // Add workflow phase
+    workflowPhase, // Add workflow phase
+    getAllUsersAddingCards
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -532,6 +534,12 @@ function Board({ showNotification }) {
           />
         </div>
       </header>
+
+      {/* Global Card Creation Indicator */}
+      <CardCreationIndicator 
+        usersAddingCards={getAllUsersAddingCards()} 
+        currentUserId={user?.uid}
+      />
 
       {/* Workflow Controls - Only show when retrospective mode is enabled */}
       {retrospectiveMode && (
