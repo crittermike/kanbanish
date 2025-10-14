@@ -44,7 +44,8 @@ describe('Board URL settings', () => {
     darkMode: true,
     updateDarkMode: vi.fn(),
     workflowPhase: 'CREATION',
-    user: { uid: 'u1' }
+    user: { uid: 'u1' },
+    getAllUsersAddingCards: vi.fn().mockReturnValue([])
   };
 
   const originalURLSearchParams = window.URLSearchParams;

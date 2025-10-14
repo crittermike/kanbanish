@@ -19,7 +19,7 @@ vi.mock('../utils/firebase', () => ({
   database: {}
 }));
 
-describe('Column - Retrospective Mode CardCreationIndicator', () => {
+describe('Column - Basic Rendering', () => {
   const mockShowNotification = vi.fn();
   const mockColumnData = {
     title: 'Test Column',
@@ -34,17 +34,14 @@ describe('Column - Retrospective Mode CardCreationIndicator', () => {
     workflowPhase: 'CREATION',
     columns: {},
     startCardCreation: vi.fn(),
-    stopCardCreation: vi.fn(),
-    getUsersAddingCardsInColumn: vi.fn().mockReturnValue([
-      { userId: 'other-user', columnId: 'test-column', lastUpdated: Date.now() }
-    ])
+    stopCardCreation: vi.fn()
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('shows CardCreationIndicator when retrospective mode is ON and conditions are met', () => {
+  it('renders column without CardCreationIndicator (moved to Board)', () => {
     useBoardContext.mockReturnValue({
       ...baseMockContext,
       retrospectiveMode: true
@@ -61,11 +58,11 @@ describe('Column - Retrospective Mode CardCreationIndicator', () => {
       </DndProvider>
     );
 
-    // Should show CardCreationIndicator when retrospective mode is ON
-    expect(container.querySelector('.card-creation-indicator')).toBeInTheDocument();
+    // CardCreationIndicator is now rendered at Board level, not in Column
+    expect(container.querySelector('.card-creation-indicator')).not.toBeInTheDocument();
   });
 
-  it('does NOT show CardCreationIndicator when retrospective mode is OFF', () => {
+  it('renders column in non-retro mode without CardCreationIndicator', () => {
     useBoardContext.mockReturnValue({
       ...baseMockContext,
       retrospectiveMode: false
@@ -82,51 +79,7 @@ describe('Column - Retrospective Mode CardCreationIndicator', () => {
       </DndProvider>
     );
 
-    // Should NOT show CardCreationIndicator when retrospective mode is OFF
-    expect(container.querySelector('.card-creation-indicator')).not.toBeInTheDocument();
-  });
-
-  it('does NOT show CardCreationIndicator when retrospective mode is ON but workflow phase is not CREATION', () => {
-    useBoardContext.mockReturnValue({
-      ...baseMockContext,
-      retrospectiveMode: true,
-      workflowPhase: 'INTERACTIONS'
-    });
-
-    const { container } = render(
-      <DndProvider backend={HTML5Backend}>
-        <Column 
-          columnId="test-column" 
-          columnData={mockColumnData} 
-          sortByVotes={false} 
-          showNotification={mockShowNotification} 
-        />
-      </DndProvider>
-    );
-
-    // Should NOT show CardCreationIndicator when workflow phase is not CREATION
-    expect(container.querySelector('.card-creation-indicator')).not.toBeInTheDocument();
-  });
-
-  it('does NOT show CardCreationIndicator when retrospective mode is OFF regardless of workflow phase', () => {
-    useBoardContext.mockReturnValue({
-      ...baseMockContext,
-      retrospectiveMode: false,
-      workflowPhase: 'CREATION'
-    });
-
-    const { container } = render(
-      <DndProvider backend={HTML5Backend}>
-        <Column 
-          columnId="test-column" 
-          columnData={mockColumnData} 
-          sortByVotes={false} 
-          showNotification={mockShowNotification} 
-        />
-      </DndProvider>
-    );
-
-    // Should NOT show CardCreationIndicator when retrospective mode is OFF, even with CREATION phase
+    // CardCreationIndicator is now at Board level
     expect(container.querySelector('.card-creation-indicator')).not.toBeInTheDocument();
   });
 });

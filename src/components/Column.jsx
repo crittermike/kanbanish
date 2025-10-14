@@ -7,7 +7,6 @@ import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
-import CardCreationIndicator from './CardCreationIndicator';
 import CardGroup from './CardGroup';
 
 function Column({ columnId, columnData, sortByVotes, showNotification }) {
@@ -20,8 +19,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     workflowPhase, 
     columns,
     startCardCreation,
-    stopCardCreation,
-    getUsersAddingCardsInColumn
+    stopCardCreation
   } = useBoardContext();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
@@ -367,14 +365,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
               Add Card
             </button>
           )
-        )}
-
-        {/* Show card creation activity indicator where new cards would appear */}
-        {retrospectiveMode && workflowPhase === 'CREATION' && isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-          <CardCreationIndicator 
-            usersAddingCards={getUsersAddingCardsInColumn(columnId)} 
-            currentUserId={user?.uid}
-          />
         )}
 
         {/* Render card groups and individual cards in sorted order */}

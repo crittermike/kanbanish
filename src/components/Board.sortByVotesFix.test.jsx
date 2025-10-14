@@ -48,6 +48,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     getUserVoteCount: vi.fn().mockReturnValue(0),
     getTotalVotes: vi.fn().mockReturnValue(0),
     getTotalVotesRemaining: vi.fn().mockReturnValue(0),
+    getAllUsersAddingCards: vi.fn().mockReturnValue([]),
     user: { uid: 'test-user-123' },
     darkMode: false,
     updateDarkMode: vi.fn()

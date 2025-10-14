@@ -77,6 +77,8 @@ describe('Board Component', () => {
     getUserVoteCount: vi.fn().mockReturnValue(0),
     getTotalVotes: vi.fn().mockReturnValue(0),
     getTotalVotesRemaining: vi.fn().mockReturnValue(0),
+    getUsersAddingCardsInColumn: vi.fn().mockReturnValue([]),
+    getAllUsersAddingCards: vi.fn().mockReturnValue([]),
     user: { uid: 'test-user-123' } // Default user state for most tests
   };
 

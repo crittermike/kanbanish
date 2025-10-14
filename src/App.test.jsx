@@ -18,7 +18,8 @@ vi.mock('./context/BoardContext', () => ({
     boardRef: null,
     createNewBoard: vi.fn(),
     openExistingBoard: vi.fn(),
-    moveCard: vi.fn()
+    moveCard: vi.fn(),
+    getAllUsersAddingCards: vi.fn().mockReturnValue([])
   })
 }));
 

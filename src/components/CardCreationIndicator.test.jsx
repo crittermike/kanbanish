@@ -22,18 +22,18 @@ describe('CardCreationIndicator', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows typing card when another user is adding a card', () => {
+  it('shows simple text indicator when another user is adding a card', () => {
     const usersAddingCards = [
       { userId: 'user2', columnId: 'col1', lastUpdated: Date.now() }
     ];
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
     expect(screen.getByText('Someone is adding a card')).toBeInTheDocument();
-    expect(document.querySelector('.typing-card')).toBeInTheDocument();
-    expect(document.querySelector('.user-avatar')).toBeInTheDocument();
+    expect(document.querySelector('.card-creation-indicator')).toBeInTheDocument();
+    expect(document.querySelector('.typing-text')).toBeInTheDocument();
   });
 
-  it('shows multiple typing cards when multiple other users are adding cards', () => {
+  it('shows count when multiple other users are adding cards', () => {
     const usersAddingCards = [
       { userId: 'user1', columnId: 'col1', lastUpdated: Date.now() }, // current user - should be filtered out
       { userId: 'user2', columnId: 'col1', lastUpdated: Date.now() },
@@ -41,11 +41,10 @@ describe('CardCreationIndicator', () => {
     ];
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
-    const typingCards = document.querySelectorAll('.typing-card');
-    expect(typingCards).toHaveLength(2); // Only user2 and user3, not user1
+    expect(screen.getByText('2 people are adding cards')).toBeInTheDocument();
   });
 
-  it('shows up to 3 typing cards and overflow indicator for many users (excluding current user)', () => {
+  it('shows count for many users (excluding current user)', () => {
     const usersAddingCards = [
       { userId: 'user1', columnId: 'col1', lastUpdated: Date.now() }, // current user - should be filtered out
       { userId: 'user2', columnId: 'col1', lastUpdated: Date.now() },
@@ -57,30 +56,19 @@ describe('CardCreationIndicator', () => {
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
     
-    const typingCards = document.querySelectorAll('.typing-card');
-    expect(typingCards).toHaveLength(3); // Only 3 cards shown
-    
-    // Should show +2 more (5 other users - 3 shown = 2 more)
-    expect(screen.getByText('+2 more people adding cards...')).toBeInTheDocument();
+    // Should show count of 5 other users
+    expect(screen.getByText('5 people are adding cards')).toBeInTheDocument();
   });
 
-  it('displays the edit icon and typing animations', () => {
+  it('displays typing dots animation', () => {
     const usersAddingCards = [
       { userId: 'user2', columnId: 'col1', lastUpdated: Date.now() }
     ];
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
     
-    // Check for edit icon (this will be the SVG element)
-    expect(document.querySelector('svg')).toBeInTheDocument();
-    
-    // Check for typing elements
-    expect(document.querySelector('.typing-content')).toBeInTheDocument();
-    expect(document.querySelector('.typing-cursor')).toBeInTheDocument();
-    expect(document.querySelectorAll('.typing-line')).toHaveLength(3); // Now we have 3 lines
-    
-    // Check for user avatar and typing dots
-    expect(document.querySelector('.user-avatar')).toBeInTheDocument();
+    // Check for typing dots
     expect(document.querySelector('.typing-dots')).toBeInTheDocument();
+    expect(document.querySelectorAll('.typing-dots span')).toHaveLength(3);
   });
 });
