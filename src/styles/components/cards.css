@@ -25,10 +25,12 @@
 
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
+    position: absolute;
+    bottom: var(--space-xs);
+    right: var(--space-xs);
     display: none;
     gap: var(--space-xxs);
-    justify-content: flex-end;
-    margin-top: var(--space-xs);
+    z-index: 10;
 }
 
 /* Show the entire container on hover OR when comment button is always visible */
