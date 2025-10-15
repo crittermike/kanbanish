@@ -26,8 +26,8 @@
 /* Comment indicator badge - shown when card has comments */
 .card-comment-indicator {
     position: absolute;
-    top: var(--space-xs);
-    right: var(--space-xs);
+    top: -5px;
+    right: -5px;
     background-color: var(--accent);
     color: white;
     border-radius: 50%;
