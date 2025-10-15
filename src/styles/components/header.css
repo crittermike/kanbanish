@@ -330,10 +330,10 @@ h1 {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 6px 6px 6px 12px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-weight: 500;
