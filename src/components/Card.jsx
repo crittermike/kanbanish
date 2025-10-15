@@ -16,6 +16,7 @@ import {
   WORKFLOW_PHASES
 } from '../utils/workflowUtils';
 // Import modularized components
+import CardHoverActions from './CardHoverActions';
 import CardReactions from './CardReactions';
 import Comments from './Comments';
 import VotingControls from './VotingControls';
@@ -379,23 +380,32 @@ function Card({
             workflowPhase={workflowPhase}
             user={user}
             disabledReason={disabledReason}
-          />          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
-            <CardReactions
-              reactions={displayCardData.reactions}
-              userId={user?.uid}
+          />
+          
+          {/* Show hover actions when interactions are allowed and we're not in a group */}
+          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+            <CardHoverActions
               showEmojiPicker={showEmojiPicker}
               setShowEmojiPicker={setShowEmojiPicker}
               setShowComments={setShowComments}
+              toggleComments={toggleComments}
+              setEmojiPickerPosition={setEmojiPickerPosition}
+              emojiPickerPosition={emojiPickerPosition}
               addReaction={addReaction}
               hasUserReactedWithEmoji={hasUserReactedWithEmoji}
               commentCount={Object.keys(displayCardData.comments || {}).length}
-              toggleComments={toggleComments}
-              emojiPickerPosition={emojiPickerPosition}
-              setEmojiPickerPosition={setEmojiPickerPosition}
               disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
               disabledReason={disabledReason}
-              retrospectiveMode={retrospectiveMode}
-              workflowPhase={workflowPhase}
+            />
+          )}
+
+          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+            <CardReactions
+              reactions={displayCardData.reactions}
+              userId={user?.uid}
+              addReaction={addReaction}
+              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+              disabledReason={disabledReason}
             />
           )}
 

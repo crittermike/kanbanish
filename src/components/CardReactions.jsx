@@ -1,40 +1,28 @@
-import React, { useRef } from 'react';
-import { MessageSquare } from 'react-feather';
+import React from 'react';
 import {
   shouldUseDisabledStyling,
-  shouldHideFeature,
   getReactionDisabledMessage
 } from '../utils/retrospectiveModeUtils';
-import { areInteractionsVisible } from '../utils/workflowUtils';
-import EmojiPicker from './EmojiPicker';
 
 const CardReactions = React.memo(({
   reactions,
   userId,
-  showEmojiPicker,
-  setShowEmojiPicker,
-  setShowComments,
   addReaction,
-  hasUserReactedWithEmoji,
-  commentCount,
-  toggleComments,
-  emojiPickerPosition,
-  setEmojiPickerPosition,
   disabled = false,
-  disabledReason = 'cards-not-revealed',
-  retrospectiveMode = false,
-  workflowPhase = 'CREATION'
+  disabledReason = 'cards-not-revealed'
 }) => {
-  const emojiButtonRef = useRef(null);
-
-  // Determine if comments button should be shown based on workflow phase
-  // Comments are visible when interactions are visible
-  const shouldShowCommentsButton = areInteractionsVisible(workflowPhase, retrospectiveMode);
-
   // Use utility functions for consistent logic
   const useDisabledStyling = shouldUseDisabledStyling(disabled, disabledReason);
-  const hideAddButton = shouldHideFeature(disabledReason);
   const isFrozen = disabledReason === 'frozen';
+
+  // Check if there are any reactions to display
+  const hasReactions = reactions && Object.entries(reactions).some(([, reactionData]) => reactionData.count > 0);
+  
+  // Hide the entire reactions bar if there are no reactions
+  // This saves vertical space on cards
+  if (!hasReactions) {
+    return null;
+  }
 
   return (
     <div className="emoji-reactions">
@@ -59,51 +47,7 @@ const CardReactions = React.memo(({
             </div>
           );
         })}
-        {showEmojiPicker && (
-          <EmojiPicker
-            position={emojiPickerPosition}
-            onEmojiSelect={addReaction}
-            onClose={() => setShowEmojiPicker(false)}
-            hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-          />
-        )}
-        {/* Hide add reaction button when interactions are frozen */}
-        {!hideAddButton && (
-          <button
-            className={`add-reaction-button ${useDisabledStyling ? 'disabled' : ''}`}
-            onClick={disabled ? undefined : e => {
-              e.stopPropagation();
-              if (emojiButtonRef.current) {
-                const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-                setEmojiPickerPosition({
-                  top: buttonRect.bottom + window.scrollY + 5,
-                  left: buttonRect.left + window.scrollX
-                });
-              }
-              setShowEmojiPicker(!showEmojiPicker);
-              setShowComments(false);
-            }}
-            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
-            ref={emojiButtonRef}
-            disabled={useDisabledStyling}
-          >+</button>
-        )}
       </div>
-      {shouldShowCommentsButton && (
-        <div className="reactions-right">
-          <button
-            className={`comments-btn ${commentCount > 0 ? 'has-comments' : ''}`}
-            onClick={e => {
-              e.stopPropagation();
-              toggleComments();
-            }}
-            title="Toggle comments"
-          >
-            <MessageSquare size={16} />
-            <span>{commentCount || 0}</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 });

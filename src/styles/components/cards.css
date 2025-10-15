@@ -23,6 +23,91 @@
     border-color: var(--accent);
 }
 
+/* Card hover actions - shown on hover to save vertical space */
+.card-hover-actions {
+    position: absolute;
+    bottom: var(--space-xs);
+    right: var(--space-xs);
+    display: none;
+    gap: var(--space-xxs);
+    z-index: 10;
+}
+
+.card:hover .card-hover-actions {
+    display: flex;
+}
+
+.card-hover-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.9;
+    transition: opacity var(--transition-speed) var(--transition-ease),
+        background-color var(--transition-speed) var(--transition-ease),
+        transform var(--transition-speed) var(--transition-ease);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card-hover-action:hover {
+    opacity: 1;
+    background-color: var(--hover-bg);
+    transform: scale(1.1);
+}
+
+.card-hover-action.disabled,
+.card-hover-action:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.card-hover-action.disabled:hover,
+.card-hover-action:disabled:hover {
+    opacity: 0.3;
+    background-color: var(--card-bg);
+    transform: none;
+}
+
+.card-hover-action.emoji-action {
+    font-size: 1.2rem;
+    font-weight: bold;
+    line-height: 1;
+    padding-bottom: 2px;
+}
+
+.card-hover-action.comment-action.has-comments {
+    background-color: var(--accent-transparent);
+    border-color: var(--accent);
+}
+
+.card-hover-action.comment-action.has-comments:hover {
+    background-color: var(--accent-transparent-light);
+}
+
+.card-hover-action .comment-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
 /* Card selection styles */
 .card.selected {
     border-color: var(--accent);
