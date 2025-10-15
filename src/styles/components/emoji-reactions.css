@@ -86,6 +86,7 @@
 
 .emoji-reaction .count {
     font-size: 0.8rem;
+    margin-right: 0;
 }
 
 /* Add reaction button */
