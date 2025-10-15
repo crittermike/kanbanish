@@ -25,23 +25,29 @@
 
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
-    display: flex;
+    display: none;
     gap: var(--space-xxs);
     justify-content: flex-end;
     margin-top: var(--space-xs);
 }
 
-/* Hide hover actions by default, show on card hover */
-.card-hover-actions .card-hover-action {
-    display: none;
-}
-
-.card:hover .card-hover-actions .card-hover-action {
+/* Show the entire container on hover OR when comment button is always visible */
+.card:hover .card-hover-actions,
+.card-hover-actions:has(.always-visible) {
     display: flex;
 }
 
-/* Always show comment button when there are comments */
-.card-hover-actions .card-hover-action.always-visible {
+/* Individual buttons are shown by default within the visible container */
+.card-hover-actions .card-hover-action {
+    display: flex;
+}
+
+/* Hide emoji button by default, show on hover */
+.card-hover-actions .emoji-action {
+    display: none;
+}
+
+.card:hover .card-hover-actions .emoji-action {
     display: flex;
 }
 
@@ -61,6 +67,7 @@
         background-color var(--transition-speed) var(--transition-ease),
         transform var(--transition-speed) var(--transition-ease);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 .card-hover-action:hover {
