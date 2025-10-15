@@ -208,6 +208,7 @@
 
 .card-header {
     display: flex;
+    position: relative;
 }
 
 .card-content {

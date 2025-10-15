@@ -59,7 +59,8 @@ const CardContent = ({
   groupId,
   workflowPhase = 'CREATION',
   user,
-  disabledReason
+  disabledReason,
+  children
 }) => {
   // Determine if we should show the downvote button:
   // 1. Always show if downvotingEnabled is true
@@ -115,6 +116,7 @@ const CardContent = ({
       <div className={`card-content ${!votingEnabled || groupId || !interactionsVisible || (retrospectiveMode && workflowPhase === 'CREATION' && user) ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
         {displayContent}
       </div>
+      {children}
     </div>
   );
 };
@@ -380,30 +382,30 @@ function Card({
             workflowPhase={workflowPhase}
             user={user}
             disabledReason={disabledReason}
-          />
+          >
+            {/* Show hover actions inside card-header when interactions are allowed and we're not in a group */}
+            {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+              <CardHoverActions
+                showEmojiPicker={showEmojiPicker}
+                setShowEmojiPicker={setShowEmojiPicker}
+                setShowComments={setShowComments}
+                toggleComments={toggleComments}
+                setEmojiPickerPosition={setEmojiPickerPosition}
+                emojiPickerPosition={emojiPickerPosition}
+                addReaction={addReaction}
+                hasUserReactedWithEmoji={hasUserReactedWithEmoji}
+                commentCount={Object.keys(displayCardData.comments || {}).length}
+                disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+                disabledReason={disabledReason}
+              />
+            )}
+          </CardContent>
           
           {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
             <CardReactions
               reactions={displayCardData.reactions}
               userId={user?.uid}
               addReaction={addReaction}
-              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
-              disabledReason={disabledReason}
-            />
-          )}
-
-          {/* Show hover actions when interactions are allowed and we're not in a group */}
-          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
-            <CardHoverActions
-              showEmojiPicker={showEmojiPicker}
-              setShowEmojiPicker={setShowEmojiPicker}
-              setShowComments={setShowComments}
-              toggleComments={toggleComments}
-              setEmojiPickerPosition={setEmojiPickerPosition}
-              emojiPickerPosition={emojiPickerPosition}
-              addReaction={addReaction}
-              hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-              commentCount={Object.keys(displayCardData.comments || {}).length}
               disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
               disabledReason={disabledReason}
             />
