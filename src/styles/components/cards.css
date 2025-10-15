@@ -26,8 +26,8 @@
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
     position: absolute;
-    bottom: var(--space-xs);
-    right: var(--space-xs);
+    bottom: 0;
+    right: 0;
     display: none;
     gap: var(--space-xxs);
     z-index: 10;
