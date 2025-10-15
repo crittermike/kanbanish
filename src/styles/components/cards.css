@@ -99,12 +99,12 @@
 }
 
 .card-hover-action.comment-action.has-comments {
-    background-color: var(--accent-transparent);
+    background-color: var(--accent);
     border-color: var(--accent);
 }
 
 .card-hover-action.comment-action.has-comments:hover {
-    background-color: var(--accent-transparent-light);
+    background-color: var(--accent-hover);
 }
 
 .card-hover-action .comment-count {
