@@ -318,7 +318,7 @@ describe('Card Reveal Mode', () => {
     expect(downvoteButton).not.toBeDisabled();
 
     // Add reaction button should be enabled when revealed
-    const addReactionButton = screen.getByRole('button', { name: '+' });
+    const addReactionButton = screen.getByRole('button', { name: 'Add reaction' });
     expect(addReactionButton).not.toBeDisabled();
 
     // In INTERACTIONS phase, others' interactions should NOT be visible
