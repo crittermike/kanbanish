@@ -59,9 +59,9 @@ const CardHoverActions = React.memo(({
           <Smile size={16} aria-hidden="true" />
         </button>
       )}
-      {/* Show comment button always if there are comments, otherwise only on hover */}
+      {/* Show comment button on hover only */}
       <button
-        className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments always-visible' : ''}`}
+        className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}
         onClick={e => {
           e.stopPropagation();
           toggleComments();

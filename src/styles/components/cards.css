@@ -23,6 +23,24 @@
     border-color: var(--accent);
 }
 
+/* Comment indicator badge - shown when card has comments */
+.card-comment-indicator {
+    position: absolute;
+    top: var(--space-xs);
+    right: var(--space-xs);
+    background-color: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
     position: absolute;
@@ -33,9 +51,8 @@
     z-index: 10;
 }
 
-/* Show the entire container on hover OR when comment button is always visible */
-.card:hover .card-hover-actions,
-.card-hover-actions:has(.always-visible) {
+/* Show the entire container on hover */
+.card:hover .card-hover-actions {
     display: flex;
 }
 
@@ -99,12 +116,12 @@
 }
 
 .card-hover-action.comment-action.has-comments {
-    background-color: var(--accent);
+    background-color: var(--accent-transparent);
     border-color: var(--accent);
 }
 
 .card-hover-action.comment-action.has-comments:hover {
-    background-color: var(--accent-hover);
+    background-color: var(--accent-transparent-light);
 }
 
 .card-hover-action .comment-count {
