@@ -148,7 +148,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     // Interactions should be visible and enabled
     expect(screen.getByText('👍')).toBeInTheDocument();
-    expect(screen.getByText('+')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.getByTitle('Upvote')).toBeInTheDocument();
 
@@ -157,7 +157,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(existingReaction).not.toHaveClass('disabled');
 
     // Add reaction button should be enabled
-    const addReactionButton = screen.getByText('+');
+    const addReactionButton = screen.getByRole('button', { name: 'Add reaction' });
     expect(addReactionButton).not.toBeDisabled();
   });
 
@@ -219,7 +219,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     // When reveal mode is disabled, interactions should always be visible and enabled
     expect(screen.getByText('👍')).toBeInTheDocument();
-    expect(screen.getByText('+')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.getByTitle('Upvote')).toBeInTheDocument();
 
@@ -228,7 +228,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(existingReaction).not.toHaveClass('disabled');
 
     // Add reaction button should be enabled
-    const addReactionButton = screen.getByText('+');
+    const addReactionButton = screen.getByRole('button', { name: 'Add reaction' });
     expect(addReactionButton).not.toBeDisabled();
   });
 });

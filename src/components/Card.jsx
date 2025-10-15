@@ -382,6 +382,16 @@ function Card({
             disabledReason={disabledReason}
           />
           
+          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+            <CardReactions
+              reactions={displayCardData.reactions}
+              userId={user?.uid}
+              addReaction={addReaction}
+              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+              disabledReason={disabledReason}
+            />
+          )}
+
           {/* Show hover actions when interactions are allowed and we're not in a group */}
           {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
             <CardHoverActions
@@ -394,16 +404,6 @@ function Card({
               addReaction={addReaction}
               hasUserReactedWithEmoji={hasUserReactedWithEmoji}
               commentCount={Object.keys(displayCardData.comments || {}).length}
-              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
-              disabledReason={disabledReason}
-            />
-          )}
-
-          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
-            <CardReactions
-              reactions={displayCardData.reactions}
-              userId={user?.uid}
-              addReaction={addReaction}
               disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
               disabledReason={disabledReason}
             />

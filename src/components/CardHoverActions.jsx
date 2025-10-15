@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { MessageSquare } from 'react-feather';
+import { MessageSquare, Smile } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
@@ -52,14 +52,16 @@ const CardHoverActions = React.memo(({
             setShowComments(false);
           }}
           title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
+          aria-label="Add reaction"
           ref={emojiButtonRef}
           disabled={useDisabledStyling}
         >
-          +
+          <Smile size={16} aria-hidden="true" />
         </button>
       )}
+      {/* Show comment button always if there are comments, otherwise only on hover */}
       <button
-        className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}
+        className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments always-visible' : ''}`}
         onClick={e => {
           e.stopPropagation();
           toggleComments();
