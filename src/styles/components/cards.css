@@ -64,7 +64,7 @@
     height: 2rem;
     cursor: pointer;
     color: var(--text-color);
-    opacity: 0.9;
+    opacity: 1;
     transition: opacity var(--transition-speed) var(--transition-ease),
         background-color var(--transition-speed) var(--transition-ease),
         transform var(--transition-speed) var(--transition-ease);
@@ -73,7 +73,6 @@
 }
 
 .card-hover-action:hover {
-    opacity: 1;
     background-color: var(--hover-bg);
     transform: scale(1.1);
 }
