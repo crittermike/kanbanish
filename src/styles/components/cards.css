@@ -23,6 +23,24 @@
     border-color: var(--accent);
 }
 
+/* Comment indicator badge - shown when card has comments */
+.card-comment-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
     position: absolute;
@@ -33,9 +51,8 @@
     z-index: 10;
 }
 
-/* Show the entire container on hover OR when comment button is always visible */
-.card:hover .card-hover-actions,
-.card-hover-actions:has(.always-visible) {
+/* Show the entire container on hover */
+.card:hover .card-hover-actions {
     display: flex;
 }
 
@@ -64,7 +81,7 @@
     height: 2rem;
     cursor: pointer;
     color: var(--text-color);
-    opacity: 0.9;
+    opacity: 1;
     transition: opacity var(--transition-speed) var(--transition-ease),
         background-color var(--transition-speed) var(--transition-ease),
         transform var(--transition-speed) var(--transition-ease);
@@ -73,7 +90,6 @@
 }
 
 .card-hover-action:hover {
-    opacity: 1;
     background-color: var(--hover-bg);
     transform: scale(1.1);
 }

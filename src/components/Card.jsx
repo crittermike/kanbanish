@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+import { MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import {
@@ -358,6 +359,12 @@ function Card({
       onClick={handleCardClick}
       data-card-id={cardId}
     >
+      {/* Show comment indicator badge when card has comments */}
+      {!isEditing && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && Object.keys(displayCardData.comments || {}).length > 0 && (
+        <div className="card-comment-indicator" title={`${Object.keys(displayCardData.comments || {}).length} comment${Object.keys(displayCardData.comments || {}).length === 1 ? '' : 's'}`}>
+          <MessageSquare size={12} />
+        </div>
+      )}
       {isEditing ? (
         <CardEditor
           editedContent={editedContent}
