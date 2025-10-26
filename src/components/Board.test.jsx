@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
-import { useBoardContext } from '../context/BoardContext';
+import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import Board from './Board';
 
 // Mock the BoardContext
@@ -410,6 +410,23 @@ describe('Board Component', () => {
 
     // Document title should be updated
     expect(document.title).toBe('Updated Board Title - Kanbanish');
+  });
+
+  test('uses SEO-friendly default title for "Untitled Board"', () => {
+    // Set up with "Untitled Board" as the title
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: DEFAULT_BOARD_TITLE
+    });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Should use SEO-friendly default title instead of "Untitled Board - Kanbanish"
+    expect(document.title).toBe('Kanbanish | Real-time anonymous kanban board');
   });
 
   test('initializes with board ID from URL', () => {
