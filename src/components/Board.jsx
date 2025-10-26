@@ -396,7 +396,9 @@ function Board({ showNotification }) {
 
   // Update document title when board title changes
   useEffect(() => {
-    document.title = boardTitle ? `${boardTitle} - Kanbanish` : 'Kanbanish';
+    // Don't set document.title to "Untitled Board" for SEO purposes
+    // Keep the default HTML title instead when board is untitled
+    document.title = boardTitle && boardTitle !== 'Untitled Board' ? `${boardTitle} - Kanbanish` : 'Kanbanish | Real-time anonymous kanban board';
   }, [boardTitle]);
 
   /**

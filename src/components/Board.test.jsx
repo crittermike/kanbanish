@@ -412,6 +412,23 @@ describe('Board Component', () => {
     expect(document.title).toBe('Updated Board Title - Kanbanish');
   });
 
+  test('uses SEO-friendly default title for "Untitled Board"', () => {
+    // Set up with "Untitled Board" as the title
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: 'Untitled Board'
+    });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board showNotification={mockShowNotification} />
+      </DndProvider>
+    );
+
+    // Should use SEO-friendly default title instead of "Untitled Board - Kanbanish"
+    expect(document.title).toBe('Kanbanish | Real-time anonymous kanban board');
+  });
+
   test('initializes with board ID from URL', () => {
     // Mock URL with board ID
     mockURLSearchParams.mockImplementation(() => ({
