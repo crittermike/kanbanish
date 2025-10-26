@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
-import { useBoardContext } from '../context/BoardContext';
+import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -23,7 +23,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     <input
       type="text"
       id="board-title"
-      placeholder="Untitled Board"
+      placeholder={DEFAULT_BOARD_TITLE}
       value={boardTitle}
       onChange={handleBoardTitleChange}
       onBlur={handleBoardTitleBlur}
@@ -398,7 +398,7 @@ function Board({ showNotification }) {
   useEffect(() => {
     // Don't set document.title to "Untitled Board" for SEO purposes
     // Keep the default HTML title instead when board is untitled
-    document.title = boardTitle && boardTitle !== 'Untitled Board' ? `${boardTitle} - Kanbanish` : 'Kanbanish | Real-time anonymous kanban board';
+    document.title = boardTitle && boardTitle !== DEFAULT_BOARD_TITLE ? `${boardTitle} - Kanbanish` : 'Kanbanish | Real-time anonymous kanban board';
   }, [boardTitle]);
 
   /**
@@ -424,7 +424,7 @@ function Board({ showNotification }) {
   // Create a new board with the selected template
   const handleTemplateSelected = (templateColumns, templateName = null) => {
     // Create a title based on the template
-    const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
+    const boardTitle = templateName ? `${templateName} Board` : DEFAULT_BOARD_TITLE;
 
     // Pass URL-derived board settings so they persist on new board
   const parsed = parseUrlSettings(window.location.search);

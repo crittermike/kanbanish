@@ -20,7 +20,8 @@ vi.mock('./context/BoardContext', () => ({
     openExistingBoard: vi.fn(),
     moveCard: vi.fn(),
     getAllUsersAddingCards: vi.fn().mockReturnValue([])
-  })
+  }),
+  DEFAULT_BOARD_TITLE: 'Untitled Board'
 }));
 
 vi.mock('react-dnd', () => ({

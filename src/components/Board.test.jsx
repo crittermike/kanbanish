@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { vi, describe, test, beforeEach, expect, afterEach } from 'vitest';
-import { useBoardContext } from '../context/BoardContext';
+import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import Board from './Board';
 
 // Mock the BoardContext
@@ -416,7 +416,7 @@ describe('Board Component', () => {
     // Set up with "Untitled Board" as the title
     useBoardContext.mockReturnValue({
       ...mockContextValue,
-      boardTitle: 'Untitled Board'
+      boardTitle: DEFAULT_BOARD_TITLE
     });
 
     render(

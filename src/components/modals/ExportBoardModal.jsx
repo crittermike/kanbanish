@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Clipboard } from 'react-feather';
-import { useBoardContext } from '../../context/BoardContext';
+import { useBoardContext, DEFAULT_BOARD_TITLE } from '../../context/BoardContext';
 
 const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   const [format, setFormat] = useState('markdown');
@@ -13,7 +13,7 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
    */
   const getBoardStructure = useCallback(() => {
     const boardData = {
-      title: boardTitle || 'Untitled Board',
+      title: boardTitle || DEFAULT_BOARD_TITLE,
       columns: []
     };
 

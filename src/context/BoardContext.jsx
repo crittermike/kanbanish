@@ -4,6 +4,9 @@ import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
+// Default board title constant
+export const DEFAULT_BOARD_TITLE = 'Untitled Board';
+
 // Create the context
 const BoardContext = createContext();
 
@@ -20,7 +23,7 @@ export const useBoardContext = () => {
 export const BoardProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [boardId, setBoardId] = useState(null);
-  const [boardTitle, setBoardTitle] = useState('Untitled Board');
+  const [boardTitle, setBoardTitle] = useState(DEFAULT_BOARD_TITLE);
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotesState] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
@@ -243,7 +246,7 @@ export const BoardProvider = ({ children }) => {
   }, [boardId, user]);
 
   // Create a new board with specified template columns, title, and optional settings overrides
-  const createNewBoard = (templateColumns = null, boardTitle = 'Untitled Board', settingsOverride = null) => {
+  const createNewBoard = (templateColumns = null, boardTitle = DEFAULT_BOARD_TITLE, settingsOverride = null) => {
     if (!user) {
       return null;
     }
@@ -302,7 +305,7 @@ export const BoardProvider = ({ children }) => {
       .then(() => {
         console.log('New board created with ID:', newBoardId);
         setBoardId(newBoardId);
-        setBoardTitle('Untitled Board');
+        setBoardTitle(DEFAULT_BOARD_TITLE);
       })
       .catch(error => {
         console.error('Error creating board:', error);
