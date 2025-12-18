@@ -100,7 +100,9 @@ function generateEmojiList() {
   const additionalEmojis = [
     '❤️', '💔', '💯', '💪', '🙏', '👍', '👎', '👏', '🙌', '🤝',
     '👀', '🧠', '💡', '⚡', '✨', '⭐', '🏆', '🎉', '🚀', '🌈',
-    '✅', '❌', '❗', '❓', '⚠️', '🔥', '💰', '💎', '🎯', '🎪'
+    '✅', '❌', '❗', '❓', '⚠️', '🔥', '💰', '💎', '🎯', '🎪',
+    // Christmas emojis
+    '🎄', '🎅', '🤶', '🎁', '🔔', '🍪', '🎀', '🦌', '🛷', '🕯️'
   ];
 
   additionalEmojis.forEach(emoji => {
@@ -425,6 +427,18 @@ export function getEmojiKeywords(emoji) {
     '🎵': ['musical', 'note', 'music'],
     '🎶': ['musical', 'notes', 'music'],
     '🎼': ['musical', 'score', 'music'],
+    
+    // Christmas emojis
+    '🎄': ['christmas', 'tree', 'xmas', 'holiday', 'festive', 'pine', 'evergreen'],
+    '🎅': ['santa', 'claus', 'christmas', 'xmas', 'holiday', 'festive', 'father'],
+    '🤶': ['mrs', 'claus', 'christmas', 'xmas', 'holiday', 'festive', 'mother'],
+    '🎁': ['gift', 'present', 'wrapped', 'christmas', 'xmas', 'holiday', 'birthday'],
+    '🔔': ['bell', 'christmas', 'xmas', 'holiday', 'jingle', 'ring'],
+    '🍪': ['cookie', 'christmas', 'xmas', 'gingerbread', 'dessert', 'sweet', 'biscuit'],
+    '🎀': ['ribbon', 'bow', 'christmas', 'xmas', 'gift', 'present', 'decoration'],
+    '🦌': ['deer', 'reindeer', 'christmas', 'xmas', 'rudolph', 'holiday', 'animal'],
+    '🛷': ['sled', 'sleigh', 'christmas', 'xmas', 'winter', 'snow', 'holiday'],
+    '🕯️': ['candle', 'light', 'christmas', 'xmas', 'holiday', 'festive', 'flame'],
   };
 
   // Get keywords for the emoji, or try to extract from Unicode name
