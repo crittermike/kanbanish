@@ -179,4 +179,22 @@ describe('EmojiPicker Component', () => {
       expect(emojiOptions.length).toBeGreaterThan(5); // Should find multiple heart emojis
     });
   });
+
+  it('searches for christmas emojis', async () => {
+    render(<EmojiPicker {...defaultProps} />);
+    
+    const searchInput = screen.getByTestId('emoji-search-input');
+    
+    // Search for "christmas" which should match Christmas-themed emojis
+    fireEvent.change(searchInput, { target: { value: 'christmas' } });
+    
+    await waitFor(() => {
+      const emojiOptions = screen.getAllByTestId('emoji-option');
+      expect(emojiOptions.length).toBeGreaterThan(0); // Should find Christmas emojis
+      // Verify some specific Christmas emojis are present
+      const emojiText = emojiOptions.map(option => option.textContent).join('');
+      expect(emojiText).toContain('🎄'); // Christmas tree
+      expect(emojiText).toContain('🎅'); // Santa
+    });
+  });
 });
