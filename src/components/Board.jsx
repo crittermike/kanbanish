@@ -66,6 +66,8 @@ const ActionButtons = ({
   updateDownvotingEnabled,
   multipleVotesAllowed,
   updateMultipleVotesAllowed,
+  votesPerUser,
+  updateVotesPerUser,
   retrospectiveMode,
   updateRetrospectiveMode,
   sortDropdownOpen,
@@ -213,6 +215,51 @@ const ActionButtons = ({
                 </div>
                 <div className="settings-divider"></div>
                 <div className="settings-section">
+                  <h4 className="settings-section-title">Maximum votes per person</h4>
+                  <div className="vote-limit-options">
+                    <button
+                      className={`vote-limit-btn ${votesPerUser === null ? 'selected' : ''}`}
+                      onClick={() => updateVotesPerUser(null)}
+                    >
+                      Unlimited
+                    </button>
+                    <button
+                      className={`vote-limit-btn ${votesPerUser === 3 ? 'selected' : ''}`}
+                      onClick={() => updateVotesPerUser(3)}
+                    >
+                      3
+                    </button>
+                    <button
+                      className={`vote-limit-btn ${votesPerUser === 5 ? 'selected' : ''}`}
+                      onClick={() => updateVotesPerUser(5)}
+                    >
+                      5
+                    </button>
+                    <button
+                      className={`vote-limit-btn ${votesPerUser === 10 ? 'selected' : ''}`}
+                      onClick={() => updateVotesPerUser(10)}
+                    >
+                      10
+                    </button>
+                    <div className="vote-limit-custom">
+                      <input
+                        type="number"
+                        id="custom-vote-limit"
+                        min="1"
+                        value={votesPerUser !== null && ![3, 5, 10].includes(votesPerUser) ? votesPerUser : ''}
+                        placeholder="#"
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          if (value > 0) {
+                            updateVotesPerUser(value);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="settings-divider"></div>
+                <div className="settings-section">
                   <h4 className="settings-section-title">Retrospective Mode</h4>
                   <div className="settings-boolean-option">
                     <button
@@ -336,6 +383,8 @@ function Board({ showNotification }) {
     updateDownvotingEnabled,
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
+    votesPerUser,
+    updateVotesPerUser,
     retrospectiveMode,
     updateRetrospectiveMode,
     createNewBoard,
@@ -525,6 +574,8 @@ function Board({ showNotification }) {
             updateDownvotingEnabled={updateDownvotingEnabled}
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
+            votesPerUser={votesPerUser}
+            updateVotesPerUser={updateVotesPerUser}
             retrospectiveMode={retrospectiveMode}
             updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}

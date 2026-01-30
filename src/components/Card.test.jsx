@@ -725,11 +725,11 @@ describe('Card Component', () => {
     });
   });
 
-  test('does not enforce vote limit when not in retrospective mode', async () => {
+  test('enforces vote limit even when not in retrospective mode', async () => {
     // Mock the context with retrospective mode disabled and a low vote limit
     useBoardContext.mockReturnValue({
       ...mockBoardContext,
-      retrospectiveMode: false, // Key: not in retrospective mode
+      retrospectiveMode: false, // Not in retrospective mode
       votesPerUser: 1, // Low limit to test
       getUserVoteCount: vi.fn(() => 1) // User already at limit
     });
@@ -740,17 +740,17 @@ describe('Card Component', () => {
 
     render(<Card {...mockProps} />);
 
-    // Try to upvote even though user is at limit
+    // Try to upvote when user is at limit
     const upvoteButton = screen.getByTitle('Upvote');
     fireEvent.click(upvoteButton);
 
-    // Verify vote was allowed (not blocked by limit)
+    // Verify vote was blocked by limit (vote limits now apply regardless of retrospective mode)
     await waitFor(() => {
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockProps.showNotification).toHaveBeenCalledWith("You've reached your vote limit (1 votes)");
     });
 
-    // Verify the vote was actually recorded (set was called)
-    expect(set).toHaveBeenCalled();
+    // Verify the vote was NOT recorded (set was not called)
+    expect(set).not.toHaveBeenCalled();
   });
 
   test('enforces vote limit when in retrospective mode', async () => {
