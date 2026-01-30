@@ -142,7 +142,7 @@ h1 {
     top: 100%;
     right: 0;
     margin-top: 2px;
-    min-width: 220px;
+    min-width: 400px;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -265,8 +265,15 @@ h1 {
 }
 
 @keyframes dropdown-fade-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* When dropdown is open, add a subtle indicator */
@@ -281,11 +288,12 @@ h1 {
 
 /* Mobile responsive adjustments for header elements */
 @media (max-width: 768px) {
+
     /* Better spacing for header content on mobile */
     .header-content {
         gap: var(--space-md);
     }
-    
+
     /* Create a grid layout for action buttons on mobile */
     .action-buttons {
         display: grid;
@@ -293,7 +301,7 @@ h1 {
         grid-gap: 10px;
         width: 100%;
     }
-    
+
     /* Adjust button sizing within the header for mobile */
     .action-buttons .btn {
         width: 100%;
@@ -302,23 +310,23 @@ h1 {
         align-items: center;
         justify-content: center;
     }
-    
+
     /* Ensure dropdown is full width on mobile */
     .sort-dropdown-container {
         grid-column: span 2;
         width: 100%;
     }
-    
+
     .sort-dropdown-button {
         width: 100%;
         min-height: 48px;
     }
-    
+
     /* Larger tap targets for dropdown options */
     .sort-dropdown-menu {
         width: 100%;
     }
-    
+
     .sort-option {
         padding: 16px;
         min-height: 48px;
@@ -406,7 +414,7 @@ h1 {
         padding: 8px 12px;
         font-size: var(--font-size-xs);
     }
-    
+
     .vote-counter-value {
         font-size: var(--font-size-sm);
     }
@@ -452,7 +460,7 @@ h1 {
         padding: 8px 12px;
         font-size: var(--font-size-xs);
     }
-    
+
     .total-vote-counter-value {
         font-size: var(--font-size-sm);
     }

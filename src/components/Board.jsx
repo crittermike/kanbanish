@@ -242,7 +242,6 @@ const ActionButtons = ({
                       10
                     </button>
                     <div className="vote-limit-custom">
-                      <label htmlFor="custom-vote-limit">Custom:</label>
                       <input
                         type="number"
                         id="custom-vote-limit"

@@ -1020,8 +1020,8 @@ export const BoardProvider = ({ children }) => {
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
 
-    // Check vote limit - skip if not in retrospective mode
-    if (retrospectiveMode) {
+    // Check vote limit - skip if votesPerUser is null (unlimited)
+    if (votesPerUser !== null) {
       const currentUserVotes = getUserVoteCount(userId);
       
       // For multiple votes allowed, check if adding this vote would exceed the limit
