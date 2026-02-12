@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Box } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/helpers';
@@ -73,7 +73,9 @@ const ActionButtons = ({
   resetAllVotes,
   showNotification,
   darkMode,
-  updateDarkMode
+  updateDarkMode,
+  anaglyphMode,
+  updateAnaglyphMode
 }) => {
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
@@ -265,6 +267,16 @@ const ActionButtons = ({
       >
         {darkMode ? <Sun size={16} /> : <Moon size={16} />}
       </button>
+      <button
+        id="anaglyph-toggle"
+        className={`btn icon-btn${anaglyphMode ? ' active' : ''}`}
+        onClick={() => {
+          updateAnaglyphMode(!anaglyphMode);
+        }}
+        title={anaglyphMode ? 'Disable 3D mode' : 'Enable 3D mode'}
+      >
+        <Box size={16} />
+      </button>
     </div>
   );
 };
@@ -345,6 +357,8 @@ function Board({ showNotification }) {
     user, // Include user from context
     darkMode,
     updateDarkMode,
+    anaglyphMode,
+    updateAnaglyphMode,
     workflowPhase, // Add workflow phase
     getAllUsersAddingCards
   } = useBoardContext();
@@ -533,6 +547,8 @@ function Board({ showNotification }) {
             showNotification={showNotification}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
+            anaglyphMode={anaglyphMode}
+            updateAnaglyphMode={updateAnaglyphMode}
           />
         </div>
       </header>
