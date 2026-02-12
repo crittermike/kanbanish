@@ -11,6 +11,8 @@ import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplat
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
+import HealthCheckVoting from './HealthCheckVoting';
+import HealthCheckResults from './HealthCheckResults';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 import VoteCounter from './VoteCounter';
@@ -549,7 +551,11 @@ function Board({ showNotification }) {
       )}
 
       <main>
-        {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
+        {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
+          <HealthCheckVoting />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS ? (
+          <HealthCheckResults />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView showNotification={showNotification} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />

@@ -4,6 +4,8 @@
 
 // Workflow phase constants
 export const WORKFLOW_PHASES = {
+  HEALTH_CHECK: 'HEALTH_CHECK',
+  HEALTH_CHECK_RESULTS: 'HEALTH_CHECK_RESULTS',
   CREATION: 'CREATION',
   GROUPING: 'GROUPING',
   INTERACTIONS: 'INTERACTIONS',
@@ -192,6 +194,10 @@ export const getWorkflowDisabledReason = (action, workflowPhase) => {
  */
 export const getPhaseDescription = workflowPhase => {
   switch (workflowPhase) {
+    case WORKFLOW_PHASES.HEALTH_CHECK:
+      return 'Rate how the team is feeling about key areas';
+    case WORKFLOW_PHASES.HEALTH_CHECK_RESULTS:
+      return 'Review team health check results';
     case WORKFLOW_PHASES.CREATION:
       return 'Create and add cards to the board';
     case WORKFLOW_PHASES.GROUPING:
