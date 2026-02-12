@@ -1,4 +1,4 @@
-import { ref, onValue, off, set, remove } from 'firebase/database';
+import { ref, onValue, off, set, remove, update } from 'firebase/database';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
@@ -1121,7 +1121,7 @@ export const BoardProvider = ({ children }) => {
   const updateDarkMode = enabled => {
     if (user) {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-      set(userPrefsRef, { darkMode: enabled, anaglyphMode })
+      update(userPrefsRef, { darkMode: enabled })
         .then(() => {
           console.log('Dark mode preference updated:', enabled);
           setDarkMode(enabled);
@@ -1139,7 +1139,7 @@ export const BoardProvider = ({ children }) => {
   const updateAnaglyphMode = enabled => {
     if (user) {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-      set(userPrefsRef, { darkMode, anaglyphMode: enabled })
+      update(userPrefsRef, { anaglyphMode: enabled })
         .then(() => {
           setAnaglyphMode(enabled);
         })
