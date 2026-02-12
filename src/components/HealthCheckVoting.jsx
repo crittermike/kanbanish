@@ -132,9 +132,6 @@ const HealthCheckVoting = () => {
                     </button>
                   ))}
                 </div>
-                {userVote && !hoveredRatings[question.id] && (
-                  <span className="vote-check">✓</span>
-                )}
               </div>
             </div>
           );

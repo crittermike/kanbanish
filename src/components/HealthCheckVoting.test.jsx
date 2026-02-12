@@ -139,7 +139,7 @@ describe('HealthCheckVoting Component', () => {
     expect(ratingButtons[4]).toHaveAttribute('data-tooltip', 'Great');
   });
 
-  test('displays check mark when question has been answered', () => {
+  test('highlights active buttons when question has been answered', () => {
     useBoardContext.mockReturnValue({
       ...defaultMockContext,
       userHealthCheckVotes: {
@@ -150,10 +150,12 @@ describe('HealthCheckVoting Component', () => {
     render(<HealthCheckVoting />);
 
     const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
-    const checkMark = teamworkQuestion.querySelector('.vote-check');
+    const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
     
-    expect(checkMark).toBeInTheDocument();
-    expect(checkMark).toHaveTextContent('✓');
+    // Buttons 1-4 should be active, button 5 should not
+    expect(ratingButtons[0]).toHaveClass('active');
+    expect(ratingButtons[3]).toHaveClass('active');
+    expect(ratingButtons[4]).not.toHaveClass('active');
   });
 
   test('shows 0% progress when no users have voted', () => {

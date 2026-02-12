@@ -115,11 +115,6 @@
     border-color: transparent;
 }
 
-.vote-check {
-    color: var(--success, #22c55e);
-    font-weight: bold;
-}
-
 .health-check-status {
     text-align: center;
     padding: 1rem;
