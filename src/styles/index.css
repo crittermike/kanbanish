@@ -19,6 +19,7 @@
 @import 'components/results.css';
 @import 'components/workflow.css';
 @import 'components/poll.css';
+@import 'components/health-check.css';
 
 /* Utility classes and notifications */
 .notification {

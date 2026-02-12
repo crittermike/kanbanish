@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, MessageCircle, Award, ArrowLeft, BarChart } from 'react-feather';
+import { Eye, MessageCircle, Award, ArrowLeft, BarChart, Heart } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import VoteLimitModal from './modals/VoteLimitModal';
@@ -11,14 +11,21 @@ const WorkflowControls = ({ showNotification }) => {
     workflowPhase,
     votesPerUser,
     updateVotesPerUser,
+    retrospectiveMode,
     startGroupingPhase,
     startInteractionsPhase,
     startInteractionRevealPhase,
     startResultsPhase,
     startPollPhase,
     startPollResultsPhase,
-    goToPreviousPhase
+    goToPreviousPhase,
+    updateBoardSettings
   } = useBoardContext();
+
+  const handleContinueToBoard = () => {
+    updateBoardSettings({ workflowPhase: WORKFLOW_PHASES.CREATION });
+    showNotification('Card creation phase started');
+  };
 
   const handleStartGrouping = () => {
     startGroupingPhase();
@@ -57,6 +64,7 @@ const WorkflowControls = ({ showNotification }) => {
 
   const handleGoToPreviousPhase = () => {
     const phaseMessages = {
+      [WORKFLOW_PHASES.CREATION]: 'Returned to health check',
       [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
       [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
       [WORKFLOW_PHASES.INTERACTION_REVEAL]: 'Returned to voting phase',
@@ -72,6 +80,25 @@ const WorkflowControls = ({ showNotification }) => {
 
   const renderPhaseControls = () => {
     switch (workflowPhase) {
+      case WORKFLOW_PHASES.HEALTH_CHECK:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Health Check Phase</h3>
+              <p>Rate how the team is feeling about key areas. View results individually when ready.</p>
+            </div>
+            <div className="phase-controls">
+              <button
+                className="btn primary-btn"
+                onClick={handleContinueToBoard}
+              >
+                <Eye size={16} />
+                Continue to Board
+              </button>
+            </div>
+          </div>
+        );
+
       case WORKFLOW_PHASES.CREATION:
         return (
           <div className="workflow-phase">
@@ -86,6 +113,13 @@ const WorkflowControls = ({ showNotification }) => {
               >
                 <Eye size={16} />
                 Reveal Cards & Start Grouping
+              </button>
+              <button
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <Heart size={16} />
+                Back to Health Check
               </button>
             </div>
           </div>

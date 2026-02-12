@@ -40,6 +40,10 @@ export const BoardProvider = ({ children }) => {
   const [pollVotes, setPollVotes] = useState({}); // { userId: rating }
   const [userPollVote, setUserPollVote] = useState(null); // Current user's vote
 
+  // Health check state
+  const [healthCheckVotes, setHealthCheckVotes] = useState({}); // { questionId: { userId: rating } }
+  const [userHealthCheckVotes, setUserHealthCheckVotes] = useState({}); // { questionId: rating }
+
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
@@ -139,6 +143,25 @@ export const BoardProvider = ({ children }) => {
           } else {
             setPollVotes({});
             setUserPollVote(null);
+          }
+
+          // Load health check data
+          if (boardData.healthCheck) {
+            setHealthCheckVotes(boardData.healthCheck.votes || {});
+            if (user) {
+              const userVotes = {};
+              Object.entries(boardData.healthCheck.votes || {}).forEach(([questionId, questionVotes]) => {
+                if (questionVotes[user.uid] !== undefined) {
+                  userVotes[questionId] = questionVotes[user.uid];
+                }
+              });
+              setUserHealthCheckVotes(userVotes);
+            } else {
+              setUserHealthCheckVotes({});
+            }
+          } else {
+            setHealthCheckVotes({});
+            setUserHealthCheckVotes({});
           }
         }
       });
@@ -440,13 +463,16 @@ export const BoardProvider = ({ children }) => {
     updateBoardSettings({ sortByVotes: enabled });
   };
 
-  // Update reveal mode setting
+  // Update retrospective mode setting
   const updateRetrospectiveMode = enabled => {
     if (enabled) {
-      // When enabling reveal mode, just update that setting
-      updateBoardSettings({ retrospectiveMode: enabled });
+      // When enabling retrospective mode, start with health check phase
+      updateBoardSettings({
+        retrospectiveMode: enabled,
+        workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+      });
     } else {
-      // When disabling reveal mode, also reset workflow to creation phase
+      // When disabling retrospective mode, also reset workflow to creation phase
       updateBoardSettings({
         retrospectiveMode: enabled,
         workflowPhase: WORKFLOW_PHASES.CREATION,
@@ -536,6 +562,71 @@ export const BoardProvider = ({ children }) => {
     return { average, distribution, totalVotes: votes.length };
   };
 
+  // Health check constants
+  const HEALTH_CHECK_QUESTIONS = [
+    { id: 'teamwork', label: 'Teamwork', description: 'How well is the team collaborating?' },
+    { id: 'process', label: 'Process', description: 'How effective are our processes?' },
+    { id: 'delivery', label: 'Delivery', description: 'How confident are we in delivering on time?' },
+    { id: 'fun', label: 'Fun', description: 'How much fun are we having at work?' },
+    { id: 'learning', label: 'Learning', description: 'How much are we learning and improving?' },
+    { id: 'support', label: 'Support', description: 'How supported do you feel by the team?' },
+    { id: 'mission', label: 'Mission', description: 'How clear and meaningful is our mission?' },
+    { id: 'speed', label: 'Speed', description: 'How satisfied are you with our pace of work?' }
+  ];
+
+  // Submit a health check vote for a specific question
+  const submitHealthCheckVote = (questionId, rating) => {
+    if (!boardId || !user || rating < 1 || rating > 5) {
+      return;
+    }
+
+    const voteRef = ref(database, `boards/${boardId}/healthCheck/votes/${questionId}/${user.uid}`);
+    set(voteRef, rating).then(() => {
+      setUserHealthCheckVotes(prev => ({ ...prev, [questionId]: rating }));
+    }).catch(error => {
+      console.error('Error submitting health check vote:', error);
+    });
+  };
+
+  // Get stats for all health check questions
+  const getHealthCheckStats = () => {
+    return HEALTH_CHECK_QUESTIONS.map(question => {
+      const questionVotes = healthCheckVotes[question.id] || {};
+      const votes = Object.values(questionVotes);
+
+      if (votes.length === 0) {
+        return { ...question, average: 0, distribution: [0, 0, 0, 0, 0], totalVotes: 0 };
+      }
+
+      const distribution = [0, 0, 0, 0, 0];
+      let sum = 0;
+
+      votes.forEach(vote => {
+        if (vote >= 1 && vote <= 5) {
+          distribution[vote - 1]++;
+          sum += vote;
+        }
+      });
+
+      const average = sum / votes.length;
+      return { ...question, average, distribution, totalVotes: votes.length };
+    });
+  };
+
+  // Start health check phase
+  const startHealthCheckPhase = () => {
+    updateBoardSettings({
+      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+    });
+  };
+
+  // Start health check results phase
+  const startHealthCheckResultsPhase = () => {
+    updateBoardSettings({
+      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS
+    });
+  };
+
   // Remove all grouping from the board
   const removeAllGrouping = () => {
     if (!boardId || !user) {
@@ -575,6 +666,11 @@ export const BoardProvider = ({ children }) => {
 
   const goToPreviousPhase = () => {
     switch (workflowPhase) {
+      case WORKFLOW_PHASES.CREATION:
+        updateBoardSettings({
+          workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+        });
+        break;
       case WORKFLOW_PHASES.GROUPING: {
         // When going back to CREATION from GROUPING, warn about losing group data
         const hasGroups = Object.values(columns).some(column =>
@@ -1221,6 +1317,14 @@ export const BoardProvider = ({ children }) => {
     userPollVote,
     submitPollVote,
     getPollStats,
+    // Health check system
+    healthCheckVotes,
+    userHealthCheckVotes,
+    submitHealthCheckVote,
+    getHealthCheckStats,
+    startHealthCheckPhase,
+    startHealthCheckResultsPhase,
+    HEALTH_CHECK_QUESTIONS,
     // Card grouping functions
     createCardGroup,
     ungroupCards,

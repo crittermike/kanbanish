@@ -1,0 +1,187 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
+import { useBoardContext } from '../context/BoardContext';
+import HealthCheckVoting from './HealthCheckVoting';
+
+// Mock the BoardContext
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
+
+describe('HealthCheckVoting Component', () => {
+  const mockSubmitHealthCheckVote = vi.fn();
+
+  const HEALTH_CHECK_QUESTIONS = [
+    { id: 'teamwork', label: 'Teamwork', description: 'How well is the team collaborating?' },
+    { id: 'fun', label: 'Fun', description: 'How much fun are we having at work?' }
+  ];
+
+  const defaultMockContext = {
+    userHealthCheckVotes: {},
+    submitHealthCheckVote: mockSubmitHealthCheckVote,
+    HEALTH_CHECK_QUESTIONS,
+    activeUsers: 5,
+    healthCheckVotes: {}
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useBoardContext.mockReturnValue(defaultMockContext);
+  });
+
+  test('renders all health check questions with labels and descriptions', () => {
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText('Teamwork')).toBeInTheDocument();
+    expect(screen.getByText('How well is the team collaborating?')).toBeInTheDocument();
+    expect(screen.getByText('Fun')).toBeInTheDocument();
+    expect(screen.getByText('How much fun are we having at work?')).toBeInTheDocument();
+  });
+
+  test('calls submitHealthCheckVote with correct questionId and rating when clicking a rating button', () => {
+    render(<HealthCheckVoting />);
+
+    const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
+    const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
+    
+    // Click the 4th rating button
+    fireEvent.click(ratingButtons[3]);
+
+    expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('teamwork', 4);
+  });
+
+  test('shows completed status when all questions have been answered', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      userHealthCheckVotes: {
+        teamwork: 4,
+        fun: 3
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText(/✓ You have rated all 2 areas\./)).toBeInTheDocument();
+  });
+
+  test('shows remaining count when not all questions are answered', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      userHealthCheckVotes: {
+        teamwork: 4
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText('1 of 2 areas rated')).toBeInTheDocument();
+  });
+
+  test('shows voting progress section', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      activeUsers: 8,
+      healthCheckVotes: {
+        teamwork: { user1: 4, user2: 3 },
+        fun: { user1: 5 }
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText('Participation')).toBeInTheDocument();
+    expect(screen.getByText('2 of 8 participants have started (25%)')).toBeInTheDocument();
+  });
+
+  test('allows voting on multiple questions', () => {
+    render(<HealthCheckVoting />);
+
+    const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
+    const funQuestion = screen.getByTestId('health-check-question-fun');
+    
+    const teamworkButtons = teamworkQuestion.querySelectorAll('.rating-button');
+    const funButtons = funQuestion.querySelectorAll('.rating-button');
+    
+    fireEvent.click(teamworkButtons[4]); // Vote 5 on teamwork
+    fireEvent.click(funButtons[2]); // Vote 3 on fun
+
+    expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('teamwork', 5);
+    expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('fun', 3);
+  });
+
+  test('allows changing vote on a question', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      userHealthCheckVotes: {
+        teamwork: 3
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
+    const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
+    
+    // Change vote from 3 to 5
+    fireEvent.click(ratingButtons[4]);
+
+    expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('teamwork', 5);
+  });
+
+  test('displays rating labels as tooltips', () => {
+    render(<HealthCheckVoting />);
+
+    const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
+    const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
+    
+    // Check that rating buttons have tooltip data attributes
+    expect(ratingButtons[0]).toHaveAttribute('data-tooltip', 'Terrible');
+    expect(ratingButtons[4]).toHaveAttribute('data-tooltip', 'Great');
+  });
+
+  test('highlights active buttons when question has been answered', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      userHealthCheckVotes: {
+        teamwork: 4
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
+    const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
+    
+    // Buttons 1-4 should be active, button 5 should not
+    expect(ratingButtons[0]).toHaveClass('active');
+    expect(ratingButtons[3]).toHaveClass('active');
+    expect(ratingButtons[4]).not.toHaveClass('active');
+  });
+
+  test('shows 0% progress when no users have voted', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      activeUsers: 5,
+      healthCheckVotes: {}
+    });
+
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText('0 of 5 participants have started (0%)')).toBeInTheDocument();
+  });
+
+  test('shows 100% progress when all active users have voted', () => {
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      activeUsers: 3,
+      healthCheckVotes: {
+        teamwork: { user1: 4, user2: 3, user3: 5 },
+        fun: { user1: 5, user2: 4, user3: 3 }
+      }
+    });
+
+    render(<HealthCheckVoting />);
+
+    expect(screen.getByText('3 of 3 participants have started (100%)')).toBeInTheDocument();
+  });
+});
