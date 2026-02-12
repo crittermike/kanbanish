@@ -11,7 +11,6 @@ const WorkflowControls = ({ showNotification }) => {
     workflowPhase,
     votesPerUser,
     updateVotesPerUser,
-    startHealthCheckPhase,
     startHealthCheckResultsPhase,
     startGroupingPhase,
     startInteractionsPhase,
@@ -22,11 +21,6 @@ const WorkflowControls = ({ showNotification }) => {
     goToPreviousPhase,
     updateBoardSettings
   } = useBoardContext();
-
-  const handleStartHealthCheck = () => {
-    startHealthCheckPhase();
-    showNotification('Health check started - rate how the team is feeling');
-  };
 
   const handleStartHealthCheckResults = () => {
     startHealthCheckResultsPhase();

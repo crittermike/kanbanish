@@ -463,16 +463,16 @@ export const BoardProvider = ({ children }) => {
     updateBoardSettings({ sortByVotes: enabled });
   };
 
-  // Update reveal mode setting
+  // Update retrospective mode setting
   const updateRetrospectiveMode = enabled => {
     if (enabled) {
-      // When enabling reveal mode, start with health check phase
+      // When enabling retrospective mode, start with health check phase
       updateBoardSettings({
         retrospectiveMode: enabled,
         workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
       });
     } else {
-      // When disabling reveal mode, also reset workflow to creation phase
+      // When disabling retrospective mode, also reset workflow to creation phase
       updateBoardSettings({
         retrospectiveMode: enabled,
         workflowPhase: WORKFLOW_PHASES.CREATION,
