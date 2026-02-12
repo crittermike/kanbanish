@@ -197,4 +197,20 @@ describe('EmojiPicker Component', () => {
       expect(emojiText).toContain('🎅'); // Santa
     });
   });
+
+  it('searches for salute emoji', async () => {
+    render(<EmojiPicker {...defaultProps} />);
+    
+    const searchInput = screen.getByTestId('emoji-search-input');
+    
+    // Search for "salute" which should match the salute emoji
+    fireEvent.change(searchInput, { target: { value: 'salute' } });
+    
+    await waitFor(() => {
+      const emojiOptions = screen.getAllByTestId('emoji-option');
+      expect(emojiOptions.length).toBeGreaterThan(0); // Should find salute emojis
+      const emojiText = emojiOptions.map(option => option.textContent).join('');
+      expect(emojiText).toContain('🫡'); // Saluting face
+    });
+  });
 });

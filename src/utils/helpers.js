@@ -102,7 +102,9 @@ function generateEmojiList() {
     '👀', '🧠', '💡', '⚡', '✨', '⭐', '🏆', '🎉', '🚀', '🌈',
     '✅', '❌', '❗', '❓', '⚠️', '🔥', '💰', '💎', '🎯', '🎪',
     // Christmas emojis
-    '🎄', '🎅', '🤶', '🎁', '🔔', '🍪', '🎀', '🦌', '🛷', '🕯️'
+    '🎄', '🎅', '🤶', '🎁', '🔔', '🍪', '🎀', '🦌', '🛷', '🕯️',
+    // Salute and related newer face/hand emojis
+    '🫡', '🫠', '🫢', '🫣', '🫤', '🫥', '🫶'
   ];
 
   additionalEmojis.forEach(emoji => {
@@ -439,6 +441,15 @@ export function getEmojiKeywords(emoji) {
     '🦌': ['deer', 'reindeer', 'christmas', 'xmas', 'rudolph', 'holiday', 'animal'],
     '🛷': ['sled', 'sleigh', 'christmas', 'xmas', 'winter', 'snow', 'holiday'],
     '🕯️': ['candle', 'light', 'christmas', 'xmas', 'holiday', 'festive', 'flame'],
+
+    // Salute and related newer face/hand emojis
+    '🫡': ['salute', 'saluting', 'face', 'respect', 'yes', 'sir', 'military', 'honor'],
+    '🫠': ['melting', 'face', 'hot', 'disappear', 'embarrassed', 'sarcasm'],
+    '🫢': ['face', 'open', 'eyes', 'hand', 'over', 'mouth', 'surprised', 'oops', 'gasp'],
+    '🫣': ['face', 'peeking', 'eye', 'shy', 'nervous', 'scared', 'hiding'],
+    '🫤': ['face', 'diagonal', 'mouth', 'skeptical', 'unsure', 'meh', 'disappointed'],
+    '🫥': ['dotted', 'line', 'face', 'invisible', 'hidden', 'disappear', 'empty'],
+    '🫶': ['heart', 'hands', 'love', 'gesture', 'appreciate', 'support', 'care'],
   };
 
   // Get keywords for the emoji, or try to extract from Unicode name
