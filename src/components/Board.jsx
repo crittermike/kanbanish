@@ -12,7 +12,6 @@ import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
 import HealthCheckVoting from './HealthCheckVoting';
-import HealthCheckResults from './HealthCheckResults';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 import VoteCounter from './VoteCounter';
@@ -559,16 +558,14 @@ function Board({ showNotification }) {
         currentUserId={user?.uid}
       />
 
-      {/* Workflow Controls - Show when retrospective mode is enabled or during health check phases */}
-      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS) && (
+      {/* Workflow Controls - Show when retrospective mode is enabled or during health check phase */}
+      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
         <WorkflowControls showNotification={showNotification} />
       )}
 
       <main>
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
-        ) : workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS ? (
-          <HealthCheckResults />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView showNotification={showNotification} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (

@@ -666,14 +666,9 @@ export const BoardProvider = ({ children }) => {
 
   const goToPreviousPhase = () => {
     switch (workflowPhase) {
-      case WORKFLOW_PHASES.HEALTH_CHECK_RESULTS:
-        updateBoardSettings({
-          workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
-        });
-        break;
       case WORKFLOW_PHASES.CREATION:
         updateBoardSettings({
-          workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS
+          workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
         });
         break;
       case WORKFLOW_PHASES.GROUPING: {

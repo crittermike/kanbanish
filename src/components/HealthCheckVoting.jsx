@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Users } from 'react-feather';
+import { Users, BarChart, ArrowLeft } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import HealthCheckResults from './HealthCheckResults';
 
 const RATING_LABELS = {
   1: 'Terrible',
@@ -28,6 +29,7 @@ const HealthCheckVoting = () => {
   } = useBoardContext();
 
   const [hoveredRatings, setHoveredRatings] = useState({});
+  const [showResults, setShowResults] = useState(false);
 
   const handleVote = (questionId, rating) => {
     submitHealthCheckVote(questionId, rating);
@@ -58,6 +60,23 @@ const HealthCheckVoting = () => {
   const answeredCount = Object.keys(userHealthCheckVotes).length;
   const totalQuestions = HEALTH_CHECK_QUESTIONS.length;
   const progressPercentage = activeUsers > 0 ? Math.round((votedCount / activeUsers) * 100) : 0;
+
+  if (showResults) {
+    return (
+      <div>
+        <HealthCheckResults />
+        <div className="health-check-results-nav">
+          <button
+            className="btn secondary-btn btn-with-icon"
+            onClick={() => setShowResults(false)}
+          >
+            <ArrowLeft size={16} />
+            Back to Voting
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="health-check-voting">
@@ -107,17 +126,12 @@ const HealthCheckVoting = () => {
                       style={{
                         backgroundColor: displayRating >= rating ? RATING_COLORS[rating] : undefined
                       }}
-                      title={RATING_LABELS[rating]}
+                      data-tooltip={RATING_LABELS[rating]}
                     >
                       {rating}
                     </button>
                   ))}
                 </div>
-                {displayRating > 0 && (
-                  <span className="rating-label" style={{ color: RATING_COLORS[displayRating] }}>
-                    {RATING_LABELS[displayRating]}
-                  </span>
-                )}
                 {userVote && !hoveredRatings[question.id] && (
                   <span className="vote-check">✓</span>
                 )}
@@ -129,10 +143,17 @@ const HealthCheckVoting = () => {
 
       <div className="health-check-status">
         {answeredCount === totalQuestions ? (
-          <p className="all-answered">✓ You have rated all {totalQuestions} areas. Ready to view results!</p>
+          <p className="all-answered">✓ You have rated all {totalQuestions} areas.</p>
         ) : (
           <p className="remaining">{answeredCount} of {totalQuestions} areas rated</p>
         )}
+        <button
+          className="btn primary-btn btn-with-icon health-check-view-results-btn"
+          onClick={() => setShowResults(true)}
+        >
+          <BarChart size={16} />
+          View Results
+        </button>
       </div>
     </div>
   );

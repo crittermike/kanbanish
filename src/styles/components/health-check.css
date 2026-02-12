@@ -84,6 +84,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .rating-button:hover {
@@ -91,16 +92,27 @@
     box-shadow: 0 0 0 2px var(--accent, #58a6ff);
 }
 
+.rating-button:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg, #1e1e1e);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid var(--border-color);
+    z-index: 10;
+}
+
 .rating-button.active {
     color: #fff;
     border-color: transparent;
-}
-
-.rating-label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    min-width: 60px;
-    text-align: center;
 }
 
 .vote-check {
@@ -121,6 +133,17 @@
 
 .health-check-status .remaining {
     color: var(--text-secondary);
+}
+
+.health-check-view-results-btn {
+    margin-top: 1rem;
+}
+
+.health-check-results-nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 
 /* Health Check Results Styles */

@@ -61,7 +61,7 @@ describe('HealthCheckVoting Component', () => {
 
     render(<HealthCheckVoting />);
 
-    expect(screen.getByText('✓ You have rated all 2 areas. Ready to view results!')).toBeInTheDocument();
+    expect(screen.getByText(/✓ You have rated all 2 areas\./)).toBeInTheDocument();
   });
 
   test('shows remaining count when not all questions are answered', () => {
@@ -128,16 +128,15 @@ describe('HealthCheckVoting Component', () => {
     expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('teamwork', 5);
   });
 
-  test('displays rating labels on hover', () => {
+  test('displays rating labels as tooltips', () => {
     render(<HealthCheckVoting />);
 
     const teamworkQuestion = screen.getByTestId('health-check-question-teamwork');
     const ratingButtons = teamworkQuestion.querySelectorAll('.rating-button');
     
-    // Hover over the 5th rating button
-    fireEvent.mouseEnter(ratingButtons[4]);
-
-    expect(screen.getByText('Great')).toBeInTheDocument();
+    // Check that rating buttons have tooltip data attributes
+    expect(ratingButtons[0]).toHaveAttribute('data-tooltip', 'Terrible');
+    expect(ratingButtons[4]).toHaveAttribute('data-tooltip', 'Great');
   });
 
   test('displays check mark when question has been answered', () => {
