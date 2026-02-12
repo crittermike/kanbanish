@@ -616,8 +616,7 @@ export const BoardProvider = ({ children }) => {
   // Start health check phase
   const startHealthCheckPhase = () => {
     updateBoardSettings({
-      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK,
-      retrospectiveMode: true
+      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
     });
   };
 

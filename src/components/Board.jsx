@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon } from 'react-feather';
+import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/helpers';
@@ -60,6 +60,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
 // UI Component for the action buttons in the header
 const ActionButtons = ({
   handleCreateNewBoard,
+  handleStartHealthCheck,
   sortByVotes,
   setSortByVotes,
   votingEnabled,
@@ -102,6 +103,14 @@ const ActionButtons = ({
       >
         <PlusSquare size={16} />
         New Board
+      </button>
+      <button
+        id="start-health-check"
+        className="btn btn-with-icon"
+        onClick={handleStartHealthCheck}
+      >
+        <Heart size={16} />
+        Health Check
       </button>
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
@@ -348,7 +357,8 @@ function Board({ showNotification }) {
     darkMode,
     updateDarkMode,
     workflowPhase, // Add workflow phase
-    getAllUsersAddingCards
+    getAllUsersAddingCards,
+    startHealthCheckPhase
   } = useBoardContext();
 
   // State for settings dropdown menu
@@ -519,6 +529,10 @@ function Board({ showNotification }) {
           />
           <ActionButtons
             handleCreateNewBoard={handleCreateNewBoard}
+            handleStartHealthCheck={() => {
+              startHealthCheckPhase();
+              showNotification('Health check started');
+            }}
             sortByVotes={sortByVotes}
             setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
@@ -545,15 +559,15 @@ function Board({ showNotification }) {
         currentUserId={user?.uid}
       />
 
-      {/* Workflow Controls - Only show when retrospective mode is enabled */}
-      {retrospectiveMode && (
+      {/* Workflow Controls - Show when retrospective mode is enabled or during health check phases */}
+      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS) && (
         <WorkflowControls showNotification={showNotification} />
       )}
 
       <main>
-        {retrospectiveMode && workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
+        {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS ? (
+        ) : workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS ? (
           <HealthCheckResults />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView showNotification={showNotification} />

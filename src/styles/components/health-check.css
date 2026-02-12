@@ -87,8 +87,8 @@
 }
 
 .rating-button:hover {
-    transform: scale(1.1);
     border-color: transparent;
+    box-shadow: 0 0 0 2px var(--accent, #58a6ff);
 }
 
 .rating-button.active {
