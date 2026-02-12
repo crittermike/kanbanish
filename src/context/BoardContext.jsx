@@ -1,4 +1,4 @@
-import { ref, onValue, off, set, remove } from 'firebase/database';
+import { ref, onValue, off, set, remove, update } from 'firebase/database';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/helpers';
@@ -42,6 +42,7 @@ export const BoardProvider = ({ children }) => {
 
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [anaglyphMode, setAnaglyphMode] = useState(false); // 3D anaglyph mode - default off
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
   const [usersAddingCards, setUsersAddingCards] = useState({}); // Track users currently adding cards
 
@@ -59,6 +60,9 @@ export const BoardProvider = ({ children }) => {
             const prefs = snapshot.val();
             if (prefs.darkMode !== undefined) {
               setDarkMode(prefs.darkMode);
+            }
+            if (prefs.anaglyphMode !== undefined) {
+              setAnaglyphMode(prefs.anaglyphMode);
             }
           }
         }).catch(error => {
@@ -84,6 +88,15 @@ export const BoardProvider = ({ children }) => {
       document.documentElement.classList.add('light-mode');
     }
   }, [darkMode]);
+
+  // Update document class when anaglyph mode changes
+  useEffect(() => {
+    if (anaglyphMode) {
+      document.documentElement.classList.add('anaglyph-3d');
+    } else {
+      document.documentElement.classList.remove('anaglyph-3d');
+    }
+  }, [anaglyphMode]);
 
   // Set up board reference when boardId changes
   useEffect(() => {
@@ -1108,7 +1121,7 @@ export const BoardProvider = ({ children }) => {
   const updateDarkMode = enabled => {
     if (user) {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-      set(userPrefsRef, { darkMode: enabled })
+      update(userPrefsRef, { darkMode: enabled })
         .then(() => {
           console.log('Dark mode preference updated:', enabled);
           setDarkMode(enabled);
@@ -1119,6 +1132,22 @@ export const BoardProvider = ({ children }) => {
     } else {
       // If we're not connected to a user yet, just update the local state
       setDarkMode(enabled);
+    }
+  };
+
+  // Update 3D anaglyph mode preference
+  const updateAnaglyphMode = enabled => {
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      update(userPrefsRef, { anaglyphMode: enabled })
+        .then(() => {
+          setAnaglyphMode(enabled);
+        })
+        .catch(error => {
+          console.error('Error updating anaglyph mode preference:', error);
+        });
+    } else {
+      setAnaglyphMode(enabled);
     }
   };
 
@@ -1200,6 +1229,8 @@ export const BoardProvider = ({ children }) => {
     getTotalVotesRemaining,
     darkMode,
     updateDarkMode,
+    anaglyphMode,
+    updateAnaglyphMode,
     activeUsers,
     // Workflow phase system
     workflowPhase,

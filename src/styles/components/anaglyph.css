@@ -1,0 +1,134 @@
+/**
+ * Kanban App - 3D Anaglyph Mode Styles
+ * 
+ * When the `.anaglyph-3d` class is active on the document root, elements gain
+ * red/cyan color-separated shadows and transforms that produce a stereoscopic
+ * 3D effect when viewed through red/blue anaglyph glasses.
+ *
+ * Last updated: February 2026
+ */
+
+/* ── Global perspective container ────────────────────────────────── */
+.anaglyph-3d {
+    perspective: 1200px;
+}
+
+.anaglyph-3d .board {
+    transform-style: preserve-3d;
+}
+
+/* ── Cards: hover / selected → pop toward viewer ─────────────────── */
+.anaglyph-3d .card {
+    transition: transform var(--transition-speed) var(--transition-ease),
+                box-shadow var(--transition-speed) var(--transition-ease),
+                border-color var(--transition-speed) var(--transition-ease);
+}
+
+.anaglyph-3d .card:hover {
+    transform: translateZ(18px);
+    box-shadow:
+        -2px 0 0 0 rgba(255, 0, 0, 0.55),
+         2px 0 0 0 rgba(0, 255, 255, 0.55),
+        var(--card-shadow);
+}
+
+.anaglyph-3d .card.selected {
+    transform: translateZ(24px);
+    box-shadow:
+        -3px 0 0 0 rgba(255, 0, 0, 0.6),
+         3px 0 0 0 rgba(0, 255, 255, 0.6),
+        0 0 0 2px var(--accent-transparent);
+}
+
+.anaglyph-3d .card.drop-target {
+    transform: translateZ(28px) scale(1.02);
+    box-shadow:
+        -4px 0 0 0 rgba(255, 0, 0, 0.65),
+         4px 0 0 0 rgba(0, 255, 255, 0.65),
+        0 0 0 3px var(--accent-transparent);
+}
+
+.anaglyph-3d .card.dragging {
+    transform: rotate(2deg) scale(1.02) translateZ(32px);
+    box-shadow:
+        -5px 0 0 0 rgba(255, 0, 0, 0.7),
+         5px 0 0 0 rgba(0, 255, 255, 0.7),
+        0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ── New-card "drop in" animation ────────────────────────────────── */
+@keyframes anaglyph-drop-in {
+    0% {
+        opacity: 0;
+        transform: translateZ(80px) translateY(-30px) scale(0.9);
+        box-shadow:
+            -6px 0 0 0 rgba(255, 0, 0, 0.7),
+             6px 0 0 0 rgba(0, 255, 255, 0.7);
+    }
+    60% {
+        opacity: 1;
+        transform: translateZ(10px) translateY(4px) scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: translateZ(0) translateY(0) scale(1);
+        box-shadow: var(--card-shadow);
+    }
+}
+
+.anaglyph-3d .inline-card-form {
+    animation: anaglyph-drop-in 0.45s ease-out;
+}
+
+/* ── Column depth layering ───────────────────────────────────────── */
+.anaglyph-3d .column {
+    transition: transform var(--transition-speed) var(--transition-ease),
+                box-shadow var(--transition-speed) var(--transition-ease);
+}
+
+.anaglyph-3d .column:hover {
+    box-shadow:
+        -1px 0 0 0 rgba(255, 0, 0, 0.3),
+         1px 0 0 0 rgba(0, 255, 255, 0.3);
+}
+
+/* ── Header depth ────────────────────────────────────────────────── */
+.anaglyph-3d header {
+    text-shadow:
+        -1px 0 0 rgba(255, 0, 0, 0.45),
+         1px 0 0 rgba(0, 255, 255, 0.45);
+}
+
+/* ── Hidden 3D Easter-egg message ────────────────────────────────── */
+.anaglyph-3d .board-container::after {
+    content: '👓 You found the 3D secret! You are now a certified depth explorer.';
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    z-index: 999;
+    /* Red text on dark bg — only legible through cyan lens of anaglyph glasses */
+    color: rgba(255, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.35);
+    text-shadow:
+        0 0 2px rgba(255, 0, 0, 0.5);
+}
+
+/* ── Buttons get a subtle 3D lift on hover ───────────────────────── */
+.anaglyph-3d .btn:hover {
+    box-shadow:
+        -1px 0 0 0 rgba(255, 0, 0, 0.4),
+         1px 0 0 0 rgba(0, 255, 255, 0.4);
+}
+
+/* ── Notification pops out ───────────────────────────────────────── */
+.anaglyph-3d .notification.show {
+    box-shadow:
+        -2px 0 0 0 rgba(255, 0, 0, 0.5),
+         2px 0 0 0 rgba(0, 255, 255, 0.5),
+        var(--notification-shadow);
+}
