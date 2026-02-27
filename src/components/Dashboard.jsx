@@ -1,6 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { useState, useEffect, useCallback } from 'react';
-import { Clock, Layout, Plus, Star, Trash2, Sun, Moon } from 'react-feather';
+import { Clock, Layout, Plus, Star, Trash2, Sun, Moon, Users, Zap, Globe } from 'react-feather';
 import { useRecentBoards } from '../hooks/useRecentBoards';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/ids';
@@ -222,31 +222,51 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
       <div className="dashboard-body">
         {/* Hero: Create + Join in a card container */}
         <div className="dashboard-hero">
-          <button
-            className="dashboard-new-board-btn"
-            onClick={() => setIsTemplateModalOpen(true)}
-          >
-            <Plus size={16} />
-            New Board
-          </button>
-          <div className="dashboard-hero-divider">or</div>
-          <div className="dashboard-join-section">
-            <input
-              type="text"
-              className="dashboard-join-input"
-              placeholder="Paste a board URL or ID to join..."
-              value={joinBoardId}
-              onChange={e => setJoinBoardId(e.target.value)}
-              onKeyDown={handleJoinKeyDown}
-              aria-label="Board ID or URL"
-            />
+          <div className="dashboard-tagline">
+            <h2>Real-time collaborative boards for teams</h2>
+            <p>Run retrospectives, brainstorm ideas, or organize work — no sign-up required. Just create a board and share the link.</p>
+          </div>
+          <div className="dashboard-hero-actions">
             <button
-              className="dashboard-join-btn"
-              onClick={handleJoinBoard}
-              disabled={!joinBoardId.trim()}
+              className="dashboard-new-board-btn"
+              onClick={() => setIsTemplateModalOpen(true)}
             >
-              Join
+              <Plus size={16} />
+              New Board
             </button>
+            <div className="dashboard-hero-divider">or</div>
+            <div className="dashboard-join-section">
+              <input
+                type="text"
+                className="dashboard-join-input"
+                placeholder="Paste a board URL or ID to join..."
+                value={joinBoardId}
+                onChange={e => setJoinBoardId(e.target.value)}
+                onKeyDown={handleJoinKeyDown}
+                aria-label="Board ID or URL"
+              />
+              <button
+                className="dashboard-join-btn"
+                onClick={handleJoinBoard}
+                disabled={!joinBoardId.trim()}
+              >
+                Join
+              </button>
+            </div>
+          </div>
+          <div className="dashboard-features">
+            <div className="dashboard-feature">
+              <Zap size={14} />
+              <span>Instant setup</span>
+            </div>
+            <div className="dashboard-feature">
+              <Users size={14} />
+              <span>Real-time collaboration</span>
+            </div>
+            <div className="dashboard-feature">
+              <Globe size={14} />
+              <span>No account needed</span>
+            </div>
           </div>
         </div>
 
@@ -293,7 +313,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       className="remove-btn"
                       title="Remove from list"
                       aria-label="Remove board from list"
-                      onClick={e => { e.stopPropagation(); removeBoard(board.id); }}
+                      onClick={e => { e.stopPropagation(); if (window.confirm('Remove this board from your list?')) removeBoard(board.id); }}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -309,7 +329,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
           <div className="dashboard-section-header">
             <h2><Clock size={14} /> Recent</h2>
             {recentBoards.length > 0 && (
-              <button className="dashboard-clear-all" onClick={clearAll}>
+              <button className="dashboard-clear-all" onClick={() => { if (window.confirm('Clear all recent boards from your list?')) clearAll(); }}>
                 Clear all
               </button>
             )}
@@ -318,11 +338,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
             <div className="dashboard-empty-state">
               <Layout size={32} />
               <h3>No recent boards</h3>
-              <p>Create a new board or join an existing one to get started.</p>
-            </div>
-          ) : unpinnedBoards.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p>All boards are pinned.</p>
+              <p>Create a new board or join an existing one above.</p>
             </div>
           ) : (
             <div className="dashboard-board-list">
@@ -361,7 +377,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       className="remove-btn"
                       title="Remove from list"
                       aria-label="Remove board from list"
-                      onClick={e => { e.stopPropagation(); removeBoard(board.id); }}
+                      onClick={e => { e.stopPropagation(); if (window.confirm('Remove this board from your list?')) removeBoard(board.id); }}
                     >
                       <Trash2 size={14} />
                     </button>

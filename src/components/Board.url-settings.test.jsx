@@ -19,10 +19,6 @@ vi.mock('../context/NotificationContext', () => ({
 }));
 
 
-// Mock the NewBoardTemplateModal component to keep DOM simple
-vi.mock('./modals/NewBoardTemplateModal', () => ({
-  default: ({ isOpen }) => (isOpen ? <div data-testid="template-modal">Template Modal</div> : null)
-}));
 
 // Mock the ExportBoardModal component
 vi.mock('./modals/ExportBoardModal', () => ({
@@ -48,7 +44,6 @@ describe('Board URL settings', () => {
     retrospectiveMode: false,
     updateRetrospectiveMode: vi.fn(),
     resetAllVotes: vi.fn(),
-    createNewBoard: vi.fn().mockReturnValue('new-board-abc'),
     openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
     darkMode: true,

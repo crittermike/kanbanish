@@ -1,15 +1,14 @@
 import React, { useCallback } from 'react';
-import { ArrowDown, ThumbsUp, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
+import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import Timer from './Timer';
 
 /**
- * Settings panel with board action buttons (New Board, Health Check, Timer),
+ * Settings panel with board action buttons (Health Check, Timer),
  * a settings dropdown (sort, voting, retrospective toggles), and theme toggle.
  *
  * @param {Object} props
- * @param {Function} props.handleCreateNewBoard - Opens the new board template modal
  * @param {Function} props.handleStartHealthCheck - Starts health check phase
  * @param {boolean} props.sortByVotes - Whether cards are sorted by votes
  * @param {Function} props.setSortByVotes - Sets the sort-by-votes preference
@@ -28,7 +27,6 @@ import Timer from './Timer';
  * @param {Function} props.updateDarkMode - Toggles dark/light theme
  */
 const SettingsPanel = ({
-  handleCreateNewBoard,
   handleStartHealthCheck,
   sortByVotes,
   setSortByVotes,
@@ -57,14 +55,6 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
-      <button
-        id="create-board"
-        className="btn btn-with-icon"
-        onClick={handleCreateNewBoard}
-      >
-        <PlusSquare size={16} />
-        New Board
-      </button>
       <button
         id="start-health-check"
         className="btn btn-with-icon"

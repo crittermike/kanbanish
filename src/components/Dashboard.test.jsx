@@ -63,7 +63,7 @@ describe('Dashboard Component', () => {
 
     expect(screen.getByText('Kanbanish')).toBeInTheDocument();
     expect(screen.getByText('No recent boards')).toBeInTheDocument();
-    expect(screen.getByText('Create a new board or join an existing one to get started.')).toBeInTheDocument();
+    expect(screen.getByText('Create a new board or join an existing one above.')).toBeInTheDocument();
   });
 
   test('renders New Board button', () => {
@@ -145,8 +145,10 @@ describe('Dashboard Component', () => {
 
     renderDashboard();
 
+    window.confirm = vi.fn().mockReturnValue(true);
     const removeBtn = screen.getByLabelText('Remove board from list');
     fireEvent.click(removeBtn);
+    expect(window.confirm).toHaveBeenCalled();
     expect(mockRemoveBoard).toHaveBeenCalledWith('board-1');
   });
 
@@ -230,7 +232,48 @@ describe('Dashboard Component', () => {
 
     renderDashboard();
 
+    window.confirm = vi.fn().mockReturnValue(true);
     fireEvent.click(screen.getByText('Clear all'));
+    expect(window.confirm).toHaveBeenCalled();
     expect(mockClearAll).toHaveBeenCalled();
+  });
+
+  test('does not remove board when confirmation is cancelled', () => {
+    useRecentBoards.mockReturnValue({
+      recentBoards: [
+        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+      ],
+      removeBoard: mockRemoveBoard,
+      togglePin: mockTogglePin,
+      updateBoardMeta: vi.fn(),
+      clearAll: mockClearAll
+    });
+
+    renderDashboard();
+
+    window.confirm = vi.fn().mockReturnValue(false);
+    const removeBtn = screen.getByLabelText('Remove board from list');
+    fireEvent.click(removeBtn);
+    expect(window.confirm).toHaveBeenCalled();
+    expect(mockRemoveBoard).not.toHaveBeenCalled();
+  });
+
+  test('does not clear all when confirmation is cancelled', () => {
+    useRecentBoards.mockReturnValue({
+      recentBoards: [
+        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+      ],
+      removeBoard: mockRemoveBoard,
+      togglePin: mockTogglePin,
+      updateBoardMeta: vi.fn(),
+      clearAll: mockClearAll
+    });
+
+    renderDashboard();
+
+    window.confirm = vi.fn().mockReturnValue(false);
+    fireEvent.click(screen.getByText('Clear all'));
+    expect(window.confirm).toHaveBeenCalled();
+    expect(mockClearAll).not.toHaveBeenCalled();
   });
 });

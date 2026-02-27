@@ -9,7 +9,6 @@ import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
-import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
@@ -24,7 +23,6 @@ function Board({ onGoHome }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
   // Get context values from BoardContext
   const {
@@ -43,7 +41,6 @@ function Board({ onGoHome }) {
     updateMultipleVotesAllowed,
     retrospectiveMode,
     updateRetrospectiveMode,
-    createNewBoard,
     resetAllVotes,
     updateBoardTitle,
     user,
@@ -92,31 +89,7 @@ function Board({ onGoHome }) {
     updateBoardTitle(boardTitle);
   };
 
-  // Show template modal for creating a new board
-  const handleCreateNewBoard = () => {
-    setIsTemplateModalOpen(true);
-  };
 
-  // Create a new board with the selected template
-  const handleTemplateSelected = (templateColumns, templateName = null) => {
-    // Create a title based on the template
-    const boardTitle = templateName ? `${templateName} Board` : DEFAULT_BOARD_TITLE;
-
-    // Pass URL-derived board settings so they persist on new board
-    const parsed = parseUrlSettings(window.location.search);
-    // sortByVotes (from URL sort=) lives in boardSettings now and will be persisted on creation
-  const newBoardId = createNewBoard(templateColumns, boardTitle, parsed.boardSettings);
-
-    // Only update URL and show notification if we got a valid board ID
-    if (newBoardId) {
-      // Build a clean URL: preserve non-setting params, add board=id, drop applied settings
-      cleanUpUrlAfterCreation(newBoardId);
-      showNotification('New board created');
-      setIsTemplateModalOpen(false);
-    } else {
-      // Silent fallback when user authentication is not ready
-    }
-  };
 
   /**
    * COLUMN MANAGEMENT
@@ -141,20 +114,6 @@ function Board({ onGoHome }) {
    * UTILITY FUNCTIONS
    */
 
-  // Clean up URL params after board creation and set board id
-  const cleanUpUrlAfterCreation = (newBoardId) => {
-    try {
-      const removeKeys = ['voting', 'downvotes', 'multivote', 'votes', 'retro', 'sort', 'theme', 'template'];
-      const currentUrl = new URL(window.location.href);
-      const qs = currentUrl.searchParams;
-      removeKeys.forEach(k => qs.delete(k));
-      if (newBoardId) qs.set('board', newBoardId);
-      currentUrl.search = qs.toString();
-      window.history.pushState({}, '', currentUrl.toString());
-    } catch {
-      // no-op if URL manipulation fails
-    }
-  };
 
   // Copy share URL to clipboard
   const copyShareUrl = () => {
@@ -189,7 +148,6 @@ function Board({ onGoHome }) {
             onGoHome={onGoHome}
           />
           <SettingsPanel
-            handleCreateNewBoard={handleCreateNewBoard}
             handleStartHealthCheck={() => {
               startHealthCheckPhase();
               showNotification('Health check started');
@@ -251,14 +209,6 @@ function Board({ onGoHome }) {
         }}
       />
 
-      {/* Template Selection Modal */}
-      <NewBoardTemplateModal
-        isOpen={isTemplateModalOpen}
-        onClose={() => {
-          setIsTemplateModalOpen(false);
-        }}
-        onSelectTemplate={handleTemplateSelected}
-      />
     </>
   );
 }

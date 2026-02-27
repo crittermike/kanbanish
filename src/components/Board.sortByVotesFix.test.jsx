@@ -52,7 +52,6 @@ describe('Board Component - Sort By Votes Fix', () => {
     workflowPhase: 'CREATION',
     setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
-    createNewBoard: vi.fn().mockReturnValue('new-board-123'),
     openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
     getUserVoteCount: vi.fn().mockReturnValue(0),
