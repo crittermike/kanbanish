@@ -28,9 +28,9 @@ export const useBoardContext = () => {
 };
 
 // Provider component
-export const BoardProvider = ({ children }) => {
+export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [user, setUser] = useState(null);
-  const [boardId, setBoardId] = useState(null);
+  const [boardId, setBoardId] = useState(initialBoardId);
   const [boardTitle, setBoardTitle] = useState(DEFAULT_BOARD_TITLE);
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotesState] = useState(false);

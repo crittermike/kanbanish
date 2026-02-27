@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -19,10 +19,6 @@ vi.mock('../context/NotificationContext', () => ({
 }));
 
 
-// Mock the NewBoardTemplateModal component to keep DOM simple
-vi.mock('./modals/NewBoardTemplateModal', () => ({
-  default: ({ isOpen }) => (isOpen ? <div data-testid="template-modal">Template Modal</div> : null)
-}));
 
 // Mock the ExportBoardModal component
 vi.mock('./modals/ExportBoardModal', () => ({
@@ -32,8 +28,8 @@ vi.mock('./modals/ExportBoardModal', () => ({
 describe('Board URL settings', () => {
 
   const baseCtx = {
-    boardId: null,
-    boardRef: null,
+    boardId: 'test-board-url',
+    boardRef: {},
     boardTitle: DEFAULT_BOARD_TITLE,
     setBoardTitle: vi.fn(),
     columns: {},
@@ -48,7 +44,6 @@ describe('Board URL settings', () => {
     retrospectiveMode: false,
     updateRetrospectiveMode: vi.fn(),
     resetAllVotes: vi.fn(),
-    createNewBoard: vi.fn().mockReturnValue('new-board-abc'),
     openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
     darkMode: true,
@@ -88,7 +83,5 @@ describe('Board URL settings', () => {
   // sortByVotes is now treated as a board setting and not applied on initial load
   expect(ctx.setSortByVotes).not.toHaveBeenCalled();
     expect(ctx.updateDarkMode).toHaveBeenCalledWith(false); // theme=light => darkMode false
-    // Template modal opens (no board id)
-    expect(screen.getByTestId('template-modal')).toBeInTheDocument();
   });
 });

@@ -2,7 +2,29 @@ import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import App from './App';
 
-// Mock the context providers to avoid actual context implementation
+// Mock Dashboard — rendered when no ?board= param
+vi.mock('./components/Dashboard', () => ({
+  default: (props) => <div data-testid="dashboard" {...props}>Dashboard</div>
+}));
+
+// Mock Board — rendered inside BoardGate when ?board= param exists
+vi.mock('./components/Board', () => ({
+  default: (props) => <div data-testid="board" {...props}>Board</div>
+}));
+
+// Mock useRecentBoards — used directly in AppContent
+vi.mock('./hooks/useRecentBoards', () => ({
+  useRecentBoards: () => ({
+    recentBoards: [],
+    addBoard: vi.fn(),
+    removeBoard: vi.fn(),
+    togglePin: vi.fn(),
+    updateBoardMeta: vi.fn(),
+    clearAll: vi.fn()
+  })
+}));
+
+// Mock BoardContext — needed when BoardGate renders BoardProvider
 vi.mock('./context/BoardContext', () => ({
   BoardProvider: ({ children }) => <div data-testid="board-provider">{children}</div>,
   useBoardContext: () => ({
@@ -31,25 +53,64 @@ vi.mock('./context/NotificationContext', () => ({
   NotificationProvider: ({ children }) => children
 }));
 
-
 vi.mock('react-dnd', () => ({
   DndProvider: ({ children }) => <div data-testid="dnd-provider">{children}</div>
 }));
 
+// Mock firebase — Dashboard uses auth.onAuthStateChanged
+vi.mock('./utils/firebase', () => ({
+  database: {},
+  auth: {
+    onAuthStateChanged: vi.fn((cb) => {
+      cb({ uid: 'test-user' });
+      return vi.fn();
+    })
+  },
+  signInAnonymously: vi.fn(),
+  get: vi.fn()
+}));
+vi.mock('firebase/database', () => ({
+  ref: vi.fn(),
+  set: vi.fn()
+}));
+
 describe('App Component', () => {
-  test('renders Kanbanish app correctly', () => {
+  const originalLocation = window.location;
+
+  afterEach(() => {
+    // Restore location
+    delete window.location;
+    window.location = originalLocation;
+  });
+
+  test('renders Dashboard when no board param in URL', () => {
     render(<App />);
 
-    // Check if the main app container is present
+    // App container always rendered
     const appElement = screen.getByTestId('app-container');
     expect(appElement).toBeInTheDocument();
 
-    // Check if the board provider is rendered
-    const boardProvider = screen.getByTestId('board-provider');
-    expect(boardProvider).toBeInTheDocument();
+    // Dashboard is shown when no ?board= param
+    expect(screen.getByTestId('dashboard')).toBeInTheDocument();
 
-    // Check if the DnD provider is rendered
-    const dndProvider = screen.getByTestId('dnd-provider');
-    expect(dndProvider).toBeInTheDocument();
+    // Board should NOT be rendered
+    expect(screen.queryByTestId('board')).not.toBeInTheDocument();
+  });
+
+  test('renders Board when board param exists in URL', () => {
+    // Set URL with board param before rendering
+    delete window.location;
+    window.location = { ...originalLocation, search: '?board=test-123', href: 'http://localhost/?board=test-123' };
+
+    render(<App />);
+
+    const appElement = screen.getByTestId('app-container');
+    expect(appElement).toBeInTheDocument();
+
+    // Board should be rendered (inside BoardGate → BoardProvider → BoardWithTracking → Board)
+    expect(screen.getByTestId('board')).toBeInTheDocument();
+
+    // Dashboard should NOT be rendered
+    expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
   });
 });

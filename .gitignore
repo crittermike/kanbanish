@@ -23,3 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 vitest.results.json
+
+# screenshots from browser automation
+*.png

@@ -20,11 +20,6 @@ vi.mock('../context/NotificationContext', () => ({
 }));
 
 
-// Mock the NewBoardTemplateModal component
-vi.mock('./modals/NewBoardTemplateModal', () => ({
-  default: ({ isOpen, _onClose, _onSelectTemplate }) =>
-    isOpen ? <div data-testid="template-modal">Template Modal</div> : null
-}));
 
 // Mock the ExportBoardModal component
 vi.mock('./modals/ExportBoardModal', () => ({
@@ -81,8 +76,6 @@ describe('Board Component', () => {
     workflowPhase: 'INTERACTION_REVEAL', // Cards revealed, interactions frozen
     setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
-    createNewBoard: vi.fn().mockReturnValue('new-board-123'),
-    openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
     getUserVoteCount: vi.fn().mockReturnValue(0),
     getTotalVotes: vi.fn().mockReturnValue(0),
@@ -224,29 +217,6 @@ describe('Board Component', () => {
     window.location = originalLocation;
   });
 
-  test('opens template modal when New Board button is clicked', () => {
-    // For this test, let's simulate having a board ID in the URL
-    // so the template modal doesn't open automatically
-    mockURLSearchParams.mockImplementation(() => ({
-      get: param => param === 'board' ? 'existing-board-id' : null
-    }));
-
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    // Initially, the template modal should not be in the document
-    expect(screen.queryByTestId('template-modal')).not.toBeInTheDocument();
-
-    // Click the New Board button
-    const newBoardButton = screen.getByText('New Board');
-    fireEvent.click(newBoardButton);
-
-    // Template modal should now be in the document
-    expect(screen.getByTestId('template-modal')).toBeInTheDocument();
-  });
 
   test('opens sort dropdown when dropdown button is clicked', () => {
     // For this test, let's simulate having a board ID in the URL
@@ -448,72 +418,7 @@ describe('Board Component', () => {
     expect(document.title).toBe('Kanbanish | Real-time anonymous kanban board');
   });
 
-  test('initializes with board ID from URL', () => {
-    // Mock URL with board ID
-    mockURLSearchParams.mockImplementation(() => ({
-      get: vi.fn().mockReturnValue('board-from-url')
-    }));
 
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    expect(mockContextValue.openExistingBoard).toHaveBeenCalledWith('board-from-url');
-    expect(mockContextValue.createNewBoard).not.toHaveBeenCalled();
-
-    // Template modal should not open when URL has a board ID
-    expect(screen.queryByTestId('template-modal')).not.toBeInTheDocument();
-  });
-
-  test('automatically opens template modal when no board ID is in URL', () => {
-    // Mock URL with no board ID
-    mockURLSearchParams.mockImplementation(() => ({
-      get: _param => null
-    }));
-
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    // Template modal should automatically open
-    expect(screen.getByTestId('template-modal')).toBeInTheDocument();
-
-    // Should not call openExistingBoard
-    expect(mockContextValue.openExistingBoard).not.toHaveBeenCalled();
-  });
-
-  test('handles template selection with failed board creation', () => {
-    // Mock URL with a board ID to prevent auto-opening the template modal
-    mockURLSearchParams.mockImplementation(() => ({
-      get: param => param === 'board' ? 'existing-board-id' : null
-    }));
-
-    // Mock createNewBoard to return null (failed creation)
-    useBoardContext.mockReturnValue({
-      ...mockContextValue,
-      createNewBoard: vi.fn().mockReturnValue(null)
-    });
-
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    // Open the template modal
-    const newBoardButton = screen.getByText('New Board');
-    fireEvent.click(newBoardButton);
-    expect(screen.getByTestId('template-modal')).toBeInTheDocument();
-
-    // Since the modal is mocked, we can't actually test the selection behavior directly
-    // But we can verify that pushState and notification are not called when board creation fails
-    expect(window.history.pushState).not.toHaveBeenCalled();
-    expect(mockShowNotification).not.toHaveBeenCalled();
-  });
 
   test('toggles downvoting enabled setting when clicked', () => {
     // For this test, let's simulate having a board ID in the URL

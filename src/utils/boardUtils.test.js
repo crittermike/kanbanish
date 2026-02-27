@@ -1,5 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { addColumn, addCard } from './boardUtils';
 // Mock Firebase
 vi.mock('./firebase', () => ({ database: {} }));
 
@@ -12,8 +13,6 @@ vi.mock('firebase/database', () => ({
 vi.mock('./ids', () => ({
   generateId: vi.fn(() => 'mock-id-123')
 }));
-
-import { addColumn, addCard } from './boardUtils';
 
 describe('addColumn', () => {
   beforeEach(() => {

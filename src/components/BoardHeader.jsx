@@ -1,4 +1,4 @@
-import { Link, FileText } from 'react-feather';
+import { Home, Link, FileText } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
@@ -13,9 +13,20 @@ import VoteCounter from './VoteCounter';
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
  * @param {Function} props.copyShareUrl - Copies the board share URL to clipboard
  * @param {Function} props.handleExportBoard - Opens the export board modal
+ * @param {Function} props.onGoHome - Navigates back to dashboard
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard, onGoHome }) => (
   <div className="board-title-container">
+    {onGoHome && (
+      <button
+        className="home-btn"
+        title="Back to Dashboard"
+        aria-label="Back to Dashboard"
+        onClick={onGoHome}
+      >
+        <Home size={16} />
+      </button>
+    )}
     <input
       type="text"
       id="board-title"

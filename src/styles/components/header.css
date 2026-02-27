@@ -53,9 +53,29 @@ h1 {
 
 .board-title-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: var(--space-xs);
     min-width: 300px;
+}
+
+/* Home button - subtle icon-only button */
+.home-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.home-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
 }
 
 .share-export-buttons {
