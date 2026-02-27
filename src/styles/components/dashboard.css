@@ -97,7 +97,7 @@
 
 .dashboard-tagline h2 {
   margin: 0 0 var(--space-xs) 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: 700;
   color: var(--text-color);
 }
@@ -467,7 +467,8 @@
   }
 
   .dashboard-features {
-    gap: var(--space-sm);
+    gap: var(--space-xs);
+    font-size: 0.7rem;
   }
 
   .dashboard-hero-row {
