@@ -465,8 +465,6 @@
   .dashboard-features {
     gap: var(--space-sm);
   }
-    padding: var(--space-md);
-  }
 
   .dashboard-hero-row {
     flex-direction: column;
