@@ -290,6 +290,13 @@
   border-radius: 12px;
 }
 
+/* Poll bar colors by data-rating attribute */
+.bar[data-rating="1"] { background-color: var(--rating-1); }
+.bar[data-rating="2"] { background-color: var(--rating-2); }
+.bar[data-rating="3"] { background-color: var(--rating-3); }
+.bar[data-rating="4"] { background-color: var(--rating-4); }
+.bar[data-rating="5"] { background-color: var(--rating-5); }
+
 .count-label {
   text-align: right;
   color: var(--text-secondary);

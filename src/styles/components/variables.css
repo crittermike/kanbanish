@@ -50,6 +50,15 @@
     --shadow-lg: 0 5px 10px rgba(0, 0, 0, 0.2);
     --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.3);
 
+    /* Rating scale colors (1-5, red to green) */
+    --rating-1: #ef4444;
+    --rating-2: #f97316;
+    --rating-3: #eab308;
+    --rating-4: #84cc16;
+    --rating-5: #22c55e;
+    --star-color: #ffd700;
+    --card-highlight: rgba(88, 166, 255, 0.6);
+
     /* Shadows */
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);

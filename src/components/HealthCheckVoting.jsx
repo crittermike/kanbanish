@@ -11,14 +11,6 @@ const RATING_LABELS = {
   5: 'Great'
 };
 
-const RATING_COLORS = {
-  1: '#ef4444',
-  2: '#f97316',
-  3: '#eab308',
-  4: '#84cc16',
-  5: '#22c55e'
-};
-
 const HealthCheckVoting = () => {
   const {
     userHealthCheckVotes,
@@ -123,9 +115,7 @@ const HealthCheckVoting = () => {
                       onClick={() => handleVote(question.id, rating)}
                       onMouseEnter={() => handleMouseEnter(question.id, rating)}
                       onMouseLeave={() => handleMouseLeave(question.id)}
-                      style={{
-                        backgroundColor: displayRating >= rating ? RATING_COLORS[rating] : undefined
-                      }}
+                      data-rating={rating}
                       data-tooltip={RATING_LABELS[rating]}
                     >
                       {rating}

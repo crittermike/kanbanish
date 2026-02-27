@@ -115,6 +115,34 @@
     border-color: transparent;
 }
 
+/* Rating button colors by data-rating attribute */
+.rating-button.active[data-rating="1"] { background-color: var(--rating-1); }
+.rating-button.active[data-rating="2"] { background-color: var(--rating-2); }
+.rating-button.active[data-rating="3"] { background-color: var(--rating-3); }
+.rating-button.active[data-rating="4"] { background-color: var(--rating-4); }
+.rating-button.active[data-rating="5"] { background-color: var(--rating-5); }
+
+/* Score colors for results display */
+.score-color-1 { color: var(--rating-1); }
+.score-color-2 { color: var(--rating-2); }
+.score-color-3 { color: var(--rating-3); }
+.score-color-4 { color: var(--rating-4); }
+.score-color-5 { color: var(--rating-5); }
+
+/* Bar fill colors by data-rating attribute */
+.health-bar-fill[data-rating="1"] { background-color: var(--rating-1); }
+.health-bar-fill[data-rating="2"] { background-color: var(--rating-2); }
+.health-bar-fill[data-rating="3"] { background-color: var(--rating-3); }
+.health-bar-fill[data-rating="4"] { background-color: var(--rating-4); }
+.health-bar-fill[data-rating="5"] { background-color: var(--rating-5); }
+
+/* Distribution bar colors by data-rating attribute */
+.dist-bar[data-rating="1"] { background-color: var(--rating-1); }
+.dist-bar[data-rating="2"] { background-color: var(--rating-2); }
+.dist-bar[data-rating="3"] { background-color: var(--rating-3); }
+.dist-bar[data-rating="4"] { background-color: var(--rating-4); }
+.dist-bar[data-rating="5"] { background-color: var(--rating-5); }
+
 .health-check-status {
     text-align: center;
     padding: 1rem;

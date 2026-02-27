@@ -140,15 +140,13 @@ function Column({ columnId, columnData, sortByVotes }) {
           showNotification('Card added');
           hideAddCardForm();
           
-          // Add a brief highlight effect to the newly added card
           setTimeout(() => {
             const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
             if (newCardElement) {
-              // Add a subtle fading highlight effect
-              newCardElement.style.boxShadow = '0 0 10px rgba(74, 144, 226, 0.6)';
-              newCardElement.style.transition = 'box-shadow 2s ease-out';
+              // Add a subtle fading highlight effect via CSS animation
+              newCardElement.classList.add('card-highlight');
               setTimeout(() => {
-                newCardElement.style.boxShadow = '';
+                newCardElement.classList.remove('card-highlight');
               }, 2000);
             }
           }, 100);

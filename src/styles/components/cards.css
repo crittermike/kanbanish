@@ -682,3 +682,17 @@
         padding: 8px;
     }
 }
+
+/* New card highlight animation */
+@keyframes card-highlight {
+    from {
+        box-shadow: 0 0 10px var(--card-highlight);
+    }
+    to {
+        box-shadow: none;
+    }
+}
+
+.card-highlight {
+    animation: card-highlight 2s ease-out forwards;
+}
