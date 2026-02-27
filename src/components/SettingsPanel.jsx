@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ArrowDown, ThumbsUp, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import Timer from './Timer';
 
 /**
@@ -46,21 +47,13 @@ const SettingsPanel = ({
   updateDarkMode
 }) => {
   const { showNotification } = useNotification();
-  // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
-  React.useEffect(() => {
-    const handleClickOutside = event => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setSortDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+  const handleClickOutside = useCallback(() => {
+    setSortDropdownOpen(false);
   }, [setSortDropdownOpen]);
+
+  useOnClickOutside(dropdownRef, handleClickOutside);
 
   return (
     <div className="action-buttons">
