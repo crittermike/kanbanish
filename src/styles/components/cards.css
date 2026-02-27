@@ -38,7 +38,7 @@
     justify-content: center;
     z-index: 5;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Card hover actions - shown on hover to save vertical space */
@@ -85,7 +85,7 @@
     transition: opacity var(--transition-speed) var(--transition-ease),
         background-color var(--transition-speed) var(--transition-ease),
         transform var(--transition-speed) var(--transition-ease);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
     position: relative;
 }
 
@@ -156,7 +156,7 @@
 
 .card.groupable:hover {
     border-color: var(--accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .card.drop-target {
@@ -217,7 +217,7 @@
 .card.dragging {
     cursor: grabbing;
     transform: rotate(2deg) scale(1.02);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
     border: 1px solid var(--accent);
     z-index: 100;
 }
@@ -389,7 +389,7 @@
     padding: var(--space-sm);
     margin-bottom: var(--space-xs);
     font-size: var(--font-size-sm);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     transition: all var(--transition-speed) var(--transition-ease);
 }
 
@@ -681,4 +681,18 @@
     .comments-btn {
         padding: 8px;
     }
+}
+
+/* New card highlight animation */
+@keyframes card-highlight {
+    from {
+        box-shadow: 0 0 10px var(--card-highlight);
+    }
+    to {
+        box-shadow: none;
+    }
+}
+
+.card-highlight {
+    animation: card-highlight 2s ease-out forwards;
 }

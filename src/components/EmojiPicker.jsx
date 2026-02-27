@@ -43,6 +43,7 @@ const EmojiPicker = React.memo(({
           data-testid="emoji-search-input"
           className="emoji-search-input"
           autoFocus
+          aria-label="Search emojis"
         />
       </div>
       <div className="emoji-picker-grid">

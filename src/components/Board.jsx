@@ -1,329 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Link, ArrowDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
+import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
+import BOARD_TEMPLATES from '../data/boardTemplates';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
-import Column from './Column';
+import ColumnsContainer from './ColumnsContainer';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
-import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplateModal';
+import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
-import Timer from './Timer';
-import TotalVoteCounter from './TotalVoteCounter';
-import UserCounter from './UserCounter';
-import VoteCounter from './VoteCounter';
+import SettingsPanel from './SettingsPanel';
 import WorkflowControls from './WorkflowControls';
-// Import Feather icons
-
-// UI Component for the board header with title input and share button
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard }) => (
-  <div className="board-title-container">
-    <input
-      type="text"
-      id="board-title"
-      placeholder={DEFAULT_BOARD_TITLE}
-      value={boardTitle}
-      onChange={handleBoardTitleChange}
-      onBlur={handleBoardTitleBlur}
-      className="header-input"
-    />
-    <div className="action-buttons">
-      <UserCounter />
-      <VoteCounter />
-      <TotalVoteCounter />
-      <button
-        id="copy-share-url"
-        className="btn secondary-btn btn-with-icon"
-        title="Copy Share URL"
-        onClick={copyShareUrl}
-      >
-        <Link size={16} />
-        Share
-      </button>
-      <button
-        id="export-board"
-        className="btn secondary-btn btn-with-icon"
-        onClick={handleExportBoard}
-      >
-        <FileText size={16} />
-        Export
-      </button>
-    </div>
-
-  </div>
-);
-
-// UI Component for the action buttons in the header
-const ActionButtons = ({
-  handleCreateNewBoard,
-  handleStartHealthCheck,
-  sortByVotes,
-  setSortByVotes,
-  votingEnabled,
-  updateVotingEnabled,
-  downvotingEnabled,
-  updateDownvotingEnabled,
-  multipleVotesAllowed,
-  updateMultipleVotesAllowed,
-  retrospectiveMode,
-  updateRetrospectiveMode,
-  sortDropdownOpen,
-  setSortDropdownOpen,
-  resetAllVotes,
-  showNotification,
-  darkMode,
-  updateDarkMode
-}) => {
-  // Handle clicking outside the dropdown
-  const dropdownRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = event => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setSortDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [setSortDropdownOpen]);
-
-  return (
-    <div className="action-buttons">
-      <button
-        id="create-board"
-        className="btn btn-with-icon"
-        onClick={handleCreateNewBoard}
-      >
-        <PlusSquare size={16} />
-        New Board
-      </button>
-      <button
-        id="start-health-check"
-        className="btn btn-with-icon"
-        onClick={handleStartHealthCheck}
-      >
-        <Heart size={16} />
-        Health Check
-      </button>
-      <Timer showNotification={showNotification} />
-      <div className="sort-dropdown-container" ref={dropdownRef}>
-        <button
-          id="settings-dropdown-button"
-          className="btn icon-btn settings-toggle-btn"
-          onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-          aria-expanded={sortDropdownOpen}
-          aria-haspopup="true"
-          title="Board settings and preferences"
-        >
-          <Settings size={16} />
-        </button>
-
-        {sortDropdownOpen && (
-          <div className="sort-dropdown-menu">
-            <div className="settings-section">
-              <h4 className="settings-section-title">Sort Cards</h4>
-              <button
-                className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
-                onClick={() => {
-                  setSortByVotes(false);
-                }}
-              >
-                <ArrowDown size={14} />
-                Chronological
-                {!sortByVotes && <span className="checkmark">✓</span>}
-              </button>
-              <button
-                className={`sort-option ${sortByVotes ? 'selected' : ''}`}
-                onClick={() => {
-                  setSortByVotes(true);
-                }}
-              >
-                <ThumbsUp size={14} />
-                By Votes
-                {sortByVotes && <span className="checkmark">✓</span>}
-              </button>
-            </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section">
-              <h4 className="settings-section-title">Allow voting?</h4>
-              <div className="settings-boolean-option">
-                <button
-                  className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
-                  onClick={() => {
-                    updateVotingEnabled(true);
-                  }}
-                >
-                  Yes
-                </button>
-                <button
-                  className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
-                  onClick={() => {
-                    updateVotingEnabled(false);
-                  }}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-            {votingEnabled && (
-              <>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Allow downvoting?</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateDownvotingEnabled(true);
-                      }}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateDownvotingEnabled(false);
-                      }}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateMultipleVotesAllowed(true);
-                      }}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateMultipleVotesAllowed(false);
-                      }}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Retrospective Mode</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateRetrospectiveMode(true);
-                      }}
-                    >
-                      On
-                    </button>
-                    <button
-                      className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateRetrospectiveMode(false);
-                      }}
-                    >
-                      Off
-                    </button>
-                  </div>
-                  <p className="settings-hint">
-                    When enabled, new cards appear with hidden text until revealed
-                  </p>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section settings-section-padded">
-                  <button
-                    className="btn danger-btn settings-full-width-btn"
-                    onClick={() => {
-                      if (resetAllVotes()) {
-                        showNotification('All votes reset to zero');
-                        // Keep dropdown open after resetting votes
-                      }
-                    }}
-                  >
-                    Reset all votes
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-      <button
-        id="theme-toggle"
-        className="btn icon-btn"
-        onClick={() => {
-          updateDarkMode(!darkMode);
-        }}
-        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-      >
-        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-      </button>
-    </div>
-  );
-};
-
-// UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
-  const { retrospectiveMode, workflowPhase } = useBoardContext();
-
-  // Get columns sorted by their IDs to maintain consistent order
-  const getSortedColumns = () => {
-    // The column IDs are prefixed with alphabet characters (a_, b_, etc.)
-    // to ensure they maintain their original order regardless of title changes
-    return Object.entries(columns || {}).sort((a, b) => {
-      return a[0].localeCompare(b[0]); // Sort by column ID
-    });
-  };
-
-  // Hide add column button during reveal phases when board structure should be stable
-  const shouldShowAddColumn = !retrospectiveMode || workflowPhase === WORKFLOW_PHASES.CREATION;
-
-  return (
-    <div className="board-container">
-      <div id="board" className="board">
-        {/* Render columns in sorted order */}
-        {getSortedColumns().map(([columnId, columnData]) => (
-          <Column
-            key={columnId}
-            columnId={columnId}
-            columnData={columnData}
-            sortByVotes={sortByVotes}
-            showNotification={showNotification}
-          />
-        ))}
-
-        {/* Add column button - hidden during interaction/results phases */}
-        {shouldShowAddColumn && (
-          <div className="add-column-container">
-            <button id="add-column" className="add-column" onClick={addNewColumn}>
-              <Plus size={16} />
-              Add Column
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 /**
- * Main Board component responsible for rendering and managing the kanban board
+ * Main Board component responsible for rendering and managing the kanban board.
+ * Orchestrates board initialization, URL settings, and layout of header, columns, and modals.
  */
-function Board({ showNotification }) {
+function Board() {
+  const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -349,10 +48,10 @@ function Board({ showNotification }) {
     openExistingBoard,
     resetAllVotes,
     updateBoardTitle,
-    user, // Include user from context
+    user,
     darkMode,
     updateDarkMode,
-    workflowPhase, // Add workflow phase
+    workflowPhase,
     getAllUsersAddingCards,
     startHealthCheckPhase
   } = useBoardContext();
@@ -450,8 +149,6 @@ function Board({ showNotification }) {
     }
   };
 
-  // This function was removed as part of removing the "Open Board" functionality
-
   /**
    * COLUMN MANAGEMENT
    */
@@ -474,8 +171,6 @@ function Board({ showNotification }) {
   /**
    * UTILITY FUNCTIONS
    */
-
-  // We no longer need toggleSortByVotes since we directly set the sort type from dropdown
 
   // Clean up URL params after board creation and set board id
   const cleanUpUrlAfterCreation = (newBoardId) => {
@@ -523,7 +218,7 @@ function Board({ showNotification }) {
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
           />
-          <ActionButtons
+          <SettingsPanel
             handleCreateNewBoard={handleCreateNewBoard}
             handleStartHealthCheck={() => {
               startHealthCheckPhase();
@@ -542,7 +237,6 @@ function Board({ showNotification }) {
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
-            showNotification={showNotification}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
           />
@@ -557,7 +251,7 @@ function Board({ showNotification }) {
 
       {/* Workflow Controls - Show when retrospective mode is enabled or during health check phase */}
       {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
-        <WorkflowControls showNotification={showNotification} />
+        <WorkflowControls />
       )}
 
 
@@ -565,7 +259,7 @@ function Board({ showNotification }) {
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
-          <ResultsView showNotification={showNotification} />
+          <ResultsView />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
@@ -574,7 +268,6 @@ function Board({ showNotification }) {
           <ColumnsContainer
             columns={columns}
             sortByVotes={sortByVotes}
-            showNotification={showNotification}
             addNewColumn={addNewColumn}
           />
         )}
@@ -586,7 +279,6 @@ function Board({ showNotification }) {
         onClose={() => {
           setIsExportModalOpen(false);
         }}
-        showNotification={showNotification}
       />
 
       {/* Template Selection Modal */}

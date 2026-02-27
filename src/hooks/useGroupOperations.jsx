@@ -1,5 +1,6 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useCallback, useRef } from 'react';
+import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import { generateId } from '../utils/ids';
 import { areInteractionsAllowed, areInteractionsRevealed } from '../utils/workflowUtils';
@@ -14,10 +15,10 @@ export function useGroupOperations({
   groupId,
   groupData,
   user,
-  showNotification,
   retrospectiveMode = false,
   workflowPhase = 'CREATION'
 }) {
+  const { showNotification } = useNotification();
   // State for group interactions
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showComments, setShowComments] = useState(false);

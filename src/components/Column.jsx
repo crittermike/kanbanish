@@ -3,13 +3,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-function Column({ columnId, columnData, sortByVotes, showNotification }) {
+function Column({ columnId, columnData, sortByVotes }) {
   const { 
     boardId, 
     moveCard, 
@@ -21,6 +22,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     startCardCreation,
     stopCardCreation
   } = useBoardContext();
+  const { showNotification } = useNotification();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -138,15 +140,13 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
           showNotification('Card added');
           hideAddCardForm();
           
-          // Add a brief highlight effect to the newly added card
           setTimeout(() => {
             const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
             if (newCardElement) {
-              // Add a subtle fading highlight effect
-              newCardElement.style.boxShadow = '0 0 10px rgba(74, 144, 226, 0.6)';
-              newCardElement.style.transition = 'box-shadow 2s ease-out';
+              // Add a subtle fading highlight effect via CSS animation
+              newCardElement.classList.add('card-highlight');
               setTimeout(() => {
-                newCardElement.style.boxShadow = '';
+                newCardElement.classList.remove('card-highlight');
               }, 2000);
             }
           }, 100);
@@ -318,16 +318,24 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
             onKeyPress={handleKeyPress}
             className="column-title-input"
             autoFocus
+            aria-label="Column title"
           />
         ) : (
-          <h2 className="column-title" onClick={() => setIsEditing(true)}>
+          <h2
+            className="column-title"
+            onClick={() => setIsEditing(true)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsEditing(true); } }}
+            role="button"
+            tabIndex={0}
+            title="Click to edit column title"
+          >
             {title}
           </h2>
         )}
         <div className="column-actions">
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="icon-button" title="Delete Column" onClick={deleteColumn}>
-              <Trash2 />
+            <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
+              <Trash2 aria-hidden="true" />
             </button>
           )}
         </div>
@@ -352,6 +360,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
               onKeyDown={handleNewCardKeyPress}
               className="inline-card-textarea"
               autoFocus
+              aria-label="Card content"
             />
             <div className="inline-card-actions">
               <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
@@ -378,7 +387,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 columnId={columnId}
                 columnData={columnData}
                 sortByVotes={sortByVotes}
-                showNotification={showNotification}
               />
             );
           } else {
@@ -388,7 +396,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 cardId={item.data.id}
                 cardData={item.data}
                 columnId={columnId}
-                showNotification={showNotification}
                 onCardDropOnCard={handleCardDropOnCard}
               />
             );
@@ -397,9 +404,9 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
 
         {/* Group creation modal */}
         {showGroupModal && (
-          <div className="group-modal-overlay" onClick={cancelCreateGroup}>
-            <div className="group-modal" onClick={e => e.stopPropagation()}>
-              <h3>Create Card Group</h3>
+          <div className="group-modal-overlay" onClick={cancelCreateGroup} role="presentation">
+            <div className="group-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+              <h3 id="create-group-title">Create Card Group</h3>
               <p>Creating a group with 2 cards</p>
               <input
                 type="text"
@@ -416,6 +423,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 }}
                 className="group-name-input"
                 autoFocus
+                aria-label="Group name"
               />
               <div className="group-modal-actions">
                 <button className="btn primary-btn" onClick={confirmCreateGroup}>

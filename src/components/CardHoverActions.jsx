@@ -67,8 +67,9 @@ const CardHoverActions = React.memo(({
           toggleComments();
         }}
         title="Toggle comments"
+        aria-label={commentCount > 0 ? `Toggle comments (${commentCount})` : 'Toggle comments'}
       >
-        <MessageSquare size={16} />
+        <MessageSquare size={16} aria-hidden="true" />
         {commentCount > 0 && <span className="comment-count">{commentCount}</span>}
       </button>
     </div>

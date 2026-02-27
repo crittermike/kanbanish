@@ -1,29 +1,6 @@
 import { Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-
-const RATING_COLORS = {
-  1: '#ef4444',
-  2: '#f97316',
-  3: '#eab308',
-  4: '#84cc16',
-  5: '#22c55e'
-};
-
-const getScoreColor = (average) => {
-  if (average >= 4.5) return '#22c55e';
-  if (average >= 3.5) return '#84cc16';
-  if (average >= 2.5) return '#eab308';
-  if (average >= 1.5) return '#f97316';
-  return '#ef4444';
-};
-
-const getScoreLabel = (average) => {
-  if (average >= 4.5) return 'Great';
-  if (average >= 3.5) return 'Good';
-  if (average >= 2.5) return 'Okay';
-  if (average >= 1.5) return 'Poor';
-  return 'Terrible';
-};
+import { getScoreLabel, getScoreRatingLevel } from '../utils/ratingUtils';
 
 const HealthCheckResults = () => {
   const { getHealthCheckStats } = useBoardContext();
@@ -53,14 +30,14 @@ const HealthCheckResults = () => {
           <div className="overall-score">
             <div className="score-display">
               <div className="average-rating">
-                <span className="score-number" style={{ color: getScoreColor(overallAverage) }}>
+                <span className={`score-number score-color-${getScoreRatingLevel(overallAverage)}`}>
                   {overallAverage.toFixed(1)}
                 </span>
                 <span className="score-separator">/</span>
                 <span className="score-max">5.0</span>
               </div>
             </div>
-            <div className="effectiveness-label" style={{ color: getScoreColor(overallAverage) }}>
+            <div className={`effectiveness-label score-color-${getScoreRatingLevel(overallAverage)}`}>
               Overall: {getScoreLabel(overallAverage)}
             </div>
           </div>
@@ -77,15 +54,15 @@ const HealthCheckResults = () => {
                   <div className="health-bar-container">
                     <div
                       className="health-bar-fill"
+                      data-rating={getScoreRatingLevel(question.average)}
                       style={{
-                        width: question.totalVotes > 0 ? `${(question.average / 5) * 100}%` : '0%',
-                        backgroundColor: getScoreColor(question.average)
+                        width: question.totalVotes > 0 ? `${(question.average / 5) * 100}%` : '0%'
                       }}
                     />
                   </div>
                   <div className="health-bar-score">
                     {question.totalVotes > 0 ? (
-                      <span style={{ color: getScoreColor(question.average) }}>
+                      <span className={`score-color-${getScoreRatingLevel(question.average)}`}>
                         {question.average.toFixed(1)}
                       </span>
                     ) : (
@@ -112,9 +89,9 @@ const HealthCheckResults = () => {
                           <div
                             className="dist-bar"
                             style={{
-                              height: `${percentage}%`,
-                              backgroundColor: RATING_COLORS[rating]
+                              height: `${percentage}%`
                             }}
+                            data-rating={rating}
                           />
                         </div>
                         <span className="dist-label">{rating}</span>

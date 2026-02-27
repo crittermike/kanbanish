@@ -16,6 +16,7 @@ const CommentEditor = ({
       onChange={e => setEditedComment(e.target.value)}
       className="comment-edit-input"
       autoFocus
+      aria-label="Edit comment"
       onKeyPress={e => {
         if (e.key === 'Enter' && editedComment.trim()) {
           saveComment();
@@ -122,6 +123,15 @@ const Comments = React.memo(({
                     startEditing(commentId, comment.content);
                   }
                 }}
+                onKeyDown={e => {
+                  if ((e.key === 'Enter' || e.key === ' ') && isCommentAuthor(comment)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startEditing(commentId, comment.content);
+                  }
+                }}
+                role={isCommentAuthor(comment) && !interactionsDisabled ? 'button' : undefined}
+                tabIndex={isCommentAuthor(comment) && !interactionsDisabled ? 0 : undefined}
                 title={
                   interactionsDisabled && shouldShowAlert
                     ? commentDisabledMessage
@@ -148,6 +158,7 @@ const Comments = React.memo(({
                 : 'Add a comment...'
             }
             className="comment-input"
+            aria-label="Add a comment"
             value={newComment}
             onChange={e => onCommentChange(e.target.value)}
             onClick={e => e.stopPropagation()}

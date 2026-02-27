@@ -19,11 +19,11 @@ const VoteLimitModal = ({ isOpen, onClose, onConfirm, currentLimit = 3 }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose} role="presentation">
+      <div className="modal-container" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="vote-limit-title">
         <div className="modal-header">
-          <h2>Set Vote Limit</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <h2 id="vote-limit-title">Set Vote Limit</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
         </div>
         
         <div className="modal-body">

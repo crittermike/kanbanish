@@ -7,6 +7,18 @@ import Card from './Card';
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock the react-dnd hooks
 vi.mock('react-dnd', () => ({
@@ -31,7 +43,6 @@ vi.mock('../utils/boardUtils', () => ({
 }));
 
 describe('Card Comment Revealing and Freezing', () => {
-  const mockShowNotification = vi.fn();
   const mockUpdateCard = vi.fn();
   const mockDeleteCard = vi.fn();
   const mockAddComment = vi.fn();
@@ -64,7 +75,6 @@ describe('Card Comment Revealing and Freezing', () => {
         }
       }
     },
-    showNotification: mockShowNotification
   };
 
   it('reveals all comments when interactions are revealed', () => {

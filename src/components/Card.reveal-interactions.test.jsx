@@ -7,6 +7,18 @@ import Card from './Card';
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock the react-dnd hooks
 vi.mock('react-dnd', () => ({
@@ -31,7 +43,6 @@ vi.mock('../utils/boardUtils', () => ({
 }));
 
 describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
-  const mockShowNotification = vi.fn();
   const mockUpdateCard = vi.fn();
   const mockDeleteCard = vi.fn();
   const mockAddComment = vi.fn();
@@ -57,7 +68,6 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       createdBy: 'user1',
       created: Date.now()
     },
-    showNotification: mockShowNotification
   };
 
   beforeEach(() => {

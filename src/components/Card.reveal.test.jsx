@@ -8,6 +8,17 @@ import Card from './Card';
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 // Mock react-dnd
 vi.mock('react-dnd', async importOriginal => {
   const actual = await importOriginal();
@@ -44,7 +55,6 @@ describe('Card Reveal Mode', () => {
     cardId: 'card123',
     cardData: mockCardData,
     columnId: 'column1',
-    showNotification: vi.fn()
   };
 
   beforeEach(() => {

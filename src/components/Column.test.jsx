@@ -54,6 +54,17 @@ vi.mock('../utils/workflowUtils', () => ({
 
 // Mock BoardContext
 vi.mock('../context/BoardContext');
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('Column Component', () => {
   const mockProps = {
@@ -67,7 +78,6 @@ describe('Column Component', () => {
       groups: {}
     },
     sortByVotes: false,
-    showNotification: vi.fn()
   };
 
   const mockBoardContext = {

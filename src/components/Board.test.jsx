@@ -8,6 +8,17 @@ import Board from './Board';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext');
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock the NewBoardTemplateModal component
 vi.mock('./modals/NewBoardTemplateModal', () => ({
@@ -39,7 +50,6 @@ vi.mock('../utils/firebase', () => ({
 }));
 
 describe('Board Component', () => {
-  const mockShowNotification = vi.fn();
 
   // Mock context values
   const mockContextValue = {
@@ -129,7 +139,7 @@ describe('Board Component', () => {
   test('renders board title and columns correctly', () => {
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -163,7 +173,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -195,7 +205,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -223,7 +233,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -247,7 +257,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -270,7 +280,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -295,7 +305,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -327,7 +337,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -368,7 +378,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -397,7 +407,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -413,7 +423,7 @@ describe('Board Component', () => {
     // Re-render with new board title
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -430,7 +440,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -446,7 +456,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -465,7 +475,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -490,7 +500,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -514,7 +524,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -551,7 +561,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -585,7 +595,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -627,7 +637,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -663,7 +673,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -693,7 +703,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -737,7 +747,7 @@ describe('Board Component', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 

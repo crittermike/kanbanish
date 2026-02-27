@@ -127,7 +127,6 @@ function Card({
   cardData,
   columnId,
   groupId = null,
-  showNotification,
   onCardDropOnCard = null
 }) {
   const { 
@@ -192,7 +191,6 @@ function Card({
     cardId,
     cardData,
     user,
-    showNotification,
     multipleVotesAllowed,
     retrospectiveMode,
     workflowPhase,

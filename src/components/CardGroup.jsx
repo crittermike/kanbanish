@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { useGroupOperations } from '../hooks/useGroupOperations';
 import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 import Card from './Card';
@@ -17,9 +18,9 @@ function CardGroup({
   groupData,
   columnId,
   columnData, // Add columnData to access all cards
-  showNotification,
   sortByVotes
 }) {
+  const { showNotification } = useNotification();
   const {
     boardId,
     user,
@@ -41,7 +42,6 @@ function CardGroup({
     groupId,
     groupData,
     user,
-    showNotification,
     retrospectiveMode,
     workflowPhase
   });
@@ -102,12 +102,12 @@ function CardGroup({
   // Voting handlers
   const handleUpvoteGroup = e => {
     e.stopPropagation();
-    upvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
+    upvoteGroup(columnId, groupId, groupData.votes || 0);
   };
 
   const handleDownvoteGroup = e => {
     e.stopPropagation();
-    downvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
+    downvoteGroup(columnId, groupId, groupData.votes || 0);
   };
 
   // Sort cards within the group
@@ -167,7 +167,15 @@ function CardGroup({
       ref={groupRef}
       className={`card-group ${isOver ? 'drag-over' : ''}`}
     >
-      <div className="card-group-header" onClick={() => setIsExpanded(!isExpanded)}>
+      <div
+        className="card-group-header"
+        onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsExpanded(!isExpanded); } }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-label={`${groupData.name || 'Unnamed Group'} group, ${isExpanded ? 'collapse' : 'expand'}`}
+      >
         <div className="card-group-title-section">
           {isExpanded ? (
             <ChevronDown size={16} className="expand-icon" />
@@ -184,6 +192,7 @@ function CardGroup({
               onKeyDown={handleKeyPress}
               className="group-name-input"
               autoFocus
+              aria-label="Group name"
               onClick={e => e.stopPropagation()}
             />
           ) : (
@@ -196,6 +205,16 @@ function CardGroup({
                     setIsEditingName(true);
                   }
                 }}
+                onKeyDown={e => {
+                  if ((e.key === 'Enter' || e.key === ' ') && isGroupingAllowed(workflowPhase, retrospectiveMode)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsEditingName(true);
+                  }
+                }}
+                role={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'button' : undefined}
+                tabIndex={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 0 : undefined}
+                title={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'Click to edit group name' : undefined}
               >
                 {groupData.name || 'Unnamed Group'}
               </h3>
@@ -207,8 +226,9 @@ function CardGroup({
                     setIsEditingName(true);
                   }}
                   title="Edit group name"
+                  aria-label="Edit group name"
                 >
-                  <Edit2 size={12} />
+                  <Edit2 size={12} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -238,8 +258,9 @@ function CardGroup({
                   handleUngroup();
                 }}
                 title="Ungroup cards"
+                aria-label="Ungroup cards"
               >
-                <Layers size={14} />
+                <Layers size={14} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -255,20 +276,17 @@ function CardGroup({
               if (reactionData.count <= 0) return null;
               const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
               return (
-                <span 
+                <button 
                   key={emoji} 
                   className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''}`}
                   onClick={e => {
                     e.stopPropagation();
-                    if (hasUserReacted) {
-                      groupOperations.addReaction(e, emoji); // This will remove it
-                    } else {
-                      groupOperations.addReaction(e, emoji);
-                    }
+                    groupOperations.addReaction(e, emoji);
                   }}
+                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'vote' : 'votes'}${hasUserReacted ? ', you reacted' : ''}`}
                 >
                   {emoji} {reactionData.count}
-                </span>
+                </button>
               );
             })}
             
@@ -287,6 +305,7 @@ function CardGroup({
                 groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
               }}
               title="Add reaction"
+              aria-label="Add reaction to group"
               ref={groupOperations.emojiButtonRef}
             >
               +
@@ -301,8 +320,9 @@ function CardGroup({
                 groupOperations.toggleComments();
               }}
               title="Toggle comments"
+              aria-label="Toggle group comments"
             >
-              <MessageSquare size={16} />
+              <MessageSquare size={16} aria-hidden="true" />
               {Object.keys(displayGroupData.comments || {}).length > 0 && (
                 <span className="interaction-count">{Object.keys(displayGroupData.comments || {}).length}</span>
               )}
@@ -352,7 +372,6 @@ function CardGroup({
                 cardData={card}
                 columnId={columnId}
                 groupId={groupId}
-                showNotification={showNotification}
               />
             ))
           )}

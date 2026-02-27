@@ -22,6 +22,17 @@ vi.mock('../utils/workflowUtils', () => ({
   areInteractionsAllowed: vi.fn(() => true),
   areInteractionsRevealed: vi.fn(() => false)
 }));
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 const mockProps = {
   boardId: 'board-123',
@@ -37,7 +48,6 @@ const mockProps = {
     }
   },
   user: { uid: 'user1' },
-  showNotification: vi.fn(),
   retrospectiveMode: false,
   workflowPhase: 'CREATION'
 };

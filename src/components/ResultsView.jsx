@@ -4,7 +4,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-const ResultsView = ({ showNotification }) => {
+const ResultsView = () => {
   const {
     workflowPhase,
     resultsViewIndex,
@@ -111,7 +111,6 @@ const ResultsView = ({ showNotification }) => {
                 columnId={currentItem.columnId}
                 columnData={columnData}
                 sortByVotes={true}
-                showNotification={showNotification}
               />
             ) : (
               <Card
@@ -119,7 +118,6 @@ const ResultsView = ({ showNotification }) => {
                 cardId={currentItem.id}
                 cardData={currentItem.data}
                 columnId={currentItem.columnId}
-                showNotification={showNotification}
               />
             )}
           </div>

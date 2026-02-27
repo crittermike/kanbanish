@@ -7,6 +7,17 @@ import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import Board from './Board';
 
 vi.mock('../context/BoardContext');
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock the NewBoardTemplateModal component to keep DOM simple
 vi.mock('./modals/NewBoardTemplateModal', () => ({
@@ -19,7 +30,6 @@ vi.mock('./modals/ExportBoardModal', () => ({
 }));
 
 describe('Board URL settings', () => {
-  const mockShowNotification = vi.fn();
 
   const baseCtx = {
     boardId: null,
@@ -70,7 +80,7 @@ describe('Board URL settings', () => {
   test('applies theme from URL on first render (sort handled on creation)', () => {
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 

@@ -1,10 +1,11 @@
-import { ref, onValue, off, set, remove } from 'firebase/database';
+import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
 import { usePoll } from '../hooks/usePoll';
 import { usePresence } from '../hooks/usePresence';
+import { useTimer } from '../hooks/useTimer';
 import { useVoting } from '../hooks/useVoting';
 import { useWorkflow } from '../hooks/useWorkflow';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
@@ -64,7 +65,6 @@ export const BoardProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
-        console.log('User authenticated:', user.uid);
         setUser(user);
 
         // Load user preferences including theme
@@ -80,7 +80,6 @@ export const BoardProvider = ({ children }) => {
           console.error('Error loading user preferences:', error);
         });
       } else {
-        console.log('No user, signing in anonymously');
         signInAnonymously(auth)
           .catch(error => {
             console.error('Error signing in:', error);
@@ -259,7 +258,6 @@ export const BoardProvider = ({ children }) => {
 
     set(newBoardRef, initialData)
       .then(() => {
-        console.log('New board created with ID:', newBoardId);
         setBoardId(newBoardId);
         setBoardTitle(DEFAULT_BOARD_TITLE);
       })
@@ -272,7 +270,6 @@ export const BoardProvider = ({ children }) => {
 
   // Open an existing board
   const openExistingBoard = boardIdToOpen => {
-    console.log('Opening board with ID:', boardIdToOpen);
     setBoardId(boardIdToOpen);
   };
 
@@ -284,9 +281,6 @@ export const BoardProvider = ({ children }) => {
     if (boardId && user) {
       const titleRef = ref(database, `boards/${boardId}/title`);
       set(titleRef, newTitle)
-        .then(() => {
-          console.log('Board title updated');
-        })
         .catch(error => {
           console.error('Error updating board title:', error);
         });
@@ -354,94 +348,11 @@ export const BoardProvider = ({ children }) => {
   });
 
   // Timer functions
-  const startTimer = (duration) => {
-    if (!boardId || !user) return;
-    const timerRef = ref(database, `boards/${boardId}/timer`);
-    const timerObj = {
-      duration, // total seconds
-      startedAt: Date.now(),
-      isRunning: true,
-      pausedRemaining: null,
-      phase: workflowPhase
-    };
-    set(timerRef, timerObj)
-      .then(() => {
-        setTimerData(timerObj);
-      })
-      .catch(error => {
-        console.error('Error starting timer:', error);
-      });
-  };
-
-  const pauseTimer = () => {
-    if (!boardId || !user || !timerData) return;
-    const timerRef = ref(database, `boards/${boardId}/timer`);
-    const elapsed = (Date.now() - timerData.startedAt) / 1000;
-    const remaining = Math.max(0, timerData.duration - elapsed);
-    const updatedTimer = {
-      ...timerData,
-      isRunning: false,
-      pausedRemaining: remaining,
-      startedAt: null
-    };
-    set(timerRef, updatedTimer)
-      .then(() => {
-        setTimerData(updatedTimer);
-      })
-      .catch(error => {
-        console.error('Error pausing timer:', error);
-      });
-  };
-
-  const resumeTimer = () => {
-    if (!boardId || !user || !timerData || !timerData.pausedRemaining) return;
-    const timerRef = ref(database, `boards/${boardId}/timer`);
-    const updatedTimer = {
-      ...timerData,
-      duration: timerData.pausedRemaining,
-      startedAt: Date.now(),
-      isRunning: true,
-      pausedRemaining: null
-    };
-    set(timerRef, updatedTimer)
-      .then(() => {
-        setTimerData(updatedTimer);
-      })
-      .catch(error => {
-        console.error('Error resuming timer:', error);
-      });
-  };
-
-  const resetTimer = () => {
-    if (!boardId || !user) return;
-    const timerRef = ref(database, `boards/${boardId}/timer`);
-    remove(timerRef)
-      .then(() => {
-        setTimerData(null);
-      })
-      .catch(error => {
-        console.error('Error resetting timer:', error);
-      });
-  };
-
-  const restartTimer = () => {
-    if (!boardId || !user || !timerData) return;
-    const timerRef = ref(database, `boards/${boardId}/timer`);
-    const timerObj = {
-      duration: timerData.duration,
-      startedAt: Date.now(),
-      isRunning: true,
-      pausedRemaining: null,
-      phase: workflowPhase
-    };
-    set(timerRef, timerObj)
-      .then(() => {
-        setTimerData(timerObj);
-      })
-      .catch(error => {
-        console.error('Error restarting timer:', error);
-      });
-  };
+  const {
+    startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer
+  } = useTimer({
+    boardId, user, timerData, setTimerData, workflowPhase
+  });
 
   // Update dark mode preference
   const updateDarkMode = enabled => {
@@ -449,7 +360,6 @@ export const BoardProvider = ({ children }) => {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
       set(userPrefsRef, { darkMode: enabled })
         .then(() => {
-          console.log('Dark mode preference updated:', enabled);
           setDarkMode(enabled);
         })
         .catch(error => {

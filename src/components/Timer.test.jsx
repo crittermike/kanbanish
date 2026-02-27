@@ -7,6 +7,18 @@ import Timer from './Timer';
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('Timer Component', () => {
   const mockStartTimer = vi.fn();
@@ -14,7 +26,6 @@ describe('Timer Component', () => {
   const mockResumeTimer = vi.fn();
   const mockResetTimer = vi.fn();
   const mockRestartTimer = vi.fn();
-  const mockShowNotification = vi.fn();
 
   const defaultMockContext = {
     timerData: null,
@@ -32,7 +43,7 @@ describe('Timer Component', () => {
 
   describe('when no timer is active', () => {
     test('renders Set Timer button for any user', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByTitle('Set timer')).toBeInTheDocument();
     });
   });
@@ -45,12 +56,12 @@ describe('Timer Component', () => {
     });
 
     test('renders Set Timer button', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByTitle('Set timer')).toBeInTheDocument();
     });
 
     test('shows timer setup when Set Timer is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       expect(screen.getByText('1m')).toBeInTheDocument();
@@ -60,14 +71,14 @@ describe('Timer Component', () => {
     });
 
     test('shows custom input in setup', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       expect(screen.getByLabelText('Custom timer duration in minutes')).toBeInTheDocument();
     });
 
     test('starts timer with preset duration when preset button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
       fireEvent.click(screen.getByText('5m'));
 
@@ -75,7 +86,7 @@ describe('Timer Component', () => {
     });
 
     test('starts timer with 1 minute preset', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
       fireEvent.click(screen.getByText('1m'));
 
@@ -83,7 +94,7 @@ describe('Timer Component', () => {
     });
 
     test('starts timer with custom duration', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       const input = screen.getByLabelText('Custom timer duration in minutes');
@@ -99,7 +110,7 @@ describe('Timer Component', () => {
     });
 
     test('starts timer with custom duration on Enter key', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       const input = screen.getByLabelText('Custom timer duration in minutes');
@@ -110,7 +121,7 @@ describe('Timer Component', () => {
     });
 
     test('does not start timer with invalid custom duration', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       const input = screen.getByLabelText('Custom timer duration in minutes');
@@ -121,7 +132,7 @@ describe('Timer Component', () => {
     });
 
     test('closes setup when cancel button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
       // Verify setup is shown
@@ -151,45 +162,45 @@ describe('Timer Component', () => {
     });
 
     test('renders active timer with time display', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByRole('timer')).toBeInTheDocument();
     });
 
     test('renders SVG progress ring', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const svg = document.querySelector('.timer-svg');
       expect(svg).toBeInTheDocument();
     });
 
     test('renders pause button for owner', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByLabelText('Pause timer')).toBeInTheDocument();
     });
 
     test('renders restart button for owner', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByLabelText('Restart timer')).toBeInTheDocument();
     });
 
     test('renders stop button for owner', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByLabelText('Stop timer')).toBeInTheDocument();
     });
 
     test('calls pauseTimer when pause button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByLabelText('Pause timer'));
       expect(mockPauseTimer).toHaveBeenCalled();
     });
 
     test('calls restartTimer when restart button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByLabelText('Restart timer'));
       expect(mockRestartTimer).toHaveBeenCalled();
     });
 
     test('calls resetTimer when stop button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByLabelText('Stop timer'));
       expect(mockResetTimer).toHaveBeenCalled();
     });
@@ -210,18 +221,18 @@ describe('Timer Component', () => {
     });
 
     test('renders resume button', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByLabelText('Resume timer')).toBeInTheDocument();
     });
 
     test('calls resumeTimer when resume button is clicked', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByLabelText('Resume timer'));
       expect(mockResumeTimer).toHaveBeenCalled();
     });
 
     test('displays paused time', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       // 180 seconds = 3:00
       expect(screen.getByText('3:00')).toBeInTheDocument();
     });
@@ -243,12 +254,12 @@ describe('Timer Component', () => {
     });
 
     test('renders active timer display', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByRole('timer')).toBeInTheDocument();
     });
 
     test('renders control buttons for all users', () => {
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByLabelText('Pause timer')).toBeInTheDocument();
       expect(screen.getByLabelText('Restart timer')).toBeInTheDocument();
       expect(screen.getByLabelText('Stop timer')).toBeInTheDocument();
@@ -269,7 +280,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const timer = screen.getByRole('timer');
       expect(timer.classList.contains('normal')).toBe(true);
     });
@@ -287,7 +298,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const timer = screen.getByRole('timer');
       expect(timer.classList.contains('warning')).toBe(true);
     });
@@ -305,7 +316,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const timer = screen.getByRole('timer');
       expect(timer.classList.contains('critical')).toBe(true);
     });
@@ -325,7 +336,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       expect(screen.getByRole('timer')).toBeInTheDocument();
     });
 
@@ -342,7 +353,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const timer = screen.getByRole('timer');
       expect(timer).toHaveAttribute('aria-live', 'polite');
     });
@@ -360,7 +371,7 @@ describe('Timer Component', () => {
         }
       });
 
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       const svg = document.querySelector('.timer-svg');
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
@@ -369,7 +380,7 @@ describe('Timer Component', () => {
       useBoardContext.mockReturnValue({
         ...defaultMockContext
       });
-      render(<Timer showNotification={mockShowNotification} />);
+      render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
       expect(screen.getByLabelText('Custom timer duration in minutes')).toBeInTheDocument();
     });
@@ -399,7 +410,7 @@ describe('Timer Component', () => {
           }
         });
 
-        const { unmount } = render(<Timer showNotification={mockShowNotification} />);
+        const { unmount } = render(<Timer />);
         expect(screen.getByText(expected)).toBeInTheDocument();
         unmount();
       });

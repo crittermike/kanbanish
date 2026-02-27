@@ -1,245 +1,40 @@
-// filepath: /Users/crittermike/Code/kanbanish/src/components/modals/NewBoardTemplateModal.jsx
 import React, { useState, useEffect } from 'react';
+import BOARD_TEMPLATES from '../../data/boardTemplates';
 import '../../styles/components/modals.css';
 import '../../styles/components/template-select.css';
 
-// Define board templates
-const BOARD_TEMPLATES = [
-  {
-    id: 'default',
-    name: 'Default',
-    description: 'Simple task tracking for any project',
-    columns: ['To Do', 'In Progress', 'Done'],
-    icon: '📋',
-    tags: ['workflow', 'kanban', 'basic']
-  },
-  {
-    id: 'custom',
-    name: 'Custom',
-    description: 'Create your own board structure from scratch',
-    columns: ['Untitled'],
-    icon: '✏️',
-    tags: ['custom', 'blank', 'flexible']
-  },
-  {
-    id: 'lean-coffee',
-    name: 'Lean Coffee',
-    description: 'Democratically driven meeting agenda format',
-    columns: ['Topics', 'Discussing', 'Done'],
-    icon: '☕',
-    tags: ['discussion', 'meeting', 'agenda']
-  },
-  {
-    id: 'retro',
-    name: 'Retrospective',
-    description: 'Reflect on past work and plan improvements',
-    columns: ['Went Well', 'Could Improve', 'Action Items'],
-    icon: '🔄',
-    tags: ['agile', 'reflection', 'team']
-  },
-  {
-    id: 'feelings-improvements',
-    name: 'Feelings / Improvements',
-    description: 'Focus on emotional impact and concrete solutions',
-    columns: ['Feelings', 'Improvements'],
-    icon: '❤️',
-    tags: ['feedback', 'emotions', 'solutions']
-  },
-  {
-    id: 'daki',
-    name: 'DAKI',
-    description: 'Evaluate current processes and identify changes',
-    columns: ['Drop', 'Add', 'Keep', 'Improve'],
-    icon: '✨',
-    tags: ['reflection', 'processes', 'practices']
-  },
-  {
-    id: 'glad-sad-mad',
-    name: 'Glad Sad Mad',
-    description: 'Categorize feedback by emotional response',
-    columns: ['Glad', 'Sad', 'Mad'],
-    icon: '😊',
-    tags: ['emotions', 'reflection', 'feedback']
-  },
-  {
-    id: 'start-stop-continue',
-    name: 'Start Stop Continue',
-    description: 'Focus on actionable changes to team behavior',
-    columns: ['Start', 'Stop', 'Continue'],
-    icon: '🚦',
-    tags: ['action', 'feedback', 'improvement']
-  },
-  {
-    id: '4ls',
-    name: '4 Ls',
-    description: 'Comprehensive retrospective with learning focus',
-    columns: ['Liked', 'Learned', 'Lacked', 'Longed For'],
-    icon: '📝',
-    tags: ['reflection', 'learning', 'retrospective']
-  },
-  {
-    id: 'swot',
-    name: 'SWOT',
-    description: 'Analyze internal and external factors for planning',
-    columns: ['Strengths', 'Weaknesses', 'Opportunities', 'Threats'],
-    icon: '📊',
-    tags: ['strategy', 'planning', 'analysis']
-  },
-  // Additional templates
-  {
-    id: 'six-thinking-hats',
-    name: 'Six Thinking Hats',
-    description: 'Examine ideas from multiple mental perspectives',
-    columns: ['Facts', 'Emotions', 'Critical', 'Optimistic', 'Creative', 'Process'],
-    icon: '🎩',
-    tags: ['thinking', 'perspectives', 'discussion']
-  },
-  {
-    id: 'moscow',
-    name: 'MoSCoW',
-    description: 'Categorize features by implementation priority',
-    columns: ['Must Have', 'Should Have', 'Could Have', 'Won\'t Have'],
-    icon: '📌',
-    tags: ['prioritization', 'planning', 'requirements']
-  },
-  {
-    id: 'five-whys',
-    name: 'Five Whys',
-    description: 'Iteratively identify the underlying causes of issues',
-    columns: ['Problem', 'Why 1', 'Why 2', 'Why 3', 'Why 4', 'Why 5', 'Root Cause'],
-    icon: '🔍',
-    tags: ['problem solving', 'analysis', 'causes']
-  },
-  {
-    id: 'eisenhower',
-    name: 'Eisenhower Matrix',
-    description: 'Prioritize tasks based on urgency and importance',
-    columns: ['Urgent & Important', 'Important & Not Urgent', 'Urgent & Not Important', 'Neither'],
-    icon: '⏱️',
-    tags: ['decision', 'prioritization', 'time management']
-  },
-  {
-    id: 'sailboat',
-    name: 'Sailboat Retrospective',
-    description: 'Visualize team progress with nautical metaphors',
-    columns: ['Wind (Helps)', 'Anchors (Hinders)', 'Rocks (Risks)', 'Island (Goals)'],
-    icon: '⛵',
-    tags: ['retrospective', 'visual', 'team']
-  },
-  {
-    id: 'fishbone',
-    name: 'Fishbone',
-    description: 'Identify causes across different categories',
-    columns: ['People', 'Process', 'Equipment', 'Materials', 'Environment', 'Management'],
-    icon: '🐟',
-    tags: ['analysis', 'causes', 'problem solving']
-  },
-  {
-    id: 'feedback-grid',
-    name: 'Feedback Grid',
-    description: 'Balanced approach to feedback with action items',
-    columns: ['What Went Well', 'What Could Be Improved', 'Questions', 'Ideas'],
-    icon: '🔄',
-    tags: ['feedback', 'collection', 'reflection']
-  },
-  {
-    id: 'starfish',
-    name: 'Starfish Retrospective',
-    description: 'Detailed action-oriented team improvement model',
-    columns: ['Keep Doing', 'Less Of', 'More Of', 'Start Doing', 'Stop Doing'],
-    icon: '⭐',
-    tags: ['retrospective', 'actions', 'team']
-  },
-  {
-    id: 'kpt',
-    name: 'KPT',
-    description: 'Concise approach for identifying issues and solutions',
-    columns: ['Keep', 'Problem', 'Try'],
-    icon: '🔑',
-    tags: ['retrospective', 'simple', 'actions']
-  },
-  {
-    id: 'pro-con',
-    name: 'Pros & Cons',
-    description: 'Evaluate options and make informed decisions',
-    columns: ['Pros', 'Cons', 'Decisions'],
-    icon: '⚖️',
-    tags: ['decision', 'evaluation', 'analysis']
-  },
-  // New templates
-  {
-    id: 'user-journey',
-    name: 'User Journey Map',
-    description: 'Map out each stage of the user experience',
-    columns: ['Awareness', 'Consideration', 'Decision', 'Onboarding', 'Retention', 'Advocacy'],
-    icon: '🗺️',
-    tags: ['ux', 'design', 'customer']
-  },
-  {
-    id: 'three-horizons',
-    name: 'Three Horizons',
-    description: 'Strategic planning across different time frames',
-    columns: ['Horizon 1 (Now)', 'Horizon 2 (Next)', 'Horizon 3 (Future)'],
-    icon: '🔭',
-    tags: ['strategy', 'planning', 'innovation']
-  },
-  {
-    id: 'impact-effort',
-    name: 'Impact/Effort Matrix',
-    description: 'Prioritize tasks based on impact and required effort',
-    columns: ['High Impact/Low Effort', 'High Impact/High Effort', 'Low Impact/Low Effort', 'Low Impact/High Effort'],
-    icon: '📊',
-    tags: ['prioritization', 'planning', 'efficiency']
-  },
-  {
-    id: 'assumption-mapping',
-    name: 'Assumption Mapping',
-    description: 'Identify and test critical business assumptions',
-    columns: ['Known Knowns', 'Known Unknowns', 'Unknown Knowns', 'Unknown Unknowns'],
-    icon: '🧠',
-    tags: ['strategy', 'risk', 'planning']
-  },
-  {
-    id: 'customer-problem-solution',
-    name: 'Customer-Problem-Solution',
-    description: 'Framework for validating business model assumptions',
-    columns: ['Customer Segments', 'Problems', 'Solutions', 'Value Propositions'],
-    icon: '💡',
-    tags: ['business', 'startup', 'validation']
-  },
-  {
-    id: 'work-breakdown',
-    name: 'Work Breakdown Structure',
-    description: 'Hierarchical decomposition of project deliverables',
-    columns: ['Project', 'Major Deliverables', 'Sub-deliverables', 'Work Packages', 'Tasks'],
-    icon: '📑',
-    tags: ['project management', 'planning', 'organization']
-  },
-  {
-    id: 'five-stage-design',
-    name: 'Five Stage Design Thinking',
-    description: 'Human-centered approach to innovation',
-    columns: ['Empathize', 'Define', 'Ideate', 'Prototype', 'Test'],
-    icon: '🎨',
-    tags: ['design', 'innovation', 'process']
-  },
-  {
-    id: 'rose-thorn-bud',
-    name: 'Rose, Thorn, Bud',
-    description: 'Review positives, challenges, and opportunities',
-    columns: ['Rose (Positive)', 'Thorn (Challenge)', 'Bud (Opportunity)'],
-    icon: '🌹',
-    tags: ['feedback', 'reflection', 'opportunity']
-  },
-  {
-    id: 'four-quadrant-feedback',
-    name: 'Four Quadrant Feedback',
-    description: 'Balanced personal or project feedback',
-    columns: ['Continue', 'Consider', 'Start', 'Stop'],
-    icon: '📝',
-    tags: ['feedback', 'personal', 'development']
+/**
+ * Safely highlights matching text by splitting into segments and wrapping
+ * matches in <mark> elements. Avoids dangerouslySetInnerHTML / XSS risk.
+ *
+ * @param {string} text - The text to highlight within
+ * @param {string} query - The search query to highlight
+ * @returns {React.ReactNode} Text with highlighted matches, or plain string if no query
+ */
+const highlightMatch = (text, query) => {
+  if (!query.trim()) {
+    return text;
   }
-];
+
+  try {
+    // Escape special regex characters in the query
+    const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    const parts = text.split(regex);
+
+    if (parts.length === 1) {
+      return text;
+    }
+
+    return parts.map((part, i) =>
+      regex.test(part)
+        ? <mark key={i}>{part}</mark>
+        : part
+    );
+  } catch {
+    return text;
+  }
+};
 
 const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('default');
@@ -254,7 +49,6 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     }
 
     const query = searchQuery.toLowerCase().trim();
-    // Keep searching in tags (for backend filtering) even though we don't display them
     const filtered = BOARD_TEMPLATES.filter(template =>
       template.name.toLowerCase().includes(query) ||
       template.description.toLowerCase().includes(query) ||
@@ -280,14 +74,12 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     setSearchQuery(e.target.value);
   };
 
-  // Create refs for the search input and create button
   const searchInputRef = React.useRef(null);
   const createButtonRef = React.useRef(null);
 
   // Enhanced keyboard navigation
   const handleKeyDown = e => {
     if (e.key === 'Enter' && e.target.classList.contains('template-search-input')) {
-      // If Enter pressed in search and we have results, select first one
       if (filteredTemplates.length > 0) {
         setSelectedTemplate(filteredTemplates[0].id);
         e.preventDefault();
@@ -296,7 +88,6 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
       handleConfirm();
       e.preventDefault();
     } else if (e.key === 'Escape') {
-      // First clear search if active, otherwise close modal
       if (searchQuery) {
         setSearchQuery('');
         if (searchInputRef.current) {
@@ -307,7 +98,6 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
         onClose();
       }
     } else if (e.key === '/' && !e.target.classList.contains('template-search-input')) {
-      // Quick shortcut to focus the search box
       if (searchInputRef.current) {
         searchInputRef.current.focus();
         e.preventDefault();
@@ -338,26 +128,12 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     return null;
   }
 
-  // Function to highlight matching text
-  const highlightMatch = (text, query) => {
-    if (!query.trim()) {
-      return text;
-    }
-
-    try {
-      const regex = new RegExp(`(${query.trim()})`, 'gi');
-      return text.replace(regex, '<mark>$1</mark>');
-    } catch {
-      return text; // In case of invalid regex
-    }
-  };
-
   return (
-    <div className="modal-overlay">
-      <div className="modal-container template-modal">
+    <div className="modal-overlay" role="presentation">
+      <div className="modal-container template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
         <div className="modal-header">
-          <h2>Choose a Board Template</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <h2 id="template-modal-title">Choose a Board Template</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
         </div>
 
         <div className="modal-body template-selector">
@@ -370,6 +146,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                 onChange={handleSearchChange}
                 className="template-search-input"
                 autoFocus
+                aria-label="Search templates"
                 ref={searchInputRef}
               />
               {searchQuery && (
@@ -399,52 +176,38 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
           </div>
 
           <div className="template-grid">
-            {filteredTemplates.map(template => {
-              // Prepare highlighted content if we're searching
-              const highlightedName = searchQuery ?
-                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.name, searchQuery) }} /> :
-                template.name;
-
-              const highlightedDesc = searchQuery ?
-                <span dangerouslySetInnerHTML={{ __html: highlightMatch(template.description, searchQuery) }} /> :
-                template.description;
-
-              return (
-                <div
-                  key={template.id}
-                  className={`template-card ${selectedTemplate === template.id ? 'selected' : ''} ${searchQuery ? 'search-active' : ''}`}
-                  onClick={() => handleTemplateSelect(template.id)}
-                >
-                  <div className="template-icon">{template.icon}</div>
-                  <div className="template-info">
-                    <h3>{highlightedName}</h3>
-                    <p>{highlightedDesc}</p>
+            {filteredTemplates.map(template => (
+              <div
+                key={template.id}
+                className={`template-card ${selectedTemplate === template.id ? 'selected' : ''} ${searchQuery ? 'search-active' : ''}`}
+                onClick={() => handleTemplateSelect(template.id)}
+              >
+                <div className="template-icon">{template.icon}</div>
+                <div className="template-info">
+                  <h3>{highlightMatch(template.name, searchQuery)}</h3>
+                  <p>{highlightMatch(template.description, searchQuery)}</p>
+                </div>
+                <div className="template-details">
+                  <div className="template-columns">
+                    {template.columns.map((col, idx) => (
+                      <span key={idx} className="template-column-pill">
+                        {highlightMatch(col, searchQuery)}
+                      </span>
+                    ))}
                   </div>
-                  <div className="template-details">
-                    <div className="template-columns">
-                      {template.columns.map((col, idx) => (
-                        <span key={idx} className="template-column-pill">
-                          {searchQuery ?
-                            <span dangerouslySetInnerHTML={{ __html: highlightMatch(col, searchQuery) }} /> :
-                            col
-                          }
-                        </span>
-                      ))}
-                    </div>
-                    <div className="template-tags">
-                      {template.tags.map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="template-tags">
+                    {template.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -469,4 +232,3 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
 };
 
 export default NewBoardTemplateModal;
-export { BOARD_TEMPLATES };

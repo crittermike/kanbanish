@@ -2,155 +2,10 @@
  * Kanban App - Modal & Dialog Styles
  * 
  * Styles for modals, dialogs, and other overlay components.
- * Last updated: April 25, 2025
+ * Uses the .modal-overlay + .modal-container pattern.
  */
 
-/* Modal base */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.75);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    background: var(--card-bg);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: var(--modal-shadow);
-    color: var(--text-color);
-}
-
-.modal-content h2 {
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--border-color);
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--text-color);
-    margin: 0;
-}
-
-.modal-body {
-    padding: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.modal-body label {
-    display: block;
-    font-size: var(--font-size-base);
-    margin-bottom: var(--space-xs);
-    color: var(--text-color);
-    font-weight: 500;
-}
-
-.modal-body input[type="text"] {
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-size-base);
-    background: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-color);
-    transition: all var(--transition-speed) var(--transition-ease);
-}
-
-.modal-body input[type="text"]:focus {
-    border-color: var(--accent);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
-}
-
-.modal-body .btn.primary-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: var(--space-sm) var(--space-lg);
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-speed) var(--transition-ease);
-    width: 100%;
-    margin-top: var(--space-xs);
-}
-
-.modal-body .btn.primary-btn:hover {
-    background: var(--accent-hover);
-    transform: translateY(-1px);
-}
-
-.modal-body .btn.primary-btn:active {
-    transform: translateY(0);
-}
-
-.close-modal {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.5rem;
-    font-size: 1.75rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: color var(--transition-speed) var(--transition-ease);
-    background: transparent;
-    border: none;
-    line-height: 1;
-}
-
-.close-modal:hover {
-    color: var(--danger);
-}
-
-/* Card editing in modal */
-#card-content-edit {
-    width: 100%;
-    min-height: 100px;
-    padding: var(--space-sm);
-    font-family: inherit;
-    font-size: var(--font-size-base);
-    background: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-color);
-    resize: vertical;
-}
-
-#card-content-edit:focus {
-    border-color: var(--accent);
-    outline: none;
-}
-
-.card-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-md);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .modal-content {
-        width: 95%;
-    }
-    
-    .modal-body {
-        padding: var(--space-md);
-    }
-}
-
-/* Export modal styles */
+/* Modal overlay */
 .modal-overlay {
   display: flex;
   position: fixed;
@@ -158,17 +13,18 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--overlay-bg-light);
   z-index: 1000;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(5px);
 }
 
+/* Modal container */
 .modal-container {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--modal-shadow);
   padding: 0;
   width: 90%;
@@ -179,37 +35,103 @@
   flex-direction: column;
 }
 
+/* Modal header */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: var(--space-md) var(--space-lg);
   border-bottom: 1px solid var(--border-color);
   background-color: var(--card-bg);
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--text-color);
-  border-bottom: none; /* Remove border when h2 is inside modal-header */
+  border-bottom: none;
 }
 
+/* Modal body */
 .modal-body {
-  padding: 24px;
+  padding: var(--space-lg);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-md);
   background-color: var(--bg-color);
 }
 
+/* Modal footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+}
+
+/* Close button */
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+/* Primary action button */
+.primary-button {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.primary-button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+/* Secondary action button */
+.secondary-button {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.secondary-button:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--border-color);
+}
+
+/* Export modal - format selector */
 .format-selector {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
-  gap: 16px;
+  margin-bottom: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .format-option {
@@ -220,12 +142,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
+  padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-color);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-speed) var(--transition-ease);
   text-align: center;
 }
 
@@ -247,19 +169,12 @@
 
 .format-name {
   font-weight: 500;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   color: var(--text-color);
   text-align: center;
 }
 
-.close-button {
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--text-color);
-}
-
+/* Export modal - preview */
 .export-preview {
   flex: 1;
   min-height: 300px;
@@ -268,13 +183,13 @@
 .export-content {
   width: 100%;
   height: 300px;
-  padding: 16px;
+  padding: var(--space-md);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   resize: none;
   white-space: pre;
@@ -282,100 +197,7 @@
   box-shadow: none;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--border-color);
-  background-color: var(--card-bg);
-}
-
-.primary-button {
-  background-color: #58a6ff;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.primary-button:hover {
-  background-color: #4794e6;
-  transform: translateY(-1px);
-}
-
-.primary-button:active {
-  transform: translateY(0);
-}
-
-.secondary-button {
-  background-color: transparent;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.secondary-button:hover {
-  background-color: var(--hover-bg);
-  border-color: #444c56;
-}
-
-/* Mobile responsive adjustments for modal buttons */
-@media (max-width: 768px) {
-  /* Improved footer layout for mobile */
-  .modal-footer {
-    padding: 16px;
-    flex-direction: column-reverse;
-    gap: 12px;
-  }
-  
-  /* Make buttons larger and full-width for better tap targets */
-  .primary-button,
-  .secondary-button {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    min-height: 48px;
-    justify-content: center;
-  }
-  
-  /* Format options in export modal should stack on mobile */
-  .format-selector {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .format-option {
-    width: 100%;
-    max-width: 280px;
-  }
-  
-  .format-label {
-    padding: 16px;
-    margin-bottom: 8px;
-  }
-  
-  /* Modal body padding adjustments */
-  .modal-body .btn.primary-btn {
-    min-height: 48px;
-    padding: var(--space-md);
-  }
-}
-
-/* Vote Limit Modal specific styles */
+/* Vote Limit Modal */
 .vote-limit-modal {
   max-width: 450px;
 }
@@ -460,7 +282,7 @@
   color: var(--text-color);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-speed) var(--transition-ease);
   min-width: 40px;
   text-align: center;
 }
@@ -478,8 +300,8 @@
 
 .vote-limit-info {
   padding: var(--space-md);
-  background: var(--info-bg, rgba(59, 130, 246, 0.1));
-  border: 1px solid var(--info-border, rgba(59, 130, 246, 0.2));
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
   border-radius: var(--radius-sm);
 }
 
@@ -488,4 +310,41 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   line-height: 1.4;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .modal-body {
+    padding: var(--space-md);
+  }
+
+  .modal-footer {
+    padding: var(--space-md);
+    flex-direction: column-reverse;
+    gap: var(--space-sm);
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    padding: var(--space-sm);
+    font-size: var(--font-size-base);
+    min-height: 48px;
+    justify-content: center;
+  }
+
+  .format-selector {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .format-option {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .format-label {
+    padding: var(--space-md);
+    margin-bottom: var(--space-xs);
+  }
 }

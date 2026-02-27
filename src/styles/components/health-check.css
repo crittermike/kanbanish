@@ -89,7 +89,7 @@
 
 .rating-button:hover {
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--accent, #58a6ff);
+    box-shadow: 0 0 0 2px var(--accent);
 }
 
 .rating-button:hover::after {
@@ -98,7 +98,7 @@
     bottom: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--card-bg, #1e1e1e);
+    background: var(--card-bg);
     color: var(--text-primary);
     padding: 4px 8px;
     border-radius: 4px;
@@ -111,9 +111,37 @@
 }
 
 .rating-button.active {
-    color: #fff;
+    color: var(--text-on-accent);
     border-color: transparent;
 }
+
+/* Rating button colors by data-rating attribute */
+.rating-button.active[data-rating="1"] { background-color: var(--rating-1); }
+.rating-button.active[data-rating="2"] { background-color: var(--rating-2); }
+.rating-button.active[data-rating="3"] { background-color: var(--rating-3); }
+.rating-button.active[data-rating="4"] { background-color: var(--rating-4); }
+.rating-button.active[data-rating="5"] { background-color: var(--rating-5); }
+
+/* Score colors for results display */
+.score-color-1 { color: var(--rating-1); }
+.score-color-2 { color: var(--rating-2); }
+.score-color-3 { color: var(--rating-3); }
+.score-color-4 { color: var(--rating-4); }
+.score-color-5 { color: var(--rating-5); }
+
+/* Bar fill colors by data-rating attribute */
+.health-bar-fill[data-rating="1"] { background-color: var(--rating-1); }
+.health-bar-fill[data-rating="2"] { background-color: var(--rating-2); }
+.health-bar-fill[data-rating="3"] { background-color: var(--rating-3); }
+.health-bar-fill[data-rating="4"] { background-color: var(--rating-4); }
+.health-bar-fill[data-rating="5"] { background-color: var(--rating-5); }
+
+/* Distribution bar colors by data-rating attribute */
+.dist-bar[data-rating="1"] { background-color: var(--rating-1); }
+.dist-bar[data-rating="2"] { background-color: var(--rating-2); }
+.dist-bar[data-rating="3"] { background-color: var(--rating-3); }
+.dist-bar[data-rating="4"] { background-color: var(--rating-4); }
+.dist-bar[data-rating="5"] { background-color: var(--rating-5); }
 
 .health-check-status {
     text-align: center;
@@ -122,7 +150,7 @@
 }
 
 .health-check-status .all-answered {
-    color: var(--success, #22c55e);
+    color: var(--success-color);
     font-weight: 600;
 }
 

@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Clock, Play, Pause, RotateCcw, Square, X } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
 
 const PRESET_DURATIONS = [
   { label: '1m', seconds: 60 },
@@ -63,7 +65,7 @@ const getUrgencyState = (remaining, total) => {
   return 'normal';
 };
 
-const Timer = ({ showNotification }) => {
+const Timer = () => {
   const {
     timerData,
     startTimer,
@@ -72,6 +74,7 @@ const Timer = ({ showNotification }) => {
     resetTimer,
     restartTimer
   } = useBoardContext();
+  const { showNotification } = useNotification();
 
   const [remaining, setRemaining] = useState(0);
   const [showSetup, setShowSetup] = useState(false);
@@ -81,19 +84,11 @@ const Timer = ({ showNotification }) => {
   const setupRef = useRef(null);
   const lastStartedAtRef = useRef(null);
 
-  // Handle clicking outside the setup popover
-  useEffect(() => {
-    const handleClickOutside = event => {
-      if (setupRef.current && !setupRef.current.contains(event.target)) {
-        setShowSetup(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+  const handleClickOutside = useCallback(() => {
+    setShowSetup(false);
   }, []);
+
+  useOnClickOutside(setupRef, handleClickOutside);
 
   // Compute remaining time from timer data
   const updateRemaining = useCallback(() => {
@@ -110,9 +105,7 @@ const Timer = ({ showNotification }) => {
       if (timeLeft <= 0 && !hasNotifiedRef.current) {
         hasNotifiedRef.current = true;
         playDing();
-        if (showNotification) {
-          showNotification('⏰ Time\'s up!');
-        }
+        showNotification('⏰ Time\'s up!');
       }
     } else if (timerData.pausedRemaining !== null && timerData.pausedRemaining !== undefined) {
       setRemaining(timerData.pausedRemaining);

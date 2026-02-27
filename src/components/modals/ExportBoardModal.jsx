@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Clipboard } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../../context/BoardContext';
+import { useNotification } from '../../context/NotificationContext';
 
-const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
+const ExportBoardModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('markdown');
   const [exportedContent, setExportedContent] = useState('');
   const { boardTitle, columns } = useBoardContext();
+  const { showNotification } = useNotification();
 
   /**
    * Get a normalized structure of the board data for export
@@ -402,9 +404,7 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(exportedContent)
       .then(() => {
-        if (showNotification) {
-          showNotification('Copied to clipboard');
-        }
+        showNotification('Copied to clipboard');
         onClose();
       })
       .catch(() => {
@@ -417,11 +417,11 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
+    <div className="modal-overlay" role="presentation">
+      <div className="modal-container" role="dialog" aria-modal="true" aria-labelledby="export-board-title">
         <div className="modal-header">
-          <h2>Export Board</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <h2 id="export-board-title">Export Board</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
         </div>
         <div className="modal-body">
           <div className="format-selector">

@@ -86,7 +86,6 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
 
       set(settingsRef, updatedSettings)
         .then(() => {
-          console.log('Board settings updated:', updatedSettings);
           applySettingsLocally(newSettings);
         })
         .catch(error => {

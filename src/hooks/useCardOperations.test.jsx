@@ -29,6 +29,18 @@ vi.mock('../utils/workflowUtils', () => ({
   areInteractionsRevealed: vi.fn(() => false),
   isCardEditingAllowed: vi.fn(() => true)
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 const createMockProps = (overrides = {}) => ({
   boardId: 'board-123',
@@ -44,7 +56,6 @@ const createMockProps = (overrides = {}) => ({
     comments: {}
   },
   user: { uid: 'user1' },
-  showNotification: vi.fn(),
   multipleVotesAllowed: false,
   retrospectiveMode: false,
   workflowPhase: 'CREATION',
@@ -170,7 +181,7 @@ describe('useCardOperations', () => {
       });
 
       expect(result.current.isEditing).toBe(false);
-      expect(props.showNotification).toHaveBeenCalledWith('Only the author can edit this card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Only the author can edit this card');
     });
 
     it('should reset editedContent to cardData.content when toggling', () => {
@@ -204,7 +215,7 @@ describe('useCardOperations', () => {
 
       expect(result.current.isEditing).toBe(false);
       // Should NOT show notification for workflow restrictions (silent)
-      expect(props.showNotification).not.toHaveBeenCalled();
+      expect(mockShowNotification).not.toHaveBeenCalled();
 
       // Reset mock
       isCardEditingAllowed.mockReturnValue(true);
@@ -257,7 +268,7 @@ describe('useCardOperations', () => {
         ...mockProps.cardData,
         content: 'Updated content'
       });
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
       expect(result.current.isEditing).toBe(false);
     });
 
@@ -273,7 +284,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalledWith('mock-ref');
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
     });
 
     it('should not save when boardId is null', async () => {
@@ -301,7 +312,7 @@ describe('useCardOperations', () => {
       // ref is called for: cardRef (useMemo) + votesRef + voterRef
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
 
     it('should not go below 0 votes when downvoting', async () => {
@@ -313,7 +324,7 @@ describe('useCardOperations', () => {
       });
 
       // cardData.votes is 0, so downvote should be rejected
-      expect(mockProps.showNotification).toHaveBeenCalledWith("Can't have negative votes");
+      expect(mockShowNotification).toHaveBeenCalledWith("Can't have negative votes");
       expect(set).not.toHaveBeenCalled();
     });
 
@@ -332,7 +343,7 @@ describe('useCardOperations', () => {
         await result.current.upvoteCard(mockEvent);
       });
 
-      expect(props.showNotification).toHaveBeenCalledWith("You've already voted");
+      expect(mockShowNotification).toHaveBeenCalledWith("You've already voted");
     });
 
     it('should show notification when interactions are disabled', async () => {
@@ -345,7 +356,7 @@ describe('useCardOperations', () => {
         await result.current.upvoteCard(mockEvent);
       });
 
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Voting is disabled until cards are revealed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Voting is disabled until cards are revealed');
 
       // Reset mock
       areInteractionsDisabled.mockReturnValue(false);
@@ -362,7 +373,7 @@ describe('useCardOperations', () => {
         await result.current.upvoteCard(mockEvent);
       });
 
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Voting is now frozen - no more changes allowed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Voting is now frozen - no more changes allowed');
 
       // Reset mocks
       areInteractionsDisabled.mockReturnValue(false);
@@ -406,7 +417,7 @@ describe('useCardOperations', () => {
         await result.current.upvoteCard(mockEvent);
       });
 
-      expect(props.showNotification).toHaveBeenCalledWith("You've reached your vote limit (3 votes)");
+      expect(mockShowNotification).toHaveBeenCalledWith("You've reached your vote limit (3 votes)");
     });
 
     it('should remove vote when voting opposite direction in single-vote mode', async () => {
@@ -425,7 +436,7 @@ describe('useCardOperations', () => {
       });
 
       // Should show "Vote removed" when toggling
-      expect(props.showNotification).toHaveBeenCalledWith('Vote removed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Vote removed');
     });
 
     it('should allow multiple votes when multipleVotesAllowed is true', async () => {
@@ -445,7 +456,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
   });
 
@@ -502,7 +513,7 @@ describe('useCardOperations', () => {
         await result.current.addReaction(mockEvent, '👍');
       });
 
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Reactions are disabled until cards are revealed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Reactions are disabled until cards are revealed');
 
       areInteractionsDisabled.mockReturnValue(false);
     });
@@ -518,7 +529,7 @@ describe('useCardOperations', () => {
         await result.current.addReaction(mockEvent, '👍');
       });
 
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Interactions are now frozen - no more changes allowed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Interactions are now frozen - no more changes allowed');
 
       areInteractionsDisabled.mockReturnValue(false);
       areInteractionsRevealed.mockReturnValue(false);
@@ -533,7 +544,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
     });
 
     it('should remove an existing reaction', async () => {
@@ -553,7 +564,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
     });
 
     it('should not add reaction when user is null', async () => {
@@ -627,7 +638,7 @@ describe('useCardOperations', () => {
         await result.current.addComment();
       });
 
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comments are disabled until cards are revealed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comments are disabled until cards are revealed');
 
       areInteractionsDisabled.mockReturnValue(false);
     });
@@ -644,7 +655,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment added');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment added');
       expect(result.current.newComment).toBe('');
     });
 
@@ -689,7 +700,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
     });
 
     it('should not allow editing a comment by another user', async () => {
@@ -708,7 +719,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).not.toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Only the author can edit this comment');
+      expect(mockShowNotification).toHaveBeenCalledWith('Only the author can edit this comment');
     });
 
     it('should delete a comment the user authored', async () => {
@@ -727,7 +738,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Comment deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted');
     });
 
     it('should not allow deleting a comment by another user', async () => {
@@ -746,7 +757,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).not.toHaveBeenCalled();
-      expect(props.showNotification).toHaveBeenCalledWith('Only the author can delete this comment');
+      expect(mockShowNotification).toHaveBeenCalledWith('Only the author can delete this comment');
     });
 
     it('should not edit comment when interactions are disabled', async () => {
@@ -766,7 +777,7 @@ describe('useCardOperations', () => {
         await result.current.editComment('comment1', 'Updated');
       });
 
-      expect(props.showNotification).toHaveBeenCalledWith('Comment editing is disabled until cards are revealed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment editing is disabled until cards are revealed');
 
       areInteractionsDisabled.mockReturnValue(false);
     });
@@ -788,7 +799,7 @@ describe('useCardOperations', () => {
         await result.current.deleteComment('comment1');
       });
 
-      expect(props.showNotification).toHaveBeenCalledWith('Comment deletion is disabled until cards are revealed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment deletion is disabled until cards are revealed');
 
       areInteractionsDisabled.mockReturnValue(false);
     });

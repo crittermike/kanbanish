@@ -1,5 +1,6 @@
 import { Star, Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { getEffectivenessLabel, getScoreRatingLevel } from '../utils/ratingUtils';
 
 const PollResults = () => {
   const { getPollStats } = useBoardContext();
@@ -12,23 +13,7 @@ const PollResults = () => {
     return (count / stats.totalVotes) * 100;
   };
 
-  const getEffectivenessLevel = average => {
-    if (average >= 4.5) {
-      return { text: 'Extremely Effective', color: '#22c55e' };
-    }
-    if (average >= 3.5) {
-      return { text: 'Very Effective', color: '#84cc16' };
-    }
-    if (average >= 2.5) {
-      return { text: 'Moderately Effective', color: '#eab308' };
-    }
-    if (average >= 1.5) {
-      return { text: 'Slightly Effective', color: '#f97316' };
-    }
-    return { text: 'Not Effective', color: '#ef4444' };
-  };
-
-  const effectiveness = getEffectivenessLevel(stats.average);
+  const effectivenessText = getEffectivenessLabel(stats.average);
 
   return (
     <div className="poll-results">
@@ -45,7 +30,7 @@ const PollResults = () => {
           <div className="overall-score">
             <div className="score-display">
               <div className="average-rating">
-                <span className="score-number">{stats.average.toFixed(1)}</span>
+                <span className={`score-number score-color-${getScoreRatingLevel(stats.average)}`}>{stats.average.toFixed(1)}</span>
                 <span className="score-separator">/</span>
                 <span className="score-max">5.0</span>
               </div>
@@ -61,10 +46,9 @@ const PollResults = () => {
               </div>
             </div>
             <div
-              className="effectiveness-label"
-              style={{ color: effectiveness.color }}
+              className={`effectiveness-label score-color-${getScoreRatingLevel(stats.average)}`}
             >
-              {effectiveness.text}
+              {effectivenessText}
             </div>
           </div>
 
@@ -84,11 +68,9 @@ const PollResults = () => {
                       <div
                         className="bar"
                         style={{
-                          width: `${getBarWidth(count)}%`,
-                          backgroundColor: rating >= 4 ? '#22c55e' :
-                            rating >= 3 ? '#84cc16' :
-                              rating >= 2 ? '#eab308' : '#ef4444'
+                          width: `${getBarWidth(count)}%`
                         }}
+                        data-rating={rating}
                       />
                     </div>
                     <div className="count-label">

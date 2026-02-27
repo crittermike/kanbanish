@@ -27,6 +27,17 @@ vi.mock('react-dom', () => ({
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('Card URL linking', () => {
   const mockBoardContext = {
@@ -55,7 +66,6 @@ describe('Card URL linking', () => {
       cardId: 'card123',
       cardData,
       columnId: 'column1',
-      showNotification: vi.fn()
     };
 
     render(<Card {...mockProps} />);
@@ -91,7 +101,6 @@ describe('Card URL linking', () => {
       cardId: 'card123',
       cardData,
       columnId: 'column1',
-      showNotification: vi.fn()
     };
 
     render(<Card {...mockProps} />);
@@ -115,7 +124,6 @@ describe('Card URL linking', () => {
       cardId: 'card123',
       cardData,
       columnId: 'column1',
-      showNotification: vi.fn()
     };
 
     render(<Card {...mockProps} />);

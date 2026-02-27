@@ -1,5 +1,6 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useCallback, useMemo, useEffect, Fragment } from 'react';
+import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import { linkifyText } from '../utils/linkify';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
@@ -11,13 +12,13 @@ export function useCardOperations({
   cardId,
   cardData,
   user,
-  showNotification,
   multipleVotesAllowed = false, // pass this from the Card component
   retrospectiveMode = false,
   workflowPhase = 'CREATION',
   votesPerUser = 3, // maximum votes per user
   getUserVoteCount = () => 0 // function to get current user vote count
 }) {
+  const { showNotification } = useNotification();
   // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(cardData.content || '');
