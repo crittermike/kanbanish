@@ -13,6 +13,24 @@ const PRESET_DURATIONS = [
 const RING_RADIUS = 46;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
+const playDing = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(830, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 1.5);
+  } catch {
+    // Web Audio API not available
+  }
+};
+
 const formatTime = (totalSeconds) => {
   const mins = Math.floor(totalSeconds / 60);
   const secs = Math.floor(totalSeconds % 60);
@@ -34,8 +52,7 @@ const Timer = ({ showNotification }) => {
     startTimer,
     pauseTimer,
     resumeTimer,
-    resetTimer,
-    isOwner
+    resetTimer
   } = useBoardContext();
 
   const [remaining, setRemaining] = useState(0);
@@ -73,6 +90,7 @@ const Timer = ({ showNotification }) => {
 
       if (timeLeft <= 0 && !hasNotifiedRef.current) {
         hasNotifiedRef.current = true;
+        playDing();
         if (showNotification) {
           showNotification('⏰ Time\'s up!');
         }
@@ -143,22 +161,16 @@ const Timer = ({ showNotification }) => {
   // Timer is expired when running timer reaches zero
   const timerExpired = hasTimer && remaining <= 0 && (isRunning || (timerData?.pausedRemaining !== null && timerData?.pausedRemaining <= 0));
 
-  // If not owner and no active timer, don't show anything
-  if (!isOwner && !hasTimer) {
-    return null;
-  }
-
-  // Owner sees setup UI when no timer is active
-  if (isOwner && !hasTimer) {
+  // If no active timer, show setup UI for everyone
+  if (!hasTimer) {
     return (
       <div className="timer-setup-container" ref={setupRef}>
         <button
-          className="btn btn-with-icon timer-start-btn"
+          className="btn icon-btn timer-start-btn"
           onClick={() => setShowSetup(!showSetup)}
-          title="Set a timer for this phase"
+          title="Set timer"
         >
           <Clock size={16} />
-          Set Timer
         </button>
         {showSetup && (
           <div className="timer-setup-popover">
@@ -242,37 +254,35 @@ const Timer = ({ showNotification }) => {
         </div>
       </div>
 
-      {isOwner && (
-        <div className="timer-controls">
-          {isRunning && remaining > 0 ? (
-            <button
-              className="btn icon-btn timer-control-btn"
-              onClick={pauseTimer}
-              title="Pause timer"
-              aria-label="Pause timer"
-            >
-              <Pause size={14} />
-            </button>
-          ) : isPaused && remaining > 0 ? (
-            <button
-              className="btn icon-btn timer-control-btn"
-              onClick={resumeTimer}
-              title="Resume timer"
-              aria-label="Resume timer"
-            >
-              <Play size={14} />
-            </button>
-          ) : null}
+      <div className="timer-controls">
+        {isRunning && remaining > 0 ? (
           <button
-            className="btn icon-btn timer-control-btn timer-reset-btn"
-            onClick={handleReset}
-            title="Reset timer"
-            aria-label="Reset timer"
+            className="btn icon-btn timer-control-btn"
+            onClick={pauseTimer}
+            title="Pause timer"
+            aria-label="Pause timer"
           >
-            <RotateCcw size={14} />
+            <Pause size={14} />
           </button>
-        </div>
-      )}
+        ) : isPaused && remaining > 0 ? (
+          <button
+            className="btn icon-btn timer-control-btn"
+            onClick={resumeTimer}
+            title="Resume timer"
+            aria-label="Resume timer"
+          >
+            <Play size={14} />
+          </button>
+        ) : null}
+        <button
+          className="btn icon-btn timer-control-btn timer-reset-btn"
+          onClick={handleReset}
+          title="Reset timer"
+          aria-label="Reset timer"
+        >
+          <RotateCcw size={14} />
+        </button>
+      </div>
     </div>
   );
 };

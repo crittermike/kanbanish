@@ -252,7 +252,7 @@ describe('Board Component', () => {
     );
 
     // Find and click the settings dropdown button
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Check that dropdown options are shown
@@ -275,7 +275,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Click the "By Votes" option
@@ -300,7 +300,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Find the "Allow Voting?" section and click the "No" option
@@ -332,7 +332,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Find the "Allow users to vote multiple times on the same card?" section and click the "Yes" option
@@ -373,7 +373,7 @@ describe('Board Component', () => {
     );
 
     // Open the settings dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Change the multiple votes setting
@@ -519,7 +519,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Find the "Allow downvoting?" section and click the "No" option
@@ -556,7 +556,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Verify the downvoting option is not visible when voting is disabled
@@ -590,7 +590,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Find and click the reset votes button
@@ -632,7 +632,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Find and click the reset votes button
@@ -668,7 +668,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Verify vote settings are displayed correctly
@@ -698,7 +698,7 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Verify all vote settings are displayed

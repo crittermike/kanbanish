@@ -105,36 +105,17 @@ h1 {
     display: inline-block;
 }
 
-.sort-dropdown-button {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    position: relative;
+/* Settings toggle button (icon-only) */
+.settings-toggle-btn {
     background-color: var(--accent);
     color: white;
-    padding: var(--space-sm) var(--space-md);
-    min-width: 120px;
-    font-family: inherit;
-    font-size: var(--font-size-base);
-    font-weight: 500;
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
     transition: all var(--transition-speed) var(--transition-ease);
-    cursor: pointer;
 }
 
-.sort-dropdown-button:hover {
+.settings-toggle-btn:hover {
     background-color: var(--accent-dark, #0056b3);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.sort-dropdown-button .dropdown-arrow {
-    margin-left: auto;
-    transition: transform 0.2s ease;
-}
-
-.sort-dropdown-button .dropdown-arrow.rotated {
-    transform: rotate(-180deg);
 }
 
 .sort-dropdown-menu {
@@ -270,12 +251,12 @@ h1 {
 }
 
 /* When dropdown is open, add a subtle indicator */
-.sort-dropdown-container:has(.sort-dropdown-menu) .sort-dropdown-button {
+.sort-dropdown-container:has(.sort-dropdown-menu) .settings-toggle-btn {
     box-shadow: 0 0 0 2px var(--accent-transparent);
 }
 
 /* Fallback for browsers that don't support :has() */
-.sort-dropdown-button[aria-expanded="true"] {
+.settings-toggle-btn[aria-expanded="true"] {
     box-shadow: 0 0 0 2px var(--accent-transparent);
 }
 
@@ -309,7 +290,7 @@ h1 {
         width: 100%;
     }
     
-    .sort-dropdown-button {
+    .settings-toggle-btn {
         width: 100%;
         min-height: 48px;
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
+import { Link, ArrowDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/helpers';
@@ -115,18 +115,13 @@ const ActionButtons = ({
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
           id="settings-dropdown-button"
-          className="btn sort-dropdown-button"
+          className="btn icon-btn settings-toggle-btn"
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
           title="Board settings and preferences"
         >
           <Settings size={16} />
-          Settings
-          <ChevronDown
-            size={12}
-            className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}
-          />
         </button>
 
         {sortDropdownOpen && (
