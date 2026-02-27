@@ -33,7 +33,7 @@ src/
 ├── setupTests.js                # Test setup (imports @testing-library/jest-dom)
 │
 ├── context/
-│   └── BoardContext.jsx         # Central state management + all Firebase CRUD (1300+ lines)
+│   └── BoardContext.jsx         # State provider + Firebase listeners (~450 lines, orchestrates hooks)
 │
 ├── components/
 │   ├── Board.jsx                # Main board layout: header, settings panel, columns (600+ lines)
@@ -62,6 +62,13 @@ src/
 │       └── VoteLimitModal.jsx
 │
 ├── hooks/
+│   ├── usePoll.js                   # Poll voting operations (submitPollVote, getPollStats)
+│   ├── useHealthCheck.js            # Health check voting (submitHealthCheckVote, getHealthCheckStats)
+│   ├── useBoardSettings.js          # Board settings CRUD (updateVotingEnabled, etc.)
+│   ├── usePresence.js               # User presence tracking, card creation activity indicators
+│   ├── useVoting.js                 # Vote operations (resetAllVotes, upvoteGroup, downvoteGroup, vote counting)
+│   ├── useGroups.js                 # Card grouping (moveCard, createCardGroup, ungroupCards, removeAllGrouping)
+│   ├── useWorkflow.js               # Retrospective workflow phase transitions
 │   ├── useCardOperations.jsx        # Card CRUD, voting, reactions, comments
 │   ├── useGroupOperations.jsx       # Group-level reactions and comments
 │   └── useVoteCounterVisibility.jsx # Intersection observer for vote counters
@@ -69,10 +76,13 @@ src/
 ├── utils/
 │   ├── firebase.js              # Firebase init (hardcoded config, project "big-orca")
 │   ├── boardUtils.js            # addColumn(), addCard() helpers
-│   ├── helpers.js               # generateId(), emoji data, linkifyText(), parseUrlSettings() (600+ lines)
+│   ├── helpers.js               # Re-export barrel (imports from ids, emoji, urlSettings, linkify)
+│   ├── ids.js                   # generateId() — unique ID generation
+│   ├── emoji.js                 # COMMON_EMOJIS array, getEmojiKeywords()
+│   ├── urlSettings.js           # parseBool(), parseUrlSettings()
+│   ├── linkify.js               # linkifyText() — URL detection in text
 │   ├── workflowUtils.js         # WORKFLOW_PHASES enum, phase permission checks
-│   ├── retrospectiveModeUtils.js # Reveal phase logic
-│   └── revealModeUtils.js       # ⚠️ DUPLICATE of retrospectiveModeUtils.js
+│   └── retrospectiveModeUtils.js # Reveal phase logic
 │
 └── styles/
     ├── index.css                # CSS entry point, imports all component CSS
@@ -98,12 +108,50 @@ src/
 
 ### State Management
 
-All application state lives in `BoardContext.jsx`. This is the single source of truth — a large React context provider (~1300 lines) that:
+All application state is managed through `BoardContext.jsx` (~450 lines), which serves as the orchestration layer. It:
 
 1. Initializes Firebase connection and anonymous auth
 2. Subscribes to Firebase Realtime Database via `onValue` listeners
-3. Exposes all board state and CRUD operations to the component tree
-4. Manages board creation, joining, URL settings parsing
+3. Delegates domain operations to 7 extracted hooks (see Hook Architecture below)
+4. Exposes all board state and operations to the component tree via context
+5. Manages board creation, joining, URL settings parsing
+
+### Hook Architecture
+
+Domain logic is extracted from BoardContext into focused hooks. Each hook:
+- **Receives dependencies as parameters** (not from context — avoids circular deps)
+- Returns operation functions wrapped in `useCallback`
+- BoardContext calls each hook, destructures the return, and spreads into context value
+- **The context value shape is unchanged** — consumers still use `useBoardContext()`
+
+**Hook call order in BoardContext** (order matters for inter-hook dependencies):
+
+```javascript
+// 1. usePresence — no hook dependencies
+const { activeUsers, ... } = usePresence({ boardId, user });
+// 2. useBoardSettings — no hook dependencies
+const { updateBoardSettings, ... } = useBoardSettings({ boardId, user, ... });
+// 3. usePoll — no hook dependencies
+const { submitPollVote, getPollStats } = usePoll({ boardId, user, ... });
+// 4. useHealthCheck — no hook dependencies
+const { submitHealthCheckVote, ... } = useHealthCheck({ boardId, user, ... });
+// 5. useVoting — depends on activeUsers from usePresence
+const { resetAllVotes, ... } = useVoting({ boardId, user, columns, activeUsers, ... });
+// 6. useGroups — no hook dependencies
+const { moveCard, ..., removeAllGrouping } = useGroups({ boardId, user, columns });
+// 7. useWorkflow — depends on updateBoardSettings AND removeAllGrouping
+const { startGroupingPhase, ... } = useWorkflow({ updateBoardSettings, columns, ..., removeAllGrouping });
+```
+
+| Hook | Responsibility | Key exports |
+|------|---------------|-------------|
+| `usePresence` | User presence tracking, card creation indicators | `activeUsers`, `usersAddingCards`, `startCardCreation`, `stopCardCreation` |
+| `useBoardSettings` | Board settings CRUD | `updateBoardSettings` + 6 setting-specific wrappers |
+| `usePoll` | Poll voting | `submitPollVote`, `getPollStats` |
+| `useHealthCheck` | Health check voting | `submitHealthCheckVote`, `getHealthCheckStats` |
+| `useVoting` | Vote operations and counting | `resetAllVotes`, `getTotalVotes`, `getUserVoteCount`, `upvoteGroup`, `downvoteGroup` |
+| `useGroups` | Card grouping | `moveCard`, `createCardGroup`, `ungroupCards`, `removeAllGrouping` |
+| `useWorkflow` | Retrospective phase transitions | Phase transition functions (`startGroupingPhase`, etc.) |
 
 **There is no routing library.** The board ID comes from the `?board=` query parameter. If none is provided, a new board is created.
 
@@ -121,7 +169,7 @@ All Firebase writes use `set()` and `remove()` — never `update()`. This is an 
 - `App.jsx` wraps everything in `DndProvider` (react-dnd) and `BoardProvider` (context)
 - `Board.jsx` is the main layout: header bar, settings panel, and columns grid
 - Components consume context via `useBoardContext()` hook
-- Card/group operations are extracted into custom hooks (`useCardOperations`, `useGroupOperations`)
+- Domain operations are extracted into hooks: 7 in `hooks/` called by BoardContext, plus `useCardOperations` and `useGroupOperations` used directly by components
 
 ### URL Settings
 
@@ -131,7 +179,7 @@ Board settings can be pre-configured via URL parameters:
 ?voting=true&downvotes=false&multivote=true&votes=5&retro=true&sort=votes&theme=dark&template=basic-retro
 ```
 
-Parsed in `helpers.js` → `parseUrlSettings()`. Applied on board creation.
+Parsed in `urlSettings.js` (re-exported via `helpers.js`) → `parseUrlSettings()`. Applied on board creation.
 
 ## Firebase Data Model
 
@@ -304,33 +352,32 @@ npm run lint:check # Same as lint (alias)
 
 ## Known Issues & Technical Debt
 
-1. **`revealModeUtils.js` is an exact duplicate of `retrospectiveModeUtils.js`** — one should be removed and imports consolidated.
-2. **`BoardContext.jsx` is very large (~1300 lines)** — contains all state, Firebase operations, and business logic. Could be split into smaller contexts or extracted into hooks.
-3. **Firebase config is hardcoded** in `src/utils/firebase.js` — not using environment variables. The project is "big-orca" on Firebase.
-4. **No TypeScript** — all files are `.jsx`. No type checking beyond ESLint.
-5. **No routing library** — board ID is managed via query params manually.
+1. **Firebase config is hardcoded** in `src/utils/firebase.js` — not using environment variables. The project is "big-orca" on Firebase.
+2. **No TypeScript** — all files are `.jsx`. No type checking beyond ESLint.
+3. **No routing library** — board ID is managed via query params manually.
 
 ## Working on This Codebase
 
 ### Adding a New Feature
 
-1. If it needs new state or Firebase operations → add to `BoardContext.jsx`
-2. If it's a new UI element → create component in `src/components/`, add corresponding CSS in `src/styles/components/`
-3. If it needs workflow phase awareness → check `workflowUtils.js` for phase permissions
-4. Add tests as `ComponentName.test.jsx` alongside the component
-5. Run `npm run lint:fix && npm test` before committing
+1. If it needs new Firebase operations → add a new hook in `src/hooks/` or extend an existing one. Wire it into `BoardContext.jsx`.
+2. If it only needs existing state → consume `useBoardContext()` directly in your component
+3. If it's a new UI element → create component in `src/components/`, add corresponding CSS in `src/styles/components/`
+4. If it needs workflow phase awareness → check `workflowUtils.js` for phase permissions
+5. Add tests as `ComponentName.test.jsx` (components) or `hookName.test.js` (hooks) alongside the source
+6. Run `npm run lint:fix && npm test` before committing
 
 ### Adding a New Column Template
 
 Templates are defined in `NewBoardTemplateModal.jsx` and applied via URL params. To add a template:
 1. Add template definition in the modal component
-2. Add URL parameter handling in `helpers.js` → `parseUrlSettings()`
+2. Add URL parameter handling in `urlSettings.js` → `parseUrlSettings()`
 
 ### Modifying the Firebase Schema
 
-All Firebase paths are defined in `BoardContext.jsx`. When changing the schema:
-1. Update the `onValue` listener that reads the data
-2. Update the write function(s) that use `set()` / `remove()`
+Firebase paths are referenced in the domain hooks (`usePresence`, `useVoting`, `useGroups`, etc.) and in `BoardContext.jsx` (for the main `onValue` listener). When changing the schema:
+1. Update the `onValue` listener in `BoardContext.jsx` that reads the data
+2. Update the write function(s) in the relevant hook that use `set()` / `remove()`
 3. Ensure the data model section above is updated
 
 ### Testing Approach
