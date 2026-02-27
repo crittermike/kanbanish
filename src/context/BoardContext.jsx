@@ -565,6 +565,26 @@ export const BoardProvider = ({ children }) => {
         console.error('Error resetting timer:', error);
       });
   };
+
+  const restartTimer = () => {
+    if (!boardId || !user || !timerData) return;
+    const timerRef = ref(database, `boards/${boardId}/timer`);
+    const timerObj = {
+      duration: timerData.duration,
+      startedAt: Date.now(),
+      isRunning: true,
+      pausedRemaining: null,
+      phase: workflowPhase
+    };
+    set(timerRef, timerObj)
+      .then(() => {
+        setTimerData(timerObj);
+      })
+      .catch(error => {
+        console.error('Error restarting timer:', error);
+      });
+  };
+
   // Workflow phase transition functions
   const startGroupingPhase = () => {
     updateBoardSettings({
@@ -1429,6 +1449,7 @@ export const BoardProvider = ({ children }) => {
     pauseTimer,
     resumeTimer,
     resetTimer,
+    restartTimer,
     // Board ownership
     boardOwner,
     isOwner: user && boardOwner ? user.uid === boardOwner : false

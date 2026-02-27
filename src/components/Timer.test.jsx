@@ -13,6 +13,7 @@ describe('Timer Component', () => {
   const mockPauseTimer = vi.fn();
   const mockResumeTimer = vi.fn();
   const mockResetTimer = vi.fn();
+  const mockRestartTimer = vi.fn();
   const mockShowNotification = vi.fn();
 
   const defaultMockContext = {
@@ -20,6 +21,7 @@ describe('Timer Component', () => {
     startTimer: mockStartTimer,
     pauseTimer: mockPauseTimer,
     resumeTimer: mockResumeTimer,
+    restartTimer: mockRestartTimer,
     resetTimer: mockResetTimer,
     isOwner: false // kept for backward compatibility in mock but no longer used for access control
   };
@@ -164,9 +166,14 @@ describe('Timer Component', () => {
       expect(screen.getByLabelText('Pause timer')).toBeInTheDocument();
     });
 
-    test('renders reset button for owner', () => {
+    test('renders restart button for owner', () => {
       render(<Timer showNotification={mockShowNotification} />);
-      expect(screen.getByLabelText('Reset timer')).toBeInTheDocument();
+      expect(screen.getByLabelText('Restart timer')).toBeInTheDocument();
+    });
+
+    test('renders stop button for owner', () => {
+      render(<Timer showNotification={mockShowNotification} />);
+      expect(screen.getByLabelText('Stop timer')).toBeInTheDocument();
     });
 
     test('calls pauseTimer when pause button is clicked', () => {
@@ -175,9 +182,15 @@ describe('Timer Component', () => {
       expect(mockPauseTimer).toHaveBeenCalled();
     });
 
-    test('calls resetTimer when reset button is clicked', () => {
+    test('calls restartTimer when restart button is clicked', () => {
       render(<Timer showNotification={mockShowNotification} />);
-      fireEvent.click(screen.getByLabelText('Reset timer'));
+      fireEvent.click(screen.getByLabelText('Restart timer'));
+      expect(mockRestartTimer).toHaveBeenCalled();
+    });
+
+    test('calls resetTimer when stop button is clicked', () => {
+      render(<Timer showNotification={mockShowNotification} />);
+      fireEvent.click(screen.getByLabelText('Stop timer'));
       expect(mockResetTimer).toHaveBeenCalled();
     });
   });
@@ -237,7 +250,8 @@ describe('Timer Component', () => {
     test('renders control buttons for all users', () => {
       render(<Timer showNotification={mockShowNotification} />);
       expect(screen.getByLabelText('Pause timer')).toBeInTheDocument();
-      expect(screen.getByLabelText('Reset timer')).toBeInTheDocument();
+      expect(screen.getByLabelText('Restart timer')).toBeInTheDocument();
+      expect(screen.getByLabelText('Stop timer')).toBeInTheDocument();
     });
   });
 

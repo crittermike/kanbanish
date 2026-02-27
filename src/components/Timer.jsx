@@ -1,6 +1,6 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Play, Pause, RotateCcw, X } from 'react-feather';
+import { Clock, Play, Pause, RotateCcw, Square, X } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 
 const PRESET_DURATIONS = [
@@ -16,16 +16,31 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const playDing = () => {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(830, ctx.currentTime);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 1.5);
+    const now = ctx.currentTime;
+
+    // Fundamental tone
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, now);
+    gain1.gain.setValueAtTime(0.4, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 1.2);
+
+    // Harmonic overtone for bell character
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1760, now);
+    gain2.gain.setValueAtTime(0.15, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now);
+    osc2.stop(now + 0.8);
   } catch {
     // Web Audio API not available
   }
@@ -52,7 +67,8 @@ const Timer = ({ showNotification }) => {
     startTimer,
     pauseTimer,
     resumeTimer,
-    resetTimer
+    resetTimer,
+    restartTimer
   } = useBoardContext();
 
   const [remaining, setRemaining] = useState(0);
@@ -105,6 +121,7 @@ const Timer = ({ showNotification }) => {
   // Animation loop for smooth countdown
   useEffect(() => {
     if (timerData?.isRunning) {
+      // Only reset notification guard when a fresh timer starts (new startedAt)
       hasNotifiedRef.current = false;
       updateRemaining();
       const tick = () => {
@@ -145,7 +162,12 @@ const Timer = ({ showNotification }) => {
     }
   };
 
-  const handleReset = () => {
+  const handleRestart = () => {
+    restartTimer();
+    hasNotifiedRef.current = false;
+  };
+
+  const handleStop = () => {
     resetTimer();
     hasNotifiedRef.current = false;
   };
@@ -276,11 +298,19 @@ const Timer = ({ showNotification }) => {
         ) : null}
         <button
           className="btn icon-btn timer-control-btn timer-reset-btn"
-          onClick={handleReset}
-          title="Reset timer"
-          aria-label="Reset timer"
+          onClick={handleRestart}
+          title="Restart timer"
+          aria-label="Restart timer"
         >
           <RotateCcw size={14} />
+        </button>
+        <button
+          className="btn icon-btn timer-control-btn timer-stop-btn"
+          onClick={handleStop}
+          title="Stop timer"
+          aria-label="Stop timer"
+        >
+          <Square size={14} />
         </button>
       </div>
     </div>
