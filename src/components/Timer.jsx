@@ -18,7 +18,7 @@ const playDing = () => {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const now = ctx.currentTime;
 
-    // Fundamental tone
+    // Single clean bell tone - fundamental with harmonic
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.type = 'sine';
@@ -30,7 +30,6 @@ const playDing = () => {
     osc1.start(now);
     osc1.stop(now + 1.2);
 
-    // Harmonic overtone for bell character
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = 'sine';
@@ -41,6 +40,9 @@ const playDing = () => {
     gain2.connect(ctx.destination);
     osc2.start(now);
     osc2.stop(now + 0.8);
+
+    // Auto-close the audio context after sounds finish
+    setTimeout(() => ctx.close(), 2000);
   } catch {
     // Web Audio API not available
   }
@@ -77,6 +79,7 @@ const Timer = ({ showNotification }) => {
   const hasNotifiedRef = useRef(false);
   const animationRef = useRef(null);
   const setupRef = useRef(null);
+  const lastStartedAtRef = useRef(null);
 
   // Handle clicking outside the setup popover
   useEffect(() => {
@@ -121,8 +124,11 @@ const Timer = ({ showNotification }) => {
   // Animation loop for smooth countdown
   useEffect(() => {
     if (timerData?.isRunning) {
-      // Only reset notification guard when a fresh timer starts (new startedAt)
-      hasNotifiedRef.current = false;
+      // Only reset notification guard when startedAt actually changes (new timer started)
+      if (timerData.startedAt !== lastStartedAtRef.current) {
+        lastStartedAtRef.current = timerData.startedAt;
+        hasNotifiedRef.current = false;
+      }
       updateRemaining();
       const tick = () => {
         updateRemaining();

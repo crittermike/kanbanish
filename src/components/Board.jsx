@@ -112,6 +112,7 @@ const ActionButtons = ({
         <Heart size={16} />
         Health Check
       </button>
+      <Timer showNotification={showNotification} />
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
           id="settings-dropdown-button"
@@ -261,7 +262,6 @@ const ActionButtons = ({
           </div>
         )}
       </div>
-      <Timer showNotification={showNotification} />
       <button
         id="theme-toggle"
         className="btn icon-btn"
