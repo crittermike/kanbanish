@@ -244,6 +244,14 @@ const BOARD_TEMPLATES = [
     columns: ['Continue', 'Consider', 'Start', 'Stop'],
     icon: '📝',
     tags: ['feedback', 'personal', 'development']
+  },
+  {
+    id: 'big-orca',
+    name: 'Big Orca',
+    description: 'Comprehensive retro covering feelings, commitments, and improvements',
+    columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
+    icon: '🐋',
+    tags: ['retrospective', 'team', 'commitments', 'feelings']
   }
 ];
 

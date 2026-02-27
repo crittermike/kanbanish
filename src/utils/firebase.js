@@ -1,7 +1,7 @@
 // Firebase configuration for the Kanban app
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getDatabase, get } from 'firebase/database';
+import { getDatabase, get, ref } from 'firebase/database';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -22,5 +22,5 @@ const database = getDatabase(app);
 const auth = getAuth(app);
 
 // Export for use in other files
-export { database, auth, signInAnonymously, get };
+export { database, auth, signInAnonymously, get, ref };
 export default app;

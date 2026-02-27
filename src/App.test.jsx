@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import App from './App';
 
@@ -62,16 +62,38 @@ vi.mock('./utils/firebase', () => ({
   database: {},
   auth: {
     onAuthStateChanged: vi.fn((cb) => {
-      cb({ uid: 'test-user' });
-      return vi.fn();
+      // Return unsubscribe function before calling callback
+      const unsubscribe = vi.fn();
+      // Call callback asynchronously to avoid ReferenceError
+      Promise.resolve().then(() => cb({ uid: 'test-user' }));
+      return unsubscribe;
     })
   },
-  signInAnonymously: vi.fn(),
+  signInAnonymously: vi.fn(() => Promise.resolve({ user: { uid: 'test-user' } })),
   get: vi.fn()
 }));
 vi.mock('firebase/database', () => ({
-  ref: vi.fn(),
-  set: vi.fn()
+  ref: vi.fn(() => ({})),
+  set: vi.fn(() => Promise.resolve())
+}));
+
+// Mock boardUtils — createBoardFromTemplate is called when ?template= is set
+vi.mock('./utils/boardUtils', () => ({
+  createBoardFromTemplate: vi.fn(() => Promise.resolve('template-board-123'))
+}));
+
+// Mock boardTemplates — provides template definitions
+vi.mock('./data/boardTemplates', () => ({
+  default: [
+    {
+      id: 'lean-coffee',
+      name: 'Lean Coffee',
+      description: 'Democratically driven meeting agenda format',
+      columns: ['Topics', 'Discussing', 'Done'],
+      icon: '☕',
+      tags: ['discussion', 'meeting', 'agenda']
+    }
+  ]
 }));
 
 describe('App Component', () => {
@@ -108,6 +130,80 @@ describe('App Component', () => {
     expect(appElement).toBeInTheDocument();
 
     // Board should be rendered (inside BoardGate → BoardProvider → BoardWithTracking → Board)
+    expect(screen.getByTestId('board')).toBeInTheDocument();
+
+    // Dashboard should NOT be rendered
+    expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
+  });
+
+  test('creates board from template when ?template=lean-coffee and no ?board= param', async () => {
+    // Set URL with template param before rendering
+    delete window.location;
+    window.location = { ...originalLocation, search: '?template=lean-coffee', href: 'http://localhost/?template=lean-coffee' };
+
+    // Mock pushState so handleOpenBoard doesn't throw in jsdom
+    const pushStateSpy = vi.spyOn(window.history, 'pushState').mockImplementation(() => {});
+
+    const { createBoardFromTemplate } = await import('./utils/boardUtils');
+    const createBoardMock = vi.mocked(createBoardFromTemplate);
+
+    render(<App />);
+
+    // App container should be rendered
+    const appElement = screen.getByTestId('app-container');
+    expect(appElement).toBeInTheDocument();
+
+    // Wait for createBoardFromTemplate to have been called with the right args
+    await waitFor(() => {
+      expect(createBoardMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['Topics', 'Discussing', 'Done'],
+          templateName: 'Lean Coffee'
+        })
+      );
+    }, { timeout: 2000 });
+
+    // After template board is created, the app should navigate to the board
+    await waitFor(() => {
+      expect(screen.getByTestId('board')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Dashboard should NOT be rendered after template creation
+    expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
+
+    pushStateSpy.mockRestore();
+  });
+
+  test('does not crash when ?template=nonexistent-template is in URL', () => {
+    // Set URL with nonexistent template param
+    delete window.location;
+    window.location = { ...originalLocation, search: '?template=does-not-exist', href: 'http://localhost/?template=does-not-exist' };
+
+    render(<App />);
+
+    // App container should be rendered
+    const appElement = screen.getByTestId('app-container');
+    expect(appElement).toBeInTheDocument();
+
+    // Dashboard should be rendered (no matching template found)
+    expect(screen.getByTestId('dashboard')).toBeInTheDocument();
+
+    // Board should NOT be rendered
+    expect(screen.queryByTestId('board')).not.toBeInTheDocument();
+  });
+
+  test('prioritizes ?board= param over ?template= param', () => {
+    // Set URL with both board and template params
+    delete window.location;
+    window.location = { ...originalLocation, search: '?board=existing-123&template=lean-coffee', href: 'http://localhost/?board=existing-123&template=lean-coffee' };
+
+    render(<App />);
+
+    // App container should be rendered
+    const appElement = screen.getByTestId('app-container');
+    expect(appElement).toBeInTheDocument();
+
+    // Board should be rendered (board param takes priority)
     expect(screen.getByTestId('board')).toBeInTheDocument();
 
     // Dashboard should NOT be rendered
