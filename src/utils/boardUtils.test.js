@@ -1,6 +1,5 @@
 import { ref, set } from 'firebase/database';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-
 // Mock Firebase
 vi.mock('./firebase', () => ({ database: {} }));
 

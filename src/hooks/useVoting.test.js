@@ -13,6 +13,18 @@ vi.mock('firebase/database', () => ({
   set: vi.fn(() => Promise.resolve()),
   remove: vi.fn(() => Promise.resolve())
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 const createMockProps = (overrides = {}) => ({
   boardId: 'board-123',
@@ -416,7 +428,6 @@ describe('useVoting', () => {
 
   describe('upvoteGroup', () => {
     it('should upvote a group', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         columns: {
           col1: {
@@ -429,53 +440,49 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
       expect(set).toHaveBeenCalledTimes(2); // votes ref + voters ref
-      expect(showNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
     });
 
     it('should not upvote when boardId is null', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({ boardId: null });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should not upvote when user is null', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({ user: null });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should not upvote when group is not found', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         columns: { col1: { groups: {} } }
       });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'nonexistent', 0, showNotification);
+        result.current.upvoteGroup('col1', 'nonexistent', 0);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should block duplicate vote in single-vote mode', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         multipleVotesAllowed: false,
         columns: {
@@ -489,15 +496,14 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 1, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 1);
       });
 
-      expect(showNotification).toHaveBeenCalledWith('You have already voted on this group');
+      expect(mockShowNotification).toHaveBeenCalledWith('You have already voted on this group');
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should enforce vote limit in retrospective mode', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         retrospectiveMode: true,
         votesPerUser: 3,
@@ -518,15 +524,14 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
-      expect(showNotification).toHaveBeenCalledWith("You've reached your vote limit (3 votes)");
+      expect(mockShowNotification).toHaveBeenCalledWith("You've reached your vote limit (3 votes)");
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should enforce vote limit in retrospective mode with single vote', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         retrospectiveMode: true,
         votesPerUser: 2,
@@ -546,15 +551,14 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
-      expect(showNotification).toHaveBeenCalledWith("You've reached your vote limit (2 votes)");
+      expect(mockShowNotification).toHaveBeenCalledWith("You've reached your vote limit (2 votes)");
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should allow vote when multipleVotesAllowed and under limit', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         multipleVotesAllowed: true,
         retrospectiveMode: true,
@@ -570,15 +574,14 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 1, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 1);
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(showNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
     });
 
     it('should skip vote limit check when not in retrospective mode', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         retrospectiveMode: false,
         multipleVotesAllowed: true,
@@ -595,17 +598,16 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.upvoteGroup('col1', 'group1', 0, showNotification);
+        result.current.upvoteGroup('col1', 'group1', 0);
       });
 
       expect(set).toHaveBeenCalled();
-      expect(showNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
     });
   });
 
   describe('downvoteGroup', () => {
     it('should downvote a group', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         columns: {
           col1: {
@@ -618,53 +620,49 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'group1', 1, showNotification);
+        result.current.downvoteGroup('col1', 'group1', 1);
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(showNotification).toHaveBeenCalledWith('Downvoted group');
+      expect(mockShowNotification).toHaveBeenCalledWith('Downvoted group');
     });
 
     it('should not downvote when boardId is null', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({ boardId: null });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'group1', 1, showNotification);
+        result.current.downvoteGroup('col1', 'group1', 1);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should not downvote when user is null', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({ user: null });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'group1', 1, showNotification);
+        result.current.downvoteGroup('col1', 'group1', 1);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should not downvote when group is not found', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         columns: { col1: { groups: {} } }
       });
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'nonexistent', 1, showNotification);
+        result.current.downvoteGroup('col1', 'nonexistent', 1);
       });
 
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should block duplicate negative vote in single-vote mode', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         multipleVotesAllowed: false,
         columns: {
@@ -678,15 +676,14 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'group1', -1, showNotification);
+        result.current.downvoteGroup('col1', 'group1', -1);
       });
 
-      expect(showNotification).toHaveBeenCalledWith('You have already voted on this group');
+      expect(mockShowNotification).toHaveBeenCalledWith('You have already voted on this group');
       expect(set).not.toHaveBeenCalled();
     });
 
     it('should allow multiple downvotes when multipleVotesAllowed', async () => {
-      const showNotification = vi.fn();
       const props = createMockProps({
         multipleVotesAllowed: true,
         columns: {
@@ -700,11 +697,11 @@ describe('useVoting', () => {
       const { result } = renderHook(() => useVoting(props));
 
       await act(async () => {
-        result.current.downvoteGroup('col1', 'group1', -1, showNotification);
+        result.current.downvoteGroup('col1', 'group1', -1);
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(showNotification).toHaveBeenCalledWith('Downvoted group');
+      expect(mockShowNotification).toHaveBeenCalledWith('Downvoted group');
     });
   });
 });

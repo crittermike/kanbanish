@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { useGroupOperations } from '../hooks/useGroupOperations';
 import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
 import Card from './Card';
@@ -17,9 +18,9 @@ function CardGroup({
   groupData,
   columnId,
   columnData, // Add columnData to access all cards
-  showNotification,
   sortByVotes
 }) {
+  const { showNotification } = useNotification();
   const {
     boardId,
     user,
@@ -41,7 +42,6 @@ function CardGroup({
     groupId,
     groupData,
     user,
-    showNotification,
     retrospectiveMode,
     workflowPhase
   });
@@ -102,12 +102,12 @@ function CardGroup({
   // Voting handlers
   const handleUpvoteGroup = e => {
     e.stopPropagation();
-    upvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
+    upvoteGroup(columnId, groupId, groupData.votes || 0);
   };
 
   const handleDownvoteGroup = e => {
     e.stopPropagation();
-    downvoteGroup(columnId, groupId, groupData.votes || 0, showNotification);
+    downvoteGroup(columnId, groupId, groupData.votes || 0);
   };
 
   // Sort cards within the group
@@ -352,7 +352,6 @@ function CardGroup({
                 cardData={card}
                 columnId={columnId}
                 groupId={groupId}
-                showNotification={showNotification}
               />
             ))
           )}

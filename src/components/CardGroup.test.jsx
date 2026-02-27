@@ -69,6 +69,17 @@ vi.mock('../hooks/useGroupOperations', () => ({
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('CardGroup Component', () => {
   const mockGroupData = {
@@ -100,7 +111,6 @@ describe('CardGroup Component', () => {
     groupData: mockGroupData,
     columnId: 'column1',
     columnData: mockColumnData, // Add columnData
-    showNotification: vi.fn(),
     sortByVotes: false
   };
 
@@ -295,8 +305,7 @@ describe('CardGroup Component', () => {
     expect(mockBoardContext.upvoteGroup).toHaveBeenCalledWith(
       'column1',
       'group123',
-      3,
-      mockProps.showNotification
+      3
     );
   });
 
@@ -349,7 +358,7 @@ describe('CardGroup Component', () => {
     });
 
     // Verify success notification
-    expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
+    expect(mockShowNotification).toHaveBeenCalledWith('Card added to group');
   });
 
   test('handles moving card from different column to group', async () => {
@@ -387,7 +396,7 @@ describe('CardGroup Component', () => {
     });
 
     // Verify success notification
-    expect(mockProps.showNotification).toHaveBeenCalledWith('Card added to group');
+    expect(mockShowNotification).toHaveBeenCalledWith('Card added to group');
   });
 
   test('displays comment toggle button with correct count', () => {
@@ -545,8 +554,7 @@ describe('CardGroup Component', () => {
     expect(mockBoardContext.upvoteGroup).toHaveBeenCalledWith(
       'column1',
       'group123',
-      3,
-      mockProps.showNotification
+      3
     );
   });
 
@@ -573,8 +581,7 @@ describe('CardGroup Component', () => {
     expect(mockBoardContext.upvoteGroup).toHaveBeenCalledWith(
       'column1',
       'group123',
-      3,
-      mockProps.showNotification
+      3
     );
   });
 });

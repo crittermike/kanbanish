@@ -50,12 +50,23 @@ const mockBoardContext = {
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: () => mockBoardContext
 }));
+// Mock the NotificationContext
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('ExportBoardModal with Card Grouping', () => {
   const mockProps = {
     isOpen: true,
     onClose: vi.fn(),
-    showNotification: vi.fn()
   };
 
   beforeEach(() => {

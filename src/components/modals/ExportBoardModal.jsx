@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Clipboard } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../../context/BoardContext';
+import { useNotification } from '../../context/NotificationContext';
 
-const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
+const ExportBoardModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('markdown');
   const [exportedContent, setExportedContent] = useState('');
   const { boardTitle, columns } = useBoardContext();
+  const { showNotification } = useNotification();
 
   /**
    * Get a normalized structure of the board data for export
@@ -402,9 +404,7 @@ const ExportBoardModal = ({ isOpen, onClose, showNotification }) => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(exportedContent)
       .then(() => {
-        if (showNotification) {
-          showNotification('Copied to clipboard');
-        }
+        showNotification('Copied to clipboard');
         onClose();
       })
       .catch(() => {

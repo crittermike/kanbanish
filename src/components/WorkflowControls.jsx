@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Eye, MessageCircle, Award, ArrowLeft, BarChart, Heart } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import VoteLimitModal from './modals/VoteLimitModal';
 
 
-const WorkflowControls = ({ showNotification }) => {
+const WorkflowControls = () => {
   const [showVoteLimitModal, setShowVoteLimitModal] = useState(false);
+  const { showNotification } = useNotification();
   
   const {
     workflowPhase,

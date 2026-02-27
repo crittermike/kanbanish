@@ -36,6 +36,17 @@ vi.mock('react-dom', () => ({
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
 }));
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 describe('Card Component', () => {
   const mockCardData = {
@@ -61,7 +72,6 @@ describe('Card Component', () => {
     cardId: 'card123',
     cardData: mockCardData,
     columnId: 'column1',
-    showNotification: vi.fn()
   };
 
   const mockBoardContext = {
@@ -120,7 +130,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
     });
   });
 
@@ -175,7 +185,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
   });
 
@@ -238,7 +248,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Vote removed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Vote removed');
     });
   });
 
@@ -255,7 +265,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(window.confirm).toHaveBeenCalled();
       expect(remove).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
     });
   });
 
@@ -321,7 +331,7 @@ describe('Card Component', () => {
     // Verify reaction was added and wait for it to appear in the DOM
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
       const addedReaction = screen.getByTestId('emoji-reaction');
       expect(addedReaction).toHaveTextContent(emojiText);
     });
@@ -339,7 +349,7 @@ describe('Card Component', () => {
     // Verify reaction was removed
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
     });
   });
 
@@ -358,7 +368,7 @@ describe('Card Component', () => {
     // Verify comment was added
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment added');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment added');
     });
   });
 
@@ -385,7 +395,7 @@ describe('Card Component', () => {
     // Verify changes were saved
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
     });
 
     // Wait for the updated content to appear and verify it's in the document
@@ -424,7 +434,7 @@ describe('Card Component', () => {
     // Verify vote count didn't change and notification was shown
     await waitFor(() => {
       expect(set).not.toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith("Can't have negative votes");
+      expect(mockShowNotification).toHaveBeenCalledWith("Can't have negative votes");
     });
   });
 
@@ -475,7 +485,7 @@ describe('Card Component', () => {
     // Verify reaction was removed
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
     });
   });
 
@@ -493,7 +503,7 @@ describe('Card Component', () => {
     // Verify no comment was added
     await waitFor(() => {
       expect(set).not.toHaveBeenCalled();
-      expect(mockProps.showNotification).not.toHaveBeenCalled();
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -514,7 +524,7 @@ describe('Card Component', () => {
     // Verify card was deleted
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
     });
   });
 
@@ -548,7 +558,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('comments/comment1'));
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
     });
   });
 
@@ -570,7 +580,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(window.confirm).toHaveBeenCalled();
       expect(remove).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted');
     });
   });
 
@@ -620,7 +630,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
     });
   });
 
@@ -699,7 +709,7 @@ describe('Card Component', () => {
 
     // Reset mocks to track calls more easily
     set.mockClear();
-    mockProps.showNotification.mockClear();
+    mockShowNotification.mockClear();
 
     render(<Card {...mockProps} />);
 
@@ -709,19 +719,19 @@ describe('Card Component', () => {
 
     // Wait for first vote to be processed
     await waitFor(() => {
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
 
     // Reset the mocks after first vote
     set.mockClear();
-    mockProps.showNotification.mockClear();
+    mockShowNotification.mockClear();
 
     // Upvote again
     fireEvent.click(upvoteButton);
 
     // Verify second vote was processed
     await waitFor(() => {
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
   });
 
@@ -736,7 +746,7 @@ describe('Card Component', () => {
 
     // Reset mocks to track calls
     set.mockClear();
-    mockProps.showNotification.mockClear();
+    mockShowNotification.mockClear();
 
     render(<Card {...mockProps} />);
 
@@ -746,7 +756,7 @@ describe('Card Component', () => {
 
     // Verify vote was allowed (not blocked by limit)
     await waitFor(() => {
-      expect(mockProps.showNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
     });
 
     // Verify the vote was actually recorded (set was called)
@@ -764,7 +774,7 @@ describe('Card Component', () => {
 
     // Reset mocks to track calls
     set.mockClear();
-    mockProps.showNotification.mockClear();
+    mockShowNotification.mockClear();
 
     render(<Card {...mockProps} />);
 
@@ -774,7 +784,7 @@ describe('Card Component', () => {
 
     // Verify vote was blocked by limit
     await waitFor(() => {
-      expect(mockProps.showNotification).toHaveBeenCalledWith("You've reached your vote limit (1 votes)");
+      expect(mockShowNotification).toHaveBeenCalledWith("You've reached your vote limit (1 votes)");
     });
 
     // Verify the vote was NOT recorded (set was not called)

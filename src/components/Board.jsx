@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, ArrowDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -74,10 +75,10 @@ const ActionButtons = ({
   sortDropdownOpen,
   setSortDropdownOpen,
   resetAllVotes,
-  showNotification,
   darkMode,
   updateDarkMode
-}) => {
+  }) => {
+  const { showNotification } = useNotification();
   // Handle clicking outside the dropdown
   const dropdownRef = React.useRef(null);
 
@@ -112,7 +113,7 @@ const ActionButtons = ({
         <Heart size={16} />
         Health Check
       </button>
-      <Timer showNotification={showNotification} />
+      <Timer />
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
           id="settings-dropdown-button"
@@ -277,7 +278,7 @@ const ActionButtons = ({
 };
 
 // UI Component for the columns container including the add column button
-const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn }) => {
+const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
   const { retrospectiveMode, workflowPhase } = useBoardContext();
 
   // Get columns sorted by their IDs to maintain consistent order
@@ -302,7 +303,6 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
             columnId={columnId}
             columnData={columnData}
             sortByVotes={sortByVotes}
-            showNotification={showNotification}
           />
         ))}
 
@@ -323,7 +323,8 @@ const ColumnsContainer = ({ columns, sortByVotes, showNotification, addNewColumn
 /**
  * Main Board component responsible for rendering and managing the kanban board
  */
-function Board({ showNotification }) {
+function Board() {
+  const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -542,7 +543,6 @@ function Board({ showNotification }) {
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             resetAllVotes={resetAllVotes}
-            showNotification={showNotification}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
           />
@@ -557,7 +557,7 @@ function Board({ showNotification }) {
 
       {/* Workflow Controls - Show when retrospective mode is enabled or during health check phase */}
       {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
-        <WorkflowControls showNotification={showNotification} />
+        <WorkflowControls />
       )}
 
 
@@ -565,7 +565,7 @@ function Board({ showNotification }) {
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
-          <ResultsView showNotification={showNotification} />
+          <ResultsView />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
@@ -574,7 +574,6 @@ function Board({ showNotification }) {
           <ColumnsContainer
             columns={columns}
             sortByVotes={sortByVotes}
-            showNotification={showNotification}
             addNewColumn={addNewColumn}
           />
         )}
@@ -586,7 +585,6 @@ function Board({ showNotification }) {
         onClose={() => {
           setIsExportModalOpen(false);
         }}
-        showNotification={showNotification}
       />
 
       {/* Template Selection Modal */}

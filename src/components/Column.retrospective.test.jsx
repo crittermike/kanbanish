@@ -7,6 +7,17 @@ import Column from './Column';
 
 // Mock the BoardContext
 vi.mock('../context/BoardContext');
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock Firebase
 vi.mock('firebase/database', () => ({
@@ -20,7 +31,6 @@ vi.mock('../utils/firebase', () => ({
 }));
 
 describe('Column - Basic Rendering', () => {
-  const mockShowNotification = vi.fn();
   const mockColumnData = {
     title: 'Test Column',
     cards: {}
@@ -53,7 +63,6 @@ describe('Column - Basic Rendering', () => {
           columnId="test-column" 
           columnData={mockColumnData} 
           sortByVotes={false} 
-          showNotification={mockShowNotification} 
         />
       </DndProvider>
     );
@@ -74,7 +83,6 @@ describe('Column - Basic Rendering', () => {
           columnId="test-column" 
           columnData={mockColumnData} 
           sortByVotes={false} 
-          showNotification={mockShowNotification} 
         />
       </DndProvider>
     );

@@ -7,6 +7,17 @@ import Board from './Board';
 
 // Mock the board context
 vi.mock('../context/BoardContext');
+const { mockShowNotification } = vi.hoisted(() => ({
+  mockShowNotification: vi.fn()
+}));
+vi.mock('../context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: mockShowNotification,
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 // Mock Firebase
 vi.mock('../utils/firebase', () => ({
@@ -18,7 +29,6 @@ vi.mock('../utils/firebase', () => ({
 }));
 
 describe('Board Component - Sort By Votes Fix', () => {
-  const mockShowNotification = vi.fn();
   
   // Mock a complete context with the setSortByVotes function
   const mockContextValue = {
@@ -74,7 +84,7 @@ describe('Board Component - Sort By Votes Fix', () => {
   it('calls setSortByVotes when sort by votes is clicked', () => {
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 
@@ -104,7 +114,7 @@ describe('Board Component - Sort By Votes Fix', () => {
 
     render(
       <DndProvider backend={HTML5Backend}>
-        <Board showNotification={mockShowNotification} />
+        <Board />
       </DndProvider>
     );
 

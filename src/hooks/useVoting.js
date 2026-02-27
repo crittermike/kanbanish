@@ -1,5 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { useCallback } from 'react';
+import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 
 /**
@@ -21,6 +22,7 @@ export const useVoting = ({
   boardId, user, columns, activeUsers,
   votesPerUser, multipleVotesAllowed, retrospectiveMode
 }) => {
+  const { showNotification } = useNotification();
   // Calculate total votes across all cards and groups
   const getTotalVotes = useCallback(() => {
     let totalVotes = 0;
@@ -127,7 +129,7 @@ export const useVoting = ({
   }, [boardId, user, columns]);
 
   // Upvote a group
-  const upvoteGroup = useCallback((columnId, groupId, currentVotes = 0, showNotification) => {
+  const upvoteGroup = useCallback((columnId, groupId, currentVotes = 0) => {
     if (!boardId || !user) {
       return;
     }
@@ -183,10 +185,10 @@ export const useVoting = ({
     }).catch(error => {
       console.error('Error updating group votes:', error);
     });
-  }, [boardId, user, columns, retrospectiveMode, multipleVotesAllowed, votesPerUser, getUserVoteCount]);
+  }, [boardId, user, columns, retrospectiveMode, multipleVotesAllowed, votesPerUser, getUserVoteCount, showNotification]);
 
   // Downvote a group
-  const downvoteGroup = useCallback((columnId, groupId, currentVotes = 0, showNotification) => {
+  const downvoteGroup = useCallback((columnId, groupId, currentVotes = 0) => {
     if (!boardId || !user) {
       return;
     }
@@ -222,7 +224,7 @@ export const useVoting = ({
     }).catch(error => {
       console.error('Error updating group votes:', error);
     });
-  }, [boardId, user, columns, multipleVotesAllowed]);
+  }, [boardId, user, columns, multipleVotesAllowed, showNotification]);
 
   return {
     resetAllVotes,

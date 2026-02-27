@@ -23,6 +23,14 @@ vi.mock('./context/BoardContext', () => ({
   }),
   DEFAULT_BOARD_TITLE: 'Untitled Board'
 }));
+vi.mock('./context/NotificationContext', () => ({
+  useNotification: () => ({
+    showNotification: vi.fn(),
+    notification: { message: '', show: false }
+  }),
+  NotificationProvider: ({ children }) => children
+}));
+
 
 vi.mock('react-dnd', () => ({
   DndProvider: ({ children }) => <div data-testid="dnd-provider">{children}</div>

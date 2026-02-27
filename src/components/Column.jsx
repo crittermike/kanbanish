@@ -3,13 +3,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
 import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-function Column({ columnId, columnData, sortByVotes, showNotification }) {
+function Column({ columnId, columnData, sortByVotes }) {
   const { 
     boardId, 
     moveCard, 
@@ -21,6 +22,7 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
     startCardCreation,
     stopCardCreation
   } = useBoardContext();
+  const { showNotification } = useNotification();
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -378,7 +380,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 columnId={columnId}
                 columnData={columnData}
                 sortByVotes={sortByVotes}
-                showNotification={showNotification}
               />
             );
           } else {
@@ -388,7 +389,6 @@ function Column({ columnId, columnData, sortByVotes, showNotification }) {
                 cardId={item.data.id}
                 cardData={item.data}
                 columnId={columnId}
-                showNotification={showNotification}
                 onCardDropOnCard={handleCardDropOnCard}
               />
             );
