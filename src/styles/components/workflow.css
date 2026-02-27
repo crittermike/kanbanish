@@ -6,6 +6,7 @@
   margin-bottom: 20px;
 }
 
+
 .workflow-phase {
   margin: 0;
   display: flex;
@@ -90,4 +91,5 @@
     flex: 1;
     min-width: 140px;
   }
+
 }

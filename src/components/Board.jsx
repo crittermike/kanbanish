@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, ArrowDown, ChevronDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
+import { Link, ArrowDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
@@ -12,6 +12,7 @@ import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplat
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
+import Timer from './Timer';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 import VoteCounter from './VoteCounter';
@@ -111,21 +112,17 @@ const ActionButtons = ({
         <Heart size={16} />
         Health Check
       </button>
+      <Timer showNotification={showNotification} />
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
           id="settings-dropdown-button"
-          className="btn sort-dropdown-button"
+          className="btn icon-btn settings-toggle-btn"
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
           title="Board settings and preferences"
         >
           <Settings size={16} />
-          Settings
-          <ChevronDown
-            size={12}
-            className={sortDropdownOpen ? 'dropdown-arrow rotated' : 'dropdown-arrow'}
-          />
         </button>
 
         {sortDropdownOpen && (
@@ -562,6 +559,7 @@ function Board({ showNotification }) {
       {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
         <WorkflowControls showNotification={showNotification} />
       )}
+
 
       <main>
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (

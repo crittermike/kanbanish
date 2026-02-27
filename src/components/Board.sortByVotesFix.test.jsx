@@ -79,7 +79,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     );
 
     // Open the settings dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Click the "By Votes" option
@@ -109,7 +109,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     );
 
     // Open the settings dropdown
-    const settingsButton = screen.getByText('Settings');
+    const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
     // Click the "Chronological" option
