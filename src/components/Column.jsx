@@ -1,7 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useRef, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
-import { Trash2, Plus } from 'react-feather';
+import { ChevronLeft, ChevronRight, Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { addCard } from '../utils/boardUtils';
@@ -10,7 +10,7 @@ import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-function Column({ columnId, columnData, sortByVotes }) {
+function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse }) {
   const { 
     boardId, 
     moveCard, 
@@ -306,6 +306,41 @@ function Column({ columnId, columnData, sortByVotes }) {
     setDraggedCardForGrouping(null);
   };
 
+  // Count total cards in this column (including grouped cards)
+  const getCardCount = () => {
+    const cardCount = columnData.cards ? Object.keys(columnData.cards).length : 0;
+    return cardCount;
+  };
+
+  // Collapsed column view
+  if (collapsed) {
+    return (
+      <div
+        className="column collapsed"
+        onClick={() => onToggleCollapse(columnId)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleCollapse(columnId); } }}
+        aria-label={`Expand ${title} column (${getCardCount()} cards)`}
+        title={`${title} — ${getCardCount()} cards. Click to expand.`}
+      >
+        <div className="column-header">
+          <span className="collapsed-card-count">{getCardCount()}</span>
+          <div className="collapsed-title-wrapper">
+            <span className="collapsed-title">{title}</span>
+          </div>
+          <button
+            className="collapse-toggle"
+            aria-label={`Expand ${title} column`}
+            onClick={e => { e.stopPropagation(); onToggleCollapse(columnId); }}
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="column">
       <div className="column-header">
@@ -333,6 +368,14 @@ function Column({ columnId, columnData, sortByVotes }) {
           </h2>
         )}
         <div className="column-actions">
+          <button
+            className="collapse-toggle icon-button"
+            title="Collapse column"
+            onClick={() => onToggleCollapse(columnId)}
+            aria-label="Collapse column"
+          >
+            <ChevronLeft aria-hidden="true" />
+          </button>
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
               <Trash2 aria-hidden="true" />
