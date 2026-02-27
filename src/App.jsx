@@ -1,4 +1,3 @@
-import './styles/index.css';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Board from './components/Board';
