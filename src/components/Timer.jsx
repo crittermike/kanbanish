@@ -43,6 +43,21 @@ const Timer = ({ showNotification }) => {
   const [customMinutes, setCustomMinutes] = useState('');
   const hasNotifiedRef = useRef(false);
   const animationRef = useRef(null);
+  const setupRef = useRef(null);
+
+  // Handle clicking outside the setup popover
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (setupRef.current && !setupRef.current.contains(event.target)) {
+        setShowSetup(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Compute remaining time from timer data
   const updateRemaining = useCallback(() => {
@@ -136,18 +151,17 @@ const Timer = ({ showNotification }) => {
   // Owner sees setup UI when no timer is active
   if (isOwner && !hasTimer) {
     return (
-      <div className="timer-container timer-setup-mode">
-        {!showSetup ? (
-          <button
-            className="btn secondary-btn btn-with-icon timer-start-btn"
-            onClick={() => setShowSetup(true)}
-            title="Set a timer for this phase"
-          >
-            <Clock size={16} />
-            Set Timer
-          </button>
-        ) : (
-          <div className="timer-setup">
+      <div className="timer-setup-container" ref={setupRef}>
+        <button
+          className="btn btn-with-icon timer-start-btn"
+          onClick={() => setShowSetup(!showSetup)}
+          title="Set a timer for this phase"
+        >
+          <Clock size={16} />
+          Set Timer
+        </button>
+        {showSetup && (
+          <div className="timer-setup-popover">
             <div className="timer-presets">
               {PRESET_DURATIONS.map(({ label, seconds }) => (
                 <button
@@ -192,7 +206,6 @@ const Timer = ({ showNotification }) => {
       </div>
     );
   }
-
   // Active timer display (visible to all users)
   return (
     <div

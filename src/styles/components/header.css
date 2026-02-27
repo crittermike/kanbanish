@@ -295,7 +295,7 @@ h1 {
     }
     
     /* Adjust button sizing within the header for mobile */
-    .action-buttons .btn {
+    .action-buttons > .btn {
         width: 100%;
         height: 48px;
         display: flex;

@@ -266,6 +266,7 @@ const ActionButtons = ({
           </div>
         )}
       </div>
+      <Timer showNotification={showNotification} />
       <button
         id="theme-toggle"
         className="btn icon-btn"
@@ -563,9 +564,6 @@ function Board({ showNotification }) {
       {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
         <WorkflowControls showNotification={showNotification} />
       )}
-
-      {/* Timer - Available in both retro and non-retro modes */}
-      <Timer showNotification={showNotification} />
 
 
       <main>
