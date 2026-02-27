@@ -28,7 +28,7 @@
 
 .icon-btn {
     min-width: unset;
-    padding: 0 15px;
+    padding: var(--space-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,7 +228,7 @@
     /* Icon buttons stay compact on mobile */
     .icon-btn {
         min-width: unset;
-        padding: 0 15px;
+        padding: var(--space-sm);
     }
 
     /* Space buttons in action bar properly */
