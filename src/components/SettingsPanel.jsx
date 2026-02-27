@@ -89,8 +89,9 @@ const SettingsPanel = ({
           aria-expanded={sortDropdownOpen}
           aria-haspopup="true"
           title="Board settings and preferences"
+          aria-label="Board settings"
         >
-          <Settings size={16} />
+          <Settings size={16} aria-hidden="true" />
         </button>
 
         {sortDropdownOpen && (
@@ -237,8 +238,9 @@ const SettingsPanel = ({
           updateDarkMode(!darkMode);
         }}
         title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
       >
-        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+        {darkMode ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
       </button>
     </div>
   );

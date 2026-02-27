@@ -129,11 +129,11 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container template-modal">
+    <div className="modal-overlay" role="presentation">
+      <div className="modal-container template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
         <div className="modal-header">
-          <h2>Choose a Board Template</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <h2 id="template-modal-title">Choose a Board Template</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
         </div>
 
         <div className="modal-body template-selector">
@@ -146,6 +146,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                 onChange={handleSearchChange}
                 className="template-search-input"
                 autoFocus
+                aria-label="Search templates"
                 ref={searchInputRef}
               />
               {searchQuery && (

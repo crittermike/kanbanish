@@ -24,8 +24,9 @@ const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteBu
         onClick={disabled ? undefined : onUpvote}
         title={getButtonTitle('upvote')}
         disabled={disabled}
+        aria-label="Upvote"
       >
-        <ChevronUp size={16} />
+        <ChevronUp size={16} aria-hidden="true" />
       </button>
       <span className="vote-count">{votes || 0}</span>
       {showDownvoteButton && (
@@ -34,8 +35,9 @@ const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteBu
           onClick={disabled ? undefined : onDownvote}
           title={getButtonTitle('downvote')}
           disabled={disabled}
+          aria-label="Downvote"
         >
-          <ChevronDown size={16} />
+          <ChevronDown size={16} aria-hidden="true" />
         </button>
       )}
     </div>

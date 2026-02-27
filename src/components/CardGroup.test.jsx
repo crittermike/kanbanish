@@ -500,11 +500,11 @@ describe('CardGroup Component', () => {
     // Should display the reactions - use more flexible matchers due to whitespace
     expect(screen.getByText(/👍/)).toBeInTheDocument();
     expect(screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'span' && element?.textContent?.includes('👍') && element?.textContent?.includes('3');
+      return element?.tagName.toLowerCase() === 'button' && element?.textContent?.includes('👍') && element?.textContent?.includes('3');
     })).toBeInTheDocument();
     expect(screen.getByText(/😄/)).toBeInTheDocument();
     expect(screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'span' && element?.textContent?.includes('😄') && element?.textContent?.includes('1');
+      return element?.tagName.toLowerCase() === 'button' && element?.textContent?.includes('😄') && element?.textContent?.includes('1');
     })).toBeInTheDocument();
   });
 

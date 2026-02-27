@@ -19,6 +19,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     <input
       type="text"
       id="board-title"
+      aria-label="Board title"
       placeholder={DEFAULT_BOARD_TITLE}
       value={boardTitle}
       onChange={handleBoardTitleChange}

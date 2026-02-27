@@ -320,16 +320,24 @@ function Column({ columnId, columnData, sortByVotes }) {
             onKeyPress={handleKeyPress}
             className="column-title-input"
             autoFocus
+            aria-label="Column title"
           />
         ) : (
-          <h2 className="column-title" onClick={() => setIsEditing(true)}>
+          <h2
+            className="column-title"
+            onClick={() => setIsEditing(true)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsEditing(true); } }}
+            role="button"
+            tabIndex={0}
+            title="Click to edit column title"
+          >
             {title}
           </h2>
         )}
         <div className="column-actions">
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="icon-button" title="Delete Column" onClick={deleteColumn}>
-              <Trash2 />
+            <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
+              <Trash2 aria-hidden="true" />
             </button>
           )}
         </div>
@@ -354,6 +362,7 @@ function Column({ columnId, columnData, sortByVotes }) {
               onKeyDown={handleNewCardKeyPress}
               className="inline-card-textarea"
               autoFocus
+              aria-label="Card content"
             />
             <div className="inline-card-actions">
               <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
@@ -397,9 +406,9 @@ function Column({ columnId, columnData, sortByVotes }) {
 
         {/* Group creation modal */}
         {showGroupModal && (
-          <div className="group-modal-overlay" onClick={cancelCreateGroup}>
-            <div className="group-modal" onClick={e => e.stopPropagation()}>
-              <h3>Create Card Group</h3>
+          <div className="group-modal-overlay" onClick={cancelCreateGroup} role="presentation">
+            <div className="group-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+              <h3 id="create-group-title">Create Card Group</h3>
               <p>Creating a group with 2 cards</p>
               <input
                 type="text"
@@ -416,6 +425,7 @@ function Column({ columnId, columnData, sortByVotes }) {
                 }}
                 className="group-name-input"
                 autoFocus
+                aria-label="Group name"
               />
               <div className="group-modal-actions">
                 <button className="btn primary-btn" onClick={confirmCreateGroup}>
