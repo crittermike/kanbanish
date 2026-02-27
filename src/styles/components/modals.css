@@ -13,7 +13,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: var(--overlay-bg);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -71,12 +71,12 @@
 .modal-body input[type="text"]:focus {
     border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
+    box-shadow: var(--focus-ring);
 }
 
 .modal-body .btn.primary-btn {
     background: var(--accent);
-    color: #fff;
+    color: var(--text-on-accent);
     border: none;
     padding: var(--space-sm) var(--space-lg);
     font-size: var(--font-size-base);
@@ -158,7 +158,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--overlay-bg-light);
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -292,8 +292,8 @@
 }
 
 .primary-button {
-  background-color: #58a6ff;
-  color: #fff;
+  background-color: var(--accent);
+  color: var(--text-on-accent);
   border: none;
   padding: 10px 20px;
   border-radius: var(--radius-sm);
@@ -308,7 +308,7 @@
 }
 
 .primary-button:hover {
-  background-color: #4794e6;
+  background-color: var(--accent-hover);
   transform: translateY(-1px);
 }
 
@@ -330,7 +330,7 @@
 
 .secondary-button:hover {
   background-color: var(--hover-bg);
-  border-color: #444c56;
+  border-color: var(--border-color);
 }
 
 /* Mobile responsive adjustments for modal buttons */

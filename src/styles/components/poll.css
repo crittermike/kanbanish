@@ -151,7 +151,7 @@
 }
 
 .vote-submitted {
-  color: var(--success-color, #22c55e);
+  color: var(--success-color);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }

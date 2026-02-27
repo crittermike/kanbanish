@@ -81,7 +81,7 @@
   border-radius: 12px;
   padding: 20px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .result-meta {
@@ -106,7 +106,7 @@
 }
 
 .result-votes {
-  background: var(--success-color, #22c55e);
+  background: var(--success-color);
   color: white;
   padding: 4px 12px;
   border-radius: 20px;

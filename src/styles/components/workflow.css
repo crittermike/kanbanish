@@ -50,11 +50,11 @@
 
 /* Phase-specific styling */
 .workflow-phase[data-phase="CREATION"] .phase-info h3 {
-  color: var(--info-color, #3b82f6);
+  color: var(--info-color);
 }
 
 .workflow-phase[data-phase="GROUPING"] .phase-info h3 {
-  color: var(--warning-color, #f59e0b);
+  color: var(--warning-color);
 }
 
 .workflow-phase[data-phase="INTERACTIONS"] .phase-info h3 {
@@ -62,11 +62,11 @@
 }
 
 .workflow-phase[data-phase="INTERACTION_REVEAL"] .phase-info h3 {
-  color: var(--success-color, #22c55e);
+  color: var(--success-color);
 }
 
 .workflow-phase[data-phase="RESULTS"] .phase-info h3 {
-  color: var(--accent-color, #8b5cf6);
+  color: var(--accent-alt);
 }
 
 /* Responsive design */

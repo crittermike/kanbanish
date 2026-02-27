@@ -213,7 +213,7 @@ main {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -226,7 +226,7 @@ main {
     padding: var(--space-lg);
     max-width: 400px;
     width: 90%;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-xl);
 }
 
 .group-modal h3 {
@@ -293,7 +293,7 @@ main {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -306,7 +306,7 @@ main {
     padding: var(--space-lg);
     min-width: 300px;
     max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-xl);
     border: 1px solid var(--border-color);
 }
 
@@ -393,7 +393,7 @@ main {
     color: var(--text-muted);
     z-index: 1000;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .card-creation-indicator .typing-text {
