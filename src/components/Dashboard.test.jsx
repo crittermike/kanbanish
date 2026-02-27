@@ -16,7 +16,8 @@ vi.mock('../utils/firebase', () => ({
     })
   },
   signInAnonymously: vi.fn(),
-  get: vi.fn().mockResolvedValue({ exists: () => false })
+  get: vi.fn().mockResolvedValue({ exists: () => false }),
+  ref: vi.fn()
 }));
 
 vi.mock('firebase/database', () => ({

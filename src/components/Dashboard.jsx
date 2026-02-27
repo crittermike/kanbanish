@@ -1,11 +1,8 @@
-import { ref, set } from 'firebase/database';
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, Layout, Plus, Star, Trash2, Sun, Moon, Users, Zap, Globe } from 'react-feather';
 import { useRecentBoards } from '../hooks/useRecentBoards';
-import { database, auth, signInAnonymously, get } from '../utils/firebase';
-import { generateId } from '../utils/ids';
-import { parseUrlSettings } from '../utils/urlSettings';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import { createBoardFromTemplate } from '../utils/boardUtils';
+import { database, auth, signInAnonymously, get, ref } from '../utils/firebase';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 
 /**
@@ -107,54 +104,13 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
   const handleTemplateSelected = useCallback((templateColumns, templateName = null) => {
     if (!user) return;
 
-    const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
-    const parsed = parseUrlSettings(window.location.search);
-
-    const newBoardId = generateId();
-    const newBoardRef = ref(database, `boards/${newBoardId}`);
-
-    const columnsToCreate = templateColumns || ['To Do', 'In Progress', 'Done'];
-    const columnsObj = {};
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-
-    columnsToCreate.forEach((columnTitle, index) => {
-      const prefix = index < 26 ? alphabet[index] : `col${index}`;
-      columnsObj[`${prefix}_${generateId()}`] = {
-        title: columnTitle,
-        cards: {}
-      };
-    });
-
-    // Only allow a safe subset of settings to be overridden on creation
-    const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
-    const sanitizedOverrides = {};
-    if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
-      allowedOverrideKeys.forEach(k => {
-        if (parsed.boardSettings[k] !== undefined) {
-          sanitizedOverrides[k] = parsed.boardSettings[k];
-        }
-      });
-    }
-
-    const initialData = {
-      title: boardTitle,
-      created: Date.now(),
-      owner: user.uid,
-      columns: columnsObj,
-      settings: {
-        votingEnabled: true,
-        downvotingEnabled: true,
-        multipleVotesAllowed: false,
-        sortByVotes: false,
-        retrospectiveMode: false,
-        workflowPhase: WORKFLOW_PHASES.CREATION,
-        resultsViewIndex: 0,
-        ...sanitizedOverrides
-      }
-    };
-
-    set(newBoardRef, initialData)
-      .then(() => {
+    createBoardFromTemplate({
+      columns: templateColumns,
+      templateName,
+      user,
+      queryString: window.location.search
+    })
+      .then(newBoardId => {
         setIsTemplateModalOpen(false);
         onOpenBoard(newBoardId);
       })

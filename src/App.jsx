@@ -1,11 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Board from './components/Board';
 import Dashboard from './components/Dashboard';
 import { BoardProvider, useBoardContext } from './context/BoardContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
+import BOARD_TEMPLATES from './data/boardTemplates';
 import { useRecentBoards } from './hooks/useRecentBoards';
+import { createBoardFromTemplate } from './utils/boardUtils';
+import { auth, signInAnonymously } from './utils/firebase';
 
 /**
  * Reads the ?board= parameter from the current URL.
@@ -14,6 +17,26 @@ import { useRecentBoards } from './hooks/useRecentBoards';
 function getBoardIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get('board') || null;
+}
+
+/**
+ * Reads the ?template= parameter from the current URL.
+ * @returns {string|null} Template ID/slug or null
+ */
+function getTemplateFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('template') || null;
+}
+
+/**
+ * Finds a template by ID (exact match).
+ * @param {string} slug - The template ID to look up
+ * @returns {Object|null} The matching template or null
+ */
+function findTemplateBySlug(slug) {
+  if (!slug) return null;
+  const normalized = slug.trim().toLowerCase();
+  return BOARD_TEMPLATES.find(t => t.id === normalized) || null;
 }
 
 /**
@@ -38,6 +61,8 @@ function AppContent() {
   const handleOpenBoard = useCallback((boardId) => {
     const url = new URL(window.location.href);
     url.searchParams.set('board', boardId);
+    // Remove template param so it doesn't re-trigger on navigation
+    url.searchParams.delete('template');
     window.history.pushState({}, '', url.toString());
     setActiveBoardId(boardId);
 
@@ -52,6 +77,54 @@ function AppContent() {
     window.history.pushState({}, '', url.toString());
     setActiveBoardId(null);
   }, []);
+
+  // Handle ?template=X URL param: auto-create board from template and redirect
+  const templateProcessed = useRef(false);
+  useEffect(() => {
+    if (activeBoardId || templateProcessed.current) return;
+
+    const templateSlug = getTemplateFromUrl();
+    if (!templateSlug) return;
+
+    const template = findTemplateBySlug(templateSlug);
+    if (!template) return;
+
+    templateProcessed.current = true;
+
+    // Ensure user is authenticated before creating board
+    const unsubscribe = auth.onAuthStateChanged(authedUser => {
+      const doCreate = (user) => {
+        createBoardFromTemplate({
+          columns: template.columns,
+          templateName: template.name,
+          user,
+          queryString: window.location.search
+        })
+          .then(newBoardId => {
+            handleOpenBoard(newBoardId);
+          })
+          .catch(error => {
+            console.error('Error creating board from template URL:', error);
+            templateProcessed.current = false;
+          });
+      };
+
+      if (authedUser) {
+        doCreate(authedUser);
+      } else {
+        signInAnonymously(auth)
+          .then(result => doCreate(result.user))
+          .catch(error => {
+            console.error('Error signing in for template creation:', error);
+            templateProcessed.current = false;
+          });
+      }
+      unsubscribe();
+    });
+
+    return () => unsubscribe();
+  }, [activeBoardId, handleOpenBoard]);
+
 
   return (
     <div className="App" data-testid="app-container">

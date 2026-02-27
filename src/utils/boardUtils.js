@@ -1,6 +1,8 @@
 import { ref, set } from 'firebase/database';
 import { database } from './firebase';
 import { generateId } from './ids';
+import { parseUrlSettings } from './urlSettings';
+import { WORKFLOW_PHASES } from './workflowUtils';
 
 /**
  * Adds a new column to the board
@@ -60,4 +62,68 @@ export function addCard(boardId, columnId, content, user = null) {
 
   // Return the promise for the caller to handle notifications, and include the cardId
   return set(cardRef, cardData).then(() => cardId);
+}
+
+/**
+ * Creates a new board from a template definition.
+ *
+ * @param {Object} params
+ * @param {string[]} params.columns - Column titles for the new board
+ * @param {string} [params.templateName] - Template name (used for board title)
+ * @param {Object} params.user - Firebase user object with uid
+ * @param {string} [params.queryString] - URL query string for settings overrides
+ * @returns {Promise<string>} Resolves with the new board ID
+ */
+export function createBoardFromTemplate({ columns, templateName = null, user, queryString = '' }) {
+  if (!user || !user.uid) {
+    return Promise.reject(new Error('User is required'));
+  }
+
+  const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
+  const parsed = parseUrlSettings(queryString);
+
+  const newBoardId = generateId();
+  const newBoardRef = ref(database, `boards/${newBoardId}`);
+
+  const columnsToCreate = columns || ['To Do', 'In Progress', 'Done'];
+  const columnsObj = {};
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
+  columnsToCreate.forEach((columnTitle, index) => {
+    const prefix = index < 26 ? alphabet[index] : `col${index}`;
+    columnsObj[`${prefix}_${generateId()}`] = {
+      title: columnTitle,
+      cards: {}
+    };
+  });
+
+  // Only allow a safe subset of settings to be overridden on creation
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+  const sanitizedOverrides = {};
+  if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
+    allowedOverrideKeys.forEach(k => {
+      if (parsed.boardSettings[k] !== undefined) {
+        sanitizedOverrides[k] = parsed.boardSettings[k];
+      }
+    });
+  }
+
+  const initialData = {
+    title: boardTitle,
+    created: Date.now(),
+    owner: user.uid,
+    columns: columnsObj,
+    settings: {
+      votingEnabled: true,
+      downvotingEnabled: true,
+      multipleVotesAllowed: false,
+      sortByVotes: false,
+      retrospectiveMode: false,
+      workflowPhase: WORKFLOW_PHASES.CREATION,
+      resultsViewIndex: 0,
+      ...sanitizedOverrides
+    }
+  };
+
+  return set(newBoardRef, initialData).then(() => newBoardId);
 }
