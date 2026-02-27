@@ -6,12 +6,13 @@ import { parseUrlSettings } from '../utils/helpers';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import CardCreationIndicator from './CardCreationIndicator';
 import Column from './Column';
+import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
 import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
-import HealthCheckVoting from './HealthCheckVoting';
+import Timer from './Timer';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 import VoteCounter from './VoteCounter';
@@ -562,6 +563,10 @@ function Board({ showNotification }) {
       {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
         <WorkflowControls showNotification={showNotification} />
       )}
+
+      {/* Timer - Available in both retro and non-retro modes */}
+      <Timer showNotification={showNotification} />
+
 
       <main>
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
