@@ -6,6 +6,16 @@
   margin-bottom: 20px;
 }
 
+.workflow-phase-with-timer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workflow-phase-with-timer .workflow-phase {
+  flex: 1;
+}
+
 .workflow-phase {
   margin: 0;
   display: flex;
@@ -89,5 +99,9 @@
   .phase-controls .btn {
     flex: 1;
     min-width: 140px;
+  }
+
+  .workflow-phase-with-timer {
+    flex-direction: column;
   }
 }

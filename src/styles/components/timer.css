@@ -1,0 +1,296 @@
+/* Timer Component Styles */
+
+/* ===== Setup Mode ===== */
+.timer-container.timer-setup-mode {
+  display: flex;
+  align-items: center;
+}
+
+.timer-start-btn {
+  font-size: var(--font-size-sm);
+}
+
+.timer-setup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+}
+
+.timer-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.timer-preset-btn {
+  font-size: var(--font-size-xs);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+  font-weight: 500;
+  min-width: auto;
+}
+
+.timer-preset-btn:hover {
+  background: var(--accent-transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.timer-custom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid var(--border-color);
+  padding-left: 8px;
+}
+
+.timer-custom-input {
+  width: 48px;
+  padding: 4px 6px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.timer-custom-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.timer-custom-input::placeholder {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.timer-custom-start {
+  padding: 4px 8px;
+  min-width: auto;
+}
+
+.timer-custom-start:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.timer-setup-close {
+  padding: 4px;
+  margin-left: 2px;
+}
+
+/* ===== Active Timer ===== */
+.timer-container.timer-active {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-ring-container {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 4;
+  opacity: 0.5;
+}
+
+.timer-ring-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke 0.5s ease;
+}
+
+/* ===== Urgency States ===== */
+.timer-active.normal .timer-ring-progress {
+  stroke: var(--accent);
+}
+
+.timer-active.warning .timer-ring-progress {
+  stroke: var(--yellow);
+}
+
+.timer-active.warning .timer-time {
+  color: var(--yellow);
+}
+
+.timer-active.critical .timer-ring-progress {
+  stroke: var(--danger);
+  animation: timer-pulse-ring 1.5s ease-in-out infinite;
+}
+
+.timer-active.critical .timer-time {
+  color: var(--danger);
+  animation: timer-pulse-text 1.5s ease-in-out infinite;
+}
+
+.timer-active.critical .timer-ring-container {
+  animation: timer-pulse-scale 1.5s ease-in-out infinite;
+}
+
+.timer-active.expired .timer-ring-progress {
+  stroke: var(--danger);
+  stroke-dashoffset: 0 !important;
+  opacity: 0.3;
+}
+
+.timer-active.expired .timer-time {
+  color: var(--danger);
+  animation: timer-blink 1s step-end infinite;
+}
+
+.timer-active.expired .timer-ring-container {
+  animation: timer-expired-glow 2s ease-in-out infinite;
+}
+
+/* ===== Timer Display ===== */
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-time {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-color);
+  transition: color 0.5s ease;
+  letter-spacing: 0.02em;
+}
+
+/* ===== Timer Controls ===== */
+.timer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timer-control-btn {
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+  transition: opacity var(--transition-speed) var(--transition-ease),
+              background var(--transition-speed) var(--transition-ease);
+}
+
+.timer-control-btn:hover {
+  opacity: 1;
+  background: var(--hover-bg);
+}
+
+.timer-reset-btn:hover {
+  color: var(--danger);
+}
+
+/* ===== Animations ===== */
+@keyframes timer-pulse-ring {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px var(--danger));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--danger));
+  }
+}
+
+@keyframes timer-pulse-text {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes timer-pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes timer-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes timer-expired-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(248, 81, 73, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(248, 81, 73, 0.6));
+  }
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .timer-ring-progress,
+  .timer-time,
+  .timer-ring-container {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .timer-ring-container {
+    width: 48px;
+    height: 48px;
+  }
+
+  .timer-time {
+    font-size: 0.7rem;
+  }
+
+  .timer-setup {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .timer-presets {
+    flex-wrap: wrap;
+  }
+
+  .timer-custom {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border-color);
+    padding-top: 6px;
+    width: 100%;
+  }
+}

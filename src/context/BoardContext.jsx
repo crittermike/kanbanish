@@ -49,6 +49,12 @@ export const BoardProvider = ({ children }) => {
   const [activeUsers, setActiveUsers] = useState(0); // Track number of active users
   const [usersAddingCards, setUsersAddingCards] = useState({}); // Track users currently adding cards
 
+  // Board owner tracking
+  const [boardOwner, setBoardOwner] = useState(null);
+
+  // Timer state for retrospective phases
+  const [timerData, setTimerData] = useState(null);
+
   // Firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -103,6 +109,14 @@ export const BoardProvider = ({ children }) => {
             setBoardTitle(boardData.title);
           }
           setColumns(boardData.columns || {});
+
+          // Set board owner
+          if (boardData.owner) {
+            setBoardOwner(boardData.owner);
+          }
+
+          // Load timer data
+          setTimerData(boardData.timer || null);
 
           // Set voting preferences if available, otherwise use defaults
           if (boardData.settings) {
@@ -481,6 +495,76 @@ export const BoardProvider = ({ children }) => {
     }
   };
 
+  // Timer functions for retrospective phases
+  const startTimer = (duration) => {
+    if (!boardId || !user) return;
+    const timerRef = ref(database, `boards/${boardId}/timer`);
+    const timerObj = {
+      duration, // total seconds
+      startedAt: Date.now(),
+      isRunning: true,
+      pausedRemaining: null,
+      phase: workflowPhase
+    };
+    set(timerRef, timerObj)
+      .then(() => {
+        setTimerData(timerObj);
+      })
+      .catch(error => {
+        console.error('Error starting timer:', error);
+      });
+  };
+
+  const pauseTimer = () => {
+    if (!boardId || !user || !timerData) return;
+    const timerRef = ref(database, `boards/${boardId}/timer`);
+    const elapsed = (Date.now() - timerData.startedAt) / 1000;
+    const remaining = Math.max(0, timerData.duration - elapsed);
+    const updatedTimer = {
+      ...timerData,
+      isRunning: false,
+      pausedRemaining: remaining,
+      startedAt: null
+    };
+    set(timerRef, updatedTimer)
+      .then(() => {
+        setTimerData(updatedTimer);
+      })
+      .catch(error => {
+        console.error('Error pausing timer:', error);
+      });
+  };
+
+  const resumeTimer = () => {
+    if (!boardId || !user || !timerData || !timerData.pausedRemaining) return;
+    const timerRef = ref(database, `boards/${boardId}/timer`);
+    const updatedTimer = {
+      ...timerData,
+      duration: timerData.pausedRemaining,
+      startedAt: Date.now(),
+      isRunning: true,
+      pausedRemaining: null
+    };
+    set(timerRef, updatedTimer)
+      .then(() => {
+        setTimerData(updatedTimer);
+      })
+      .catch(error => {
+        console.error('Error resuming timer:', error);
+      });
+  };
+
+  const resetTimer = () => {
+    if (!boardId || !user) return;
+    const timerRef = ref(database, `boards/${boardId}/timer`);
+    remove(timerRef)
+      .then(() => {
+        setTimerData(null);
+      })
+      .catch(error => {
+        console.error('Error resetting timer:', error);
+      });
+  };
   // Workflow phase transition functions
   const startGroupingPhase = () => {
     updateBoardSettings({
@@ -1338,7 +1422,16 @@ export const BoardProvider = ({ children }) => {
     startCardCreation,
     stopCardCreation,
     getUsersAddingCardsInColumn,
-    getAllUsersAddingCards
+    getAllUsersAddingCards,
+    // Timer system
+    timerData,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
+    // Board ownership
+    boardOwner,
+    isOwner: user && boardOwner ? user.uid === boardOwner : false
   };
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

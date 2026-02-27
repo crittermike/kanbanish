@@ -3,6 +3,7 @@ import { Eye, MessageCircle, Award, ArrowLeft, BarChart, Heart } from 'react-fea
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import VoteLimitModal from './modals/VoteLimitModal';
+import Timer from './Timer';
 
 const WorkflowControls = ({ showNotification }) => {
   const [showVoteLimitModal, setShowVoteLimitModal] = useState(false);
@@ -11,7 +12,6 @@ const WorkflowControls = ({ showNotification }) => {
     workflowPhase,
     votesPerUser,
     updateVotesPerUser,
-    retrospectiveMode,
     startGroupingPhase,
     startInteractionsPhase,
     startInteractionRevealPhase,
@@ -281,7 +281,10 @@ const WorkflowControls = ({ showNotification }) => {
 
   return (
     <div className="workflow-controls">
-      {renderPhaseControls()}
+      <div className="workflow-phase-with-timer">
+        {renderPhaseControls()}
+        <Timer showNotification={showNotification} />
+      </div>
       <VoteLimitModal
         isOpen={showVoteLimitModal}
         onClose={() => setShowVoteLimitModal(false)}
