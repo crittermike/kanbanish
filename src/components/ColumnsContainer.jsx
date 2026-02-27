@@ -1,11 +1,15 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Column from './Column';
 
+const STORAGE_KEY_PREFIX = 'kanbanish-collapsed-';
+
 /**
  * Renders the board columns grid with an optional "Add Column" button.
  * Columns are sorted by their ID prefix (a_, b_, c_) for consistent ordering.
+ * Manages per-column collapsed state, persisted to localStorage per board.
  *
  * @param {Object} props
  * @param {Object} props.columns - Column data keyed by column ID
@@ -13,7 +17,43 @@ import Column from './Column';
  * @param {Function} props.addNewColumn - Callback to add a new column
  */
 const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
-  const { retrospectiveMode, workflowPhase } = useBoardContext();
+  const { retrospectiveMode, workflowPhase, boardId } = useBoardContext();
+
+  // Load collapsed columns from localStorage
+  const [collapsedColumns, setCollapsedColumns] = useState(() => {
+    if (!boardId) return new Set();
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_PREFIX + boardId);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Persist collapsed state to localStorage whenever it changes
+  useEffect(() => {
+    if (!boardId) return;
+    try {
+      localStorage.setItem(
+        STORAGE_KEY_PREFIX + boardId,
+        JSON.stringify([...collapsedColumns])
+      );
+    } catch {
+      // localStorage full or unavailable — silently ignore
+    }
+  }, [collapsedColumns, boardId]);
+
+  const toggleCollapse = useCallback((columnId) => {
+    setCollapsedColumns(prev => {
+      const next = new Set(prev);
+      if (next.has(columnId)) {
+        next.delete(columnId);
+      } else {
+        next.add(columnId);
+      }
+      return next;
+    });
+  }, []);
 
   // Get columns sorted by their IDs to maintain consistent order
   const getSortedColumns = () => {
@@ -37,6 +77,8 @@ const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
             columnId={columnId}
             columnData={columnData}
             sortByVotes={sortByVotes}
+            collapsed={collapsedColumns.has(columnId)}
+            onToggleCollapse={toggleCollapse}
           />
         ))}
 

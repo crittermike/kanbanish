@@ -35,7 +35,9 @@ vi.mock('./CardCreationIndicator', () => ({
 // Mock react-feather
 vi.mock('react-feather', () => ({
   Trash2: () => <div>trash-icon</div>,
-  Plus: () => <div>plus-icon</div>
+  Plus: () => <div>plus-icon</div>,
+  ChevronLeft: () => <div>chevron-left-icon</div>,
+  ChevronRight: () => <div>chevron-right-icon</div>
 }));
 
 // Mock utils
@@ -67,7 +69,7 @@ vi.mock('../context/NotificationContext', () => ({
 
 
 describe('Column Component', () => {
-  const mockProps = {
+const mockProps = {
     columnId: 'col1',
     columnData: {
       title: 'Test Column',
@@ -78,6 +80,8 @@ describe('Column Component', () => {
       groups: {}
     },
     sortByVotes: false,
+    collapsed: false,
+    onToggleCollapse: vi.fn()
   };
 
   const mockBoardContext = {
@@ -139,5 +143,57 @@ describe('Column Component', () => {
     expect(formEl.compareDocumentPosition(firstCardEl)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  describe('Column - Collapsed State', () => {
+    test('renders collapsed view when collapsed prop is true', () => {
+      const collapsedProps = { ...mockProps, collapsed: true };
+      render(<Column {...collapsedProps} />);
+      
+      const columnEl = document.querySelector('.column.collapsed');
+      expect(columnEl).toBeInTheDocument();
+      
+      const collapsedTitle = screen.getByText('Test Column');
+      expect(collapsedTitle).toHaveClass('collapsed-title');
+      
+      const cardCountBadge = screen.getByText('2');
+      expect(cardCountBadge).toHaveClass('collapsed-card-count');
+      
+      const expandButton = document.querySelector('.collapse-toggle');
+      expect(expandButton).toBeInTheDocument();
+      expect(expandButton).toHaveAttribute('aria-label', expect.stringMatching(/expand.*column/i));
+    });
+
+    test('calls onToggleCollapse when collapsed column is clicked', () => {
+      const onToggleCollapseMock = vi.fn();
+      const collapsedProps = { ...mockProps, collapsed: true, onToggleCollapse: onToggleCollapseMock };
+      render(<Column {...collapsedProps} />);
+      
+      const columnEl = document.querySelector('.column.collapsed');
+      fireEvent.click(columnEl);
+      
+      expect(onToggleCollapseMock).toHaveBeenCalledWith('col1');
+    });
+
+    test('renders expanded view when collapsed prop is false', () => {
+      render(<Column {...mockProps} />);
+      
+      const columnEl = document.querySelector('.column:not(.collapsed)');
+      expect(columnEl).toBeInTheDocument();
+      
+      const cards = screen.getAllByTestId('card');
+      expect(cards).toHaveLength(2);
+      
+      const collapseButton = screen.getByRole('button', { name: /collapse column/i });
+      expect(collapseButton).toBeInTheDocument();
+    });
+
+    test('does not render cards in collapsed state', () => {
+      const collapsedProps = { ...mockProps, collapsed: true };
+      render(<Column {...collapsedProps} />);
+      
+      const cards = screen.queryAllByTestId('card');
+      expect(cards).toHaveLength(0);
+    });
   });
 });
