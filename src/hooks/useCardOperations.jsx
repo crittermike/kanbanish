@@ -1,7 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useCallback, useMemo, useEffect, Fragment } from 'react';
 import { database } from '../utils/firebase';
-import { linkifyText } from '../utils/helpers';
+import { linkifyText } from '../utils/linkify';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
 import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
 

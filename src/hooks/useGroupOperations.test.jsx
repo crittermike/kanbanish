@@ -14,7 +14,7 @@ vi.mock('firebase/database', () => ({
 }));
 
 // Mock utilities
-vi.mock('../utils/helpers', () => ({
+vi.mock('../utils/ids', () => ({
   generateId: vi.fn(() => 'mock-id-123')
 }));
 

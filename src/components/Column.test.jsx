@@ -91,7 +91,7 @@ describe('Column Component', () => {
   test('renders add card button at the top before existing cards', () => {
     render(<Column {...mockProps} />);
     
-    const columnContent = screen.getByTestId = () => document.querySelector('.column-content');
+    const _columnContent = screen.getByTestId = () => document.querySelector('.column-content');
     const addCardButton = screen.getByRole('button', { name: /add card/i });
     const cards = screen.getAllByTestId('card');
     

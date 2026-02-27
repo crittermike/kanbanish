@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseUrlSettings, generateId, parseBool, getEmojiKeywords, COMMON_EMOJIS } from './helpers';
+import { getEmojiKeywords, COMMON_EMOJIS } from './emoji';
+import { generateId } from './ids';
+import { parseUrlSettings, parseBool } from './urlSettings';
 
 describe('parseUrlSettings', () => {
   it('parses boolean flags, numbers, and sort', () => {
@@ -16,7 +18,7 @@ describe('parseUrlSettings', () => {
   });
 
   it('ignores invalid numbers and unknown values', () => {
-  const { boardSettings, uiPrefs } = parseUrlSettings('?votes=abc&sort=unknown&theme=blue');
+    const { boardSettings, uiPrefs } = parseUrlSettings('?votes=abc&sort=unknown&theme=blue');
     expect(boardSettings).toEqual({});
     expect(uiPrefs).toEqual({});
   });

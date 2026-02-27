@@ -1,7 +1,7 @@
 import { ref, onValue, off, set, remove } from 'firebase/database';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
-import { generateId } from '../utils/helpers';
+import { generateId } from '../utils/ids';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 // Default board title constant

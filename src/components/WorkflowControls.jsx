@@ -11,7 +11,6 @@ const WorkflowControls = ({ showNotification }) => {
     workflowPhase,
     votesPerUser,
     updateVotesPerUser,
-    retrospectiveMode,
     startGroupingPhase,
     startInteractionsPhase,
     startInteractionRevealPhase,

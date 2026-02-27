@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { COMMON_EMOJIS, getEmojiKeywords } from '../utils/helpers';
+import { COMMON_EMOJIS, getEmojiKeywords } from '../utils/emoji';
 
 const EmojiPicker = React.memo(({
   position,

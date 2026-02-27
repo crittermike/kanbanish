@@ -4,7 +4,7 @@ import { ref, set, remove } from 'firebase/database';
 import { useDrag } from 'react-dnd';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
-import { COMMON_EMOJIS } from '../utils/helpers';
+import { COMMON_EMOJIS } from '../utils/emoji';
 import Card from './Card';
 
 // Mock firebase and react-dnd
