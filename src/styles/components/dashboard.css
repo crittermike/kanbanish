@@ -100,6 +100,7 @@
   gap: var(--space-md);
   color: var(--text-muted);
   font-size: var(--font-size-xs);
+  font-weight: 500;
 }
 
 .dashboard-hero-divider::before,
@@ -127,7 +128,7 @@
 .dashboard-section-header h2 {
   margin: 0;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -193,6 +194,7 @@
   margin-top: 2px;
   font-size: var(--font-size-xs);
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .dashboard-board-meta-separator {
@@ -334,6 +336,7 @@
   border: none;
   color: var(--text-muted);
   font-size: var(--font-size-xs);
+  font-weight: 500;
   cursor: pointer;
   padding: var(--space-xxs) var(--space-xs);
   transition: color var(--transition-speed) var(--transition-ease);
@@ -392,8 +395,9 @@
 }
 
 .dashboard-join-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: default;
+  color: var(--text-muted);
 }
 
 /* Mobile responsive */
@@ -453,4 +457,31 @@
 
 .light-mode .dashboard-board-card:hover {
   box-shadow: var(--shadow-md);
+}
+
+/* Light mode — improved contrast for muted elements */
+.light-mode .dashboard-section-header h2 {
+  color: #4b5563;
+}
+
+.light-mode .dashboard-clear-all {
+  color: #4b5563;
+}
+
+.light-mode .dashboard-board-meta {
+  color: #4b5563;
+}
+
+.light-mode .dashboard-hero-divider {
+  color: #6b7280;
+}
+
+.light-mode .dashboard-join-input {
+  border-color: #c0c8d0;
+}
+
+.light-mode .dashboard-join-btn:disabled {
+  color: #9ca3af;
+  border-color: #d0d7de;
+  opacity: 0.6;
 }
