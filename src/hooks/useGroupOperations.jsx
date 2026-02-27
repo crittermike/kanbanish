@@ -1,7 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
 import { useState, useCallback, useRef } from 'react';
 import { database } from '../utils/firebase';
-import { generateId } from '../utils/helpers';
+import { generateId } from '../utils/ids';
 import { areInteractionsAllowed, areInteractionsRevealed } from '../utils/workflowUtils';
 
 /**

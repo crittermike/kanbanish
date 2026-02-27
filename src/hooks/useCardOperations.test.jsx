@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ref, set, remove } from 'firebase/database';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
 import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
 import { useCardOperations } from './useCardOperations';
@@ -17,7 +17,7 @@ vi.mock('firebase/database', () => ({
 }));
 
 // Mock utilities
-vi.mock('../utils/helpers', () => ({
+vi.mock('../utils/linkify', () => ({
   linkifyText: vi.fn(text => text)
 }));
 

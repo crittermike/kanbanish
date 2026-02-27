@@ -1,6 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { database } from './firebase';
-import { generateId } from './helpers';
+import { generateId } from './ids';
 
 /**
  * Adds a new column to the board

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, ArrowDown, Plus, ThumbsUp, FileText, PlusSquare, Settings, Sun, Moon, Heart } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { addColumn } from '../utils/boardUtils';
-import { parseUrlSettings } from '../utils/helpers';
+import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import CardCreationIndicator from './CardCreationIndicator';
 import Column from './Column';

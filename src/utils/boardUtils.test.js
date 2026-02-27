@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref, set } from 'firebase/database';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Firebase
 vi.mock('./firebase', () => ({ database: {} }));
@@ -10,7 +10,7 @@ vi.mock('firebase/database', () => ({
   remove: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('./helpers', () => ({
+vi.mock('./ids', () => ({
   generateId: vi.fn(() => 'mock-id-123')
 }));
 

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { linkifyText } from './helpers';
+import { linkifyText } from './linkify';
 
 describe('linkifyText', () => {
   test('returns non-string input unchanged', () => {

@@ -106,7 +106,7 @@ const HealthCheckVoting = () => {
       <div className="health-check-questions">
         {HEALTH_CHECK_QUESTIONS.map(question => {
           const displayRating = getDisplayRating(question.id);
-          const userVote = userHealthCheckVotes[question.id];
+          const _userVote = userHealthCheckVotes[question.id];
 
           return (
             <div key={question.id} className="health-check-question" data-testid={`health-check-question-${question.id}`}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { linkifyText } from '../utils/helpers';
+import { linkifyText } from '../utils/linkify';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 
 const CommentEditor = ({
