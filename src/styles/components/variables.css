@@ -28,6 +28,10 @@
     --primary-color: #58a6ff;
     --primary-color-rgb: 88, 166, 255;
     
+    --primary-color-alpha: rgba(88, 166, 255, 0.2);
+    --primary-color-text: #ffffff;
+    --info-bg: rgba(59, 130, 246, 0.1);
+    --info-border: rgba(59, 130, 246, 0.2);
     /* Status colors */
     --danger: #f85149;
     --success: #2ea043;
@@ -134,6 +138,10 @@
     --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 5px 10px rgba(0, 0, 0, 0.15);
     --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --primary-color-alpha: rgba(9, 105, 218, 0.2);
+    --primary-color-text: #ffffff;
+    --info-bg: rgba(37, 99, 235, 0.08);
+    --info-border: rgba(37, 99, 235, 0.2);
 }
 
 /* Media query breakpoints (can be used with CSS custom media queries) */
