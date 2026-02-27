@@ -73,7 +73,7 @@
   align-items: center;
   padding: var(--space-xl) var(--space-xl);
   padding-top: clamp(var(--space-xl), 8vh, 6rem);
-  max-width: 640px;
+  max-width: 720px;
   width: 100%;
   margin: 0 auto;
 }
@@ -149,6 +149,7 @@
   color: var(--text-muted);
   font-size: var(--font-size-xs);
   font-weight: 500;
+  padding: var(--space-xxs) 0;
 }
 
 .dashboard-hero-divider::before,
@@ -162,6 +163,7 @@
 /* Section headers */
 .dashboard-section {
   margin-bottom: var(--space-lg);
+  width: 100%;
 }
 
 .dashboard-section-header {
@@ -427,7 +429,7 @@
   padding: var(--space-sm) var(--space-lg);
   background: transparent;
   color: var(--text-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--accent-transparent);
   border-radius: var(--radius-md);
   font-family: inherit;
   font-size: var(--font-size-xs);
