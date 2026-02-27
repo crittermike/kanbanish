@@ -10,10 +10,12 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-color);
 }
 
+/* Header */
 .dashboard-header {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-md) var(--space-xl);
   background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -31,7 +33,7 @@
   margin: 0;
   font-size: var(--font-size-xl);
   font-weight: 700;
-  background: linear-gradient(45deg, var(--accent), var(--info-color));
+  background: linear-gradient(135deg, var(--accent), var(--info-color));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -47,10 +49,17 @@
 /* Dashboard body */
 .dashboard-body {
   flex: 1;
-  padding: var(--space-lg) var(--space-xl);
-  max-width: 960px;
+  padding: var(--space-xl) var(--space-xl);
+  max-width: 720px;
   width: 100%;
   margin: 0 auto;
+}
+
+/* Hero section — Create + Join */
+.dashboard-hero {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 /* Section headers */
@@ -62,14 +71,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dashboard-section-header h2 {
   margin: 0;
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -77,13 +90,14 @@
 
 .dashboard-section-header h2 svg {
   color: var(--text-muted);
+  opacity: 0.7;
 }
 
 /* Board list */
 .dashboard-board-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 /* Board card */
@@ -91,7 +105,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -101,8 +115,7 @@
 
 .dashboard-board-card:hover {
   border-color: var(--accent);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
+  background-color: var(--hover-bg);
 }
 
 .dashboard-board-card.pinned {
@@ -116,7 +129,7 @@
 }
 
 .dashboard-board-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text-color);
   margin: 0;
@@ -129,7 +142,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-top: var(--space-xxs);
+  margin-top: 2px;
   font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
@@ -142,8 +155,14 @@
 .dashboard-board-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-xxs);
+  gap: 2px;
   flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.dashboard-board-card:hover .dashboard-board-actions {
+  opacity: 1;
 }
 
 .dashboard-board-actions button {
@@ -166,6 +185,12 @@
 
 .dashboard-board-actions button.pin-active {
   color: var(--accent);
+  opacity: 1;
+}
+
+/* Always show pin icon if active, even when not hovering */
+.dashboard-board-card .dashboard-board-actions:has(.pin-active) {
+  opacity: 1;
 }
 
 .dashboard-board-actions button.pin-active:hover {
@@ -182,26 +207,26 @@
   text-align: center;
   padding: var(--space-xl) var(--space-lg);
   color: var(--text-muted);
-  background: var(--card-bg);
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
 }
 
 .dashboard-empty-state svg {
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
   color: var(--text-muted);
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 .dashboard-empty-state h3 {
-  margin: 0 0 var(--space-xs) 0;
-  font-size: var(--font-size-md);
+  margin: 0 0 var(--space-xxs) 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
   color: var(--text-color);
 }
 
 .dashboard-empty-state p {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
 }
 
 /* New board CTA */
@@ -210,14 +235,14 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  width: 100%;
-  padding: var(--space-md);
+  flex: 1;
+  padding: var(--space-sm) var(--space-lg);
   background: var(--accent);
   color: var(--text-on-accent);
   border: none;
   border-radius: var(--radius-md);
   font-family: inherit;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-speed) var(--transition-ease);
@@ -225,7 +250,6 @@
 
 .dashboard-new-board-btn:hover {
   background: var(--accent-hover);
-  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -245,7 +269,7 @@
 .dashboard-board-meta-loading {
   display: inline-block;
   width: 60px;
-  height: 12px;
+  height: 10px;
   background: var(--hover-bg);
   border-radius: var(--radius-sm);
   animation: shimmer 1.5s infinite;
@@ -266,6 +290,7 @@
   cursor: pointer;
   padding: var(--space-xxs) var(--space-xs);
   transition: color var(--transition-speed) var(--transition-ease);
+  font-family: inherit;
 }
 
 .dashboard-clear-all:hover {
@@ -275,8 +300,8 @@
 /* Join board by ID */
 .dashboard-join-section {
   display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
+  flex: 1;
+  gap: var(--space-xs);
 }
 
 .dashboard-join-input {
@@ -287,7 +312,7 @@
   background: var(--card-bg);
   color: var(--text-color);
   font-family: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
 }
 
 .dashboard-join-input:focus {
@@ -307,23 +332,26 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-family: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-speed) var(--transition-ease);
   white-space: nowrap;
 }
 
-.dashboard-join-btn:hover {
+.dashboard-join-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.dashboard-join-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
   .dashboard-header {
-    flex-direction: column;
-    gap: var(--space-sm);
     padding: var(--space-md);
   }
 
@@ -331,8 +359,16 @@
     padding: var(--space-md);
   }
 
+  .dashboard-hero {
+    flex-direction: column;
+  }
+
   .dashboard-board-card {
     padding: var(--space-sm);
+  }
+
+  .dashboard-board-actions {
+    opacity: 1;
   }
 
   .dashboard-board-meta {

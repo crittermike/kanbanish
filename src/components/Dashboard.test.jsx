@@ -66,17 +66,17 @@ describe('Dashboard Component', () => {
     expect(screen.getByText('Create a new board or join an existing one to get started.')).toBeInTheDocument();
   });
 
-  test('renders Create New Board button', () => {
+  test('renders New Board button', () => {
     renderDashboard();
 
-    expect(screen.getByText('Create New Board')).toBeInTheDocument();
+    expect(screen.getByText('New Board')).toBeInTheDocument();
   });
 
   test('renders join board input', () => {
     renderDashboard();
 
     expect(screen.getByLabelText('Board ID or URL')).toBeInTheDocument();
-    expect(screen.getByText('Join Board')).toBeInTheDocument();
+    expect(screen.getByText('Join')).toBeInTheDocument();
   });
 
   test('renders recent boards', () => {
@@ -168,12 +168,12 @@ describe('Dashboard Component', () => {
     expect(mockTogglePin).toHaveBeenCalledWith('board-1');
   });
 
-  test('opens template modal when Create New Board is clicked', () => {
+  test('opens template modal when New Board is clicked', () => {
     renderDashboard();
 
     expect(screen.queryByTestId('template-modal')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Create New Board'));
+    fireEvent.click(screen.getByText('New Board'));
 
     expect(screen.getByTestId('template-modal')).toBeInTheDocument();
   });
@@ -183,7 +183,7 @@ describe('Dashboard Component', () => {
 
     const input = screen.getByLabelText('Board ID or URL');
     fireEvent.change(input, { target: { value: 'some-board-id' } });
-    fireEvent.click(screen.getByText('Join Board'));
+    fireEvent.click(screen.getByText('Join'));
 
     expect(mockOnOpenBoard).toHaveBeenCalledWith('some-board-id');
   });
@@ -193,7 +193,7 @@ describe('Dashboard Component', () => {
 
     const input = screen.getByLabelText('Board ID or URL');
     fireEvent.change(input, { target: { value: 'https://kanbanish.com/?board=extracted-id' } });
-    fireEvent.click(screen.getByText('Join Board'));
+    fireEvent.click(screen.getByText('Join'));
 
     expect(mockOnOpenBoard).toHaveBeenCalledWith('extracted-id');
   });

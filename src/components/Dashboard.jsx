@@ -209,7 +209,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         </div>
         <div className="dashboard-header-right">
           <button
-            className="btn secondary-btn btn-with-icon"
+            className="btn icon-btn"
             onClick={onToggleDarkMode}
             title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -220,40 +220,40 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
       </div>
 
       <div className="dashboard-body">
-        {/* New Board CTA */}
-        <button
-          className="dashboard-new-board-btn"
-          onClick={() => setIsTemplateModalOpen(true)}
-        >
-          <Plus size={18} />
-          Create New Board
-        </button>
-
-        {/* Join by ID */}
-        <div className="dashboard-join-section">
-          <input
-            type="text"
-            className="dashboard-join-input"
-            placeholder="Paste a board URL or ID to join..."
-            value={joinBoardId}
-            onChange={e => setJoinBoardId(e.target.value)}
-            onKeyDown={handleJoinKeyDown}
-            aria-label="Board ID or URL"
-          />
+        {/* Hero: Create + Join side by side */}
+        <div className="dashboard-hero">
           <button
-            className="dashboard-join-btn"
-            onClick={handleJoinBoard}
-            disabled={!joinBoardId.trim()}
+            className="dashboard-new-board-btn"
+            onClick={() => setIsTemplateModalOpen(true)}
           >
-            Join Board
+            <Plus size={16} />
+            New Board
           </button>
+          <div className="dashboard-join-section">
+            <input
+              type="text"
+              className="dashboard-join-input"
+              placeholder="Paste a board URL or ID to join..."
+              value={joinBoardId}
+              onChange={e => setJoinBoardId(e.target.value)}
+              onKeyDown={handleJoinKeyDown}
+              aria-label="Board ID or URL"
+            />
+            <button
+              className="dashboard-join-btn"
+              onClick={handleJoinBoard}
+              disabled={!joinBoardId.trim()}
+            >
+              Join
+            </button>
+          </div>
         </div>
 
         {/* Pinned Boards */}
         {pinnedBoards.length > 0 && (
           <div className="dashboard-section">
             <div className="dashboard-section-header">
-              <h2><Star size={16} /> Pinned Boards</h2>
+              <h2><Star size={14} /> Pinned</h2>
             </div>
             <div className="dashboard-board-list">
               {pinnedBoards.map(board => (
@@ -286,7 +286,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       aria-label="Unpin board"
                       onClick={e => { e.stopPropagation(); togglePin(board.id); }}
                     >
-                      <Star size={16} />
+                      <Star size={14} />
                     </button>
                     <button
                       className="remove-btn"
@@ -294,7 +294,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       aria-label="Remove board from list"
                       onClick={e => { e.stopPropagation(); removeBoard(board.id); }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -306,7 +306,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         {/* Recent Boards */}
         <div className="dashboard-section">
           <div className="dashboard-section-header">
-            <h2><Clock size={16} /> Recent Boards</h2>
+            <h2><Clock size={14} /> Recent</h2>
             {recentBoards.length > 0 && (
               <button className="dashboard-clear-all" onClick={clearAll}>
                 Clear all
@@ -315,14 +315,13 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
           </div>
           {unpinnedBoards.length === 0 && pinnedBoards.length === 0 ? (
             <div className="dashboard-empty-state">
-              <Layout size={48} />
+              <Layout size={32} />
               <h3>No recent boards</h3>
               <p>Create a new board or join an existing one to get started.</p>
             </div>
           ) : unpinnedBoards.length === 0 ? (
             <div className="dashboard-empty-state">
-              <Clock size={32} />
-              <p>All your boards are pinned. Unpin some to see them here.</p>
+              <p>All boards are pinned.</p>
             </div>
           ) : (
             <div className="dashboard-board-list">
@@ -355,7 +354,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       aria-label="Pin board"
                       onClick={e => { e.stopPropagation(); togglePin(board.id); }}
                     >
-                      <Star size={16} />
+                      <Star size={14} />
                     </button>
                     <button
                       className="remove-btn"
@@ -363,7 +362,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                       aria-label="Remove board from list"
                       onClick={e => { e.stopPropagation(); removeBoard(board.id); }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>

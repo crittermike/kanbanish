@@ -53,9 +53,25 @@ h1 {
 
 .board-title-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: var(--space-xs);
     min-width: 300px;
+}
+
+/* Home button - compact icon button */
+.home-btn {
+    flex-shrink: 0;
+    min-width: unset;
+    padding: var(--space-xs);
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-muted);
+}
+
+.home-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+    border-color: var(--border-color);
 }
 
 .share-export-buttons {
