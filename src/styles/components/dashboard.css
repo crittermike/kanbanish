@@ -81,7 +81,7 @@
 .dashboard-hero {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   margin-bottom: var(--space-xl);
   padding: var(--space-lg);
   background: var(--card-bg);
@@ -97,7 +97,7 @@
 .dashboard-hero-divider {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   color: var(--text-muted);
   font-size: var(--font-size-xs);
 }
@@ -203,7 +203,7 @@
 .dashboard-board-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-xs);
   flex-shrink: 0;
   opacity: 0;
   transition: opacity var(--transition-speed) var(--transition-ease);
@@ -392,7 +392,7 @@
 }
 
 .dashboard-join-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: default;
 }
 
@@ -435,4 +435,22 @@
     width: 100%;
     text-align: center;
   }
+}
+
+/* Light mode enhancements — add depth via shadows */
+.light-mode .dashboard-header {
+  box-shadow: var(--shadow-sm);
+}
+
+.light-mode .dashboard-hero {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-color);
+}
+
+.light-mode .dashboard-board-card {
+  box-shadow: var(--shadow-sm);
+}
+
+.light-mode .dashboard-board-card:hover {
+  box-shadow: var(--shadow-md);
 }
