@@ -209,7 +209,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         </div>
         <div className="dashboard-header-right">
           <button
-            className="btn icon-btn"
+            className="dashboard-theme-toggle"
             onClick={onToggleDarkMode}
             title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -220,7 +220,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
       </div>
 
       <div className="dashboard-body">
-        {/* Hero: Create + Join side by side */}
+        {/* Hero: Create + Join in a card container */}
         <div className="dashboard-hero">
           <button
             className="dashboard-new-board-btn"
@@ -229,6 +229,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
             <Plus size={16} />
             New Board
           </button>
+          <div className="dashboard-hero-divider">or</div>
           <div className="dashboard-join-section">
             <input
               type="text"

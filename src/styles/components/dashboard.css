@@ -5,7 +5,7 @@
  * Shows recent and pinned boards when no board is active.
  */
 
-/* Dashboard layout */
+/* Dashboard layout — vertically center content when little content */
 .dashboard {
   min-height: 100vh;
   display: flex;
@@ -46,25 +46,73 @@
   gap: var(--space-sm);
 }
 
-/* Dashboard body */
+/* Theme toggle — subtle icon button */
+.dashboard-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.dashboard-theme-toggle:hover {
+  color: var(--text-color);
+  background: var(--hover-bg);
+}
+
+/* Dashboard body — center vertically when content is short */
 .dashboard-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: var(--space-xl) var(--space-xl);
-  max-width: 720px;
+  max-width: 640px;
   width: 100%;
   margin: 0 auto;
 }
 
-/* Hero section — Create + Join */
+/* Hero section — Create + Join inside a subtle container */
 .dashboard-hero {
   display: flex;
-  gap: var(--space-md);
+  flex-direction: column;
+  gap: var(--space-sm);
   margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-hero-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dashboard-hero-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.dashboard-hero-divider::before,
+.dashboard-hero-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
 }
 
 /* Section headers */
 .dashboard-section {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .dashboard-section-header {
@@ -78,11 +126,11 @@
 
 .dashboard-section-header h2 {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -202,19 +250,19 @@
   background: rgba(248, 81, 73, 0.1);
 }
 
-/* Empty state */
+/* Empty state — subtle filled container, no dashed border */
 .dashboard-empty-state {
   text-align: center;
   padding: var(--space-xl) var(--space-lg);
   color: var(--text-muted);
-  border: 1px dashed var(--border-color);
+  background: var(--hover-bg);
   border-radius: var(--radius-md);
 }
 
 .dashboard-empty-state svg {
   margin-bottom: var(--space-sm);
   color: var(--text-muted);
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .dashboard-empty-state h3 {
@@ -229,13 +277,12 @@
   font-size: var(--font-size-xs);
 }
 
-/* New board CTA */
+/* New board CTA button */
 .dashboard-new-board-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  flex: 1;
   padding: var(--space-sm) var(--space-lg);
   background: var(--accent);
   color: var(--text-on-accent);
@@ -297,10 +344,9 @@
   color: var(--danger);
 }
 
-/* Join board by ID */
+/* Join board section */
 .dashboard-join-section {
   display: flex;
-  flex: 1;
   gap: var(--space-xs);
 }
 
@@ -309,7 +355,7 @@
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background: var(--card-bg);
+  background: var(--bg-color);
   color: var(--text-color);
   font-family: inherit;
   font-size: var(--font-size-xs);
@@ -326,14 +372,14 @@
 }
 
 .dashboard-join-btn {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--hover-bg);
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
   color: var(--text-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-family: inherit;
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-speed) var(--transition-ease);
   white-space: nowrap;
@@ -342,10 +388,11 @@
 .dashboard-join-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--accent-transparent-light);
 }
 
 .dashboard-join-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: default;
 }
 
@@ -357,9 +404,14 @@
 
   .dashboard-body {
     padding: var(--space-md);
+    justify-content: flex-start;
   }
 
   .dashboard-hero {
+    padding: var(--space-md);
+  }
+
+  .dashboard-hero-row {
     flex-direction: column;
   }
 

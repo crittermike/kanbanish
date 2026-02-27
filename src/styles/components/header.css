@@ -58,20 +58,24 @@ h1 {
     min-width: 300px;
 }
 
-/* Home button - compact icon button */
+/* Home button - subtle icon-only button */
 .home-btn {
     flex-shrink: 0;
-    min-width: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: var(--space-xs);
     background: transparent;
-    border-color: transparent;
+    border: none;
     color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .home-btn:hover {
     color: var(--accent);
     background: var(--hover-bg);
-    border-color: var(--border-color);
 }
 
 .share-export-buttons {

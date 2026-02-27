@@ -19,7 +19,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
   <div className="board-title-container">
     {onGoHome && (
       <button
-        className="btn icon-btn home-btn"
+        className="home-btn"
         title="Back to Dashboard"
         aria-label="Back to Dashboard"
         onClick={onGoHome}
