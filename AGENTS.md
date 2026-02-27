@@ -29,14 +29,18 @@ Kanbanish is a real-time collaborative kanban board with retrospective workflow 
 ```
 src/
 ├── index.jsx                    # Entry point (renders App)
-├── App.jsx                      # Root: DndProvider + BoardProvider + Board
+├── App.jsx                      # Root: template URL handling, view gating (Dashboard vs Board)
 ├── setupTests.js                # Test setup (imports @testing-library/jest-dom)
+│
+├── data/
+│   └── boardTemplates.js       # BOARD_TEMPLATES array — all template definitions (columns, icons, tags)
 │
 ├── context/
 │   └── BoardContext.jsx         # State provider + Firebase listeners (~450 lines, orchestrates hooks)
 │
 ├── components/
 │   ├── Board.jsx                # Main board layout: header, settings panel, columns (600+ lines)
+│   ├── Dashboard.jsx            # Landing page: create board, pick template, recent boards
 │   ├── Column.jsx               # Single column with cards
 │   ├── Card.jsx                 # Individual card (content, votes, reactions, comments)
 │   ├── CardGroup.jsx            # Grouped cards container
@@ -71,11 +75,12 @@ src/
 │   ├── useWorkflow.js               # Retrospective workflow phase transitions
 │   ├── useCardOperations.jsx        # Card CRUD, voting, reactions, comments
 │   ├── useGroupOperations.jsx       # Group-level reactions and comments
-│   └── useVoteCounterVisibility.jsx # Intersection observer for vote counters
+│   ├── useVoteCounterVisibility.jsx # Intersection observer for vote counters
+│   └── useRecentBoards.js           # localStorage-backed recent boards list (add, remove, pin)
 │
 ├── utils/
-│   ├── firebase.js              # Firebase init (hardcoded config, project "big-orca")
-│   ├── boardUtils.js            # addColumn(), addCard() helpers
+│   ├── firebase.js              # Firebase init + re-exports (database, auth, signInAnonymously, get, ref)
+│   ├── boardUtils.js            # addColumn(), addCard(), createBoardFromTemplate() helpers
 │   ├── helpers.js               # Re-export barrel (imports from ids, emoji, urlSettings, linkify)
 │   ├── ids.js                   # generateId() — unique ID generation
 │   ├── emoji.js                 # COMMON_EMOJIS array, getEmojiKeywords()
@@ -166,7 +171,9 @@ All Firebase writes use `set()` and `remove()` — never `update()`. This is an 
 
 ### Component Architecture
 
-- `App.jsx` wraps everything in `DndProvider` (react-dnd) and `BoardProvider` (context)
+- `App.jsx` gates between Dashboard and Board views based on `?board=` URL param
+- `App.jsx` also handles `?template=<id>` URL param: auto-creates a board from a matching template and redirects to it (see URL Settings below)
+- `App.jsx` uses `window.history.pushState` for URL management (no React Router)
 - `Board.jsx` is the main layout: header bar, settings panel, and columns grid
 - Components consume context via `useBoardContext()` hook
 - Domain operations are extracted into hooks: 7 in `hooks/` called by BoardContext, plus `useCardOperations` and `useGroupOperations` used directly by components
@@ -176,10 +183,12 @@ All Firebase writes use `set()` and `remove()` — never `update()`. This is an 
 Board settings can be pre-configured via URL parameters:
 
 ```
-?voting=true&downvotes=false&multivote=true&votes=5&retro=true&sort=votes&theme=dark&template=basic-retro
+?voting=true&downvotes=false&multivote=true&votes=5&retro=true&sort=votes&theme=dark
 ```
 
 Parsed in `urlSettings.js` (re-exported via `helpers.js`) → `parseUrlSettings()`. Applied on board creation.
+
+Additionally, `?template=<id>` creates a board from a predefined template and redirects to it (bypasses the template selection dialog). Template IDs match the `id` field in `src/data/boardTemplates.js` (e.g., `?template=lean-coffee`, `?template=retro`, `?template=big-orca`). This is handled in `App.jsx`, not `urlSettings.js`.
 
 ## Firebase Data Model
 
@@ -365,13 +374,14 @@ npm run lint:check # Same as lint (alias)
 3. If it's a new UI element → create component in `src/components/`, add corresponding CSS in `src/styles/components/`
 4. If it needs workflow phase awareness → check `workflowUtils.js` for phase permissions
 5. Add tests as `ComponentName.test.jsx` (components) or `hookName.test.js` (hooks) alongside the source
-6. Run `npm run lint:fix && npm test` before committing
+6. Run `npm run lint:fix && npm test && npm run build` before committing
 
-### Adding a New Column Template
+### Adding a New Board Template
 
-Templates are defined in `NewBoardTemplateModal.jsx` and applied via URL params. To add a template:
-1. Add template definition in the modal component
-2. Add URL parameter handling in `urlSettings.js` → `parseUrlSettings()`
+Templates are defined in `src/data/boardTemplates.js` as a `BOARD_TEMPLATES` array (default export). Each template has `{ id, name, description, columns, icon, tags }`. To add a template:
+1. Add a new entry to the `BOARD_TEMPLATES` array in `src/data/boardTemplates.js`
+2. The template is automatically available in the template selection modal and via `?template=<id>` URL param
+3. The `id` field is the slug used in URLs (e.g., `lean-coffee` → `?template=lean-coffee`)
 
 ### Modifying the Firebase Schema
 
@@ -386,3 +396,9 @@ Firebase paths are referenced in the domain hooks (`usePresence`, `useVoting`, `
 - Mock Firebase modules (`src/utils/firebase.js`)
 - Use React Testing Library idioms: query by role/text, not implementation details
 - Run `npm test` to verify
+
+### Testing Gotchas
+
+- **`window.location` replacement**: When replacing `window.location` in tests (`delete window.location; window.location = {...}`), also mock `window.history.pushState` as a no-op — jsdom throws `DOMException` when `pushState` is called with a replaced location object.
+- **Firebase auth mocks**: When testing code that uses `auth.onAuthStateChanged`, the callback should fire asynchronously (`Promise.resolve().then(() => cb(...))`) to avoid `ReferenceError` from variables referenced before the return value is assigned.
+- **Always run `npm run build`** in addition to tests — Vite's production build (Rollup) catches import/export errors that Vitest (with its more lenient module resolution) does not. For example, importing a symbol not exported by a module will pass tests but fail the build.
