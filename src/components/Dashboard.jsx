@@ -223,8 +223,8 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         {/* Hero: Create + Join in a card container */}
         <div className="dashboard-hero">
           <div className="dashboard-tagline">
-            <h2>Real-time collaborative boards for teams</h2>
-            <p>Run retrospectives, brainstorm ideas, or organize work — no sign-up required. Just create a board and share the link.</p>
+            <h2>Collaborative boards for teams</h2>
+            <p>Run retros, brainstorm, or organize work — no sign-up needed.</p>
           </div>
           <div className="dashboard-hero-actions">
             <button
