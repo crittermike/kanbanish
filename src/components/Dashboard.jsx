@@ -231,7 +231,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
               className="dashboard-new-board-btn"
               onClick={() => setIsTemplateModalOpen(true)}
             >
-              <Plus size={16} />
+              <Plus size={20} />
               New Board
             </button>
             <div className="dashboard-hero-divider">or</div>
@@ -256,15 +256,15 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
           </div>
           <div className="dashboard-features">
             <div className="dashboard-feature">
-              <Zap size={14} />
+              <Zap size={16} />
               <span>Instant setup</span>
             </div>
             <div className="dashboard-feature">
-              <Users size={14} />
+              <Users size={16} />
               <span>Real-time collaboration</span>
             </div>
             <div className="dashboard-feature">
-              <Globe size={14} />
+              <Globe size={16} />
               <span>No account needed</span>
             </div>
           </div>
