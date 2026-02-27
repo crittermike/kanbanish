@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
-import BOARD_TEMPLATES from '../data/boardTemplates';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -21,7 +20,7 @@ import WorkflowControls from './WorkflowControls';
  * Main Board component responsible for rendering and managing the kanban board.
  * Orchestrates board initialization, URL settings, and layout of header, columns, and modals.
  */
-function Board() {
+function Board({ onGoHome }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -45,7 +44,6 @@ function Board() {
     retrospectiveMode,
     updateRetrospectiveMode,
     createNewBoard,
-    openExistingBoard,
     resetAllVotes,
     updateBoardTitle,
     user,
@@ -63,43 +61,14 @@ function Board() {
    * BOARD INITIALIZATION
    */
 
-  // Check for board ID in URL on load and handle board initialization
+  // Apply URL-derived theme preference on mount
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const boardIdFromUrl = urlParams.get('board');
-  // Parse URL settings and apply theme preference immediately (persisted in user prefs)
-  const parsed = parseUrlSettings(window.location.search);
-  if (parsed.uiPrefs && parsed.uiPrefs.darkMode !== undefined) {
-    updateDarkMode(parsed.uiPrefs.darkMode);
-  }
-
-  if (boardIdFromUrl) {
-      openExistingBoard(boardIdFromUrl);
-    } else if (user) {
-      // If a template is provided via URL, create board immediately
-      const templateId = urlParams.get('template');
-      if (templateId) {
-        const template = BOARD_TEMPLATES.find(t => t.id === templateId);
-        if (template) {
-          const newBoardId = createNewBoard(template.columns, `${template.name} Board`, parsed.boardSettings);
-          if (newBoardId) {
-            // Clean up URL and add board id
-            cleanUpUrlAfterCreation(newBoardId);
-            // Do not open template modal
-          } else {
-            setIsTemplateModalOpen(true);
-          }
-        } else {
-          // Unknown template id, show template selector
-          setIsTemplateModalOpen(true);
-        }
-      } else {
-        // Show template selection instead of immediately creating a board
-        setIsTemplateModalOpen(true);
-      }
+    const parsed = parseUrlSettings(window.location.search);
+    if (parsed.uiPrefs && parsed.uiPrefs.darkMode !== undefined) {
+      updateDarkMode(parsed.uiPrefs.darkMode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]); // Depend on user so this effect reruns when user authentication completes
+  }, []);
 
   // Update document title when board title changes
   useEffect(() => {
@@ -134,8 +103,8 @@ function Board() {
     const boardTitle = templateName ? `${templateName} Board` : DEFAULT_BOARD_TITLE;
 
     // Pass URL-derived board settings so they persist on new board
-  const parsed = parseUrlSettings(window.location.search);
-  // sortByVotes (from URL sort=) lives in boardSettings now and will be persisted on creation
+    const parsed = parseUrlSettings(window.location.search);
+    // sortByVotes (from URL sort=) lives in boardSettings now and will be persisted on creation
   const newBoardId = createNewBoard(templateColumns, boardTitle, parsed.boardSettings);
 
     // Only update URL and show notification if we got a valid board ID
@@ -217,6 +186,7 @@ function Board() {
             handleBoardTitleBlur={handleBoardTitleBlur}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
+            onGoHome={onGoHome}
           />
           <SettingsPanel
             handleCreateNewBoard={handleCreateNewBoard}
@@ -285,13 +255,7 @@ function Board() {
       <NewBoardTemplateModal
         isOpen={isTemplateModalOpen}
         onClose={() => {
-          // If the user already has a board open, just close the modal
-          // Otherwise (app just loaded without a board), create a default board
-          if (boardId) {
-            setIsTemplateModalOpen(false);
-          } else if (user) {
-            handleTemplateSelected(['To Do', 'In Progress', 'Done'], 'Default');
-          }
+          setIsTemplateModalOpen(false);
         }}
         onSelectTemplate={handleTemplateSelected}
       />

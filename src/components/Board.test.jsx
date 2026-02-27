@@ -82,7 +82,6 @@ describe('Board Component', () => {
     setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
     createNewBoard: vi.fn().mockReturnValue('new-board-123'),
-    openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),
     getUserVoteCount: vi.fn().mockReturnValue(0),
     getTotalVotes: vi.fn().mockReturnValue(0),
@@ -448,43 +447,6 @@ describe('Board Component', () => {
     expect(document.title).toBe('Kanbanish | Real-time anonymous kanban board');
   });
 
-  test('initializes with board ID from URL', () => {
-    // Mock URL with board ID
-    mockURLSearchParams.mockImplementation(() => ({
-      get: vi.fn().mockReturnValue('board-from-url')
-    }));
-
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    expect(mockContextValue.openExistingBoard).toHaveBeenCalledWith('board-from-url');
-    expect(mockContextValue.createNewBoard).not.toHaveBeenCalled();
-
-    // Template modal should not open when URL has a board ID
-    expect(screen.queryByTestId('template-modal')).not.toBeInTheDocument();
-  });
-
-  test('automatically opens template modal when no board ID is in URL', () => {
-    // Mock URL with no board ID
-    mockURLSearchParams.mockImplementation(() => ({
-      get: _param => null
-    }));
-
-    render(
-      <DndProvider backend={HTML5Backend}>
-        <Board />
-      </DndProvider>
-    );
-
-    // Template modal should automatically open
-    expect(screen.getByTestId('template-modal')).toBeInTheDocument();
-
-    // Should not call openExistingBoard
-    expect(mockContextValue.openExistingBoard).not.toHaveBeenCalled();
-  });
 
   test('handles template selection with failed board creation', () => {
     // Mock URL with a board ID to prevent auto-opening the template modal
