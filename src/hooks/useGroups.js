@@ -111,9 +111,6 @@ export const useGroups = ({ boardId, user, columns }) => {
 
     // Execute all operations atomically
     return Promise.all(promises)
-      .then(() => {
-        console.log(`Card ${cardId} moved from ${sourceColumnId} to ${targetColumnId}${targetGroupId ? ` (group ${targetGroupId})` : ''}`);
-      })
       .catch(error => {
         console.error('Error moving card:', error);
         throw error; // Re-throw so caller can handle it
@@ -153,9 +150,6 @@ export const useGroups = ({ boardId, user, columns }) => {
       set(groupRef, groupData),
       ...cardUpdatePromises
     ])
-      .then(() => {
-        console.log(`Group ${groupId} created with ${cardIds.length} cards`);
-      })
       .catch(error => {
         console.error('Error creating group:', error);
       });
@@ -187,9 +181,6 @@ export const useGroups = ({ boardId, user, columns }) => {
       ...updatePromises,
       remove(groupRef)
     ])
-      .then(() => {
-        console.log(`Group ${groupId} ungrouped`);
-      })
       .catch(error => {
         console.error('Error ungrouping cards:', error);
       });
@@ -223,9 +214,6 @@ export const useGroups = ({ boardId, user, columns }) => {
     });
 
     return Promise.all(promises)
-      .then(() => {
-        console.log('All grouping removed from board');
-      })
       .catch(error => {
         console.error('Error removing all grouping:', error);
         throw error;
@@ -240,9 +228,6 @@ export const useGroups = ({ boardId, user, columns }) => {
 
     const nameRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/name`);
     set(nameRef, newName)
-      .then(() => {
-        console.log('Group name updated');
-      })
       .catch(error => {
         console.error('Error updating group name:', error);
       });

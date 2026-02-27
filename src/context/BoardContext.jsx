@@ -64,7 +64,6 @@ export const BoardProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
-        console.log('User authenticated:', user.uid);
         setUser(user);
 
         // Load user preferences including theme
@@ -80,7 +79,6 @@ export const BoardProvider = ({ children }) => {
           console.error('Error loading user preferences:', error);
         });
       } else {
-        console.log('No user, signing in anonymously');
         signInAnonymously(auth)
           .catch(error => {
             console.error('Error signing in:', error);
@@ -259,7 +257,6 @@ export const BoardProvider = ({ children }) => {
 
     set(newBoardRef, initialData)
       .then(() => {
-        console.log('New board created with ID:', newBoardId);
         setBoardId(newBoardId);
         setBoardTitle(DEFAULT_BOARD_TITLE);
       })
@@ -272,7 +269,6 @@ export const BoardProvider = ({ children }) => {
 
   // Open an existing board
   const openExistingBoard = boardIdToOpen => {
-    console.log('Opening board with ID:', boardIdToOpen);
     setBoardId(boardIdToOpen);
   };
 
@@ -284,9 +280,6 @@ export const BoardProvider = ({ children }) => {
     if (boardId && user) {
       const titleRef = ref(database, `boards/${boardId}/title`);
       set(titleRef, newTitle)
-        .then(() => {
-          console.log('Board title updated');
-        })
         .catch(error => {
           console.error('Error updating board title:', error);
         });
@@ -449,7 +442,6 @@ export const BoardProvider = ({ children }) => {
       const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
       set(userPrefsRef, { darkMode: enabled })
         .then(() => {
-          console.log('Dark mode preference updated:', enabled);
           setDarkMode(enabled);
         })
         .catch(error => {
