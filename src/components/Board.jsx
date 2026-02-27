@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
+import BOARD_TEMPLATES from '../data/boardTemplates';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -9,7 +10,7 @@ import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
-import NewBoardTemplateModal, { BOARD_TEMPLATES } from './modals/NewBoardTemplateModal';
+import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
