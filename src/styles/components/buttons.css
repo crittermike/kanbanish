@@ -121,15 +121,65 @@
     opacity: 0.9;
 }
 
-/* Card edit action buttons container */
-.card-edit-actions {
+/* Card/comment edit action buttons — refined ghost + accent style */
+.card-edit-actions,
+.comment-edit-actions {
     display: flex;
-    justify-content: space-between;
-    gap: var(--space-sm);
+    justify-content: flex-end;
+    gap: var(--space-xs);
 }
 
-.card-edit-actions .btn {
-    flex: 1;
+.card-edit-actions .btn,
+.comment-edit-actions .btn {
+    flex: none;
+    min-width: auto;
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.card-edit-actions .danger-btn,
+.comment-edit-actions .danger-btn {
+    background: transparent;
+    color: var(--danger);
+    border-color: transparent;
+    margin-right: auto;
+}
+
+.card-edit-actions .danger-btn:hover,
+.comment-edit-actions .danger-btn:hover {
+    background: rgba(248, 81, 73, 0.12);
+    border-color: rgba(248, 81, 73, 0.4);
+    opacity: 1;
+}
+
+.card-edit-actions .secondary-btn,
+.comment-edit-actions .secondary-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: transparent;
+}
+
+.card-edit-actions .secondary-btn:hover,
+.comment-edit-actions .secondary-btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.card-edit-actions .success-btn,
+.comment-edit-actions .success-btn {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.card-edit-actions .success-btn:hover,
+.comment-edit-actions .success-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    opacity: 1;
 }
 
 /* Inline card action buttons container */
@@ -245,14 +295,12 @@
         font-size: var(--font-size-sm);
     }
 
-    /* Ensure card edit action buttons are properly sized */
-    .card-edit-actions {
-        gap: var(--space-md);
-    }
-
-    .card-edit-actions .btn {
-        min-height: 44px;
+    /* Ensure card/comment edit action buttons are properly sized on mobile */
+    .card-edit-actions .btn,
+    .comment-edit-actions .btn {
+        min-height: 40px;
         padding: var(--space-xs) var(--space-sm);
+        font-size: var(--font-size-sm);
     }
 }
 

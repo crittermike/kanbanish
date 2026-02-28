@@ -503,9 +503,7 @@
 }
 
 .comment-edit-actions {
-    display: flex;
-    gap: var(--space-xs);
-    justify-content: space-between;
+    margin-top: var(--space-xxs);
 }
 
 .btn-sm {
@@ -574,9 +572,7 @@
 }
 
 .card-edit-actions {
-    display: flex;
-    gap: var(--space-sm);
-    justify-content: flex-end;
+    margin-top: var(--space-xs);
 }
 
 /* Mobile responsive adjustments for cards */
@@ -587,29 +583,20 @@
         padding: var(--space-md);
     }
 
-    /* Better spacing for action buttons on mobile */
-    .card-edit-actions {
-        flex-direction: column;
-        gap: var(--space-md);
-    }
-
+    /* Card edit actions stay horizontal on mobile, just increase touch targets */
     .card-edit-actions .btn {
-        padding: var(--space-md);
-        min-height: 50px;
-        font-size: var(--font-size-base);
+        min-height: 40px;
     }
 
-    /* Make Save button more prominent */
-    .card-edit-actions .primary-btn {
+    /* Reorder card edit buttons on mobile: Save first, Cancel second, Delete last */
+    .card-edit-actions .success-btn {
         order: -3;
     }
 
-    /* Put Cancel second */
     .card-edit-actions .secondary-btn {
         order: -2;
     }
 
-    /* Put Delete last */
     .card-edit-actions .danger-btn {
         order: -1;
     }
@@ -625,21 +612,13 @@
         min-height: 50px;
     }
 
-    /* Improve comment editing on mobile */
-    .comment-edit-actions {
-        flex-direction: column;
-        gap: var(--space-md);
-    }
-
+    /* Comment edit actions stay horizontal on mobile */
     .comment-edit-actions .btn-sm {
-        flex: 1;
-        padding: var(--space-sm);
-        font-size: var(--font-size-sm);
-        min-height: 40px;
+        min-height: 36px;
     }
 
-    /* Order the comment edit buttons properly on mobile */
-    .comment-edit-actions .primary-btn {
+    /* Reorder comment edit buttons on mobile */
+    .comment-edit-actions .success-btn {
         order: -3;
     }
 
