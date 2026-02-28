@@ -10,7 +10,7 @@ import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse }) {
+function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds }) {
   const { 
     boardId, 
     moveCard, 
@@ -430,6 +430,9 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
                 columnId={columnId}
                 columnData={columnData}
                 sortByVotes={sortByVotes}
+                dimmed={isFiltering && matchingGroupIds && !matchingGroupIds.has(item.data.id)}
+                isFiltering={isFiltering}
+                matchingCardIds={matchingCardIds}
               />
             );
           } else {
@@ -440,6 +443,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
                 cardData={item.data}
                 columnId={columnId}
                 onCardDropOnCard={handleCardDropOnCard}
+                dimmed={isFiltering && matchingCardIds && !matchingCardIds.has(item.data.id)}
               />
             );
           }

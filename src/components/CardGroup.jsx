@@ -17,8 +17,11 @@ function CardGroup({
   groupId,
   groupData,
   columnId,
-  columnData, // Add columnData to access all cards
-  sortByVotes
+  columnData,
+  sortByVotes,
+  dimmed = false,
+  isFiltering = false,
+  matchingCardIds = null
 }) {
   const { showNotification } = useNotification();
   const {
@@ -165,7 +168,7 @@ function CardGroup({
   return (
     <div
       ref={groupRef}
-      className={`card-group ${isOver ? 'drag-over' : ''}`}
+      className={`card-group ${isOver ? 'drag-over' : ''}${dimmed ? ' card-group-filtered-out' : ''}`}
     >
       <div
         className="card-group-header"
@@ -372,6 +375,7 @@ function CardGroup({
                 cardData={card}
                 columnId={columnId}
                 groupId={groupId}
+                dimmed={isFiltering && matchingCardIds && !matchingCardIds.has(card.id)}
               />
             ))
           )}

@@ -1,0 +1,299 @@
+/**
+ * Kanban App - Search & Filter Bar Styles
+ *
+ * Styles for the card search and filtering feature.
+ */
+
+/* Search bar container — sits below the header */
+.search-filter-bar {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    animation: search-slide-in 0.2s ease;
+}
+
+@keyframes search-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Top row: search input + actions */
+.search-input-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Search input wrapper with icon */
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: var(--space-sm);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm) var(--space-xs) calc(var(--space-sm) + 24px);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-speed) var(--transition-ease),
+                box-shadow var(--transition-speed) var(--transition-ease);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Clear button inside the search input */
+.search-clear-input {
+    position: absolute;
+    right: var(--space-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.search-clear-input:hover {
+    color: var(--text-color);
+}
+
+/* Actions section (result count + close) */
+.search-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.search-result-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.search-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xxs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.search-close-btn:hover {
+    color: var(--text-color);
+    background: var(--hover-bg);
+}
+
+/* Bottom row: filter controls */
+.search-filters-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.filter-icon {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+/* Individual filter group (label + input/select) */
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+}
+
+.filter-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.filter-number-input {
+    width: 60px;
+    padding: var(--space-xxs) var(--space-xs);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition-speed) var(--transition-ease);
+}
+
+.filter-number-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.filter-select {
+    padding: var(--space-xxs) var(--space-xs);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition-speed) var(--transition-ease);
+    max-width: 160px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+/* Pill-style toggle button for boolean filters */
+.filter-pill {
+    padding: var(--space-xxs) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--bg-color);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.filter-pill:hover {
+    border-color: var(--accent);
+    color: var(--text-color);
+}
+
+.filter-pill.active {
+    background: var(--accent);
+    color: var(--text-on-accent);
+    border-color: var(--accent);
+}
+
+.filter-pill.active:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+/* Clear all filters button */
+.filter-clear-btn {
+    padding: var(--space-xxs) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: transparent;
+    color: var(--accent);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.filter-clear-btn:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* Search trigger button in the header */
+.search-trigger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xxs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-color);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed) var(--transition-ease);
+    white-space: nowrap;
+}
+
+.search-trigger-btn:hover {
+    border-color: var(--accent);
+    color: var(--text-color);
+    background: var(--hover-bg);
+}
+
+.search-trigger-btn .search-shortcut {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-left: var(--space-xxs);
+}
+
+/* Dimming for cards/groups that don't match the filter */
+.card.card-filtered-out {
+    opacity: 0.2;
+    pointer-events: none;
+    transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.card-group.card-group-filtered-out {
+    opacity: 0.2;
+    pointer-events: none;
+    transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+/* Responsive: stack filters vertically on narrow screens */
+@media (max-width: 768px) {
+    .search-filter-bar {
+        padding: var(--space-sm);
+    }
+
+    .search-filters-row {
+        gap: var(--space-xs);
+    }
+
+    .filter-select {
+        max-width: 130px;
+    }
+
+    .search-trigger-btn .search-shortcut {
+        display: none;
+    }
+}
