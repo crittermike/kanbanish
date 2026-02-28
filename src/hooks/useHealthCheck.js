@@ -1,4 +1,4 @@
-import { ref, set } from 'firebase/database';
+import { ref, remove, set } from 'firebase/database';
 import { useCallback } from 'react';
 import { database } from '../utils/firebase';
 
@@ -64,5 +64,18 @@ export const useHealthCheck = ({ boardId, user, healthCheckVotes, setUserHealthC
     });
   }, [healthCheckVotes]);
 
-  return { HEALTH_CHECK_QUESTIONS, submitHealthCheckVote, getHealthCheckStats };
+  const resetHealthCheck = useCallback(() => {
+    if (!boardId || !user) {
+      return;
+    }
+
+    const healthCheckRef = ref(database, `boards/${boardId}/healthCheck`);
+    remove(healthCheckRef).then(() => {
+      setUserHealthCheckVotes({});
+    }).catch(error => {
+      console.error('Error resetting health check:', error);
+    });
+  }, [boardId, user, setUserHealthCheckVotes]);
+
+  return { HEALTH_CHECK_QUESTIONS, submitHealthCheckVote, getHealthCheckStats, resetHealthCheck };
 };
