@@ -532,17 +532,13 @@
     resize: vertical;
     background: var(--input-bg);
     color: var(--text-color);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
 }
 
 .inline-card-textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-transparent);
-}
-
-.inline-card-actions {
-    margin-top: var(--space-xxs);
 }
 
 /* Card Edit Mode */

@@ -185,7 +185,7 @@
 /* Inline card action buttons container — matches edit action button style */
 .inline-card-actions {
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: var(--space-xs);
 }
 
