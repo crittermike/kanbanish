@@ -244,7 +244,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardId, user, pollVotes, setUserPollVote
   });
 
-  const { submitHealthCheckVote, getHealthCheckStats } = useHealthCheck({
+  const { submitHealthCheckVote, getHealthCheckStats, resetHealthCheck } = useHealthCheck({
     boardId, user, healthCheckVotes, setUserHealthCheckVotes
   });
 
@@ -439,7 +439,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase,
+    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
       HEALTH_CHECK_QUESTIONS,
       // Card grouping functions
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
@@ -484,7 +484,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
     pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase,
+    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,

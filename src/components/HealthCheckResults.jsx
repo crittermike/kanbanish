@@ -1,9 +1,10 @@
-import { Users } from 'react-feather';
+import { CheckCircle, RotateCcw, Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
 import { getScoreLabel, getScoreRatingLevel } from '../utils/ratingUtils';
 
 const HealthCheckResults = () => {
-  const { getHealthCheckStats } = useBoardContext();
+  const { getHealthCheckStats, healthCheckVotes, resetHealthCheck } = useBoardContext();
   const stats = getHealthCheckStats();
 
   const questionsWithVotes = stats.filter(q => q.totalVotes > 0);
@@ -11,9 +12,26 @@ const HealthCheckResults = () => {
     ? Math.max(...questionsWithVotes.map(q => q.totalVotes))
     : 0;
 
+  // Calculate how many users have completed ALL questions
+  const userQuestionCounts = {};
+  Object.values(healthCheckVotes).forEach(questionVotes => {
+    Object.keys(questionVotes).forEach(uid => {
+      userQuestionCounts[uid] = (userQuestionCounts[uid] || 0) + 1;
+    });
+  });
+  const completedCount = Object.values(userQuestionCounts).filter(
+    count => count === HEALTH_CHECK_QUESTIONS.length
+  ).length;
+
   const overallAverage = questionsWithVotes.length > 0
     ? questionsWithVotes.reduce((sum, q) => sum + q.average, 0) / questionsWithVotes.length
     : 0;
+
+  const handleReset = () => {
+    if (window.confirm('Reset the health check? This will clear all votes and cannot be undone.')) {
+      resetHealthCheck();
+    }
+  };
 
   return (
     <div className="health-check-results">
@@ -22,6 +40,12 @@ const HealthCheckResults = () => {
         <div className="participation-stats">
           <Users size={16} />
           <span>{totalParticipants} participant{totalParticipants !== 1 ? 's' : ''}</span>
+          {totalParticipants > 0 && (
+            <span className="completion-count">
+              <CheckCircle size={14} />
+              {completedCount} of {totalParticipants} complete
+            </span>
+          )}
         </div>
       </div>
 
@@ -103,6 +127,14 @@ const HealthCheckResults = () => {
               </div>
             ))}
           </div>
+
+          <button
+            className="health-check-reset-btn"
+            onClick={handleReset}
+          >
+            <RotateCcw size={12} />
+            Reset health check
+          </button>
         </>
       ) : (
         <div className="no-votes">

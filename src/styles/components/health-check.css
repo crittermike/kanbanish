@@ -160,6 +160,41 @@
 
 .health-check-view-results-btn {
     margin-top: 1rem;
+    width: 100%;
+}
+
+/* Completion count badge */
+.completion-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Reset health check button — matches reset votes pattern */
+.health-check-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 11px;
+    padding: 2px 0;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: opacity 0.15s ease;
+    opacity: 0.6;
+}
+
+.health-check-reset-btn:hover {
+    opacity: 1;
+    text-decoration: underline;
 }
 
 .health-check-results-nav {

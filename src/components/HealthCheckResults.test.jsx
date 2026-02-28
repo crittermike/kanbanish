@@ -12,7 +12,9 @@ describe('HealthCheckResults Component', () => {
   const mockGetHealthCheckStats = vi.fn();
 
   const defaultMockContext = {
-    getHealthCheckStats: mockGetHealthCheckStats
+    getHealthCheckStats: mockGetHealthCheckStats,
+    healthCheckVotes: {},
+    resetHealthCheck: vi.fn()
   };
 
   beforeEach(() => {
