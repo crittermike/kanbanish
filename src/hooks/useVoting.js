@@ -2,6 +2,7 @@ import { ref, set } from 'firebase/database';
 import { useCallback } from 'react';
 import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
+import { withRetry } from '../utils/firebaseRetry';
 
 /**
  * Hook for voting operations across cards and groups.
@@ -104,7 +105,7 @@ export const useVoting = ({
           // Reset votes to 0 and clear all voters
           const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
           const updatedCard = { ...card, votes: 0, voters: {} };
-          set(cardRef, updatedCard)
+          withRetry(() => set(cardRef, updatedCard), { operationName: 'Reset card votes' })
             .catch(error => {
               console.error(`Error resetting votes for card ${cardId}:`, error);
             });
@@ -117,7 +118,7 @@ export const useVoting = ({
           // Reset group votes to 0 and clear all voters
           const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
           const updatedGroup = { ...group, votes: 0, voters: {} };
-          set(groupRef, updatedGroup)
+          withRetry(() => set(groupRef, updatedGroup), { operationName: 'Reset group votes' })
             .catch(error => {
               console.error(`Error resetting votes for group ${groupId}:`, error);
             });
@@ -177,10 +178,10 @@ export const useVoting = ({
     const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
     const groupVotersRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/voters`);
 
-    Promise.all([
+    withRetry(() => Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]).then(() => {
+    ]), { operationName: 'Upvote group' }).then(() => {
       showNotification('Upvoted group');
     }).catch(error => {
       console.error('Error updating group votes:', error);
@@ -216,10 +217,10 @@ export const useVoting = ({
     const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
     const groupVotersRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/voters`);
 
-    Promise.all([
+    withRetry(() => Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]).then(() => {
+    ]), { operationName: 'Downvote group' }).then(() => {
       showNotification('Downvoted group');
     }).catch(error => {
       console.error('Error updating group votes:', error);

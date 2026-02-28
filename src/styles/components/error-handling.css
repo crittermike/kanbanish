@@ -1,0 +1,131 @@
+/**
+ * Error Boundary & Offline Indicator Styles
+ */
+
+/* ---- Error Boundary Fallback ---- */
+.error-boundary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--space-xl);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.error-boundary-content {
+    text-align: center;
+    max-width: 480px;
+}
+
+.error-boundary-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+}
+
+.error-boundary-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0 0 var(--space-sm);
+    color: var(--text-color);
+}
+
+.error-boundary-message {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--space-lg);
+    line-height: 1.5;
+}
+
+.error-boundary-details {
+    text-align: left;
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+}
+
+.error-boundary-details summary {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.error-boundary-details pre {
+    margin: 0;
+    padding: var(--space-xs);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--danger);
+    font-family: monospace;
+    font-size: var(--font-size-xs);
+}
+
+.error-boundary-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+}
+
+.error-boundary-btn {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) var(--transition-ease),
+                border-color var(--transition-speed) var(--transition-ease);
+    border: 1px solid transparent;
+}
+
+.error-boundary-btn-primary {
+    background-color: var(--accent);
+    color: var(--text-on-accent);
+}
+
+.error-boundary-btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.error-boundary-btn-secondary {
+    background-color: transparent;
+    color: var(--text-muted);
+    border-color: var(--border-color);
+}
+
+.error-boundary-btn-secondary:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-color);
+}
+
+/* ---- Offline Indicator ---- */
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-xxs) var(--space-sm);
+    background-color: var(--warning-color);
+    color: #000;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}

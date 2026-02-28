@@ -3,6 +3,8 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Board from './components/Board';
 import Dashboard from './components/Dashboard';
+import ErrorBoundary from './components/ErrorBoundary';
+import OfflineIndicator from './components/OfflineIndicator';
 import { BoardProvider, useBoardContext } from './context/BoardContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import BOARD_TEMPLATES from './data/boardTemplates';
@@ -217,9 +219,12 @@ function DashboardGate({ onOpenBoard }) {
 
 function App() {
   return (
-    <NotificationProvider>
-      <AppContent />
-    </NotificationProvider>
+    <ErrorBoundary>
+      <NotificationProvider>
+        <OfflineIndicator />
+        <AppContent />
+      </NotificationProvider>
+    </ErrorBoundary>
   );
 }
 
