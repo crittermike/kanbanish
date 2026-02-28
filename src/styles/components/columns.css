@@ -123,13 +123,15 @@ main {
 .column-header {
     padding: var(--space-md);
     border-bottom: 1px solid var(--border-color);
+    background-color: var(--hover-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
 }
-
 .column-title {
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
     font-size: var(--font-size-base);
     padding: var(--space-xxs) var(--space-xs);
@@ -187,12 +189,13 @@ main {
 }
 
 .column-content:empty::before {
-    content: "Add a card to get started";
+    content: "No cards yet";
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: var(--text-muted);
+    opacity: 0.5;
     font-style: italic;
     text-align: center;
     display: flex;
@@ -200,7 +203,6 @@ main {
     align-items: center;
     width: 80%;
 }
-
 .column-content.drag-over {
     background-color: var(--drag-over);
 }

@@ -10,6 +10,9 @@ header {
     padding: var(--space-md);
     background: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 10;
 }
 
 .header-content {
@@ -125,16 +128,12 @@ h1 {
     display: inline-block;
 }
 
-/* Settings toggle button (icon-only) */
+/* Settings toggle button */
 .settings-toggle-btn {
-    background-color: var(--accent);
-    color: white;
-    border: 1px solid transparent;
     transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .settings-toggle-btn:hover {
-    background-color: var(--accent-dark);
     box-shadow: var(--shadow-sm);
 }
 
@@ -272,12 +271,12 @@ h1 {
 
 /* When dropdown is open, add a subtle indicator */
 .sort-dropdown-container:has(.sort-dropdown-menu) .settings-toggle-btn {
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    background-color: var(--hover-bg);
 }
 
 /* Fallback for browsers that don't support :has() */
 .settings-toggle-btn[aria-expanded="true"] {
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    background-color: var(--hover-bg);
 }
 
 /* Mobile responsive adjustments for header elements */
@@ -330,11 +329,11 @@ h1 {
 .user-counter {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 6px 6px 12px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    gap: 4px;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -343,8 +342,7 @@ h1 {
 }
 
 .user-counter:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--border-hover);
+    background: var(--hover-bg);
 }
 
 .user-count {

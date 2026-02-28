@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Heart } from 'react-feather';
+import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Heart, Link, FileText } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import Timer from './Timer';
@@ -28,6 +28,8 @@ import Timer from './Timer';
  */
 const SettingsPanel = ({
   handleStartHealthCheck,
+  copyShareUrl,
+  handleExportBoard,
   sortByVotes,
   setSortByVotes,
   votingEnabled,
@@ -55,14 +57,6 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
-      <button
-        id="start-health-check"
-        className="btn btn-with-icon"
-        onClick={handleStartHealthCheck}
-      >
-        <Heart size={16} />
-        Health Check
-      </button>
       <Timer />
       <div className="sort-dropdown-container" ref={dropdownRef}>
         <button
@@ -79,6 +73,39 @@ const SettingsPanel = ({
 
         {sortDropdownOpen && (
           <div className="sort-dropdown-menu">
+            <div className="settings-section">
+              <button
+                className="sort-option"
+                onClick={() => {
+                  copyShareUrl();
+                  setSortDropdownOpen(false);
+                }}
+              >
+                <Link size={14} />
+                Share Board
+              </button>
+              <button
+                className="sort-option"
+                onClick={() => {
+                  handleExportBoard();
+                  setSortDropdownOpen(false);
+                }}
+              >
+                <FileText size={14} />
+                Export Board
+              </button>
+              <button
+                className="sort-option"
+                onClick={() => {
+                  handleStartHealthCheck();
+                  setSortDropdownOpen(false);
+                }}
+              >
+                <Heart size={14} />
+                Start Health Check
+              </button>
+            </div>
+            <div className="settings-divider"></div>
             <div className="settings-section">
               <h4 className="settings-section-title">Sort Cards</h4>
               <button

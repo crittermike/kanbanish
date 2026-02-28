@@ -148,8 +148,6 @@ function Board({ onGoHome }) {
             boardTitle={boardTitle}
             handleBoardTitleChange={handleBoardTitleChange}
             handleBoardTitleBlur={handleBoardTitleBlur}
-            copyShareUrl={copyShareUrl}
-            handleExportBoard={handleExportBoard}
             onGoHome={onGoHome}
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
@@ -159,6 +157,8 @@ function Board({ onGoHome }) {
               startHealthCheckPhase();
               showNotification('Health check started');
             }}
+            copyShareUrl={copyShareUrl}
+            handleExportBoard={handleExportBoard}
             sortByVotes={sortByVotes}
             setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}

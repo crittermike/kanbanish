@@ -425,13 +425,12 @@
     height: 120px;
     margin: 20px 0;
     padding: var(--space-sm);
-    border: 2px dashed var(--border-color);
+    border: 1px dashed rgba(139, 148, 158, 0.2);
     border-radius: var(--radius-md);
     color: var(--text-muted);
     font-style: italic;
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: transparent;
 }
-
 .empty-column-placeholder span:first-child {
     font-weight: 500;
     margin-bottom: var(--space-xs);

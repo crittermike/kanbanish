@@ -140,9 +140,9 @@ describe('Board Component', () => {
     const boardTitleInput = screen.getByDisplayValue('Test Board');
     expect(boardTitleInput).toBeInTheDocument();
 
-    // Check if Share button exists
-    const shareButton = screen.getByTitle('Copy Share URL');
-    expect(shareButton).toBeInTheDocument();
+    // Check if settings button exists
+    const settingsButton = screen.getByTitle('Board settings and preferences');
+    expect(settingsButton).toBeInTheDocument();
 
     // Check if columns are rendered
     expect(screen.getByText('To Do')).toBeInTheDocument();
@@ -202,7 +202,11 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    const copyButton = screen.getByTitle('Copy Share URL');
+    // Open settings dropdown first
+    const settingsButton = screen.getByTitle('Board settings and preferences');
+    fireEvent.click(settingsButton);
+
+    const copyButton = screen.getByText('Share Board');
     fireEvent.click(copyButton);
 
     const expectedUrl = 'https://example.com/?board=test-board-123';
