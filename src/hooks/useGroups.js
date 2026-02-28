@@ -1,6 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
 import { useCallback } from 'react';
 import { database } from '../utils/firebase';
+import { withRetry } from '../utils/firebaseRetry';
 import { generateId } from '../utils/ids';
 
 /**
@@ -110,7 +111,7 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
     }
 
     // Execute all operations atomically
-    return Promise.all(promises)
+    return withRetry(() => Promise.all(promises), { operationName: 'Move card' })
       .catch(error => {
         console.error('Error moving card:', error);
         throw error; // Re-throw so caller can handle it
@@ -145,11 +146,10 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
       return set(cardRef, groupId);
     });
 
-    // Create the group and update cards atomically
-    Promise.all([
+    withRetry(() => Promise.all([
       set(groupRef, groupData),
       ...cardUpdatePromises
-    ])
+    ]), { operationName: 'Create card group' })
       .then(() => {
         // Record undo after successful creation
         if (recordAction) {
@@ -199,10 +199,10 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
     // Remove the group
     const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
 
-    Promise.all([
+    withRetry(() => Promise.all([
       ...updatePromises,
       remove(groupRef)
-    ])
+    ]), { operationName: 'Ungroup cards' })
       .then(() => {
         // Record undo after successful ungroup
         if (recordAction) {
@@ -257,7 +257,7 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
       }
     });
 
-    return Promise.all(promises)
+    return withRetry(() => Promise.all(promises), { operationName: 'Remove all grouping' })
       .catch(error => {
         console.error('Error removing all grouping:', error);
         throw error;
@@ -271,7 +271,7 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
     }
 
     const nameRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/name`);
-    set(nameRef, newName)
+    withRetry(() => set(nameRef, newName), { operationName: 'Update group name' })
       .catch(error => {
         console.error('Error updating group name:', error);
       });
@@ -284,7 +284,7 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
     }
 
     const expandedRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/expanded`);
-    set(expandedRef, expanded)
+    withRetry(() => set(expandedRef, expanded), { operationName: 'Toggle group expanded' })
       .catch(error => {
         console.error('Error updating group expanded state:', error);
       });

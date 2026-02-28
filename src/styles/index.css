@@ -23,6 +23,7 @@
 @import 'components/timer.css';
 @import 'components/dashboard.css';
 @import 'components/search.css';
+@import 'components/error-handling.css';
 
 /* Utility classes and notifications */
 .notification {

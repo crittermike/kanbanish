@@ -74,7 +74,8 @@ vi.mock('./utils/firebase', () => ({
 }));
 vi.mock('firebase/database', () => ({
   ref: vi.fn(() => ({})),
-  set: vi.fn(() => Promise.resolve())
+  set: vi.fn(() => Promise.resolve()),
+  onValue: vi.fn(() => vi.fn())
 }));
 
 // Mock boardUtils — createBoardFromTemplate is called when ?template= is set
