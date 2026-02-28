@@ -6,7 +6,7 @@ const TotalVoteCounter = () => {
   const { isTotalVoteCounterVisible } = useVoteCounterVisibility();
   const { votesPerUser, getTotalVotesRemaining, activeUsers } = useBoardContext();
 
-  if (!isTotalVoteCounterVisible) {
+  if (!isTotalVoteCounterVisible || votesPerUser === 0) {
     return null;
   }
 
