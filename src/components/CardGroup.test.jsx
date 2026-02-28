@@ -479,7 +479,7 @@ describe('CardGroup Component', () => {
       isCommentAuthor: vi.fn(() => true)
     });
 
-    rerender(<CardGroup {...mockProps} groupData={groupWithComments} />);
+    rerender(<CardGroup {...mockProps} groupData={{...groupWithComments}} />);
 
     // Comments section should now be visible
     expect(screen.getByText('Comments')).toBeInTheDocument();

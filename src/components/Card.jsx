@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
@@ -439,4 +439,4 @@ function Card({
   );
 }
 
-export default Card;
+export default memo(Card);

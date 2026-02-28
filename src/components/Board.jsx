@@ -203,7 +203,7 @@ function Board({ onGoHome }) {
       )}
 
 
-      <main>
+      <main id="board-content">
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (

@@ -3,17 +3,14 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getDatabase, get, ref } from 'firebase/database';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  // Using the same Firebase configuration from the original app
-  apiKey: 'AIzaSyBIAM_tIBqFUYQl5r-f7e78lNPzc0fIDcM',
-  authDomain: 'big-orca.firebaseapp.com',
-  projectId: 'big-orca',
-  storageBucket: 'big-orca.firebasestorage.app',
-  messagingSenderId: '338206440353',
-  appId: '1:338206440353:web:a6af4374836968379d29e0',
-  databaseURL: 'https://big-orca-default-rtdb.firebaseio.com' // Added databaseURL based on project
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyBIAM_tIBqFUYQl5r-f7e78lNPzc0fIDcM',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'big-orca.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'big-orca',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'big-orca.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '338206440353',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:338206440353:web:a6af4374836968379d29e0',
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || 'https://big-orca-default-rtdb.firebaseio.com'
 };
 
 // Initialize Firebase

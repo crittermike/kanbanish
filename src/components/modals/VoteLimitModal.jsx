@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import '../../styles/components/modals.css';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const VoteLimitModal = ({ isOpen, onClose, onConfirm, currentLimit = 3 }) => {
   const [votesPerUser, setVotesPerUser] = useState(currentLimit);
+  const modalRef = useRef(null);
+  useFocusTrap(modalRef, isOpen, { onClose });
 
   if (!isOpen) return null;
 
@@ -20,7 +23,7 @@ const VoteLimitModal = ({ isOpen, onClose, onConfirm, currentLimit = 3 }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
-      <div className="modal-container" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="vote-limit-title">
+      <div ref={modalRef} className="modal-container" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="vote-limit-title">
         <div className="modal-header">
           <h2 id="vote-limit-title">Set Vote Limit</h2>
           <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>

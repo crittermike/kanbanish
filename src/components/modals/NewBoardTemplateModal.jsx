@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import BOARD_TEMPLATES from '../../data/boardTemplates';
 import '../../styles/components/modals.css';
 import '../../styles/components/template-select.css';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 /**
  * Safely highlights matching text by splitting into segments and wrapping
@@ -40,7 +41,9 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('default');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTemplates, setFilteredTemplates] = useState(BOARD_TEMPLATES);
+  const modalRef = useRef(null);
 
+  useFocusTrap(modalRef, isOpen, { onClose });
   // Filter templates based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -130,7 +133,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
 
   return (
     <div className="modal-overlay" role="presentation">
-      <div className="modal-container template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
+      <div ref={modalRef} className="modal-container template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
         <div className="modal-header">
           <h2 id="template-modal-title">Choose a Board Template</h2>
           <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
