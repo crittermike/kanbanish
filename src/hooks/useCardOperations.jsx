@@ -1,8 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
-import { useState, useCallback, useMemo, useEffect, Fragment } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
-import { linkifyText } from '../utils/linkify';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
 import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
 
@@ -285,19 +284,6 @@ export function useCardOperations({
     updateVotes(-1, e, 'Downvoted card');
   }, [updateVotes]);
 
-  // Format content
-  const formatContentWithEmojis = useCallback(content => {
-    if (!content) {
-      return '';
-    }
-
-    return content.split('\n').map((line, i) => (
-      <Fragment key={i}>
-        {linkifyText(line)}
-        {i < content.split('\n').length - 1 && <br />}
-      </Fragment>
-    ));
-  }, []);
 
   // Reaction operations
   const hasUserReactedWithEmoji = useCallback(emoji => {
@@ -541,8 +527,6 @@ export function useCardOperations({
     upvoteCard,
     downvoteCard,
 
-    // Content formatting
-    formatContentWithEmojis,
 
     // Reaction operations
     hasUserReactedWithEmoji,

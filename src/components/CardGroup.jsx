@@ -8,6 +8,7 @@ import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAl
 import Card from './Card';
 import Comments from './Comments';
 import EmojiPicker from './EmojiPicker';
+import MarkdownContent from './MarkdownContent';
 import VotingControls from './VotingControls';
 
 /**
@@ -399,7 +400,7 @@ function CardGroup({
             }}
           >
             <div className="card-preview-content">
-              {sortedCards()[0]?.content}
+              <MarkdownContent content={sortedCards()[0]?.content} />
             </div>
           </div>
         </div>
