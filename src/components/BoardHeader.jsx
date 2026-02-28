@@ -1,4 +1,4 @@
-import { Home, Link, FileText } from 'react-feather';
+import { Home, Link, FileText, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
@@ -15,7 +15,7 @@ import VoteCounter from './VoteCounter';
  * @param {Function} props.handleExportBoard - Opens the export board modal
  * @param {Function} props.onGoHome - Navigates back to dashboard
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard, onGoHome }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, copyShareUrl, handleExportBoard, onGoHome, onSearchOpen, isSearchOpen }) => (
   <div className="board-title-container">
     {onGoHome && (
       <button
@@ -37,6 +37,16 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       onBlur={handleBoardTitleBlur}
       className="header-input"
     />
+    {!isSearchOpen && (
+      <button
+        className="search-trigger-btn"
+        onClick={onSearchOpen}
+        title="Search cards (Ctrl+F)"
+        aria-label="Search cards"
+      >
+        <Search size={16} />
+      </button>
+    )}
     <div className="action-buttons">
       <UserCounter />
       <VoteCounter />

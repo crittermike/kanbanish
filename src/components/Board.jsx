@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
+import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -12,6 +13,7 @@ import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ResultsView from './ResultsView';
+import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
 import WorkflowControls from './WorkflowControls';
 
@@ -50,6 +52,9 @@ function Board({ onGoHome }) {
     getAllUsersAddingCards,
     startHealthCheckPhase
   } = useBoardContext();
+
+  // Search state
+  const searchFilter = useSearchFilter({ columns });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -146,6 +151,8 @@ function Board({ onGoHome }) {
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             onGoHome={onGoHome}
+            onSearchOpen={searchFilter.openSearch}
+            isSearchOpen={searchFilter.isOpen}
           />
           <SettingsPanel
             handleStartHealthCheck={() => {
@@ -170,6 +177,19 @@ function Board({ onGoHome }) {
           />
         </div>
       </header>
+
+      {/* Search and Filter Bar */}
+      {searchFilter.isOpen && (
+        <SearchFilterBar
+          searchQuery={searchFilter.searchQuery}
+          setSearchQuery={searchFilter.setSearchQuery}
+          isFiltering={searchFilter.isFiltering}
+          matchingCount={searchFilter.matchingCount}
+          totalCards={searchFilter.totalCards}
+          closeSearch={searchFilter.closeSearch}
+          searchInputRef={searchFilter.searchInputRef}
+        />
+      )}
 
       {/* Global Card Creation Indicator */}
       <CardCreationIndicator 
@@ -197,6 +217,9 @@ function Board({ onGoHome }) {
             columns={columns}
             sortByVotes={sortByVotes}
             addNewColumn={addNewColumn}
+            isFiltering={searchFilter.isFiltering}
+            matchingCardIds={searchFilter.matchingCardIds}
+            matchingGroupIds={searchFilter.matchingGroupIds}
           />
         )}
       </main>

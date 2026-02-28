@@ -127,7 +127,8 @@ function Card({
   cardData,
   columnId,
   groupId = null,
-  onCardDropOnCard = null
+  onCardDropOnCard = null,
+  dimmed = false
 }) {
   const { 
     boardId, 
@@ -356,7 +357,7 @@ function Card({
   return (
     <div
       ref={combinedRef}
-      className={`card ${getDynamicClasses()}`}
+      className={`card ${getDynamicClasses()}${dimmed ? ' card-filtered-out' : ''}`}
       onClick={handleCardClick}
       data-card-id={cardId}
     >

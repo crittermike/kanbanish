@@ -16,7 +16,7 @@ const STORAGE_KEY_PREFIX = 'kanbanish-collapsed-';
  * @param {boolean} props.sortByVotes - Whether cards within columns are sorted by votes
  * @param {Function} props.addNewColumn - Callback to add a new column
  */
-const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
+const ColumnsContainer = ({ columns, sortByVotes, addNewColumn, isFiltering, matchingCardIds, matchingGroupIds }) => {
   const { retrospectiveMode, workflowPhase, boardId } = useBoardContext();
 
   // Load collapsed columns from localStorage
@@ -79,9 +79,11 @@ const ColumnsContainer = ({ columns, sortByVotes, addNewColumn }) => {
             sortByVotes={sortByVotes}
             collapsed={collapsedColumns.has(columnId)}
             onToggleCollapse={toggleCollapse}
+            isFiltering={isFiltering}
+            matchingCardIds={matchingCardIds}
+            matchingGroupIds={matchingGroupIds}
           />
         ))}
-
         {/* Add column button - hidden during interaction/results phases */}
         {shouldShowAddColumn && (
           <div className="add-column-container">
