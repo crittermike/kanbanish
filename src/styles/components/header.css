@@ -402,17 +402,16 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     box-sizing: border-box;
 }
 
-.settings-vote-limit-custom {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-xs) 0;
+.vote-limit-custom-inline {
+    flex: 1;
+    min-width: 0;
 }
 
-.settings-vote-limit-custom .vote-limit-input {
-    width: 60px;
+.vote-limit-custom-inline .vote-limit-input {
+    width: 100%;
     padding: var(--space-xs) var(--space-sm);
     font-size: var(--font-size-sm);
+    box-sizing: border-box;
 }
 
 /* Fallback for browsers that don't support :has() */

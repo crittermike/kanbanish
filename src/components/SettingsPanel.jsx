@@ -227,28 +227,25 @@ const SettingsPanel = ({
                     </div>
                   </div>
 
-                  {multipleVotesAllowed && (
-                    <div className="settings-section settings-vote-limit">
-                      <h4 className="settings-section-title">Votes per person</h4>
-                      <div className="vote-limit-preset-buttons">
-                        {[3, 5, 10].map(val => (
-                          <button
-                            key={val}
-                            className={`vote-limit-preset ${votesPerUser === val ? 'active' : ''}`}
-                            onClick={() => updateVotesPerUser(val)}
-                          >
-                            {val}
-                          </button>
-                        ))}
+                  <div className="settings-section settings-vote-limit">
+                    <h4 className="settings-section-title">Votes per person</h4>
+                    <div className="vote-limit-preset-buttons">
+                      {[3, 5, 10].map(val => (
                         <button
-                          className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
-                          onClick={() => updateVotesPerUser(0)}
+                          key={val}
+                          className={`vote-limit-preset ${votesPerUser === val ? 'active' : ''}`}
+                          onClick={() => updateVotesPerUser(val)}
                         >
-                          Unlimited
+                          {val}
                         </button>
-                      </div>
-                      <div className="settings-vote-limit-custom">
-                        <span className="settings-toggle-label">Custom:</span>
+                      ))}
+                      <button
+                        className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
+                        onClick={() => updateVotesPerUser(0)}
+                      >
+                        Unlimited
+                      </button>
+                      <div className="vote-limit-custom-inline">
                         <input
                           type="number"
                           className="vote-limit-input"
@@ -265,7 +262,7 @@ const SettingsPanel = ({
                              const val = parseInt(e.target.value, 10);
                              if (isNaN(val) || val <= 0) {
                                if (votesPerUser > 0 && ![3, 5, 10].includes(votesPerUser)) {
-                                  updateVotesPerUser(0); // reset if invalid
+                                  updateVotesPerUser(0);
                                }
                              }
                           }}
@@ -273,7 +270,7 @@ const SettingsPanel = ({
                         />
                       </div>
                     </div>
-                  )}
+                  </div>
 
                 </>
               )}
