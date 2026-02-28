@@ -160,7 +160,8 @@ export default [
       'public/manifest.json',
       'coverage/',
       '.vscode/',
-      '.git/'
+      '.git/',
+      'e2e/'
     ]
   }
 ];
