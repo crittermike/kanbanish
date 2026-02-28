@@ -265,7 +265,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(window.confirm).toHaveBeenCalled();
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted', expect.objectContaining({ actionLabel: 'Undo', timeoutMs: 6000 }));
     });
   });
 
@@ -524,7 +524,7 @@ describe('Card Component', () => {
     // Verify card was deleted
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted', expect.objectContaining({ actionLabel: 'Undo', timeoutMs: 6000 }));
     });
   });
 
@@ -580,7 +580,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(window.confirm).toHaveBeenCalled();
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted', expect.objectContaining({ actionLabel: 'Undo', timeoutMs: 6000 }));
     });
   });
 

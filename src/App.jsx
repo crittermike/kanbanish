@@ -44,7 +44,7 @@ function findTemplateBySlug(slug) {
  * Renders Dashboard when no ?board= param, Board otherwise.
  */
 function AppContent() {
-  const { notification } = useNotification();
+  const { notification, handleAction } = useNotification();
   const [activeBoardId, setActiveBoardId] = useState(() => getBoardIdFromUrl());
   const { addBoard } = useRecentBoards();
 
@@ -137,6 +137,14 @@ function AppContent() {
       {/* Success Notification */}
       <div id="notification" className={`notification ${notification.show ? 'show' : ''}`}>
         <span id="notification-message">{notification.message}</span>
+        {notification.actionLabel && (
+          <button
+            className="notification-action"
+            onClick={handleAction}
+          >
+            {notification.actionLabel}
+          </button>
+        )}
       </div>
     </div>
   );

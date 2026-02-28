@@ -138,7 +138,9 @@ function Card({
     votesPerUser, 
     getUserVoteCount, 
     retrospectiveMode, 
-    workflowPhase = 'CREATION' 
+    workflowPhase = 'CREATION',
+    recordAction,
+    undo
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -195,9 +197,10 @@ function Card({
     retrospectiveMode,
     workflowPhase,
     votesPerUser,
-    getUserVoteCount
+    getUserVoteCount,
+    recordAction,
+    undo
   });
-
   // Calculate disabled reason for interactions
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
 

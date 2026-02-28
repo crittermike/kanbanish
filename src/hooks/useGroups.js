@@ -15,7 +15,7 @@ import { generateId } from '../utils/ids';
  * @param {Object} params.columns - Board columns data
  * @returns {Object} Group operations
  */
-export const useGroups = ({ boardId, user, columns }) => {
+export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
   // Move a card between columns or into/out of groups
   const moveCard = useCallback((cardId, sourceColumnId, targetColumnId, targetGroupId = null) => {
     if (!boardId || !user) {
@@ -150,10 +150,32 @@ export const useGroups = ({ boardId, user, columns }) => {
       set(groupRef, groupData),
       ...cardUpdatePromises
     ])
+      .then(() => {
+        // Record undo after successful creation
+        if (recordAction) {
+          const undoOps = [
+            // Remove the group
+            { type: 'remove', path: `boards/${boardId}/columns/${columnId}/groups/${groupId}` },
+            // Remove groupId from each card
+            ...cardIds.map(cId => ({
+              type: 'remove', path: `boards/${boardId}/columns/${columnId}/cards/${cId}/groupId`
+            }))
+          ];
+          const redoOps = [
+            // Re-create the group
+            { type: 'set', path: `boards/${boardId}/columns/${columnId}/groups/${groupId}`, value: groupData },
+            // Re-set groupId on each card
+            ...cardIds.map(cId => ({
+              type: 'set', path: `boards/${boardId}/columns/${columnId}/cards/${cId}/groupId`, value: groupId
+            }))
+          ];
+          recordAction({ description: 'Cards grouped', undo: undoOps, redo: redoOps });
+        }
+      })
       .catch(error => {
         console.error('Error creating group:', error);
       });
-  }, [boardId, user]);
+  }, [boardId, user, recordAction]);
 
   // Ungroup cards (remove group and clear groupId from cards)
   const ungroupCards = useCallback((columnId, groupId) => {
@@ -181,10 +203,32 @@ export const useGroups = ({ boardId, user, columns }) => {
       ...updatePromises,
       remove(groupRef)
     ])
+      .then(() => {
+        // Record undo after successful ungroup
+        if (recordAction) {
+          const undoOps = [
+            // Re-create the group
+            { type: 'set', path: `boards/${boardId}/columns/${columnId}/groups/${groupId}`, value: groupData },
+            // Re-set groupId on each card
+            ...groupData.cardIds.map(cId => ({
+              type: 'set', path: `boards/${boardId}/columns/${columnId}/cards/${cId}/groupId`, value: groupId
+            }))
+          ];
+          const redoOps = [
+            // Remove groupId from cards
+            ...groupData.cardIds.map(cId => ({
+              type: 'remove', path: `boards/${boardId}/columns/${columnId}/cards/${cId}/groupId`
+            })),
+            // Remove the group
+            { type: 'remove', path: `boards/${boardId}/columns/${columnId}/groups/${groupId}` }
+          ];
+          recordAction({ description: 'Cards ungrouped', undo: undoOps, redo: redoOps });
+        }
+      })
       .catch(error => {
         console.error('Error ungrouping cards:', error);
       });
-  }, [boardId, user, columns]);
+  }, [boardId, user, columns, recordAction]);
 
   // Remove all grouping from the board
   const removeAllGrouping = useCallback(() => {

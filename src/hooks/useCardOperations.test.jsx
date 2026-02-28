@@ -284,7 +284,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalledWith('mock-ref');
-      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Card deleted', expect.objectContaining({ actionLabel: 'Undo', timeoutMs: 6000 }));
     });
 
     it('should not save when boardId is null', async () => {
@@ -738,7 +738,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted');
+      expect(mockShowNotification).toHaveBeenCalledWith('Comment deleted', expect.objectContaining({ actionLabel: 'Undo', timeoutMs: 6000 }));
     });
 
     it('should not allow deleting a comment by another user', async () => {
