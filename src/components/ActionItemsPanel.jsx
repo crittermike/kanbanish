@@ -67,7 +67,7 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
       >
         <div className="modal-header">
           <h2 id="action-items-title">Action Items</h2>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close action items">
+          <button className="close-button" onClick={onClose} aria-label="Close action items">
             &times;
           </button>
         </div>

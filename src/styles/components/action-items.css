@@ -164,17 +164,19 @@
 /* Card Badge */
 .card-action-item-badge {
   position: absolute;
-  top: var(--space-xs);
-  right: calc(var(--space-xs) + 18px); /* Adjust based on comment indicator */
+  top: -5px;
+  right: 18px; /* offset to left of comment indicator */
+  background-color: var(--success);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--success);
-  background-color: var(--card-bg);
-  border-radius: var(--radius-sm);
-  padding: 2px;
-  box-shadow: 0 0 0 2px var(--card-bg); /* Match card background */
-  z-index: 2;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
 }
 
 /* Card Hover Action Indicator */
@@ -188,29 +190,12 @@
   color: var(--text-muted);
 }
 
-.action-item-action:hover {
-  color: var(--success);
-  background-color: rgba(46, 160, 67, 0.1); /* Based on --success variable */
-}
-
 /* Header Button */
 .action-items-header-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-speed) var(--transition-ease);
   position: relative;
 }
 
 .action-items-header-btn:hover {
-  background-color: var(--hover-bg);
-  border-color: var(--accent);
   color: var(--accent);
 }
 

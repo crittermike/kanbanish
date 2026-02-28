@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText, CheckSquare } from 'react-feather';
+import { ArrowDown, CheckSquare, FileText, Link, Moon, RotateCcw, Settings, Sun, ThumbsUp } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import Timer from './Timer';
 
@@ -75,6 +75,16 @@ const SettingsPanel = ({
   return (
     <div className="action-buttons">
       <Timer />
+
+      <button
+        className="btn icon-btn action-items-header-btn"
+        onClick={onOpenActionItems}
+        title={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
+        aria-label={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
+      >
+        <CheckSquare size={16} aria-hidden="true" />
+        {actionItemCount > 0 && <span className="action-items-badge">{actionItemCount}</span>}
+      </button>
       
       <button
           id="settings-dropdown-button"

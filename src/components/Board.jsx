@@ -160,8 +160,6 @@ function Board({ onGoHome }) {
             onGoHome={onGoHome}
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
-            onActionItemsOpen={() => setIsActionItemsPanelOpen(true)}
-            actionItemCount={actionItemCount}
           />
           <SettingsPanel
             handleStartHealthCheck={() => {
