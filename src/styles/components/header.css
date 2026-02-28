@@ -152,12 +152,12 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
-    padding: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
     background: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-color);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     cursor: pointer;
     transition: all 0.2s ease;
 }
