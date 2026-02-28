@@ -56,6 +56,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [hideCardAuthorship, setHideCardAuthorship] = useState(false);
 
   // Board owner tracking
   const [boardOwner, setBoardOwner] = useState(null);
@@ -76,6 +77,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             const prefs = snapshot.val();
             if (prefs.darkMode !== undefined) {
               setDarkMode(prefs.darkMode);
+            }
+            if (prefs.hideCardAuthorship !== undefined) {
+              setHideCardAuthorship(prefs.hideCardAuthorship);
             }
           }
         }).catch(error => {
@@ -371,16 +375,41 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     const updateDarkMode = enabled => {
       if (user) {
         const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-        set(userPrefsRef, { darkMode: enabled })
-          .then(() => {
-            setDarkMode(enabled);
-          })
-          .catch(error => {
-            console.error('Error updating dark mode preference:', error);
-          });
+        get(userPrefsRef).then(snapshot => {
+          const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+          set(userPrefsRef, { ...currentPrefs, darkMode: enabled })
+            .then(() => {
+              setDarkMode(enabled);
+            })
+            .catch(error => {
+              console.error('Error updating dark mode preference:', error);
+            });
+        }).catch(error => {
+          console.error('Error reading preferences:', error);
+        });
       } else {
-        // If we're not connected to a user yet, just update the local state
         setDarkMode(enabled);
+      }
+    };
+
+    // Update hide card authorship preference
+    const updateHideCardAuthorship = enabled => {
+      if (user) {
+        const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+        get(userPrefsRef).then(snapshot => {
+          const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+          set(userPrefsRef, { ...currentPrefs, hideCardAuthorship: enabled })
+            .then(() => {
+              setHideCardAuthorship(enabled);
+            })
+            .catch(error => {
+              console.error('Error updating hide card authorship preference:', error);
+            });
+        }).catch(error => {
+          console.error('Error reading preferences:', error);
+        });
+      } else {
+        setHideCardAuthorship(enabled);
       }
     };
 
@@ -395,6 +424,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
       updateDarkMode,
+      // Screen sharing mode
+      hideCardAuthorship,
+      updateHideCardAuthorship,
       activeUsers,
       // Workflow phase system
       workflowPhase,
@@ -444,6 +476,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
+    hideCardAuthorship,
     activeUsers, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,

@@ -22,6 +22,8 @@ import Timer from './Timer';
  * @param {Function} props.resetAllVotes - Resets all votes on the board
  * @param {boolean} props.darkMode - Whether dark mode is active
  * @param {Function} props.updateDarkMode - Toggles dark/light theme
+ * @param {boolean} props.hideCardAuthorship - Whether card authorship marker is hidden
+ * @param {Function} props.updateHideCardAuthorship - Toggles card authorship marker
  * @param {number} props.votesPerUser - Maximum votes allowed per user (0 for unlimited)
  * @param {Function} props.updateVotesPerUser - Updates the maximum votes per user
  */
@@ -45,6 +47,8 @@ const SettingsPanel = ({
   resetAllVotes,
   darkMode,
   updateDarkMode,
+  hideCardAuthorship,
+  updateHideCardAuthorship,
   votesPerUser,
   updateVotesPerUser
 }) => {
@@ -293,6 +297,21 @@ const SettingsPanel = ({
                 </div>
                 <p className="settings-hint">
                   When enabled, new cards appear with hidden text until revealed
+                </p>
+                <div className="settings-toggle-row" style={{ marginTop: '8px' }}>
+                  <span className="settings-toggle-label">Screen sharing mode</span>
+                  <button
+                    className="settings-toggle-switch"
+                    role="switch"
+                    aria-checked={hideCardAuthorship}
+                    onClick={() => updateHideCardAuthorship(!hideCardAuthorship)}
+                    aria-label="Screen sharing mode"
+                  >
+                    <span className="settings-toggle-knob"></span>
+                  </button>
+                </div>
+                <p className="settings-hint">
+                  Hides the colored marker on cards you created
                 </p>
               </div>
 

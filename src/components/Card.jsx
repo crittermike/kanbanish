@@ -140,6 +140,7 @@ function Card({
     getUserVoteCount, 
     retrospectiveMode, 
     workflowPhase = 'CREATION',
+    hideCardAuthorship,
     recordAction,
     undo
   } = useBoardContext();
@@ -320,7 +321,7 @@ function Card({
       classes.push('groupable');
     }
     // Only show author indicator during creation phase to maintain anonymity in later phases
-    if (isCardAuthor() && workflowPhase === WORKFLOW_PHASES.CREATION) {
+    if (isCardAuthor() && workflowPhase === WORKFLOW_PHASES.CREATION && !hideCardAuthorship) {
       classes.push('author-editable');
     }
 
