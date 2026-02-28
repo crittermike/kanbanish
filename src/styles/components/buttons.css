@@ -149,8 +149,8 @@
 
 .card-edit-actions .danger-btn:hover,
 .comment-edit-actions .danger-btn:hover {
-    background: rgba(248, 81, 73, 0.12);
-    border-color: rgba(248, 81, 73, 0.4);
+    background: var(--danger-transparent);
+    border-color: var(--danger-transparent-border);
     opacity: 1;
 }
 
