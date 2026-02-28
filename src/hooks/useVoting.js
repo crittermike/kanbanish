@@ -16,12 +16,12 @@ import { withRetry } from '../utils/firebaseRetry';
  * @param {number} params.activeUsers - Number of active users
  * @param {number} params.votesPerUser - Votes allowed per user
  * @param {boolean} params.multipleVotesAllowed - Whether multiple votes are allowed
- * @param {boolean} params.retrospectiveMode - Whether retrospective mode is active
+
  * @returns {Object} Voting operations
  */
 export const useVoting = ({
   boardId, user, columns, activeUsers,
-  votesPerUser, multipleVotesAllowed, retrospectiveMode
+  votesPerUser, multipleVotesAllowed
 }) => {
   const { showNotification } = useNotification();
   // Calculate total votes across all cards and groups
@@ -143,8 +143,8 @@ export const useVoting = ({
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
 
-    // Check vote limit - skip if not in retrospective mode
-    if (retrospectiveMode) {
+    // Check vote limit - skip if votesPerUser is 0 (unlimited)
+    if (votesPerUser > 0) {
       const currentUserVotes = getUserVoteCount(userId);
       
       // For multiple votes allowed, check if adding this vote would exceed the limit
@@ -186,7 +186,7 @@ export const useVoting = ({
     }).catch(error => {
       console.error('Error updating group votes:', error);
     });
-  }, [boardId, user, columns, retrospectiveMode, multipleVotesAllowed, votesPerUser, getUserVoteCount, showNotification]);
+  }, [boardId, user, columns, multipleVotesAllowed, votesPerUser, getUserVoteCount, showNotification]);
 
   // Downvote a group
   const downvoteGroup = useCallback((columnId, groupId, currentVotes = 0) => {

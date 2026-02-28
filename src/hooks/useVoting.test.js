@@ -503,7 +503,7 @@ describe('useVoting', () => {
       expect(set).not.toHaveBeenCalled();
     });
 
-    it('should enforce vote limit in retrospective mode', async () => {
+    it('should enforce vote limit when votesPerUser > 0', async () => {
       const props = createMockProps({
         retrospectiveMode: true,
         votesPerUser: 3,
@@ -531,7 +531,7 @@ describe('useVoting', () => {
       expect(set).not.toHaveBeenCalled();
     });
 
-    it('should enforce vote limit in retrospective mode with single vote', async () => {
+    it('should enforce vote limit when votesPerUser > 0 with single vote', async () => {
       const props = createMockProps({
         retrospectiveMode: true,
         votesPerUser: 2,
@@ -581,11 +581,11 @@ describe('useVoting', () => {
       expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
     });
 
-    it('should skip vote limit check when not in retrospective mode', async () => {
+    it('should skip vote limit check when votesPerUser is 0', async () => {
       const props = createMockProps({
         retrospectiveMode: false,
         multipleVotesAllowed: true,
-        votesPerUser: 1,
+        votesPerUser: 0,
         columns: {
           col1: {
             cards: { card1: { voters: { user1: 1 } } },

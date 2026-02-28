@@ -39,7 +39,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
-  const [votesPerUser, setVotesPerUser] = useState(3); // Default to 3 votes per user
+  const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
 
   // New workflow phase system

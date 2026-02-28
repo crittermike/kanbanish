@@ -52,7 +52,9 @@ function Board({ onGoHome }) {
     updateHideCardAuthorship,
     workflowPhase,
     getAllUsersAddingCards,
-    startHealthCheckPhase
+    startHealthCheckPhase,
+    votesPerUser,
+    updateVotesPerUser
   } = useBoardContext();
 
   // Search state
@@ -178,6 +180,8 @@ function Board({ onGoHome }) {
             updateDarkMode={updateDarkMode}
             hideCardAuthorship={hideCardAuthorship}
             updateHideCardAuthorship={updateHideCardAuthorship}
+            votesPerUser={votesPerUser}
+            updateVotesPerUser={updateVotesPerUser}
           />
         </div>
       </header>
