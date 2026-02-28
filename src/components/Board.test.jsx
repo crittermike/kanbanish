@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -287,16 +287,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
-    // Find the "Allow Voting?" section and click the "No" option
-    const allowVotingSection = screen.getByText('Allow voting?');
-    expect(allowVotingSection).toBeInTheDocument();
-
-    // Find the closest parent section element containing the setting
-    const votingSection = allowVotingSection.closest('.settings-section');
-
-    // Within that section, find the No option and click it
-    const noOption = within(votingSection).getByText('No');
-    fireEvent.click(noOption);
+    // Find the toggle switch for "Allow voting" and click it
+    const votingToggle = screen.getByRole('switch', { name: 'Allow voting' });
+    fireEvent.click(votingToggle);
 
     // Check that updateVotingEnabled was called with the opposite of its current value
     expect(mockContextValue.updateVotingEnabled).toHaveBeenCalledWith(!mockContextValue.votingEnabled);
@@ -319,18 +312,11 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
-    // Find the "Allow users to vote multiple times on the same card?" section and click the "Yes" option
-    const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
-    expect(allowMultipleVotesSection).toBeInTheDocument();
+    // Find the toggle switch for "Allow multiple votes" and click it
+    const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
+    fireEvent.click(multiVoteToggle);
 
-    // Find the closest parent section element containing the setting
-    const multipleVotesSection = allowMultipleVotesSection.closest('.settings-section');
-
-    // Within that section, find the Yes option and click it
-    const yesOption = within(multipleVotesSection).getByText('Yes');
-    fireEvent.click(yesOption);
-
-    // Check that updateMultipleVotesAllowed was called with true
+    // Check that updateMultipleVotesAllowed was called with true (toggling from false)
     expect(mockContextValue.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
   });
 
@@ -360,11 +346,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
-    // Change the multiple votes setting
-    const allowMultipleVotesSection = screen.getByText('Allow users to vote multiple times on the same card?');
-    const multipleVotesSection = allowMultipleVotesSection.closest('.settings-section');
-    const yesOption = within(multipleVotesSection).getByText('Yes');
-    fireEvent.click(yesOption);
+    // Click the toggle switch for multiple votes
+    const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
+    fireEvent.click(multiVoteToggle);
 
     // Verify that only updateMultipleVotesAllowed was called, not updateRetrospectiveMode
     expect(contextWithRetrospectiveMode.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
@@ -441,18 +425,11 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
-    // Find the "Allow downvoting?" section and click the "No" option
-    const allowDownvotingSection = screen.getByText('Allow downvoting?');
-    expect(allowDownvotingSection).toBeInTheDocument();
+    // Find the toggle switch for "Allow downvoting" and click it
+    const downvotingToggle = screen.getByRole('switch', { name: 'Allow downvoting' });
+    fireEvent.click(downvotingToggle);
 
-    // Find the closest parent section element containing the setting
-    const downvotingSection = allowDownvotingSection.closest('.settings-section');
-
-    // Within that section, find the No option and click it
-    const noOption = within(downvotingSection).getByText('No');
-    fireEvent.click(noOption);
-
-    // Check that updateDownvotingEnabled was called with false
+    // Check that updateDownvotingEnabled was called with false (toggling from true)
     expect(mockContextValue.updateDownvotingEnabled).toHaveBeenCalledWith(false);
   });
 

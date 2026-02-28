@@ -327,6 +327,63 @@ h1 {
     border-color: var(--accent);
 }
 
+/* Toggle Switch Styles */
+.settings-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    width: 100%;
+}
+
+.settings-toggle-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.settings-toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: var(--border-color);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color var(--transition-speed) ease;
+    flex-shrink: 0;
+}
+
+.settings-toggle-switch[aria-checked="true"] {
+    background-color: var(--accent);
+}
+
+.settings-toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    transition: transform var(--transition-speed) ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.settings-toggle-switch[aria-checked="true"] .settings-toggle-knob {
+    transform: translateX(18px);
+}
+
+html.light-mode .settings-toggle-switch {
+    background-color: #afb8c1;
+}
+
+html.light-mode .settings-toggle-switch[aria-checked="true"] {
+    background-color: var(--accent);
+}
+
 /* Fallback for browsers that don't support :has() */
 .settings-toggle-btn[aria-expanded="true"] {
     background-color: var(--hover-bg);

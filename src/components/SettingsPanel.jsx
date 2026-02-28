@@ -176,19 +176,16 @@ const SettingsPanel = ({
 
               {/* Voting Settings */}
               <div className="settings-section">
-                <h4 className="settings-section-title">Allow voting?</h4>
-                <div className="settings-boolean-option">
+                <div className="settings-toggle-row">
+                  <span className="settings-toggle-label">Allow voting?</span>
                   <button
-                    className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
-                    onClick={() => updateVotingEnabled(true)}
+                    className="settings-toggle-switch"
+                    role="switch"
+                    aria-checked={votingEnabled}
+                    onClick={() => updateVotingEnabled(!votingEnabled)}
+                    aria-label="Allow voting"
                   >
-                    Yes
-                  </button>
-                  <button
-                    className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
-                    onClick={() => updateVotingEnabled(false)}
-                  >
-                    No
+                    <span className="settings-toggle-knob"></span>
                   </button>
                 </div>
               </div>
@@ -196,37 +193,31 @@ const SettingsPanel = ({
               {votingEnabled && (
                 <>
                   <div className="settings-section">
-                    <h4 className="settings-section-title">Allow downvoting?</h4>
-                    <div className="settings-boolean-option">
+                    <div className="settings-toggle-row">
+                      <span className="settings-toggle-label">Allow downvoting?</span>
                       <button
-                        className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
-                        onClick={() => updateDownvotingEnabled(true)}
+                        className="settings-toggle-switch"
+                        role="switch"
+                        aria-checked={downvotingEnabled}
+                        onClick={() => updateDownvotingEnabled(!downvotingEnabled)}
+                        aria-label="Allow downvoting"
                       >
-                        Yes
-                      </button>
-                      <button
-                        className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
-                        onClick={() => updateDownvotingEnabled(false)}
-                      >
-                        No
+                        <span className="settings-toggle-knob"></span>
                       </button>
                     </div>
                   </div>
 
                   <div className="settings-section">
-                    <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
-                    <div className="settings-boolean-option">
+                    <div className="settings-toggle-row">
+                      <span className="settings-toggle-label">Allow users to vote multiple times on the same card?</span>
                       <button
-                        className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                        onClick={() => updateMultipleVotesAllowed(true)}
+                        className="settings-toggle-switch"
+                        role="switch"
+                        aria-checked={multipleVotesAllowed}
+                        onClick={() => updateMultipleVotesAllowed(!multipleVotesAllowed)}
+                        aria-label="Allow users to vote multiple times on the same card"
                       >
-                        Yes
-                      </button>
-                      <button
-                        className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                        onClick={() => updateMultipleVotesAllowed(false)}
-                      >
-                        No
+                        <span className="settings-toggle-knob"></span>
                       </button>
                     </div>
                   </div>
@@ -237,19 +228,16 @@ const SettingsPanel = ({
 
               {/* Retrospective Mode */}
               <div className="settings-section">
-                <h4 className="settings-section-title">Retrospective Mode</h4>
-                <div className="settings-boolean-option">
+                <div className="settings-toggle-row">
+                  <span className="settings-toggle-label">Retrospective Mode</span>
                   <button
-                    className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
-                    onClick={() => updateRetrospectiveMode(true)}
+                    className="settings-toggle-switch"
+                    role="switch"
+                    aria-checked={retrospectiveMode}
+                    onClick={() => updateRetrospectiveMode(!retrospectiveMode)}
+                    aria-label="Retrospective Mode"
                   >
-                    On
-                  </button>
-                  <button
-                    className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
-                    onClick={() => updateRetrospectiveMode(false)}
-                  >
-                    Off
+                    <span className="settings-toggle-knob"></span>
                   </button>
                 </div>
                 <p className="settings-hint">
