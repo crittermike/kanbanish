@@ -282,6 +282,21 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardId, user, timerData, setTimerData, workflowPhase
   });
 
+  // Compute board-wide tags
+  const boardTags = useMemo(() => {
+    const tagsSet = new Set();
+    Object.values(columns || {}).forEach(column => {
+      if (column.cards) {
+        Object.values(column.cards).forEach(card => {
+          if (card.tags && Array.isArray(card.tags)) {
+            card.tags.forEach(tag => tagsSet.add(tag));
+          }
+        });
+      }
+    });
+    return Array.from(tagsSet).sort();
+  }, [columns]);
+
   // Context value
   const value = useMemo(() => {
     // Create a new board with specified template columns, title, and optional settings overrides
@@ -424,6 +439,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
       updateDarkMode,
+      // Tags
+      boardTags,
       // Screen sharing mode
       hideCardAuthorship,
       updateHideCardAuthorship,
@@ -475,7 +492,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
     boardRef, moveCard, resetAllVotes,
-    getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
+    getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,
     activeUsers, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,

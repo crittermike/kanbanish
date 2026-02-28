@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
-import { MessageSquare, Smile } from 'react-feather';
+import React, { useRef, useState } from 'react';
+import { MessageSquare, Smile, Droplet, Tag } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
   getReactionDisabledMessage
 } from '../utils/retrospectiveModeUtils';
+import CardColorPicker from './CardColorPicker';
+import CardTagPicker from './CardTagPicker';
 import EmojiPicker from './EmojiPicker';
 
 const CardHoverActions = React.memo(({
@@ -18,9 +20,22 @@ const CardHoverActions = React.memo(({
   hasUserReactedWithEmoji,
   commentCount = 0,
   disabled = false,
-  disabledReason = 'cards-not-revealed'
+  disabledReason = 'cards-not-revealed',
+  onColorSelect,
+  onTagAdd,
+  onTagRemove,
+  currentColor,
+  currentTags,
+  boardTags
 }) => {
   const emojiButtonRef = useRef(null);
+  const colorButtonRef = useRef(null);
+  const tagButtonRef = useRef(null);
+
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0 });
+  const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
 
   // Use utility functions for consistent logic
   const useDisabledStyling = shouldUseDisabledStyling(disabled, disabledReason);
@@ -36,28 +51,96 @@ const CardHoverActions = React.memo(({
           hasUserReactedWithEmoji={hasUserReactedWithEmoji}
         />
       )}
+      {showColorPicker && (
+        <CardColorPicker
+          position={colorPickerPosition}
+          onColorSelect={onColorSelect}
+          onClose={() => setShowColorPicker(false)}
+          currentColor={currentColor}
+        />
+      )}
+      {showTagPicker && (
+        <CardTagPicker
+          position={tagPickerPosition}
+          onTagAdd={onTagAdd}
+          onTagRemove={onTagRemove}
+          currentTags={currentTags}
+          boardTags={boardTags}
+          onClose={() => setShowTagPicker(false)}
+        />
+      )}
       {!hideAddButton && (
-        <button
-          className={`card-hover-action emoji-action ${useDisabledStyling ? 'disabled' : ''}`}
-          onClick={disabled ? undefined : e => {
-            e.stopPropagation();
-            if (emojiButtonRef.current) {
-              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-              setEmojiPickerPosition({
-                top: buttonRect.bottom + window.scrollY + 5,
-                left: buttonRect.left + window.scrollX
-              });
-            }
-            setShowEmojiPicker(!showEmojiPicker);
-            setShowComments(false);
-          }}
-          title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
-          aria-label="Add reaction"
-          ref={emojiButtonRef}
-          disabled={useDisabledStyling}
-        >
-          <Smile size={16} aria-hidden="true" />
-        </button>
+        <>
+          <button
+            className={`card-hover-action color-action ${useDisabledStyling ? 'disabled' : ''}`}
+            onClick={disabled ? undefined : e => {
+              e.stopPropagation();
+              if (colorButtonRef.current) {
+                const buttonRect = colorButtonRef.current.getBoundingClientRect();
+                setColorPickerPosition({
+                  top: buttonRect.bottom + window.scrollY + 5,
+                  left: buttonRect.left + window.scrollX
+                });
+              }
+              setShowColorPicker(!showColorPicker);
+              setShowEmojiPicker(false);
+              setShowTagPicker(false);
+              setShowComments(false);
+            }}
+            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Set color'}
+            aria-label="Set color"
+            ref={colorButtonRef}
+            disabled={useDisabledStyling}
+          >
+            <Droplet size={16} aria-hidden="true" />
+          </button>
+          <button
+            className={`card-hover-action tag-action ${useDisabledStyling ? 'disabled' : ''}`}
+            onClick={disabled ? undefined : e => {
+              e.stopPropagation();
+              if (tagButtonRef.current) {
+                const buttonRect = tagButtonRef.current.getBoundingClientRect();
+                setTagPickerPosition({
+                  top: buttonRect.bottom + window.scrollY + 5,
+                  left: buttonRect.left + window.scrollX
+                });
+              }
+              setShowTagPicker(!showTagPicker);
+              setShowEmojiPicker(false);
+              setShowColorPicker(false);
+              setShowComments(false);
+            }}
+            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add tags'}
+            aria-label="Add tags"
+            ref={tagButtonRef}
+            disabled={useDisabledStyling}
+          >
+            <Tag size={16} aria-hidden="true" />
+          </button>
+          <button
+            className={`card-hover-action emoji-action ${useDisabledStyling ? 'disabled' : ''}`}
+            onClick={disabled ? undefined : e => {
+              e.stopPropagation();
+              if (emojiButtonRef.current) {
+                const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+                setEmojiPickerPosition({
+                  top: buttonRect.bottom + window.scrollY + 5,
+                  left: buttonRect.left + window.scrollX
+                });
+              }
+              setShowEmojiPicker(!showEmojiPicker);
+              setShowColorPicker(false);
+              setShowTagPicker(false);
+              setShowComments(false);
+            }}
+            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
+            aria-label="Add reaction"
+            ref={emojiButtonRef}
+            disabled={useDisabledStyling}
+          >
+            <Smile size={16} aria-hidden="true" />
+          </button>
+        </>
       )}
       {/* Show comment button on hover only */}
       <button

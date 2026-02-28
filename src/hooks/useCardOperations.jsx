@@ -500,6 +500,34 @@ export function useCardOperations({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showEmojiPicker]);
 
+  const setCardColor = useCallback(async color => {
+    if (!boardId) return;
+    try {
+      const colorRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/color`);
+      if (color) {
+        await set(colorRef, color);
+      } else {
+        await remove(colorRef);
+      }
+    } catch (error) {
+      console.error('Error setting card color:', error);
+    }
+  }, [boardId, columnId, cardId]);
+
+  const setCardTags = useCallback(async tags => {
+    if (!boardId) return;
+    try {
+      const tagsRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/tags`);
+      if (tags && tags.length > 0) {
+        await set(tagsRef, tags);
+      } else {
+        await remove(tagsRef);
+      }
+    } catch (error) {
+      console.error('Error setting card tags:', error);
+    }
+  }, [boardId, columnId, cardId]);
+
   return {
     // State
     isEditing,
@@ -522,11 +550,12 @@ export function useCardOperations({
     saveCardChanges,
     deleteCard,
     handleKeyPress,
+    setCardColor,
+    setCardTags,
 
     // Voting operations
     upvoteCard,
     downvoteCard,
-
 
     // Reaction operations
     hasUserReactedWithEmoji,
