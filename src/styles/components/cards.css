@@ -542,8 +542,7 @@
 }
 
 .inline-card-actions {
-    display: flex;
-    gap: var(--space-sm);
+    margin-top: var(--space-xxs);
 }
 
 /* Card Edit Mode */
@@ -601,15 +600,11 @@
         order: -1;
     }
 
-    /* Better spacing for inline card actions */
-    .inline-card-actions {
-        flex-direction: column;
-        gap: var(--space-md);
-    }
-
+    /* Inline card actions stay horizontal on mobile, just increase touch targets */
     .inline-card-actions .btn {
-        padding: var(--space-md);
-        min-height: 50px;
+        min-height: 40px;
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--font-size-sm);
     }
 
     /* Comment edit actions stay horizontal on mobile */

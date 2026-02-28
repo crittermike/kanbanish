@@ -182,11 +182,43 @@
     opacity: 1;
 }
 
-/* Inline card action buttons container */
+/* Inline card action buttons container — matches edit action button style */
 .inline-card-actions {
     display: flex;
     justify-content: flex-start;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
+}
+
+.inline-card-actions .btn {
+    flex: none;
+    min-width: auto;
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.inline-card-actions .primary-btn {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.inline-card-actions .primary-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.inline-card-actions .secondary-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: transparent;
+}
+
+.inline-card-actions .secondary-btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
 }
 
 /* Icon buttons */
