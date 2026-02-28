@@ -38,11 +38,30 @@
     transform: translateY(100px);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
 }
 
 .notification.show {
     transform: translateY(0);
     opacity: 1;
+}
+.notification-action {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px var(--space-xs);
+    border-radius: var(--radius-sm);
+    font-size: inherit;
+    white-space: nowrap;
+    transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.notification-action:hover {
+    background-color: var(--accent-transparent-light);
 }
 
 /* Animations */

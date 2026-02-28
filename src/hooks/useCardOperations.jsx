@@ -16,7 +16,9 @@ export function useCardOperations({
   retrospectiveMode = false,
   workflowPhase = 'CREATION',
   votesPerUser = 3, // maximum votes per user
-  getUserVoteCount = () => 0 // function to get current user vote count
+  getUserVoteCount = () => 0, // function to get current user vote count
+  recordAction = null, // undo/redo recording function
+  undo = null // undo function for notification action buttons
 }) {
   const { showNotification } = useNotification();
   // State
@@ -84,12 +86,35 @@ export function useCardOperations({
     }
 
     const trimmedContent = editedContent.trim();
+    const cardPath = `boards/${boardId}/columns/${columnId}/cards/${cardId}`;
 
     try {
       if (!trimmedContent) {
+        // Record undo for delete-by-empty
+        if (recordAction) {
+          recordAction({
+            description: 'Card deleted',
+            undo: [{ type: 'set', path: cardPath, value: cardData }],
+            redo: [{ type: 'remove', path: cardPath }]
+          });
+        }
         await remove(cardRef);
-        showNotification('Card deleted');
+        showNotification('Card deleted', {
+          actionLabel: 'Undo',
+          onAction: undo,
+          timeoutMs: 6000
+        });
         return;
+      }
+
+      // Record undo for content edit
+      const oldContent = cardData.content;
+      if (recordAction && trimmedContent !== oldContent) {
+        recordAction({
+          description: 'Card edited',
+          undo: [{ type: 'set', path: cardPath, value: cardData }],
+          redo: [{ type: 'set', path: cardPath, value: { ...cardData, content: trimmedContent } }]
+        });
       }
 
       await set(cardRef, {
@@ -101,7 +126,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error saving card:', error);
     }
-  }, [boardId, cardRef, cardData, editedContent, showNotification]);
+  }, [boardId, columnId, cardId, cardRef, cardData, editedContent, showNotification, recordAction, undo]);
 
   // Delete card
   const deleteCard = useCallback(async e => {
@@ -112,14 +137,29 @@ export function useCardOperations({
     }
 
     if (window.confirm('Are you sure you want to delete this card?')) {
+      const cardPath = `boards/${boardId}/columns/${columnId}/cards/${cardId}`;
+
+      // Record undo before deleting
+      if (recordAction) {
+        recordAction({
+          description: 'Card deleted',
+          undo: [{ type: 'set', path: cardPath, value: cardData }],
+          redo: [{ type: 'remove', path: cardPath }]
+        });
+      }
+
       try {
         await remove(cardRef);
-        showNotification('Card deleted');
+        showNotification('Card deleted', {
+          actionLabel: 'Undo',
+          onAction: undo,
+          timeoutMs: 6000
+        });
       } catch (error) {
         console.error('Error deleting card:', error);
       }
     }
-  }, [boardId, cardRef, showNotification]);
+  }, [boardId, columnId, cardId, cardRef, cardData, showNotification, recordAction, undo]);
 
   // Handle key press
   const handleKeyPress = useCallback(e => {
@@ -379,18 +419,26 @@ export function useCardOperations({
         return;
       }
 
-      const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
+      const commentPath = `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`;
+      const updatedComment = { ...existingComment, content: newContent.trim() };
 
-      await set(commentRef, {
-        ...existingComment,
-        content: newContent.trim()
-      });
+      // Record undo for comment edit
+      if (recordAction) {
+        recordAction({
+          description: 'Comment edited',
+          undo: [{ type: 'set', path: commentPath, value: existingComment }],
+          redo: [{ type: 'set', path: commentPath, value: updatedComment }]
+        });
+      }
+
+      const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
+      await set(commentRef, updatedComment);
 
       showNotification('Comment updated');
     } catch (error) {
       console.error('Error updating comment:', error);
     }
-  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode, recordAction]);
 
   const deleteComment = useCallback(async commentId => {
     if (!boardId || !commentId) {
@@ -420,13 +468,28 @@ export function useCardOperations({
         return;
       }
 
+      const commentPath = `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`;
+
+      // Record undo before deleting
+      if (recordAction) {
+        recordAction({
+          description: 'Comment deleted',
+          undo: [{ type: 'set', path: commentPath, value: existingComment }],
+          redo: [{ type: 'remove', path: commentPath }]
+        });
+      }
+
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       await remove(commentRef);
-      showNotification('Comment deleted');
+      showNotification('Comment deleted', {
+        actionLabel: 'Undo',
+        onAction: undo,
+        timeoutMs: 6000
+      });
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
-  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode, recordAction, undo]);
 
   const toggleComments = useCallback(() => {
     setShowComments(!showComments);

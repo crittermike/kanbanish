@@ -6,11 +6,13 @@ import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck'
 import { usePoll } from '../hooks/usePoll';
 import { usePresence } from '../hooks/usePresence';
 import { useTimer } from '../hooks/useTimer';
+import { useUndoRedo } from '../hooks/useUndoRedo';
 import { useVoting } from '../hooks/useVoting';
 import { useWorkflow } from '../hooks/useWorkflow';
 import { database, auth, signInAnonymously, get } from '../utils/firebase';
 import { generateId } from '../utils/ids';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import { useNotification } from './NotificationContext';
 
 // Default board title constant
 export const DEFAULT_BOARD_TITLE = 'Untitled Board';
@@ -200,6 +202,15 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     getAllUsersAddingCards
   } = usePresence({ boardId, user });
 
+  // Notification hook (from NotificationContext, which wraps BoardProvider)
+  const { showNotification } = useNotification();
+
+  // Undo/redo system
+  const {
+    recordAction, undo, redo,
+    canUndo, canRedo, pastCount, futureCount
+  } = useUndoRedo({ boardId, showNotification });
+
   // Create a new board with specified template columns, title, and optional settings overrides
   const createNewBoard = (templateColumns = null, boardTitle = DEFAULT_BOARD_TITLE, settingsOverride = null) => {
     if (!user) {
@@ -333,7 +344,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const {
     moveCard, createCardGroup, ungroupCards,
     removeAllGrouping, updateGroupName, toggleGroupExpanded
-  } = useGroups({ boardId, user, columns });
+  } = useGroups({ boardId, user, columns, recordAction });
 
   // Workflow phase transitions and results navigation
   const {
@@ -460,9 +471,16 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     restartTimer,
     // Board ownership
     boardOwner,
-    isOwner: user && boardOwner ? user.uid === boardOwner : false
+    isOwner: user && boardOwner ? user.uid === boardOwner : false,
+    // Undo/redo system
+    recordAction,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    pastCount,
+    futureCount
   };
-
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };
 
