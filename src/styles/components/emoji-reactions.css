@@ -43,9 +43,11 @@
     display: inline-flex;
     align-items: center;
     background-color: var(--hover-bg);
+    border: none;
     border-radius: var(--emoji-reaction-radius);
     padding: var(--emoji-reaction-padding);
     font-size: var(--emoji-reaction-font-size);
+    color: var(--text-color);
     cursor: pointer;
     transition: background-color var(--transition-speed) var(--transition-ease);
     user-select: none;
