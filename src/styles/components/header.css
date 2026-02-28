@@ -122,10 +122,84 @@ h1 {
     margin-bottom: var(--space-md);
 }
 
-/* Settings dropdown styles */
-.sort-dropdown-container {
-    position: relative;
-    display: inline-block;
+/* Settings modal styles */
+.settings-modal {
+    max-width: 500px;
+}
+
+.settings-modal .modal-body {
+    padding: var(--space-md) var(--space-lg);
+    gap: 0;
+}
+
+.settings-quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-xs) 0;
+}
+
+@media (min-width: 600px) {
+    .settings-quick-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+.settings-quick-action-btn {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-quick-action-btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--text-muted);
+}
+
+/* Health Check prominent button */
+.settings-health-check-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md);
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.settings-health-check-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+}
+
+.settings-health-check-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+}
+
+.health-check-btn-icon {
+    font-size: 1.2em;
+    line-height: 1;
 }
 
 /* Settings toggle button */
@@ -137,20 +211,7 @@ h1 {
     box-shadow: var(--shadow-sm);
 }
 
-.sort-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 2px;
-    min-width: 220px;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    z-index: 100;
-    overflow: hidden;
-    animation: dropdown-fade-in 0.2s ease;
-}
+/* Kept for backward compatibility with sort options in modal */
 
 .sort-option {
     display: flex;
@@ -189,7 +250,7 @@ h1 {
 
 /* Settings section styling */
 .settings-section {
-    padding: var(--space-xs) 0;
+    padding: var(--space-sm) 0;
 }
 
 .settings-section.settings-section-padded {
@@ -213,13 +274,14 @@ h1 {
     color: var(--text-muted);
     padding: var(--space-xs) var(--space-sm);
     margin: 0;
+    line-height: 1.4;
     border-bottom: 1px solid var(--border-color-light);
 }
 
 .settings-divider {
     height: 1px;
     background-color: var(--border-color);
-    margin: var(--space-xs) 0;
+    margin: var(--space-sm) 0;
 }
 
 .settings-section-placeholder {
@@ -237,6 +299,7 @@ h1 {
 /* Boolean option styling (Yes/No buttons) */
 .settings-boolean-option {
     display: flex;
+    flex-wrap: wrap;
     padding: var(--space-xs) var(--space-sm);
     gap: var(--space-xs);
 }
@@ -262,16 +325,6 @@ h1 {
     background-color: var(--accent);
     color: white;
     border-color: var(--accent);
-}
-
-@keyframes dropdown-fade-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* When dropdown is open, add a subtle indicator */
-.sort-dropdown-container:has(.sort-dropdown-menu) .settings-toggle-btn {
-    background-color: var(--hover-bg);
 }
 
 /* Fallback for browsers that don't support :has() */
@@ -303,20 +356,9 @@ h1 {
         justify-content: center;
     }
     
-    /* Ensure dropdown is full width on mobile */
-    .sort-dropdown-container {
-        grid-column: span 2;
-        width: 100%;
-    }
-    
     .settings-toggle-btn {
         width: 100%;
         min-height: 48px;
-    }
-    
-    /* Larger tap targets for dropdown options */
-    .sort-dropdown-menu {
-        width: 100%;
     }
     
     .sort-option {

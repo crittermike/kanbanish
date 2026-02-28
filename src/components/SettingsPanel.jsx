@@ -1,13 +1,10 @@
-import React, { useCallback } from 'react';
-import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Heart, Link, FileText } from 'react-feather';
+import { useCallback, useEffect } from 'react';
+import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
-import { useOnClickOutside } from '../hooks/useOnClickOutside';
 import Timer from './Timer';
 
 /**
- * Settings panel with board action buttons (Health Check, Timer),
- * a settings dropdown (sort, voting, retrospective toggles), and theme toggle.
- *
+ * a settings modal (quick actions, sort, voting, retrospective toggles, theme).
  * @param {Object} props
  * @param {Function} props.handleStartHealthCheck - Starts health check phase
  * @param {boolean} props.sortByVotes - Whether cards are sorted by votes
@@ -47,211 +44,242 @@ const SettingsPanel = ({
   updateDarkMode
 }) => {
   const { showNotification } = useNotification();
-  const dropdownRef = React.useRef(null);
-
-  const handleClickOutside = useCallback(() => {
-    setSortDropdownOpen(false);
+  const handleOverlayClick = useCallback((e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+      setSortDropdownOpen(false);
+    }
   }, [setSortDropdownOpen]);
 
-  useOnClickOutside(dropdownRef, handleClickOutside);
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && sortDropdownOpen) {
+        setSortDropdownOpen(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sortDropdownOpen, setSortDropdownOpen]);
 
   return (
     <div className="action-buttons">
       <Timer />
-      <div className="sort-dropdown-container" ref={dropdownRef}>
-        <button
+      
+      <button
           id="settings-dropdown-button"
           className="btn icon-btn settings-toggle-btn"
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-          aria-expanded={sortDropdownOpen}
-          aria-haspopup="true"
-          title="Board settings and preferences"
-          aria-label="Board settings"
-        >
-          <Settings size={16} aria-hidden="true" />
-        </button>
+        aria-expanded={sortDropdownOpen}
+        aria-haspopup="dialog"
+        title="Board settings and preferences"
+        aria-label="Board settings"
+      >
+        <Settings size={16} aria-hidden="true" />
+      </button>
 
-        {sortDropdownOpen && (
-          <div className="sort-dropdown-menu">
-            <div className="settings-section">
-              <button
-                className="sort-option"
-                onClick={() => {
-                  copyShareUrl();
-                  setSortDropdownOpen(false);
-                }}
-              >
-                <Link size={14} />
-                Share Board
-              </button>
-              <button
-                className="sort-option"
-                onClick={() => {
-                  handleExportBoard();
-                  setSortDropdownOpen(false);
-                }}
-              >
-                <FileText size={14} />
-                Export Board
-              </button>
-              <button
-                className="sort-option"
-                onClick={() => {
-                  handleStartHealthCheck();
-                  setSortDropdownOpen(false);
-                }}
-              >
-                <Heart size={14} />
-                Start Health Check
-              </button>
+      {sortDropdownOpen && (
+        <div className="modal-overlay" role="presentation" onClick={handleOverlayClick}>
+          <div className="modal-container settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 id="settings-modal-title">Board Settings</h2>
+              <button className="close-button" onClick={() => setSortDropdownOpen(false)} aria-label="Close">&times;</button>
             </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section">
-              <h4 className="settings-section-title">Sort Cards</h4>
-              <button
-                className={`sort-option ${!sortByVotes ? 'selected' : ''}`}
-                onClick={() => {
-                  setSortByVotes(false);
-                }}
-              >
-                <ArrowDown size={14} />
-                Chronological
-                {!sortByVotes && <span className="checkmark">✓</span>}
-              </button>
-              <button
-                className={`sort-option ${sortByVotes ? 'selected' : ''}`}
-                onClick={() => {
-                  setSortByVotes(true);
-                }}
-              >
-                <ThumbsUp size={14} />
-                By Votes
-                {sortByVotes && <span className="checkmark">✓</span>}
-              </button>
-            </div>
-            <div className="settings-divider"></div>
-            <div className="settings-section">
-              <h4 className="settings-section-title">Allow voting?</h4>
-              <div className="settings-boolean-option">
-                <button
-                  className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
-                  onClick={() => {
-                    updateVotingEnabled(true);
-                  }}
-                >
-                  Yes
-                </button>
-                <button
-                  className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
-                  onClick={() => {
-                    updateVotingEnabled(false);
-                  }}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-            {votingEnabled && (
-              <>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Allow downvoting?</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateDownvotingEnabled(true);
-                      }}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateDownvotingEnabled(false);
-                      }}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateMultipleVotesAllowed(true);
-                      }}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateMultipleVotesAllowed(false);
-                      }}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section">
-                  <h4 className="settings-section-title">Retrospective Mode</h4>
-                  <div className="settings-boolean-option">
-                    <button
-                      className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateRetrospectiveMode(true);
-                      }}
-                    >
-                      On
-                    </button>
-                    <button
-                      className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
-                      onClick={() => {
-                        updateRetrospectiveMode(false);
-                      }}
-                    >
-                      Off
-                    </button>
-                  </div>
-                  <p className="settings-hint">
-                    When enabled, new cards appear with hidden text until revealed
-                  </p>
-                </div>
-                <div className="settings-divider"></div>
-                <div className="settings-section settings-section-padded">
+            
+            <div className="modal-body">
+              {/* Appearance */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Appearance</h4>
+                <div className="settings-boolean-option">
                   <button
-                    className="btn danger-btn settings-full-width-btn"
-                    onClick={() => {
-                      if (resetAllVotes()) {
-                        showNotification('All votes reset to zero');
-                        // Keep dropdown open after resetting votes
-                      }
-                    }}
+                    className={`boolean-option ${!darkMode ? 'selected' : ''}`}
+                    onClick={() => updateDarkMode(false)}
                   >
-                    Reset all votes
+                    <Sun size={14} style={{ marginRight: '6px' }} />
+                    Light Mode
+                  </button>
+                  <button
+                    className={`boolean-option ${darkMode ? 'selected' : ''}`}
+                    onClick={() => updateDarkMode(true)}
+                  >
+                    <Moon size={14} style={{ marginRight: '6px' }} />
+                    Dark Mode
                   </button>
                 </div>
-              </>
-            )}
+              </div>
+
+              <div className="settings-divider"></div>
+
+              {/* Quick Actions */}
+              <div className="settings-section">
+                <div className="settings-quick-actions">
+                  <button
+                    className="settings-quick-action-btn"
+                    onClick={() => {
+                      copyShareUrl();
+                      setSortDropdownOpen(false);
+                    }}
+                  >
+                    <Link size={14} /> Share Board
+                  </button>
+                  <button
+                    className="settings-quick-action-btn"
+                    onClick={() => {
+                      handleExportBoard();
+                      setSortDropdownOpen(false);
+                    }}
+                  >
+                    <FileText size={14} /> Export Board
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-divider"></div>
+
+              {/* Health Check - Prominent */}
+              <div className="settings-section">
+                <button
+                  className="settings-health-check-btn"
+                  onClick={() => {
+                    handleStartHealthCheck();
+                    setSortDropdownOpen(false);
+                  }}
+                >
+                  <span className="health-check-btn-icon" aria-hidden="true">💚</span>
+                  Start Health Check
+                </button>
+              </div>
+
+              <div className="settings-divider"></div>
+
+              {/* Sort Cards */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Sort Cards</h4>
+                <div className="settings-boolean-option">
+                  <button
+                    className={`boolean-option ${!sortByVotes ? 'selected' : ''}`}
+                    onClick={() => setSortByVotes(false)}
+                  >
+                    <ArrowDown size={14} style={{ marginRight: '6px' }} />
+                    Chronological
+                  </button>
+                  <button
+                    className={`boolean-option ${sortByVotes ? 'selected' : ''}`}
+                    onClick={() => setSortByVotes(true)}
+                  >
+                    <ThumbsUp size={14} style={{ marginRight: '6px' }} />
+                    By Votes
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-divider"></div>
+
+              {/* Voting Settings */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Allow voting?</h4>
+                <div className="settings-boolean-option">
+                  <button
+                    className={`boolean-option ${votingEnabled ? 'selected' : ''}`}
+                    onClick={() => updateVotingEnabled(true)}
+                  >
+                    Yes
+                  </button>
+                  <button
+                    className={`boolean-option ${!votingEnabled ? 'selected' : ''}`}
+                    onClick={() => updateVotingEnabled(false)}
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+
+              {votingEnabled && (
+                <>
+                  <div className="settings-section">
+                    <h4 className="settings-section-title">Allow downvoting?</h4>
+                    <div className="settings-boolean-option">
+                      <button
+                        className={`boolean-option ${downvotingEnabled ? 'selected' : ''}`}
+                        onClick={() => updateDownvotingEnabled(true)}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        className={`boolean-option ${!downvotingEnabled ? 'selected' : ''}`}
+                        onClick={() => updateDownvotingEnabled(false)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="settings-section">
+                    <h4 className="settings-section-title">Allow users to vote multiple times on the same card?</h4>
+                    <div className="settings-boolean-option">
+                      <button
+                        className={`boolean-option ${multipleVotesAllowed ? 'selected' : ''}`}
+                        onClick={() => updateMultipleVotesAllowed(true)}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        className={`boolean-option ${!multipleVotesAllowed ? 'selected' : ''}`}
+                        onClick={() => updateMultipleVotesAllowed(false)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="settings-divider"></div>
+
+              {/* Retrospective Mode */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Retrospective Mode</h4>
+                <div className="settings-boolean-option">
+                  <button
+                    className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`}
+                    onClick={() => updateRetrospectiveMode(true)}
+                  >
+                    On
+                  </button>
+                  <button
+                    className={`boolean-option ${!retrospectiveMode ? 'selected' : ''}`}
+                    onClick={() => updateRetrospectiveMode(false)}
+                  >
+                    Off
+                  </button>
+                </div>
+                <p className="settings-hint">
+                  When enabled, new cards appear with hidden text until revealed
+                </p>
+              </div>
+
+              {/* Danger Zone */}
+              {votingEnabled && (
+                <>
+                  <div className="settings-divider"></div>
+                  <div className="settings-section settings-section-padded">
+                    <button
+                      className="btn danger-btn settings-full-width-btn"
+                      onClick={() => {
+                        if (resetAllVotes()) {
+                          showNotification('All votes reset to zero');
+                        }
+                      }}
+                    >
+                      Reset all votes
+                    </button>
+                  </div>
+                </>
+              )}
+
+            </div>
           </div>
-        )}
-      </div>
-      <button
-        id="theme-toggle"
-        className="btn icon-btn"
-        onClick={() => {
-          updateDarkMode(!darkMode);
-        }}
-        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-      >
-        {darkMode ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
-      </button>
+        </div>
+      )}
     </div>
   );
 };
