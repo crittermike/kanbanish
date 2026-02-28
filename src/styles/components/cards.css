@@ -695,3 +695,149 @@
 .card-highlight {
     animation: card-highlight 2s ease-out forwards;
 }
+
+/* Card color strip */
+.card[style*="border-left"] {
+    padding-left: calc(var(--space-sm) - 2px); /* compensate for thicker border */
+}
+
+/* Card tags */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xxs);
+    padding: 0;
+    margin-top: var(--space-xs);
+    margin-bottom: calc(-1 * var(--space-xxs));
+}
+
+.card-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: var(--radius-round);
+    background: var(--accent-transparent-light);
+    color: var(--accent);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    line-height: 1.6;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card color picker */
+.card-color-picker {
+    position: fixed;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-lg);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-xs);
+    min-width: 140px;
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-speed), border-color var(--transition-speed);
+}
+
+.color-option:hover {
+    transform: scale(1.15);
+    border-color: var(--text-muted);
+}
+
+.color-option.selected {
+    border-color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--text-color);
+}
+
+.color-option.no-color {
+    background: var(--hover-bg);
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Card tag picker */
+.card-tag-picker {
+    position: fixed;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    max-width: 260px;
+}
+
+.tag-picker-input {
+    width: 100%;
+    padding: var(--space-xxs) var(--space-xs);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--input-bg, var(--bg-color));
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    margin-bottom: var(--space-xs);
+}
+
+.tag-picker-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.tag-picker-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xxs);
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.tag-picker-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: var(--radius-round);
+    background: var(--hover-bg);
+    color: var(--text-color);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-speed);
+}
+
+.tag-picker-tag:hover {
+    background: var(--accent-transparent-light);
+    border-color: var(--accent);
+}
+
+.tag-picker-tag.active {
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tag-picker-empty {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    padding: var(--space-xs);
+    text-align: center;
+}

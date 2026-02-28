@@ -142,7 +142,8 @@ function Card({
     workflowPhase = 'CREATION',
     hideCardAuthorship,
     recordAction,
-    undo
+    undo,
+    boardTags
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -168,7 +169,8 @@ function Card({
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-
+    setCardColor,
+    setCardTags,
     // Voting operations
     upvoteCard,
     downvoteCard,
@@ -356,6 +358,7 @@ function Card({
     <div
       ref={combinedRef}
       className={`card ${getDynamicClasses()}${dimmed ? ' card-filtered-out' : ''}`}
+      style={{ borderLeft: displayCardData.color ? `4px solid ${displayCardData.color}` : undefined }}
       onClick={handleCardClick}
       data-card-id={cardId}
     >
@@ -403,10 +406,24 @@ function Card({
                 commentCount={Object.keys(displayCardData.comments || {}).length}
                 disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
                 disabledReason={disabledReason}
+                onColorSelect={setCardColor}
+                onTagAdd={(tag) => setCardTags([...(displayCardData.tags || []), tag])}
+                onTagRemove={(tag) => setCardTags((displayCardData.tags || []).filter(t => t !== tag))}
+                currentColor={displayCardData.color}
+                currentTags={displayCardData.tags || []}
+                boardTags={boardTags}
               />
             )}
           </CardContent>
-          
+
+          {displayCardData.tags && displayCardData.tags.length > 0 && (
+            <div className="card-tags">
+              {displayCardData.tags.map(tag => (
+                <span key={tag} className="card-tag-chip">{tag}</span>
+              ))}
+            </div>
+          )}
+
           {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
             <CardReactions
               reactions={displayCardData.reactions}

@@ -90,6 +90,8 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
               const processedCard = {
                 content: card.content,
                 votes: card.votes || 0,
+                color: card.color || null,
+                tags: card.tags || [],
                 comments: [],
                 reactions: []
               };
@@ -132,6 +134,8 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
             const processedCard = {
               content: card.content,
               votes: card.votes || 0,
+              color: card.color || null,
+              tags: card.tags || [],
               comments: [],
               reactions: []
             };
@@ -212,7 +216,8 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
           // Cards within the group as list items
           group.cards.forEach(card => {
             const voteCount = card.votes;
-            markdown += `- **${card.content}** ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n`;
+            const tagsStr = card.tags && card.tags.length > 0 ? ` [${card.tags.join('] [')}]` : '';
+            markdown += `- **${card.content}** ${voteCount > 0 ? `(${voteCount} votes)` : ''}${tagsStr}\n`;
 
             // Comments - indented under the list item
             if (card.comments.length > 0) {
@@ -242,9 +247,10 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
       column.cards.forEach(card => {
         // Card content as heading with vote count
         const voteCount = card.votes;
+        const tagsStr = card.tags && card.tags.length > 0 ? ` [${card.tags.join('] [')}]` : '';
 
         // Use content as heading/title
-        markdown += `### ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n\n`;
+        markdown += `### ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}${tagsStr}\n\n`;
 
         // Comments
         if (card.comments.length > 0) {
@@ -312,7 +318,8 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
           // Cards within the group
           group.cards.forEach(card => {
             const voteCount = card.votes;
-            const content = `  • ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}`;
+            const tagsStr = card.tags && card.tags.length > 0 ? ` (tags: ${card.tags.join(', ')})` : '';
+            const content = `  • ${card.content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}${tagsStr}`;
             text += `${content}\n`;
 
             // Comments
@@ -343,8 +350,9 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
       column.cards.forEach(card => {
         // Card content as heading with vote count
         const voteCount = card.votes;
+        const tagsStr = card.tags && card.tags.length > 0 ? ` (tags: ${card.tags.join(', ')})` : '';
         const content = card.content;
-        text += `${content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}\n${'-'.repeat(content.length)}\n\n`;
+        text += `${content} ${voteCount > 0 ? `(${voteCount} votes)` : ''}${tagsStr}\n${'-'.repeat(content.length)}\n\n`;
 
         // Comments
         if (card.comments.length > 0) {
