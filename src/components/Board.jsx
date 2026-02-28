@@ -50,7 +50,9 @@ function Board({ onGoHome }) {
     updateDarkMode,
     workflowPhase,
     getAllUsersAddingCards,
-    startHealthCheckPhase
+    startHealthCheckPhase,
+    votesPerUser,
+    updateVotesPerUser
   } = useBoardContext();
 
   // Search state
@@ -174,6 +176,8 @@ function Board({ onGoHome }) {
             resetAllVotes={resetAllVotes}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
+            votesPerUser={votesPerUser}
+            updateVotesPerUser={updateVotesPerUser}
           />
         </div>
       </header>

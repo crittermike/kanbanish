@@ -15,7 +15,7 @@ export function useCardOperations({
   multipleVotesAllowed = false, // pass this from the Card component
   retrospectiveMode = false,
   workflowPhase = 'CREATION',
-  votesPerUser = 3, // maximum votes per user
+  votesPerUser = 0, // maximum votes per user
   getUserVoteCount = () => 0, // function to get current user vote count
   recordAction = null, // undo/redo recording function
   undo = null // undo function for notification action buttons
@@ -201,8 +201,8 @@ export function useCardOperations({
     // Get the user's current vote if any
     const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
 
-    // Check vote limit (only for positive votes) - skip if not in retrospective mode
-    if (delta > 0 && retrospectiveMode) {
+    // Check vote limit (only for positive votes) - skip if votesPerUser is 0 (unlimited)
+    if (delta > 0 && votesPerUser > 0) {
       const currentUserVotes = getUserVoteCount(user.uid);
       
       // For multiple votes allowed, check if adding this vote would exceed the limit

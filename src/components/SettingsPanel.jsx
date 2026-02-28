@@ -22,7 +22,10 @@ import Timer from './Timer';
  * @param {Function} props.resetAllVotes - Resets all votes on the board
  * @param {boolean} props.darkMode - Whether dark mode is active
  * @param {Function} props.updateDarkMode - Toggles dark/light theme
+ * @param {number} props.votesPerUser - Maximum votes allowed per user (0 for unlimited)
+ * @param {Function} props.updateVotesPerUser - Updates the maximum votes per user
  */
+
 const SettingsPanel = ({
   handleStartHealthCheck,
   copyShareUrl,
@@ -41,7 +44,9 @@ const SettingsPanel = ({
   setSortDropdownOpen,
   resetAllVotes,
   darkMode,
-  updateDarkMode
+  updateDarkMode,
+  votesPerUser,
+  updateVotesPerUser
 }) => {
   const { showNotification } = useNotification();
   const handleOverlayClick = useCallback((e) => {
@@ -221,6 +226,52 @@ const SettingsPanel = ({
                       </button>
                     </div>
                   </div>
+
+                  <div className="settings-section settings-vote-limit">
+                    <h4 className="settings-section-title">Votes per person</h4>
+                    <div className="vote-limit-preset-buttons">
+                      {[3, 5, 10].map(val => (
+                        <button
+                          key={val}
+                          className={`vote-limit-preset ${votesPerUser === val ? 'active' : ''}`}
+                          onClick={() => updateVotesPerUser(val)}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                      <button
+                        className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
+                        onClick={() => updateVotesPerUser(0)}
+                      >
+                        Unlimited
+                      </button>
+                      <div className="vote-limit-custom-inline">
+                        <input
+                          type="number"
+                          className="vote-limit-input"
+                          min="1"
+                          max="99"
+                          value={votesPerUser > 0 && ![3, 5, 10].includes(votesPerUser) ? votesPerUser : ''}
+                          onChange={e => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val) && val > 0) {
+                              updateVotesPerUser(val);
+                            }
+                          }}
+                          onBlur={e => {
+                             const val = parseInt(e.target.value, 10);
+                             if (isNaN(val) || val <= 0) {
+                               if (votesPerUser > 0 && ![3, 5, 10].includes(votesPerUser)) {
+                                  updateVotesPerUser(0);
+                               }
+                             }
+                          }}
+                          placeholder="#"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                 </>
               )}
 
