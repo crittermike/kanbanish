@@ -272,23 +272,22 @@ h1 {
 .settings-reset-votes-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    align-self: flex-start;
+    gap: 4px;
     background: none;
-    border: 1px solid var(--danger);
-    border-radius: var(--radius-sm);
+    border: none;
     color: var(--danger);
-    font-size: 12px;
-    padding: 4px 10px;
+    font-size: 11px;
+    padding: 2px 0;
     cursor: pointer;
-    margin-top: var(--space-sm);
-    transition: all 0.15s ease;
-    opacity: 0.85;
+    margin-top: var(--space-xs);
+    transition: opacity 0.15s ease;
+    opacity: 0.6;
 }
 
 .settings-reset-votes-btn:hover {
-    background: var(--danger);
-    color: white;
     opacity: 1;
+    text-decoration: underline;
 }
 
 .settings-section-title {
