@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^13.5.0",
     "firebase": "^11.6.1",
+    "markdown-to-jsx": "^9.7.6",
     "react": "^19.1.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

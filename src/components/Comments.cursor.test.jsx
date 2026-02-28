@@ -38,7 +38,7 @@ describe('Comments Cursor Behavior', () => {
       />
     );
 
-    const commentContent = screen.getByText('Test comment');
+    const commentContent = screen.getByText('Test comment').closest('.comment-content');
     expect(commentContent).toHaveClass('editable');
     expect(commentContent).toHaveAttribute('title', 'Click to edit');
   });
@@ -62,7 +62,7 @@ describe('Comments Cursor Behavior', () => {
       />
     );
 
-    const commentContent = screen.getByText('Test comment');
+    const commentContent = screen.getByText('Test comment').closest('.comment-content');
     expect(commentContent).not.toHaveClass('editable');
     expect(commentContent).toHaveAttribute('title', 'Only the author can edit this comment');
   });

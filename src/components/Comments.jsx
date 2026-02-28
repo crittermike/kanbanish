@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { linkifyText } from '../utils/linkify';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
+import MarkdownContent from './MarkdownContent';
 
 const CommentEditor = ({
   editedComment,
@@ -138,7 +138,7 @@ const Comments = React.memo(({
                     : (isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment')
                 }
               >
-                {linkifyText(comment.content)}
+                <MarkdownContent content={comment.content} />
               </div>
             )}
           </div>

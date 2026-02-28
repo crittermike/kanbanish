@@ -20,6 +20,7 @@ import {
 import CardHoverActions from './CardHoverActions';
 import CardReactions from './CardReactions';
 import Comments from './Comments';
+import MarkdownContent from './MarkdownContent';
 import VotingControls from './VotingControls';
 
 // Card Editor component for editing mode
@@ -50,7 +51,6 @@ const CardEditor = ({
 // Card Content component for display mode
 const CardContent = ({
   cardData,
-  formatContentWithEmojis,
   upvoteCard,
   downvoteCard,
   votingEnabled,
@@ -100,7 +100,7 @@ const CardContent = ({
 
   const displayContent = showObfuscatedText ?
     generateObfuscatedText(cardData.content) :
-    formatContentWithEmojis(cardData.content);
+    cardData.content;
 
   return (
     <div className="card-header">
@@ -115,7 +115,7 @@ const CardContent = ({
         />
       )}
       <div className={`card-content ${!votingEnabled || groupId || !interactionsVisible || (retrospectiveMode && workflowPhase === 'CREATION' && user) ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
-        {displayContent}
+        {showObfuscatedText ? displayContent : <MarkdownContent content={displayContent} />}
       </div>
       {children}
     </div>
@@ -171,9 +171,6 @@ function Card({
     // Voting operations
     upvoteCard,
     downvoteCard,
-
-    // Content formatting
-    formatContentWithEmojis,
 
     // Reaction operations
     hasUserReactedWithEmoji,
@@ -380,7 +377,6 @@ function Card({
         <>
           <CardContent
             cardData={displayCardData}
-            formatContentWithEmojis={formatContentWithEmojis}
             upvoteCard={upvoteCard}
             downvoteCard={downvoteCard}
             votingEnabled={votingEnabled}
