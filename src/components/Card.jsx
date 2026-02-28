@@ -143,7 +143,10 @@ function Card({
     hideCardAuthorship,
     recordAction,
     undo,
-    boardTags
+    boardTags,
+    presenceData,
+    displayName,
+    userColor
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -200,7 +203,9 @@ function Card({
     votesPerUser,
     getUserVoteCount,
     recordAction,
-    undo
+    undo,
+    displayName,
+    userColor
   });
   // Calculate disabled reason for interactions
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
@@ -445,6 +450,7 @@ function Card({
               isCommentAuthor={isCommentAuthor}
               interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
               disabledReason={disabledReason}
+              presenceData={presenceData}
             />
           )}
         </>

@@ -8,6 +8,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
+import DisplayNamePrompt from './DisplayNamePrompt';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
@@ -54,7 +55,11 @@ function Board({ onGoHome }) {
     getAllUsersAddingCards,
     startHealthCheckPhase,
     votesPerUser,
-    updateVotesPerUser
+    updateVotesPerUser,
+    displayName,
+    userColor,
+    updateDisplayName,
+    updateUserColor
   } = useBoardContext();
 
   // Search state
@@ -182,6 +187,10 @@ function Board({ onGoHome }) {
             updateHideCardAuthorship={updateHideCardAuthorship}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
+            displayName={displayName}
+            userColor={userColor}
+            updateDisplayName={updateDisplayName}
+            updateUserColor={updateUserColor}
           />
         </div>
       </header>
@@ -240,6 +249,7 @@ function Board({ onGoHome }) {
         }}
       />
 
+      <DisplayNamePrompt />
     </>
   );
 }

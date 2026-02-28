@@ -7,16 +7,20 @@ import { database } from '../utils/firebase';
  *
  * Manages:
  * - Active user count via Firebase presence heartbeats
+ * - Display names and colors for each user
  * - Card creation activity indicators (who's typing where)
  * - Cleanup on unmount and page unload
  *
  * @param {Object} params
  * @param {string|null} params.boardId - Current board ID
  * @param {Object|null} params.user - Current Firebase user
+ * @param {string} params.displayName - Current user's display name
+ * @param {string} params.userColor - Current user's color
  * @returns {Object} Presence state and card creation tracking functions
  */
-export const usePresence = ({ boardId, user }) => {
+export const usePresence = ({ boardId, user, displayName, userColor }) => {
   const [activeUsers, setActiveUsers] = useState(0);
+  const [presenceData, setPresenceData] = useState({});
   const [usersAddingCards, setUsersAddingCards] = useState({});
 
   // Track user presence on the board
@@ -28,24 +32,38 @@ export const usePresence = ({ boardId, user }) => {
       // Set this user as active
       set(presenceRef, {
         lastSeen: Date.now(),
-        uid: user.uid
+        uid: user.uid,
+        displayName: displayName || '',
+        color: userColor || ''
       });
 
       // Listen to all active users
       const handlePresenceChange = snapshot => {
         if (snapshot.exists()) {
-          const presenceData = snapshot.val();
+          const data = snapshot.val();
           const now = Date.now();
           const activeThreshold = 30000; // Consider users active if seen within last 30 seconds
 
-          // Count users who were active recently
-          const activeUserCount = Object.values(presenceData).filter(userData =>
-            userData.lastSeen && (now - userData.lastSeen < activeThreshold)
-          ).length;
+          // Build presence data map for active users
+          const activePresence = {};
+          let activeUserCount = 0;
+          Object.entries(data).forEach(([uid, userData]) => {
+            if (userData.lastSeen && (now - userData.lastSeen < activeThreshold)) {
+              activeUserCount++;
+              activePresence[uid] = {
+                uid,
+                displayName: userData.displayName || '',
+                color: userData.color || '',
+                lastSeen: userData.lastSeen
+              };
+            }
+          });
 
           setActiveUsers(activeUserCount);
+          setPresenceData(activePresence);
         } else {
           setActiveUsers(0);
+          setPresenceData({});
         }
       };
 
@@ -55,7 +73,9 @@ export const usePresence = ({ boardId, user }) => {
       const presenceInterval = setInterval(() => {
         set(presenceRef, {
           lastSeen: Date.now(),
-          uid: user.uid
+          uid: user.uid,
+          displayName: displayName || '',
+          color: userColor || ''
         });
       }, 10000);
 
@@ -72,7 +92,7 @@ export const usePresence = ({ boardId, user }) => {
         }
       };
     }
-  }, [boardId, user]);
+  }, [boardId, user, displayName, userColor]);
 
   // Track users adding cards
   useEffect(() => {
@@ -125,11 +145,13 @@ export const usePresence = ({ boardId, user }) => {
     set(activityRef, {
       columnId,
       lastUpdated: Date.now(),
-      uid: user.uid
+      uid: user.uid,
+      displayName: displayName || '',
+      color: userColor || ''
     }).catch(error => {
       console.error('Error starting card creation tracking:', error);
     });
-  }, [boardId, user]);
+  }, [boardId, user, displayName, userColor]);
 
   // Stop tracking card creation activity for current user
   const stopCardCreation = useCallback(() => {
@@ -158,6 +180,7 @@ export const usePresence = ({ boardId, user }) => {
 
   return {
     activeUsers,
+    presenceData,
     usersAddingCards,
     startCardCreation,
     stopCardCreation,

@@ -1,5 +1,5 @@
 import { ref, onValue, off, set } from 'firebase/database';
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
@@ -58,6 +58,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [hideCardAuthorship, setHideCardAuthorship] = useState(false);
 
+  // Display name and color for user presence
+  const [displayName, setDisplayName] = useState('');
+  const [userColor, setUserColor] = useState('');
   // Board owner tracking
   const [boardOwner, setBoardOwner] = useState(null);
 
@@ -70,7 +73,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       if (user) {
         setUser(user);
 
-        // Load user preferences including theme
+        // Load user preferences including theme, display name, and color
         const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
         get(userPrefsRef).then(snapshot => {
           if (snapshot.exists()) {
@@ -80,6 +83,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (prefs.hideCardAuthorship !== undefined) {
               setHideCardAuthorship(prefs.hideCardAuthorship);
+            }
+            if (prefs.displayName) {
+              setDisplayName(prefs.displayName);
+            }
+            if (prefs.userColor) {
+              setUserColor(prefs.userColor);
             }
           }
         }).catch(error => {
@@ -199,12 +208,66 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Presence and card creation activity tracking
   const {
     activeUsers,
+    presenceData,
     usersAddingCards,
     startCardCreation,
     stopCardCreation,
     getUsersAddingCardsInColumn,
     getAllUsersAddingCards
-  } = usePresence({ boardId, user });
+  } = usePresence({ boardId, user, displayName, userColor });
+
+  // Update display name and color (persists to user prefs)
+  const updateDisplayName = useCallback((newName) => {
+    setDisplayName(newName);
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        set(userPrefsRef, { ...currentPrefs, displayName: newName });
+      }).catch(error => {
+        console.error('Error saving display name:', error);
+      });
+    }
+  }, [user]);
+
+  const updateUserColor = useCallback((newColor) => {
+    setUserColor(newColor);
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        set(userPrefsRef, { ...currentPrefs, userColor: newColor });
+      }).catch(error => {
+        console.error('Error saving user color:', error);
+      });
+    }
+  }, [user]);
+
+  // Clear display name (used when removing name)
+  const clearDisplayName = useCallback(() => {
+    setDisplayName('');
+    setUserColor('');
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        const { displayName: _dn, userColor: _uc, ...rest } = currentPrefs;
+        set(userPrefsRef, rest);
+      }).catch(error => {
+        console.error('Error clearing display name:', error);
+      });
+      // Also clear from presence
+      if (boardId) {
+        const presenceRef = ref(database, `boards/${boardId}/presence/${user.uid}`);
+        set(presenceRef, {
+          lastSeen: Date.now(),
+          uid: user.uid,
+          displayName: '',
+          color: ''
+        });
+      }
+    }
+  }, [user, boardId]);
 
   // Notification hook (from NotificationContext, which wraps BoardProvider)
   const { showNotification } = useNotification();
@@ -444,7 +507,14 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       // Screen sharing mode
       hideCardAuthorship,
       updateHideCardAuthorship,
+      // Display name and presence
+      displayName,
+      userColor,
+      updateDisplayName,
+      updateUserColor,
+      clearDisplayName,
       activeUsers,
+      presenceData,
       // Workflow phase system
       workflowPhase,
       setWorkflowPhase,
@@ -494,7 +564,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,
-    activeUsers, workflowPhase, setWorkflowPhase,
+    displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
+    activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,

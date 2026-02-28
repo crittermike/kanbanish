@@ -36,7 +36,10 @@ function CardGroup({
     upvoteGroup,
     downvoteGroup,
     retrospectiveMode,
-    workflowPhase
+    workflowPhase,
+    presenceData,
+    displayName,
+    userColor
   } = useBoardContext();
 
   // Initialize group operations hook
@@ -47,7 +50,9 @@ function CardGroup({
     groupData,
     user,
     retrospectiveMode,
-    workflowPhase
+    workflowPhase,
+    displayName,
+    userColor
   });
 
   const [isExpanded, setIsExpanded] = useState(groupData.expanded !== false); // Default to expanded
@@ -357,6 +362,7 @@ function CardGroup({
             onDeleteComment={groupOperations.deleteComment}
             isCommentAuthor={groupOperations.isCommentAuthor}
             interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+            presenceData={presenceData}
           />
         </div>
       )}

@@ -16,7 +16,9 @@ export function useGroupOperations({
   groupData,
   user,
   retrospectiveMode = false,
-  workflowPhase = 'CREATION'
+  workflowPhase = 'CREATION',
+  displayName = '',
+  userColor = ''
 }) {
   const { showNotification } = useNotification();
   // State for group interactions
@@ -110,7 +112,9 @@ export function useGroupOperations({
     const commentData = {
       content: newComment.trim(),
       createdBy: user.uid,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      displayName: displayName || '',
+      color: userColor || ''
     };
 
     try {
@@ -121,7 +125,7 @@ export function useGroupOperations({
       console.error('Error adding comment:', error);
       showNotification('Error adding comment');
     }
-  }, [boardId, columnId, groupId, newComment, user, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, groupId, newComment, user, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode, displayName, userColor]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !newContent.trim()) {

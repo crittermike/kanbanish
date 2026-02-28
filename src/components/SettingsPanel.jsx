@@ -1,6 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
+import { AVATAR_COLORS, generateRandomName, getInitials } from '../utils/avatarColors';
 import Timer from './Timer';
 
 /**
@@ -50,8 +51,32 @@ const SettingsPanel = ({
   hideCardAuthorship,
   updateHideCardAuthorship,
   votesPerUser,
-  updateVotesPerUser
+  updateVotesPerUser,
+  displayName,
+  userColor,
+  updateDisplayName,
+  updateUserColor
 }) => {
+  const [localName, setLocalName] = useState(displayName || '');
+  
+  useEffect(() => {
+    setLocalName(displayName || '');
+  }, [displayName]);
+
+  const handleNameBlur = () => {
+    const trimmed = localName.trim();
+    if (trimmed && trimmed !== displayName) {
+      updateDisplayName(trimmed);
+    } else if (!trimmed) {
+      setLocalName(displayName || '');
+    }
+  };
+
+  const handleRandomize = () => {
+    const newName = generateRandomName();
+    setLocalName(newName);
+    updateDisplayName(newName);
+  };
   const { showNotification } = useNotification();
   const handleOverlayClick = useCallback((e) => {
     if (e.target.classList.contains('modal-overlay')) {
@@ -95,6 +120,48 @@ const SettingsPanel = ({
             </div>
             
             <div className="modal-body">
+              {/* Your Profile */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Your Profile</h4>
+                <div className="settings-name-editor">
+                  <div className="avatar-circle" style={{ backgroundColor: userColor || 'var(--accent)' }}>
+                    {getInitials(localName || displayName || 'A')}
+                  </div>
+                  <input
+                    type="text"
+                    className="settings-name-input"
+                    value={localName}
+                    onChange={(e) => setLocalName(e.target.value)}
+                    onBlur={handleNameBlur}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.target.blur();
+                      }
+                    }}
+                    placeholder="Enter display name"
+                  />
+                  <button 
+                    className="display-name-randomize-btn" 
+                    onClick={handleRandomize}
+                    title="Randomize name"
+                  >
+                    🎲
+                  </button>
+                </div>
+                <div className="settings-color-row">
+                  {AVATAR_COLORS.map(color => (
+                    <button
+                      key={color}
+                      className={`display-name-color-swatch ${userColor === color ? 'selected' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => updateUserColor(color)}
+                      aria-label={`Select color ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="settings-divider"></div>
+
               {/* Appearance */}
               <div className="settings-section">
                 <h4 className="settings-section-title">Appearance</h4>
