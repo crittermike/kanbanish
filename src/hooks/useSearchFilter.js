@@ -1,31 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
- * Custom hook for card search and filtering.
- * Manages search query, filter state, and computes which cards match.
+ * Custom hook for card text search.
+ * Manages search query state and computes which cards match.
  *
  * @param {Object} params
  * @param {Object} params.columns - Column data from BoardContext
- * @param {Object|null} params.user - Current user object (for "my cards" filter)
- * @returns {Object} Search/filter state and operations
+ * @returns {Object} Search state and operations
  */
-export function useSearchFilter({ columns, user }) {
+export function useSearchFilter({ columns }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [minVotes, setMinVotes] = useState(0);
-  const [filterColumn, setFilterColumn] = useState(''); // '' = all columns
-  const [myCardsOnly, setMyCardsOnly] = useState(false);
-  const [groupedFilter, setGroupedFilter] = useState('all'); // 'all' | 'grouped' | 'ungrouped'
   const [isOpen, setIsOpen] = useState(false);
   const searchInputRef = useRef(null);
 
-  // Check if any filter is active
+  // Check if search is active
   const isFiltering = useMemo(() => (
-    searchQuery.trim() !== '' ||
-    minVotes > 0 ||
-    filterColumn !== '' ||
-    myCardsOnly ||
-    groupedFilter !== 'all'
-  ), [searchQuery, minVotes, filterColumn, myCardsOnly, groupedFilter]);
+    searchQuery.trim() !== ''
+  ), [searchQuery]);
 
   // Check if a card's content or comments match the search query
   const cardMatchesSearch = useCallback((cardData, query) => {
@@ -49,29 +40,6 @@ export function useSearchFilter({ columns, user }) {
     return false;
   }, []);
 
-  // Check if a card matches all active filters
-  const cardMatchesFilters = useCallback((cardId, cardData, columnId) => {
-    const query = searchQuery.trim();
-
-    // Text search
-    if (!cardMatchesSearch(cardData, query)) return false;
-
-    // Min votes filter
-    if (minVotes > 0 && (cardData.votes || 0) < minVotes) return false;
-
-    // Column filter
-    if (filterColumn && columnId !== filterColumn) return false;
-
-    // My cards filter
-    if (myCardsOnly && user?.uid && cardData.createdBy !== user.uid) return false;
-
-    // Grouped/ungrouped filter
-    if (groupedFilter === 'grouped' && !cardData.groupId) return false;
-    if (groupedFilter === 'ungrouped' && cardData.groupId) return false;
-
-    return true;
-  }, [searchQuery, minVotes, filterColumn, myCardsOnly, groupedFilter, user, cardMatchesSearch]);
-
   // Compute matching card IDs and total counts
   const { matchingCardIds, totalCards, matchingCount } = useMemo(() => {
     const matching = new Set();
@@ -79,19 +47,21 @@ export function useSearchFilter({ columns, user }) {
 
     if (!columns) return { matchingCardIds: matching, totalCards: 0, matchingCount: 0 };
 
-    for (const [columnId, columnData] of Object.entries(columns)) {
+    const query = searchQuery.trim();
+
+    for (const [_columnId, columnData] of Object.entries(columns)) {
       if (!columnData.cards) continue;
 
       for (const [cardId, cardData] of Object.entries(columnData.cards)) {
         total++;
-        if (!isFiltering || cardMatchesFilters(cardId, cardData, columnId)) {
+        if (!isFiltering || cardMatchesSearch(cardData, query)) {
           matching.add(cardId);
         }
       }
     }
 
     return { matchingCardIds: matching, totalCards: total, matchingCount: matching.size };
-  }, [columns, isFiltering, cardMatchesFilters]);
+  }, [columns, isFiltering, cardMatchesSearch, searchQuery]);
 
   // Also compute matching group IDs — a group matches if ANY card inside it matches
   const matchingGroupIds = useMemo(() => {
@@ -121,13 +91,9 @@ export function useSearchFilter({ columns, user }) {
     return matching;
   }, [columns, isFiltering, matchingCardIds, searchQuery]);
 
-  // Clear all filters
-  const clearFilters = useCallback(() => {
+  // Clear search
+  const clearSearch = useCallback(() => {
     setSearchQuery('');
-    setMinVotes(0);
-    setFilterColumn('');
-    setMyCardsOnly(false);
-    setGroupedFilter('all');
   }, []);
 
   // Open search and focus input
@@ -139,11 +105,11 @@ export function useSearchFilter({ columns, user }) {
     }, 50);
   }, []);
 
-  // Close search and clear filters
+  // Close search and clear
   const closeSearch = useCallback(() => {
     setIsOpen(false);
-    clearFilters();
-  }, [clearFilters]);
+    clearSearch();
+  }, [clearSearch]);
 
   // Keyboard shortcut: Ctrl+F / Cmd+F to open search
   useEffect(() => {
@@ -166,21 +132,9 @@ export function useSearchFilter({ columns, user }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, openSearch, closeSearch]);
 
-  // Get column options for the column filter dropdown
-  const columnOptions = useMemo(() => {
-    if (!columns) return [];
-    return Object.entries(columns)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([id, data]) => ({ id, title: data.title || 'Untitled' }));
-  }, [columns]);
-
   return {
     // State
     searchQuery,
-    minVotes,
-    filterColumn,
-    myCardsOnly,
-    groupedFilter,
     isOpen,
     isFiltering,
     searchInputRef,
@@ -190,16 +144,11 @@ export function useSearchFilter({ columns, user }) {
     matchingGroupIds,
     totalCards,
     matchingCount,
-    columnOptions,
 
     // Actions
     setSearchQuery,
-    setMinVotes,
-    setFilterColumn,
-    setMyCardsOnly,
-    setGroupedFilter,
     openSearch,
     closeSearch,
-    clearFilters,
+    clearSearch,
   };
 }

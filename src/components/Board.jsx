@@ -53,8 +53,8 @@ function Board({ onGoHome }) {
     startHealthCheckPhase
   } = useBoardContext();
 
-  // Search and filter state
-  const searchFilter = useSearchFilter({ columns, user });
+  // Search state
+  const searchFilter = useSearchFilter({ columns });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -183,19 +183,9 @@ function Board({ onGoHome }) {
         <SearchFilterBar
           searchQuery={searchFilter.searchQuery}
           setSearchQuery={searchFilter.setSearchQuery}
-          minVotes={searchFilter.minVotes}
-          setMinVotes={searchFilter.setMinVotes}
-          filterColumn={searchFilter.filterColumn}
-          setFilterColumn={searchFilter.setFilterColumn}
-          myCardsOnly={searchFilter.myCardsOnly}
-          setMyCardsOnly={searchFilter.setMyCardsOnly}
-          groupedFilter={searchFilter.groupedFilter}
-          setGroupedFilter={searchFilter.setGroupedFilter}
           isFiltering={searchFilter.isFiltering}
           matchingCount={searchFilter.matchingCount}
           totalCards={searchFilter.totalCards}
-          columnOptions={searchFilter.columnOptions}
-          clearFilters={searchFilter.clearFilters}
           closeSearch={searchFilter.closeSearch}
           searchInputRef={searchFilter.searchInputRef}
         />

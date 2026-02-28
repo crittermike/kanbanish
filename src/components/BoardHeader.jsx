@@ -45,7 +45,6 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
         aria-label="Search cards"
       >
         <Search size={16} />
-        <span className="search-shortcut">⌘F</span>
       </button>
     )}
     <div className="action-buttons">
