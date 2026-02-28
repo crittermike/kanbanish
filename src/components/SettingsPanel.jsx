@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { ArrowDown, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
+import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import Timer from './Timer';
 
@@ -234,6 +234,12 @@ const SettingsPanel = ({
                   <div className="settings-section settings-vote-limit">
                     <h4 className="settings-section-title">Votes per person</h4>
                     <div className="vote-limit-preset-buttons">
+                      <button
+                        className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
+                        onClick={() => updateVotesPerUser(0)}
+                      >
+                        Unlimited
+                      </button>
                       {[3, 5, 10].map(val => (
                         <button
                           key={val}
@@ -243,13 +249,7 @@ const SettingsPanel = ({
                           {val}
                         </button>
                       ))}
-                      <button
-                        className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
-                        onClick={() => updateVotesPerUser(0)}
-                      >
-                        Unlimited
-                      </button>
-                      <div className="vote-limit-custom-inline">
+                      <div className={`vote-limit-custom-inline ${votesPerUser > 0 && ![3, 5, 10].includes(votesPerUser) ? 'active' : ''}`}>
                         <input
                           type="number"
                           className="vote-limit-input"
@@ -276,6 +276,17 @@ const SettingsPanel = ({
                     </div>
                   </div>
 
+                  <button
+                    className="settings-reset-votes-btn"
+                    onClick={() => {
+                      if (resetAllVotes()) {
+                        showNotification('All votes reset to zero');
+                      }
+                    }}
+                  >
+                    <RotateCcw size={12} />
+                    Reset all votes
+                  </button>
                 </>
               )}
 
@@ -315,24 +326,6 @@ const SettingsPanel = ({
                 </p>
               </div>
 
-              {/* Danger Zone */}
-              {votingEnabled && (
-                <>
-                  <div className="settings-divider"></div>
-                  <div className="settings-section settings-section-padded">
-                    <button
-                      className="btn danger-btn settings-full-width-btn"
-                      onClick={() => {
-                        if (resetAllVotes()) {
-                          showNotification('All votes reset to zero');
-                        }
-                      }}
-                    >
-                      Reset all votes
-                    </button>
-                  </div>
-                </>
-              )}
 
             </div>
           </div>

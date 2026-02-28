@@ -269,6 +269,27 @@ h1 {
     margin: var(--space-xs) 0;
 }
 
+.settings-reset-votes-btn {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 11px;
+    padding: 2px 0;
+    cursor: pointer;
+    margin-top: var(--space-xs);
+    transition: opacity 0.15s ease;
+    opacity: 0.6;
+}
+
+.settings-reset-votes-btn:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
 .settings-section-title {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
@@ -412,6 +433,11 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     padding: var(--space-xs) var(--space-sm);
     font-size: var(--font-size-sm);
     box-sizing: border-box;
+}
+
+.vote-limit-custom-inline.active .vote-limit-input {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 /* Fallback for browsers that don't support :has() */
