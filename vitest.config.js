@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.js'],
+    exclude: ['e2e/**', 'node_modules/**'],
     reporters: ['default', 'json'],
     outputFile: 'vitest.results.json',
     coverage: {

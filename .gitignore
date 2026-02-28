@@ -27,3 +27,7 @@ vitest.results.json
 
 # screenshots from browser automation
 *.png
+
+# Playwright
+/test-results/
+/playwright-report/
