@@ -254,14 +254,14 @@ h1 {
 }
 
 .settings-section.settings-section-padded {
-    padding: 0 var(--space-sm);
+    padding: 0;
 }
 
 .settings-hint {
     font-size: 12px;
     color: var(--text-muted);
     margin-top: 4px;
-    padding: 0 var(--space-sm);
+    padding: 0;
 }
 
 .settings-full-width-btn {
@@ -272,7 +272,7 @@ h1 {
 .settings-section-title {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-xs) 0;
     margin: 0;
     line-height: 1.4;
     border-bottom: 1px solid var(--border-color-light);
@@ -300,7 +300,7 @@ h1 {
 .settings-boolean-option {
     display: flex;
     flex-wrap: wrap;
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-xs) 0;
     gap: var(--space-xs);
 }
 
