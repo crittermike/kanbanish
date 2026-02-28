@@ -161,6 +161,9 @@
 .health-check-view-results-btn {
     margin-top: 1rem;
     width: 100%;
+    padding: 12px 16px;
+    text-align: center;
+    justify-content: center;
 }
 
 /* Completion count badge */
