@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useBoardContext } from '../context/BoardContext';
 import { getInitials } from '../utils/avatarColors';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 import MarkdownContent from './MarkdownContent';
@@ -46,6 +47,7 @@ const Comments = React.memo(({
   disabledReason = null,
   presenceData = {}
 }) => {
+  const { showDisplayNames } = useBoardContext();
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
 
@@ -118,19 +120,21 @@ const Comments = React.memo(({
               />
             ) : (
               <>
-                <div className="comment-author">
-                  <div 
-                    className="comment-author-avatar" 
-                    style={{ 
-                      backgroundColor: presenceData[comment.createdBy]?.color || comment.color || 'var(--text-muted)' 
-                    }}
-                  >
-                    {getInitials(presenceData[comment.createdBy]?.displayName || comment.displayName || 'Anonymous')}
+                {showDisplayNames && (
+                  <div className="comment-author">
+                    <div 
+                      className="comment-author-avatar" 
+                      style={{ 
+                        backgroundColor: presenceData?.[comment.createdBy]?.color || comment.userColor || comment.color || 'var(--text-muted)' 
+                      }}
+                    >
+                      {getInitials(presenceData?.[comment.createdBy]?.displayName || comment.displayName || 'Anonymous')}
+                    </div>
+                    <span className="comment-author-name">
+                      {presenceData?.[comment.createdBy]?.displayName || comment.displayName || 'Anonymous'}
+                    </span>
                   </div>
-                  <span className="comment-author-name">
-                    {presenceData[comment.createdBy]?.displayName || comment.displayName || 'Anonymous'}
-                  </span>
-                </div>
+                )}
                 <div
                 className={`comment-content ${isCommentAuthor(comment) && !interactionsDisabled ? 'editable' : ''}`}
                 onClick={e => {

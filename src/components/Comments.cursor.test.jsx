@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useBoardContext } from '../context/BoardContext';
 import Comments from './Comments';
+
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
 
 describe('Comments Cursor Behavior', () => {
   const mockAddComment = vi.fn();
@@ -17,6 +22,10 @@ describe('Comments Cursor Behavior', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useBoardContext.mockReturnValue({
+      presenceData: {},
+      showDisplayNames: true
+    });
   });
 
   it('shows pointer cursor for editable comments (author)', () => {

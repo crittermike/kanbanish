@@ -266,7 +266,9 @@ describe('useCardOperations', () => {
 
       expect(set).toHaveBeenCalledWith('mock-ref', {
         ...mockProps.cardData,
-        content: 'Updated content'
+        content: 'Updated content',
+        displayName: '',
+        userColor: ''
       });
       expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
       expect(result.current.isEditing).toBe(false);

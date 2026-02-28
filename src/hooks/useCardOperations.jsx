@@ -120,14 +120,16 @@ export function useCardOperations({
 
       await set(cardRef, {
         ...cardData,
-        content: trimmedContent
+        content: trimmedContent,
+        displayName: displayName || cardData.displayName || '',
+        userColor: userColor || cardData.userColor || ''
       });
       showNotification('Card saved');
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving card:', error);
     }
-  }, [boardId, columnId, cardId, cardRef, cardData, editedContent, showNotification, recordAction, undo]);
+  }, [boardId, columnId, cardId, cardRef, cardData, editedContent, showNotification, recordAction, undo, displayName, userColor]);
 
   // Delete card
   const deleteCard = useCallback(async e => {

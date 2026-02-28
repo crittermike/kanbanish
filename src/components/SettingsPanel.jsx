@@ -25,8 +25,9 @@ import Timer from './Timer';
  * @param {Function} props.updateDarkMode - Toggles dark/light theme
  * @param {boolean} props.hideCardAuthorship - Whether card authorship marker is hidden
  * @param {Function} props.updateHideCardAuthorship - Toggles card authorship marker
+ * @param {boolean} props.showDisplayNames - Whether to show display names globally
+ * @param {Function} props.updateShowDisplayNames - Toggles display names visibility
  * @param {number} props.votesPerUser - Maximum votes allowed per user (0 for unlimited)
- * @param {Function} props.updateVotesPerUser - Updates the maximum votes per user
  */
 
 const SettingsPanel = ({
@@ -50,6 +51,8 @@ const SettingsPanel = ({
   updateDarkMode,
   hideCardAuthorship,
   updateHideCardAuthorship,
+  showDisplayNames,
+  updateShowDisplayNames,
   votesPerUser,
   updateVotesPerUser,
   displayName,
@@ -159,6 +162,21 @@ const SettingsPanel = ({
                     />
                   ))}
                 </div>
+                <div className="settings-toggle-row" style={{ marginTop: '16px' }}>
+                  <span className="settings-toggle-label">Show display names on board</span>
+                  <button
+                    className="settings-toggle-switch"
+                    role="switch"
+                    aria-checked={showDisplayNames}
+                    onClick={() => updateShowDisplayNames(!showDisplayNames)}
+                    aria-label="Show display names on board"
+                  >
+                    <span className="settings-toggle-knob"></span>
+                  </button>
+                </div>
+                <p className="settings-hint">
+                  Displays author names and avatars on cards and comments
+                </p>
               </div>
               <div className="settings-divider"></div>
 

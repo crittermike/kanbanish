@@ -51,6 +51,8 @@ function Board({ onGoHome }) {
     updateDarkMode,
     hideCardAuthorship,
     updateHideCardAuthorship,
+    showDisplayNames,
+    updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
     startHealthCheckPhase,
@@ -185,6 +187,8 @@ function Board({ onGoHome }) {
             updateDarkMode={updateDarkMode}
             hideCardAuthorship={hideCardAuthorship}
             updateHideCardAuthorship={updateHideCardAuthorship}
+            showDisplayNames={showDisplayNames}
+            updateShowDisplayNames={updateShowDisplayNames}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
             displayName={displayName}

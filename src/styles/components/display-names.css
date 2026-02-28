@@ -212,7 +212,37 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-bottom: 2px;
+}
+
+/* Card Author Badges */
+.card-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
   margin-bottom: 4px;
+}
+
+.card-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.card-author-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .comment-author-avatar {

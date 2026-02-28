@@ -7,21 +7,21 @@ import { AVATAR_COLORS, generateRandomName, getInitials, getRandomColor } from '
  * Shows automatically when user has no displayName set.
  */
 const DisplayNamePrompt = () => {
-  const { displayName, updateDisplayName, updateUserColor, boardId } = useBoardContext();
+  const { displayName, updateDisplayName, updateUserColor, boardId, showDisplayNames } = useBoardContext();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [color, setColor] = useState('');
 
-  // Show prompt when user joins a board without a display name
+  // Show prompt when user joins a board without a display name, AND showDisplayNames is enabled
   useEffect(() => {
-    if (boardId && !displayName) {
+    if (boardId && !displayName && showDisplayNames) {
       const suggested = generateRandomName();
       const suggestedColor = getRandomColor();
       setName(suggested);
       setColor(suggestedColor);
       setIsOpen(true);
     }
-  }, [boardId, displayName]);
+  }, [boardId, displayName, showDisplayNames]);
 
   const handleSubmit = useCallback(() => {
     const trimmed = name.trim();

@@ -41,6 +41,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
+  const [showDisplayNames, setShowDisplayNames] = useState(false); // Default to off
 
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
@@ -163,7 +164,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (boardData.settings.resultsViewIndex !== undefined) {
               setResultsViewIndex(boardData.settings.resultsViewIndex);
             }
+            if (boardData.settings.showDisplayNames !== undefined) {
+              setShowDisplayNames(boardData.settings.showDisplayNames);
+            }
           }
+
 
           // Load poll data
           if (boardData.poll) {
@@ -286,19 +291,20 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateRetrospectiveMode
+    updateRetrospectiveMode,
+    updateShowDisplayNames
   } = useBoardSettings({
     boardId,
     user,
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex
+      workflowPhase, resultsViewIndex, showDisplayNames
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
     }
   });
 
@@ -390,7 +396,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       });
 
       // Only allow a safe subset of settings to be overridden on creation
-      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames'];
       const sanitizedOverrides = {};
       if (settingsOverride && typeof settingsOverride === 'object') {
         allowedOverrideKeys.forEach(k => {
@@ -413,6 +419,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           retrospectiveMode: false, // Default to disabled (cards are visible)
           workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
           resultsViewIndex: 0, // Default to first result
+          showDisplayNames: false, // Default to off
           // Apply any overrides parsed from URL (validated/whitelisted)
           ...sanitizedOverrides
         }
@@ -499,6 +506,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    showDisplayNames, updateShowDisplayNames,
     boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
       updateDarkMode,
@@ -561,6 +569,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    showDisplayNames, updateShowDisplayNames,
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,

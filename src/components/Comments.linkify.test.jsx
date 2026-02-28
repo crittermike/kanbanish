@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { useBoardContext } from '../context/BoardContext';
 import Comments from './Comments';
+
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: vi.fn()
+}));
 
 describe('Comments URL linking', () => {
   const mockProps = {
@@ -30,6 +35,13 @@ describe('Comments URL linking', () => {
     interactionsDisabled: false,
     disabledReason: null
   };
+
+  beforeEach(() => {
+    useBoardContext.mockReturnValue({
+      presenceData: {},
+      showDisplayNames: true
+    });
+  });
 
   test('renders URLs as clickable links in comments', () => {
     render(<Comments {...mockProps} />);

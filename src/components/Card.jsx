@@ -3,6 +3,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import { getInitials } from '../utils/avatarColors';
 import {
   getDisabledReason
 } from '../utils/retrospectiveModeUtils';
@@ -146,7 +147,8 @@ function Card({
     boardTags,
     presenceData,
     displayName,
-    userColor
+    userColor,
+    showDisplayNames
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -420,6 +422,22 @@ function Card({
               />
             )}
           </CardContent>
+
+          {showDisplayNames && (
+            <div className="card-author">
+              <div 
+                className="card-author-avatar" 
+                style={{ 
+                  backgroundColor: presenceData?.[displayCardData.createdBy]?.color || displayCardData.userColor || 'var(--text-muted)' 
+                }}
+              >
+                {getInitials(presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous')}
+              </div>
+              <span className="card-author-name">
+                {presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous'}
+              </span>
+            </div>
+          )}
 
           {displayCardData.tags && displayCardData.tags.length > 0 && (
             <div className="card-tags">

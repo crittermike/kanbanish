@@ -38,7 +38,7 @@ export function addColumn(boardId, title = 'New Column') {
  * @param {object} user - The user object who created the card
  * @returns {Promise<string>} - A promise that resolves with the new card ID when the card is added
  */
-export function addCard(boardId, columnId, content, user = null) {
+export function addCard(boardId, columnId, content, user = null, displayName = '', userColor = '') {
   if (!boardId) {
     return Promise.reject(new Error('Board ID is required'));
   }
@@ -54,7 +54,9 @@ export function addCard(boardId, columnId, content, user = null) {
     content: content.trim(),
     votes: 0,
     created: Date.now(),
-    createdBy: user ? user.uid : null // Add creator information
+    createdBy: user ? user.uid : null, // Add creator information
+    displayName: displayName || '',
+    userColor: userColor || '' // Used for author avatar (not card border)
   };
 
   // Create a direct reference to the card path
