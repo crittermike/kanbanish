@@ -48,6 +48,8 @@ function Board({ onGoHome }) {
     user,
     darkMode,
     updateDarkMode,
+    hideCardAuthorship,
+    updateHideCardAuthorship,
     workflowPhase,
     getAllUsersAddingCards,
     startHealthCheckPhase
@@ -174,6 +176,8 @@ function Board({ onGoHome }) {
             resetAllVotes={resetAllVotes}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
+            hideCardAuthorship={hideCardAuthorship}
+            updateHideCardAuthorship={updateHideCardAuthorship}
           />
         </div>
       </header>
