@@ -25,6 +25,7 @@
 @import 'components/dashboard.css';
 @import 'components/search.css';
 @import 'components/error-handling.css';
+@import 'components/action-items.css';
 
 /* Utility classes and notifications */
 .notification {

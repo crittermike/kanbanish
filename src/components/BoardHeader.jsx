@@ -1,4 +1,4 @@
-import { Home, Search } from 'react-feather';
+import { Home, Search, CheckSquare } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import UserCounter from './UserCounter';
 /**
@@ -9,7 +9,7 @@ import UserCounter from './UserCounter';
  * @param {Function} props.handleBoardTitleChange - Called on title input change
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, onActionItemsOpen, actionItemCount }) => (
   <div className="board-title-container">
     {onGoHome && (
       <button
@@ -43,6 +43,15 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     )}
     <div className="action-buttons">
       <UserCounter />
+      <button
+        className="action-items-header-btn"
+        onClick={onActionItemsOpen}
+        title="Action Items"
+        aria-label={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
+      >
+        <CheckSquare size={16} />
+        {actionItemCount > 0 && <span className="action-items-badge">{actionItemCount}</span>}
+      </button>
     </div>
 
   </div>

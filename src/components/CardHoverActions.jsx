@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { MessageSquare, Smile, Droplet, Tag } from 'react-feather';
+import { MessageSquare, Smile, Droplet, Tag, CheckSquare } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
@@ -26,7 +26,9 @@ const CardHoverActions = React.memo(({
   onTagRemove,
   currentColor,
   currentTags,
-  boardTags
+  boardTags,
+  onConvertToActionItem,
+  hasActionItem
 }) => {
   const emojiButtonRef = useRef(null);
   const colorButtonRef = useRef(null);
@@ -142,6 +144,27 @@ const CardHoverActions = React.memo(({
           </button>
         </>
       )}
+      
+      {!hideAddButton && !hasActionItem && (
+        <button
+          className={`card-hover-action action-item-action ${useDisabledStyling ? 'disabled' : ''}`}
+          onClick={disabled ? undefined : e => {
+            e.stopPropagation();
+            if (onConvertToActionItem) onConvertToActionItem();
+          }}
+          title={disabled ? getReactionDisabledMessage(disabledReason) : 'Convert to action item'}
+          aria-label="Convert to action item"
+          disabled={useDisabledStyling}
+        >
+          <CheckSquare size={16} aria-hidden="true" />
+        </button>
+      )}
+      {hasActionItem && (
+        <span className="card-hover-action action-item-indicator" title="Has action item">
+          <CheckSquare size={16} aria-hidden="true" />
+        </span>
+      )}
+
       {/* Show comment button on hover only */}
       <button
         className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}

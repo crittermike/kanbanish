@@ -1,6 +1,6 @@
 import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { MessageSquare } from 'react-feather';
+import { MessageSquare, CheckSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import {
@@ -143,7 +143,9 @@ function Card({
     hideCardAuthorship,
     recordAction,
     undo,
-    boardTags
+    boardTags,
+    actionItems,
+    createActionItem
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -251,6 +253,17 @@ function Card({
     ) : {}
   } : cardData;
 
+  const hasActionItem = actionItems && Object.values(actionItems).some(
+    item => item.sourceCardId === cardId && item.sourceColumnId === columnId
+  );
+
+  const handleConvertToActionItem = () => {
+    createActionItem({
+      description: cardData.content,
+      sourceCardId: cardId,
+      sourceColumnId: columnId
+    });
+  };
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
   const canDropOnCard = isGroupingAllowed(workflowPhase, retrospectiveMode);
@@ -368,6 +381,11 @@ function Card({
           <MessageSquare size={12} />
         </div>
       )}
+      {hasActionItem && !isEditing && (
+        <div className="card-action-item-badge" title="Converted to action item">
+          <CheckSquare size={12} />
+        </div>
+      )}
       {isEditing ? (
         <CardEditor
           editedContent={editedContent}
@@ -412,6 +430,8 @@ function Card({
                 currentColor={displayCardData.color}
                 currentTags={displayCardData.tags || []}
                 boardTags={boardTags}
+                onConvertToActionItem={handleConvertToActionItem}
+                hasActionItem={hasActionItem}
               />
             )}
           </CardContent>

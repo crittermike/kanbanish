@@ -1,5 +1,6 @@
 import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { useActionItems } from '../hooks/useActionItems';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
@@ -63,6 +64,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Timer state for retrospective phases
   const [timerData, setTimerData] = useState(null);
+
+  // Action items state
+  const [actionItems, setActionItems] = useState({});
 
   // Firebase authentication
   useEffect(() => {
@@ -187,6 +191,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             setHealthCheckVotes({});
             setUserHealthCheckVotes({});
           }
+
+          // Load action items
+          setActionItems(boardData.actionItems || {});
         }
       });
 
@@ -281,6 +288,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   } = useTimer({
     boardId, user, timerData, setTimerData, workflowPhase
   });
+
+  // Action items operations
+  const {
+    createActionItem, updateActionItemStatus, updateActionItemAssignee,
+    updateActionItemDueDate, updateActionItemDescription, deleteActionItem
+  } = useActionItems({ boardId, user, columns });
 
   // Compute board-wide tags
   const boardTags = useMemo(() => {
@@ -481,7 +494,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       recordAction,
       undo,
       redo,
-    canUndo, canRedo, pastCount, futureCount
+    canUndo, canRedo, pastCount, futureCount,
+      // Action items
+      actionItems,
+      createActionItem, updateActionItemStatus, updateActionItemAssignee,
+      updateActionItemDueDate, updateActionItemDescription, deleteActionItem
     };
   }, [
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
@@ -507,7 +524,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
     getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer,
     resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
-    canUndo, canRedo, pastCount, futureCount
+    canUndo, canRedo, pastCount, futureCount, actionItems, createActionItem,
+    updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
+    updateActionItemDescription, deleteActionItem
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
+import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText, CheckSquare } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import Timer from './Timer';
 
@@ -50,7 +50,9 @@ const SettingsPanel = ({
   hideCardAuthorship,
   updateHideCardAuthorship,
   votesPerUser,
-  updateVotesPerUser
+  updateVotesPerUser,
+  onOpenActionItems,
+  actionItemCount
 }) => {
   const { showNotification } = useNotification();
   const handleOverlayClick = useCallback((e) => {
@@ -139,9 +141,17 @@ const SettingsPanel = ({
                   >
                     <FileText size={14} /> Export Board
                   </button>
+                  <button
+                    className="settings-quick-action-btn"
+                    onClick={() => {
+                      if (onOpenActionItems) onOpenActionItems();
+                    }}
+                  >
+                    <CheckSquare size={14} /> Action Items
+                    {actionItemCount > 0 && <span className="action-items-count-badge">{actionItemCount}</span>}
+                  </button>
                 </div>
               </div>
-
               <div className="settings-divider"></div>
 
               {/* Health Check - Prominent */}

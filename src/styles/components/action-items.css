@@ -1,0 +1,243 @@
+/**
+ * Action Items Styles
+ */
+
+/* Modal Container */
+.modal-container.action-items-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+/* Empty State */
+.action-item-empty {
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* List Container */
+.action-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+/* Row */
+.action-item-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.action-item-row:hover {
+  background-color: var(--hover-bg);
+}
+
+/* Status Toggle Button */
+.action-item-status-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: 50%;
+  transition: color var(--transition-speed) var(--transition-ease),
+              background-color var(--transition-speed) var(--transition-ease);
+  flex-shrink: 0;
+}
+
+.action-item-status-btn:hover {
+  background-color: var(--border-color);
+  color: var(--accent);
+}
+
+.action-item-status-btn.done {
+  color: var(--success);
+}
+
+/* Content Area */
+.action-item-content {
+  flex-grow: 1;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  word-break: break-word;
+  padding: var(--space-xs) 0;
+  transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.action-item-content.done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Inline Inputs (Assignee & Due Date) */
+.action-item-assignee,
+.action-item-due-date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.action-item-assignee input,
+.action-item-due-date input {
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.action-item-assignee input {
+  width: 80px;
+}
+
+.action-item-assignee:focus-within,
+.action-item-due-date:focus-within {
+  border-color: var(--accent);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.action-item-assignee:hover,
+.action-item-due-date:hover {
+  border-color: var(--border-color);
+  background-color: var(--bg-color);
+}
+
+.action-item-assignee::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Delete Button */
+.action-item-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-speed) var(--transition-ease);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.action-item-row:hover .action-item-delete-btn {
+  opacity: 1;
+}
+
+.action-item-delete-btn:hover {
+  color: var(--danger);
+  background-color: rgba(248, 81, 73, 0.1); /* Based on --danger variable */
+}
+
+/* Footer Summary */
+.action-items-summary {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+/* Card Badge */
+.card-action-item-badge {
+  position: absolute;
+  top: var(--space-xs);
+  right: calc(var(--space-xs) + 18px); /* Adjust based on comment indicator */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+  background-color: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  box-shadow: 0 0 0 2px var(--card-bg); /* Match card background */
+  z-index: 2;
+}
+
+/* Card Hover Action Indicator */
+.action-item-indicator {
+  color: var(--success);
+  opacity: 0.8;
+  cursor: default;
+}
+
+.action-item-action {
+  color: var(--text-muted);
+}
+
+.action-item-action:hover {
+  color: var(--success);
+  background-color: rgba(46, 160, 67, 0.1); /* Based on --success variable */
+}
+
+/* Header Button */
+.action-items-header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+  position: relative;
+}
+
+.action-items-header-btn:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Header Button Badge */
+.action-items-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  line-height: 1;
+}
+
+/* Settings Quick Action Badge */
+.action-items-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto; /* Push to right side of the button */
+}
