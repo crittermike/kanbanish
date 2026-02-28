@@ -1,9 +1,10 @@
 import { ref, set, remove } from 'firebase/database';
-import { useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronLeft, ChevronRight, Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
@@ -31,6 +32,16 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const [newGroupName, setNewGroupName] = useState('');
   const [draggedCardForGrouping, setDraggedCardForGrouping] = useState(null);
   const columnRef = useRef(null);
+  const groupModalRef = useRef(null);
+
+  // Cancel group creation
+  const cancelCreateGroup = () => {
+    setShowGroupModal(false);
+    setNewGroupName('');
+    setDraggedCardForGrouping(null);
+  };
+
+  useFocusTrap(groupModalRef, showGroupModal, { onClose: cancelCreateGroup });
 
   // Update local title when columnData changes (from Firebase)
   useEffect(() => {
@@ -299,12 +310,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     setDraggedCardForGrouping(null);
   };
 
-  // Cancel group creation
-  const cancelCreateGroup = () => {
-    setShowGroupModal(false);
-    setNewGroupName('');
-    setDraggedCardForGrouping(null);
-  };
 
   // Count total cards in this column (including grouped cards)
   const getCardCount = () => {
@@ -452,7 +457,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
         {/* Group creation modal */}
         {showGroupModal && (
           <div className="group-modal-overlay" onClick={cancelCreateGroup} role="presentation">
-            <div className="group-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+            <div ref={groupModalRef} className="group-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="create-group-title">
               <h3 id="create-group-title">Create Card Group</h3>
               <p>Creating a group with 2 cards</p>
               <input
@@ -488,4 +493,4 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   );
 }
 
-export default Column;
+export default memo(Column);

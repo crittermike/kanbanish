@@ -1,5 +1,5 @@
 import { ref, onValue, off, set } from 'firebase/database';
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
@@ -211,93 +211,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     canUndo, canRedo, pastCount, futureCount
   } = useUndoRedo({ boardId, showNotification });
 
-  // Create a new board with specified template columns, title, and optional settings overrides
-  const createNewBoard = (templateColumns = null, boardTitle = DEFAULT_BOARD_TITLE, settingsOverride = null) => {
-    if (!user) {
-      return null;
-    }
-
-    const newBoardId = generateId();
-    const newBoardRef = ref(database, `boards/${newBoardId}`);
-
-    // Default columns if no template specified
-    const columnsToCreate = templateColumns || ['To Do', 'In Progress', 'Done'];
-
-    // Build columns object with ordered prefixes
-    const columnsObj = {};
-
-    // Using alphabet prefixes to ensure correct ordering
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-
-    columnsToCreate.forEach((columnTitle, index) => {
-      // Use alphabet prefixes up to 26 columns, then fallback to numeric prefixes
-      const prefix = index < 26 ? alphabet[index] : `col${index}`;
-      columnsObj[`${prefix}_${generateId()}`] = {
-        title: columnTitle,
-        cards: {}
-      };
-    });
-
-    // Only allow a safe subset of settings to be overridden on creation
-  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
-    const sanitizedOverrides = {};
-    if (settingsOverride && typeof settingsOverride === 'object') {
-      allowedOverrideKeys.forEach(k => {
-        if (settingsOverride[k] !== undefined) {
-          sanitizedOverrides[k] = settingsOverride[k];
-        }
-      });
-    }
-
-    const initialData = {
-      title: boardTitle,
-      created: Date.now(),
-      owner: user.uid,
-      columns: columnsObj,
-      settings: {
-        votingEnabled: true, // Default to enabled for new boards
-        downvotingEnabled: true, // Default to enabled for new boards
-        multipleVotesAllowed: false, // Default to not allowing multiple votes
-  sortByVotes: false, // Default to chronological
-        retrospectiveMode: false, // Default to disabled (cards are visible)
-        workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
-        resultsViewIndex: 0, // Default to first result
-        // Apply any overrides parsed from URL (validated/whitelisted)
-        ...sanitizedOverrides
-      }
-    };
-
-    set(newBoardRef, initialData)
-      .then(() => {
-        setBoardId(newBoardId);
-        setBoardTitle(DEFAULT_BOARD_TITLE);
-      })
-      .catch(error => {
-        console.error('Error creating board:', error);
-      });
-
-    return newBoardId;
-  };
-
-  // Open an existing board
-  const openExistingBoard = boardIdToOpen => {
-    setBoardId(boardIdToOpen);
-  };
-
-  // Update board title
-  const updateBoardTitle = newTitle => {
-    // Optimistically update the local state first for better UI responsiveness
-    setBoardTitle(newTitle);
-
-    if (boardId && user) {
-      const titleRef = ref(database, `boards/${boardId}/title`);
-      set(titleRef, newTitle)
-        .catch(error => {
-          console.error('Error updating board title:', error);
-        });
-    }
-  };
-
   // Board settings hook
   const {
     updateBoardSettings,
@@ -365,122 +278,187 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     boardId, user, timerData, setTimerData, workflowPhase
   });
 
-  // Update dark mode preference
-  const updateDarkMode = enabled => {
-    if (user) {
-      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-      set(userPrefsRef, { darkMode: enabled })
+  // Context value
+  const value = useMemo(() => {
+    // Create a new board with specified template columns, title, and optional settings overrides
+    const createNewBoard = (templateColumns = null, newBoardTitle = DEFAULT_BOARD_TITLE, settingsOverride = null) => {
+      if (!user) {
+        return null;
+      }
+
+      const newBoardId = generateId();
+      const newBoardRef = ref(database, `boards/${newBoardId}`);
+
+      // Default columns if no template specified
+      const columnsToCreate = templateColumns || ['To Do', 'In Progress', 'Done'];
+
+      // Build columns object with ordered prefixes
+      const columnsObj = {};
+
+      // Using alphabet prefixes to ensure correct ordering
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
+      columnsToCreate.forEach((columnTitle, index) => {
+        // Use alphabet prefixes up to 26 columns, then fallback to numeric prefixes
+        const prefix = index < 26 ? alphabet[index] : `col${index}`;
+        columnsObj[`${prefix}_${generateId()}`] = {
+          title: columnTitle,
+          cards: {}
+        };
+      });
+
+      // Only allow a safe subset of settings to be overridden on creation
+      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+      const sanitizedOverrides = {};
+      if (settingsOverride && typeof settingsOverride === 'object') {
+        allowedOverrideKeys.forEach(k => {
+          if (settingsOverride[k] !== undefined) {
+            sanitizedOverrides[k] = settingsOverride[k];
+          }
+        });
+      }
+
+      const initialData = {
+        title: newBoardTitle,
+        created: Date.now(),
+        owner: user.uid,
+        columns: columnsObj,
+        settings: {
+          votingEnabled: true, // Default to enabled for new boards
+          downvotingEnabled: true, // Default to enabled for new boards
+          multipleVotesAllowed: false, // Default to not allowing multiple votes
+          sortByVotes: false, // Default to chronological
+          retrospectiveMode: false, // Default to disabled (cards are visible)
+          workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
+          resultsViewIndex: 0, // Default to first result
+          // Apply any overrides parsed from URL (validated/whitelisted)
+          ...sanitizedOverrides
+        }
+      };
+
+      set(newBoardRef, initialData)
         .then(() => {
-          setDarkMode(enabled);
+          setBoardId(newBoardId);
+          setBoardTitle(DEFAULT_BOARD_TITLE);
         })
         .catch(error => {
-          console.error('Error updating dark mode preference:', error);
+          console.error('Error creating board:', error);
         });
-    } else {
-      // If we're not connected to a user yet, just update the local state
-      setDarkMode(enabled);
-    }
-  };
 
-  // Context value
-  const value = {
-    user,
-    boardId,
-    setBoardId,
-    boardTitle,
-    setBoardTitle,
-    columns,
-    updateBoardTitle,
-    sortByVotes,
-    setSortByVotes,
-    votingEnabled,
-    setVotingEnabled,
-    updateVotingEnabled,
-    downvotingEnabled,
-    setDownvotingEnabled,
-    updateDownvotingEnabled,
-    multipleVotesAllowed,
-    setMultipleVotesAllowed,
-    updateMultipleVotesAllowed,
-    votesPerUser,
-    setVotesPerUser,
-    updateVotesPerUser,
-    retrospectiveMode,
-    setRetrospectiveMode,
-    updateRetrospectiveMode,
-    updateBoardSettings,
-    boardRef,
-    createNewBoard,
-    openExistingBoard,
-    moveCard,
-    resetAllVotes,
-    getTotalVotes,
-    getUserVoteCount,
-    getTotalVotesRemaining,
-    darkMode,
-    updateDarkMode,
-    activeUsers,
-    // Workflow phase system
-    workflowPhase,
-    setWorkflowPhase,
-    resultsViewIndex,
-    setResultsViewIndex,
-    startGroupingPhase,
-    startInteractionsPhase,
-    startInteractionRevealPhase,
-    startResultsPhase,
-    startPollPhase,
-    startPollResultsPhase,
-    goToCreationPhase,
-    goToPreviousPhase,
-    navigateResults,
-    getSortedItemsForResults,
-    // Poll system
-    pollVotes,
-    userPollVote,
-    submitPollVote,
-    getPollStats,
-    // Health check system
-    healthCheckVotes,
-    userHealthCheckVotes,
-    submitHealthCheckVote,
-    getHealthCheckStats,
-    startHealthCheckPhase,
-    startHealthCheckResultsPhase,
-    HEALTH_CHECK_QUESTIONS,
-    // Card grouping functions
-    createCardGroup,
-    ungroupCards,
-    removeAllGrouping,
-    updateGroupName,
-    toggleGroupExpanded,
-    upvoteGroup,
-    downvoteGroup,
-    // Card creation activity tracking
-    usersAddingCards,
-    startCardCreation,
-    stopCardCreation,
-    getUsersAddingCardsInColumn,
-    getAllUsersAddingCards,
-    // Timer system
-    timerData,
-    startTimer,
-    pauseTimer,
-    resumeTimer,
-    resetTimer,
-    restartTimer,
-    // Board ownership
-    boardOwner,
-    isOwner: user && boardOwner ? user.uid === boardOwner : false,
-    // Undo/redo system
-    recordAction,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    pastCount,
-    futureCount
-  };
+      return newBoardId;
+    };
+
+    // Open an existing board
+    const openExistingBoard = boardIdToOpen => {
+      setBoardId(boardIdToOpen);
+    };
+
+    // Update board title
+    const updateBoardTitle = newTitle => {
+      // Optimistically update the local state first for better UI responsiveness
+      setBoardTitle(newTitle);
+
+      if (boardId && user) {
+        const titleRef = ref(database, `boards/${boardId}/title`);
+        set(titleRef, newTitle)
+          .catch(error => {
+            console.error('Error updating board title:', error);
+          });
+      }
+    };
+
+    // Update dark mode preference
+    const updateDarkMode = enabled => {
+      if (user) {
+        const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+        set(userPrefsRef, { darkMode: enabled })
+          .then(() => {
+            setDarkMode(enabled);
+          })
+          .catch(error => {
+            console.error('Error updating dark mode preference:', error);
+          });
+      } else {
+        // If we're not connected to a user yet, just update the local state
+        setDarkMode(enabled);
+      }
+    };
+
+    return {
+    user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
+    updateBoardTitle, sortByVotes, setSortByVotes, votingEnabled,
+    setVotingEnabled, updateVotingEnabled, downvotingEnabled,
+    setDownvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed,
+    setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
+    setVotesPerUser, updateVotesPerUser, retrospectiveMode,
+    setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
+    getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
+      updateDarkMode,
+      activeUsers,
+      // Workflow phase system
+      workflowPhase,
+      setWorkflowPhase,
+    resultsViewIndex, setResultsViewIndex, startGroupingPhase,
+    startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
+    startPollPhase, startPollResultsPhase, goToCreationPhase,
+    goToPreviousPhase, navigateResults, getSortedItemsForResults,
+      // Poll system
+    pollVotes, userPollVote, submitPollVote, getPollStats,
+      // Health check system
+    healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
+    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase,
+      HEALTH_CHECK_QUESTIONS,
+      // Card grouping functions
+    createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
+      toggleGroupExpanded,
+      upvoteGroup,
+      downvoteGroup,
+      // Card creation activity tracking
+      usersAddingCards,
+    startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
+      getAllUsersAddingCards,
+      // Timer system
+      timerData,
+      startTimer,
+      pauseTimer,
+      resumeTimer,
+      resetTimer,
+      restartTimer,
+      // Board ownership
+      boardOwner,
+      isOwner: user && boardOwner ? user.uid === boardOwner : false,
+      // Undo/redo system
+      recordAction,
+      undo,
+      redo,
+    canUndo, canRedo, pastCount, futureCount
+    };
+  }, [
+    user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
+    sortByVotes, setSortByVotes, votingEnabled,
+    setVotingEnabled, updateVotingEnabled, downvotingEnabled,
+    setDownvotingEnabled, updateDownvotingEnabled, multipleVotesAllowed,
+    setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
+    setVotesPerUser, updateVotesPerUser, retrospectiveMode,
+    setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    boardRef, moveCard, resetAllVotes,
+    getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
+    activeUsers, workflowPhase, setWorkflowPhase,
+    resultsViewIndex, setResultsViewIndex, startGroupingPhase,
+    startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
+    startPollPhase, startPollResultsPhase, goToCreationPhase,
+    goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    pollVotes, userPollVote, submitPollVote, getPollStats,
+    healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
+    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase,
+    createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
+    toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
+    startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
+    getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer,
+    resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
+    canUndo, canRedo, pastCount, futureCount
+  ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };
 

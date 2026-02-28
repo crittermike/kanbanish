@@ -130,6 +130,11 @@ function AppContent() {
 
   return (
     <div className="App" data-testid="app-container">
+      {activeBoardId && (
+        <a href="#board-content" className="skip-to-content">
+          Skip to board content
+        </a>
+      )}
       {activeBoardId ? (
         <BoardGate boardId={activeBoardId} onGoHome={handleGoHome} />
       ) : (
@@ -137,7 +142,7 @@ function AppContent() {
       )}
 
       {/* Success Notification */}
-      <div id="notification" className={`notification ${notification.show ? 'show' : ''}`}>
+      <div id="notification" className={`notification ${notification.show ? 'show' : ''}`} role="status" aria-live="polite">
         <span id="notification-message">{notification.message}</span>
         {notification.actionLabel && (
           <button

@@ -240,7 +240,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                   onClick={() => handleOpenBoard(board.id)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && handleOpenBoard(board.id)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenBoard(board.id); } }}
                 >
                   <div className="dashboard-board-info">
                     <h3 className="dashboard-board-title">{board.title || 'Untitled Board'}</h3>
@@ -305,7 +305,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                   onClick={() => handleOpenBoard(board.id)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && handleOpenBoard(board.id)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenBoard(board.id); } }}
                 >
                   <div className="dashboard-board-info">
                     <h3 className="dashboard-board-title">{board.title || 'Untitled Board'}</h3>
