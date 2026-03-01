@@ -102,7 +102,7 @@ describe('BoardSetupWizard', () => {
       expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
-    it('health check toggle is hidden when Kanban mode is selected', () => {
+    it('health check toggle is always visible regardless of board mode', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -112,8 +112,8 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      const healthCheckWrapper = screen.getByText('Start with Health Check').closest('div').parentElement.parentElement;
-      expect(healthCheckWrapper).toHaveAttribute('aria-hidden', 'true');
+      const healthCheckSwitch = screen.getByRole('switch', { name: /Start with Health Check/i });
+      expect(healthCheckSwitch).toBeInTheDocument();
     });
 
     it('defaults to Retrospective Mode when template has retro-related tags', () => {
@@ -134,8 +134,8 @@ describe('BoardSetupWizard', () => {
       expect(kanbanButton).toHaveAttribute('aria-checked', 'false');
 
       // Health check should be visible
-      const healthCheckWrapper = screen.getByText('Start with Health Check').closest('div').parentElement.parentElement;
-      expect(healthCheckWrapper).toHaveAttribute('aria-hidden', 'false');
+      const healthCheckSwitch = screen.getByRole('switch', { name: /Start with Health Check/i });
+      expect(healthCheckSwitch).toBeInTheDocument();
     });
 
     it('defaults to Kanban Mode when template has no retro-related tags', () => {
@@ -197,7 +197,7 @@ describe('BoardSetupWizard', () => {
       expect(retroButton).toHaveAttribute('aria-checked', 'false');
     });
 
-    it('when Retrospective Mode is selected, health check toggle appears', () => {
+    it('selecting Retrospective Mode auto-enables voting', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -207,11 +207,16 @@ describe('BoardSetupWizard', () => {
         />
       );
 
+      // First disable voting
+      const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
+      fireEvent.click(votingSwitch);
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
+
+      // Select Retrospective Mode — should auto-enable voting
       const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
       fireEvent.click(retroButton);
 
-      const healthCheckWrapper = screen.getByText('Start with Health Check').closest('div').parentElement.parentElement;
-      expect(healthCheckWrapper).toHaveAttribute('aria-hidden', 'false');
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
     it('toggle switches work: clicking Allow Voting toggle turns it off', () => {
@@ -268,7 +273,7 @@ describe('BoardSetupWizard', () => {
       expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
-    it('when health check is visible, clicking it toggles it on', () => {
+    it('clicking health check toggle turns it on (no mode switch needed)', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -277,9 +282,6 @@ describe('BoardSetupWizard', () => {
           templateName="Test"
         />
       );
-
-      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
-      fireEvent.click(retroButton);
 
       const healthCheckSwitch = screen.getByRole('switch', { name: /Start with Health Check/i });
       expect(healthCheckSwitch).toHaveAttribute('aria-checked', 'false');
@@ -381,7 +383,7 @@ describe('BoardSetupWizard', () => {
       expect(mockOnConfirm).not.toHaveBeenCalled();
     });
 
-    it('health check is always false when Kanban mode is active, even if previously toggled', () => {
+    it('health check value is passed through even in Kanban mode', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -391,29 +393,21 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      // Switch to retrospective mode
-      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
-      fireEvent.click(retroButton);
-
-      // Toggle health check on
+      // Toggle health check on in Kanban mode
       const healthCheckSwitch = screen.getByRole('switch', { name: /Start with Health Check/i });
       fireEvent.click(healthCheckSwitch);
 
-      // Switch back to Kanban mode
-      const kanbanButton = screen.getByRole('radio', { name: /Kanban Mode/i });
-      fireEvent.click(kanbanButton);
-
-      // Create board with Kanban mode
+      // Create board
       const createButton = screen.getByText('Create Board');
       fireEvent.click(createButton);
 
-      // Health check should be false even though it was toggled on
+      // Health check should be true
       expect(mockOnConfirm).toHaveBeenCalledWith({
         retrospectiveMode: false,
         votingEnabled: true,
         showDisplayNames: false,
         actionItemsEnabled: false,
-        startHealthCheck: false
+        startHealthCheck: true
       });
     });
   });

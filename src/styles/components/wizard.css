@@ -34,25 +34,6 @@
   margin-bottom: 0;
 }
 
-/* Animations for health check wrapper */
-.wizard-health-check-wrapper {
-  overflow: hidden;
-  transition: max-height var(--transition-speed, 0.2s) var(--transition-ease, ease-in-out),
-              opacity var(--transition-speed, 0.2s) var(--transition-ease, ease-in-out),
-              margin var(--transition-speed, 0.2s) var(--transition-ease, ease-in-out);
-}
-
-.wizard-health-check-enter {
-  max-height: 100px;
-  opacity: 1;
-  margin-top: var(--space-md);
-}
-
-.wizard-health-check-exit {
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-}
 
 /* Mobile responsive adjustments */
 @media (max-width: 480px) {

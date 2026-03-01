@@ -369,13 +369,7 @@ const SettingsPanel = ({
                 <p className="settings-hint">
                   Displays author names and avatars on cards and comments
                 </p>
-              </div>
-
-              <div className="settings-divider"></div>
-
-              {/* Action Items */}
-              <div className="settings-section">
-                <div className="settings-toggle-row">
+                <div className="settings-toggle-row" style={{ marginTop: '8px' }}>
                   <span className="settings-toggle-label">Enable action items?</span>
                   <button
                     className="settings-toggle-switch"

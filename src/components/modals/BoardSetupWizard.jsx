@@ -39,7 +39,7 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
       votingEnabled,
       showDisplayNames,
       actionItemsEnabled,
-      startHealthCheck: retrospectiveMode ? startHealthCheck : false,
+      startHealthCheck,
     });
   };
 
@@ -76,7 +76,7 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
               </button>
               <button 
                 className={`boolean-option ${retrospectiveMode ? 'selected' : ''}`} 
-                onClick={() => setRetrospectiveMode(true)}
+                onClick={() => { setRetrospectiveMode(true); setVotingEnabled(true); }}
                 role="radio"
                 aria-checked={retrospectiveMode}
               >
@@ -143,27 +143,20 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
               <p className="settings-hint">Track action items with assignees and due dates</p>
             </div>
             
-            <div 
-              className={`wizard-health-check-wrapper ${retrospectiveMode ? 'wizard-health-check-enter' : 'wizard-health-check-exit'}`}
-              aria-hidden={!retrospectiveMode}
-            >
-              <div className="wizard-setting-group">
-                <div className="settings-toggle-row">
-                  <span className="settings-toggle-label" id="label-health-check">Start with Health Check</span>
-                  <button 
-                    className="settings-toggle-switch" 
-                    role="switch" 
-                    aria-checked={startHealthCheck} 
-                    onClick={() => setStartHealthCheck(!startHealthCheck)} 
-                    aria-labelledby="label-health-check"
-                    disabled={!retrospectiveMode}
-                    tabIndex={retrospectiveMode ? 0 : -1}
-                  >
-                    <span className="settings-toggle-knob"></span>
-                  </button>
-                </div>
-                <p className="settings-hint">Begin with a team health check survey</p>
+            <div className="wizard-setting-group">
+              <div className="settings-toggle-row">
+                <span className="settings-toggle-label" id="label-health-check">Start with Health Check</span>
+                <button 
+                  className="settings-toggle-switch" 
+                  role="switch" 
+                  aria-checked={startHealthCheck} 
+                  onClick={() => setStartHealthCheck(!startHealthCheck)} 
+                  aria-labelledby="label-health-check"
+                >
+                  <span className="settings-toggle-knob"></span>
+                </button>
               </div>
+              <p className="settings-hint">Begin with a team health check survey</p>
             </div>
             
           </div>
