@@ -206,6 +206,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Share & Export tab
+    fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
+
     const copyButton = screen.getByText('Share Board');
     fireEvent.click(copyButton);
 
@@ -287,6 +290,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Find the toggle switch for "Allow voting" and click it
     const votingToggle = screen.getByRole('switch', { name: 'Allow voting' });
     fireEvent.click(votingToggle);
@@ -311,6 +317,9 @@ describe('Board Component', () => {
     // Open the dropdown
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
+
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Find the toggle switch for "Allow multiple votes" and click it
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
@@ -345,6 +354,9 @@ describe('Board Component', () => {
     // Open the settings dropdown
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
+
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Click the toggle switch for multiple votes
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
@@ -425,6 +437,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Find the toggle switch for "Allow downvoting" and click it
     const downvotingToggle = screen.getByRole('switch', { name: 'Allow downvoting' });
     fireEvent.click(downvotingToggle);
@@ -455,8 +470,11 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Verify the downvoting option is not visible when voting is disabled
-    expect(screen.queryByText('Allow downvoting?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Allow downvoting')).not.toBeInTheDocument();
   });
 
   // Tests for Reset All Votes functionality are already defined above
@@ -488,6 +506,9 @@ describe('Board Component', () => {
     // Open the dropdown
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
+
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Find and click the reset votes button
     const resetVotesButton = screen.getByText('Reset all votes');
@@ -531,6 +552,9 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Find and click the reset votes button
     const resetVotesButton = screen.getByText('Reset all votes');
     fireEvent.click(resetVotesButton);
@@ -567,11 +591,14 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Verify vote settings are displayed correctly
-    expect(screen.getByText('Allow voting?')).toBeInTheDocument();
+    expect(screen.getByText('Allow voting')).toBeInTheDocument();
 
     // The multi-vote setting and reset votes button should be hidden when voting is disabled
-    expect(screen.queryByText('Allow users to vote multiple times on the same card?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Multiple votes per card')).not.toBeInTheDocument();
     expect(screen.queryByText('Reset all votes')).not.toBeInTheDocument();
   });
 
@@ -597,9 +624,12 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings and preferences');
     fireEvent.click(settingsButton);
 
+    // Navigate to Voting tab
+    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
     // Verify all vote settings are displayed
-    expect(screen.getByText('Allow voting?')).toBeInTheDocument();
-    expect(screen.getByText('Allow users to vote multiple times on the same card?')).toBeInTheDocument();
+    expect(screen.getByText('Allow voting')).toBeInTheDocument();
+    expect(screen.getByText('Multiple votes per card')).toBeInTheDocument();
     expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 
