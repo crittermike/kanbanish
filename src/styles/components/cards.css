@@ -557,7 +557,7 @@
     resize: vertical;
     background: var(--input-bg);
     color: var(--text-color);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
 }
 
 .card-edit-textarea:focus {
@@ -567,7 +567,7 @@
 }
 
 .card-edit-actions {
-    margin-top: var(--space-xs);
+    margin-top: 0;
 }
 
 /* Mobile responsive adjustments for cards */
