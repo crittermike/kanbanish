@@ -17,7 +17,9 @@ export function useCardOperations({
   votesPerUser = 0, // maximum votes per user
   getUserVoteCount = () => 0, // function to get current user vote count
   recordAction = null, // undo/redo recording function
-  undo = null // undo function for notification action buttons
+  undo = null, // undo function for notification action buttons
+  displayName = '',
+  userColor = ''
 }) {
   const { showNotification } = useNotification();
   // State
@@ -118,14 +120,16 @@ export function useCardOperations({
 
       await set(cardRef, {
         ...cardData,
-        content: trimmedContent
+        content: trimmedContent,
+        displayName: displayName || cardData.displayName || '',
+        userColor: userColor || cardData.userColor || ''
       });
       showNotification('Card saved');
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving card:', error);
     }
-  }, [boardId, columnId, cardId, cardRef, cardData, editedContent, showNotification, recordAction, undo]);
+  }, [boardId, columnId, cardId, cardRef, cardData, editedContent, showNotification, recordAction, undo, displayName, userColor]);
 
   // Delete card
   const deleteCard = useCallback(async e => {
@@ -365,9 +369,10 @@ export function useCardOperations({
       const commentData = {
         content: newComment,
         timestamp: Date.now(),
-        createdBy: user?.uid || null // Add creator information
+        createdBy: user?.uid || null, // Add creator information
+        displayName: displayName || '',
+        color: userColor || ''
       };
-
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       await set(commentRef, commentData);
       showNotification('Comment added');
@@ -375,7 +380,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error adding comment:', error);
     }
-  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid, isInteractionDisabled, workflowPhase, retrospectiveMode, displayName, userColor]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !commentId || !newContent.trim()) {

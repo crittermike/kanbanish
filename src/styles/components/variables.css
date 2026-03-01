@@ -34,6 +34,8 @@
     --info-border: rgba(59, 130, 246, 0.2);
     /* Status colors */
     --danger: #f85149;
+    --danger-transparent: rgba(248, 81, 73, 0.12);
+    --danger-transparent-border: rgba(248, 81, 73, 0.4);
     --success: #2ea043;
     --orange: #db6d28;
     --yellow: #d29922;

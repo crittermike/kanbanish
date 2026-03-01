@@ -41,7 +41,7 @@ describe('CardCreationIndicator', () => {
     ];
     
     render(<CardCreationIndicator usersAddingCards={usersAddingCards} currentUserId="user1" />);
-    expect(screen.getByText('2 people are adding cards')).toBeInTheDocument();
+    expect(screen.getByText('Someone and Someone are adding cards')).toBeInTheDocument();
   });
 
   it('shows count for many users (excluding current user)', () => {

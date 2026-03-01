@@ -1,8 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clipboard } from 'react-feather';
+import { Clipboard, Download, FileText, AlignLeft, Grid, Code } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../../context/BoardContext';
 import { useNotification } from '../../context/NotificationContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+
+const FORMAT_OPTIONS = [
+  { value: 'markdown', label: 'Markdown', icon: FileText, ext: '.md' },
+  { value: 'plaintext', label: 'Plain Text', icon: AlignLeft, ext: '.txt' },
+  { value: 'csv', label: 'CSV', icon: Grid, ext: '.csv' },
+  { value: 'json', label: 'JSON', icon: Code, ext: '.json' },
+];
 
 const ExportBoardModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('markdown');
@@ -430,21 +437,89 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
     return text;
   }, [getBoardStructure, actionItems]);
 
+  const generateCsvExport = useCallback(() => {
+    const boardData = getBoardStructure();
+    const rows = [];
+
+    // CSV header
+    rows.push(['Column', 'Group', 'Card', 'Votes', 'Tags', 'Comments', 'Reactions']);
+
+    if (boardData.columns.length === 0) {
+      return rows.map(row => row.map(escapeCsvField).join(',')).join('\n');
+    }
+
+    boardData.columns.forEach(column => {
+      // Export grouped cards
+      if (column.groups && column.groups.length > 0) {
+        column.groups.forEach(group => {
+          // Add group row itself if it has votes/comments/reactions
+          if (group.votes > 0 || group.comments.length > 0 || group.reactions.length > 0) {
+            rows.push([
+              column.title,
+              group.name,
+              '',
+              String(group.votes),
+              '',
+              group.comments.join('; '),
+              group.reactions.map(r => `${r.emoji} (${r.count})`).join(', ')
+            ]);
+          }
+
+          // Add each card in the group
+          group.cards.forEach(card => {
+            rows.push([
+              column.title,
+              group.name,
+              card.content,
+              String(card.votes),
+              (card.tags || []).join(', '),
+              card.comments.join('; '),
+              card.reactions.map(r => `${r.emoji} (${r.count})`).join(', ')
+            ]);
+          });
+        });
+      }
+
+      // Export ungrouped cards
+      column.cards.forEach(card => {
+        rows.push([
+          column.title,
+          '',
+          card.content,
+          String(card.votes),
+          (card.tags || []).join(', '),
+          card.comments.join('; '),
+          card.reactions.map(r => `${r.emoji} (${r.count})`).join(', ')
+        ]);
+      });
+    });
+
+    return rows.map(row => row.map(escapeCsvField).join(',')).join('\n');
+  }, [getBoardStructure]);
+
+  const generateJsonExport = useCallback(() => {
+    const boardData = getBoardStructure();
+    return JSON.stringify(boardData, null, 2);
+  }, [getBoardStructure]);
+
   // Generate export content when modal is opened or format changes
   useEffect(() => {
     if (isOpen) {
       try {
-        if (format === 'markdown') {
-          setExportedContent(generateMarkdownExport());
-        } else {
-          setExportedContent(generatePlainTextExport());
-        }
+        const generators = {
+          markdown: generateMarkdownExport,
+          plaintext: generatePlainTextExport,
+          csv: generateCsvExport,
+          json: generateJsonExport,
+        };
+        const generator = generators[format];
+        setExportedContent(generator ? generator() : generateMarkdownExport());
       } catch {
         // Error generating export - silent fallback
         setExportedContent('Error generating export. Please try again.');
       }
     }
-  }, [isOpen, format, columns, boardTitle, actionItems, generateMarkdownExport, generatePlainTextExport]);
+  }, [isOpen, format, columns, boardTitle, actionItems, generateMarkdownExport, generatePlainTextExport, generateCsvExport, generateJsonExport]);
 
   /**
    * Note on column ordering and card grouping:
@@ -474,44 +549,63 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
       });
   };
 
+  const downloadFile = () => {
+    const formatOption = FORMAT_OPTIONS.find(f => f.value === format);
+    const ext = formatOption ? formatOption.ext : '.txt';
+    const title = (boardTitle || DEFAULT_BOARD_TITLE).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const filename = `${title}${ext}`;
+
+    const mimeTypes = {
+      markdown: 'text/markdown',
+      plaintext: 'text/plain',
+      csv: 'text/csv',
+      json: 'application/json',
+    };
+
+    const blob = new Blob([exportedContent], { type: mimeTypes[format] || 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showNotification(`Downloaded ${filename}`);
+  };
+
   if (!isOpen) {
     return null;
   }
 
   return (
     <div className="modal-overlay" role="presentation">
-      <div ref={modalRef} className="modal-container" role="dialog" aria-modal="true" aria-labelledby="export-board-title">
+      <div ref={modalRef} className="modal-container export-modal" role="dialog" aria-modal="true" aria-labelledby="export-board-title">
         <div className="modal-header">
           <h2 id="export-board-title">Export Board</h2>
           <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
         </div>
         <div className="modal-body">
           <div className="format-selector">
-            <div className="format-option">
-              <label className={`format-label ${format === 'markdown' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  value="markdown"
-                  checked={format === 'markdown'}
-                  onChange={() => setFormat('markdown')}
-                  className="format-radio"
-                />
-                <span className="format-name">Markdown</span>
-              </label>
-            </div>
-
-            <div className="format-option">
-              <label className={`format-label ${format === 'plaintext' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  value="plaintext"
-                  checked={format === 'plaintext'}
-                  onChange={() => setFormat('plaintext')}
-                  className="format-radio"
-                />
-                <span className="format-name">Plain Text</span>
-              </label>
-            </div>
+            {FORMAT_OPTIONS.map(opt => {
+              const Icon = opt.icon;
+              return (
+                <div className="format-option" key={opt.value}>
+                  <label className={`format-label ${format === opt.value ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      value={opt.value}
+                      checked={format === opt.value}
+                      onChange={() => setFormat(opt.value)}
+                      className="format-radio"
+                    />
+                    <Icon size={16} className="format-icon" />
+                    <span className="format-name">{opt.label}</span>
+                  </label>
+                </div>
+              );
+            })}
           </div>
           <div className="export-preview">
             <textarea
@@ -530,6 +624,13 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
             Copy to Clipboard
           </button>
           <button
+            className="primary-button export-download-button"
+            onClick={downloadFile}
+          >
+            <Download size={16} />
+            Download File
+          </button>
+          <button
             className="secondary-button"
             onClick={onClose}
           >
@@ -540,5 +641,20 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
+/**
+ * Escape a CSV field value, wrapping in quotes if it contains
+ * commas, quotes, or newlines.
+ */
+function escapeCsvField(value) {
+  if (value == null) {
+    return '';
+  }
+  const str = String(value);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
 
 export default ExportBoardModal;

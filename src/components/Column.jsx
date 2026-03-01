@@ -21,7 +21,9 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     workflowPhase, 
     columns,
     startCardCreation,
-    stopCardCreation
+    stopCardCreation,
+    displayName,
+    userColor
   } = useBoardContext();
   const { showNotification } = useNotification();
   const [title, setTitle] = useState(columnData.title || 'New Column');
@@ -146,7 +148,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   // Add a new card inline
   const saveNewCard = () => {
     if (boardId && newCardContent.trim()) {
-      addCard(boardId, columnId, newCardContent, user)
+      addCard(boardId, columnId, newCardContent, user, displayName, userColor)
         .then((cardId) => {
           showNotification('Card added');
           hideAddCardForm();
@@ -411,8 +413,8 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
               aria-label="Card content"
             />
             <div className="inline-card-actions">
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
               <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
             </div>
           </div>
         ) : (

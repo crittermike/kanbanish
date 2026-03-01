@@ -278,22 +278,10 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .timer-setup-container,
-  .timer-container.timer-active {
-    width: 100%;
-  }
-  .timer-start-btn {
-    width: 100%;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .timer-setup-popover {
-    width: 100%;
-    right: auto;
+    min-width: 280px;
     left: 0;
+    right: auto;
   }
 
   .timer-presets {

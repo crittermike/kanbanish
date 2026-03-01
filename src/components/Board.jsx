@@ -9,10 +9,12 @@ import ActionItemsPanel from './ActionItemsPanel';
 import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
+import DisplayNamePrompt from './DisplayNamePrompt';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
+import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
@@ -52,12 +54,18 @@ function Board({ onGoHome }) {
     updateDarkMode,
     hideCardAuthorship,
     updateHideCardAuthorship,
+    showDisplayNames,
+    updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
     startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
-    actionItems
+    actionItems,
+    displayName,
+    userColor,
+    updateDisplayName,
+    updateUserColor
   } = useBoardContext();
 
   // Search state
@@ -185,6 +193,8 @@ function Board({ onGoHome }) {
             updateDarkMode={updateDarkMode}
             hideCardAuthorship={hideCardAuthorship}
             updateHideCardAuthorship={updateHideCardAuthorship}
+            showDisplayNames={showDisplayNames}
+            updateShowDisplayNames={updateShowDisplayNames}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
             onOpenActionItems={() => {
@@ -192,7 +202,15 @@ function Board({ onGoHome }) {
               setSettingsDropdownOpen(false);
             }}
             actionItemCount={actionItemCount}
-          />
+          >
+            <ProfileButton
+              showDisplayNames={showDisplayNames}
+              displayName={displayName}
+              userColor={userColor}
+              updateDisplayName={updateDisplayName}
+              updateUserColor={updateUserColor}
+            />
+          </SettingsPanel>
         </div>
       </header>
 
@@ -254,6 +272,8 @@ function Board({ onGoHome }) {
         isOpen={isActionItemsPanelOpen}
         onClose={() => setIsActionItemsPanelOpen(false)}
       />
+
+      <DisplayNamePrompt />
     </>
   );
 }
