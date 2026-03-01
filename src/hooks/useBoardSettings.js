@@ -29,13 +29,13 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   const {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
-    workflowPhase, resultsViewIndex, showDisplayNames
+    workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
   } = settingsState;
 
   const {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -66,10 +66,13 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.showDisplayNames !== undefined) {
       setShowDisplayNames(newSettings.showDisplayNames);
     }
+    if (newSettings.actionItemsEnabled !== undefined) {
+      setActionItemsEnabled(newSettings.actionItemsEnabled);
+    }
   }, [
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -86,6 +89,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         workflowPhase,
         resultsViewIndex,
         showDisplayNames,
+        actionItemsEnabled,
         ...newSettings
       };
 
@@ -103,7 +107,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   }, [
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
-    resultsViewIndex, showDisplayNames, applySettingsLocally
+    resultsViewIndex, showDisplayNames, actionItemsEnabled, applySettingsLocally
   ]);
 
   // Convenience wrappers
@@ -148,6 +152,10 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     }
   }, [updateBoardSettings]);
 
+  const updateActionItemsEnabled = useCallback((enabled) => {
+    updateBoardSettings({ actionItemsEnabled: enabled });
+  }, [updateBoardSettings]);
+
   return {
     updateBoardSettings,
     updateVotingEnabled,
@@ -156,6 +164,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateVotesPerUser,
     setSortByVotes,
     updateRetrospectiveMode,
-    updateShowDisplayNames
+    updateShowDisplayNames,
+    updateActionItemsEnabled
   };
 };

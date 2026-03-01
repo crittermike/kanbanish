@@ -5,6 +5,7 @@ import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import ActionItemsPanel from './ActionItemsPanel';
 import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
@@ -27,6 +28,7 @@ function Board({ onGoHome }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isActionItemsPanelOpen, setIsActionItemsPanelOpen] = useState(false);
 
   // Get context values from BoardContext
   const {
@@ -59,6 +61,9 @@ function Board({ onGoHome }) {
     startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
+    actionItems,
+    actionItemsEnabled,
+    updateActionItemsEnabled,
     displayName,
     userColor,
     updateDisplayName,
@@ -152,6 +157,8 @@ function Board({ onGoHome }) {
     showNotification('Preparing board export...');
   };
 
+  const actionItemCount = Object.values(actionItems || {}).filter(i => i.status === 'open').length;
+
   return (
     <>
       <header>
@@ -192,6 +199,13 @@ function Board({ onGoHome }) {
             updateShowDisplayNames={updateShowDisplayNames}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
+            onOpenActionItems={() => {
+              setIsActionItemsPanelOpen(true);
+              setSettingsDropdownOpen(false);
+            }}
+            actionItemCount={actionItemCount}
+            actionItemsEnabled={actionItemsEnabled}
+            updateActionItemsEnabled={updateActionItemsEnabled}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
@@ -256,6 +270,11 @@ function Board({ onGoHome }) {
         onClose={() => {
           setIsExportModalOpen(false);
         }}
+      />
+
+      <ActionItemsPanel
+        isOpen={isActionItemsPanelOpen}
+        onClose={() => setIsActionItemsPanelOpen(false)}
       />
 
       <DisplayNamePrompt />

@@ -1,5 +1,6 @@
 import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
+import { useActionItems } from '../hooks/useActionItems';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
@@ -68,6 +69,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Timer state for retrospective phases
   const [timerData, setTimerData] = useState(null);
+
+  // Action items state
+  const [actionItems, setActionItems] = useState({});
+  const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
 
   // Firebase authentication
   useEffect(() => {
@@ -170,6 +175,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (boardData.settings.showDisplayNames !== undefined) {
               setShowDisplayNames(boardData.settings.showDisplayNames);
             }
+            if (boardData.settings.actionItemsEnabled !== undefined) {
+              setActionItemsEnabled(boardData.settings.actionItemsEnabled);
+            }
           }
 
 
@@ -204,6 +212,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             setHealthCheckVotes({});
             setUserHealthCheckVotes({});
           }
+
+          // Load action items
+          setActionItems(boardData.actionItems || {});
         }
       });
 
@@ -295,19 +306,20 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateVotesPerUser,
     setSortByVotes,
     updateRetrospectiveMode,
-    updateShowDisplayNames
+    updateShowDisplayNames,
+    updateActionItemsEnabled
   } = useBoardSettings({
     boardId,
     user,
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames
+      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
     }
   });
 
@@ -353,6 +365,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   } = useTimer({
     boardId, user, timerData, setTimerData, workflowPhase
   });
+
+  // Action items operations
+  const {
+    createActionItem, updateActionItemStatus, updateActionItemAssignee,
+    updateActionItemDueDate, updateActionItemDescription, deleteActionItem
+  } = useActionItems({ boardId, user, columns });
 
   // Compute board-wide tags
   const boardTags = useMemo(() => {
@@ -563,7 +581,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       recordAction,
       undo,
       redo,
-    canUndo, canRedo, pastCount, futureCount
+    canUndo, canRedo, pastCount, futureCount,
+      // Action items
+      actionItems, actionItemsEnabled, updateActionItemsEnabled,
+      createActionItem, updateActionItemStatus, updateActionItemAssignee,
+      updateActionItemDueDate, updateActionItemDescription, deleteActionItem
     };
   }, [
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
@@ -592,7 +614,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
     getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer,
     resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
-    canUndo, canRedo, pastCount, futureCount
+    canUndo, canRedo, pastCount, futureCount, actionItems, actionItemsEnabled,
+    updateActionItemsEnabled, createActionItem,
+    updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
+    updateActionItemDescription, deleteActionItem
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };

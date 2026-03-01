@@ -1,0 +1,199 @@
+import { useRef, useMemo, useState, useEffect } from 'react';
+import { Trash2, Check, Circle } from 'react-feather';
+import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+
+const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange, onDescriptionChange, onDelete }) => {
+  const [localAssignee, setLocalAssignee] = useState(item.assignee || '');
+  const [localDescription, setLocalDescription] = useState(item.description || '');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+
+  useEffect(() => {
+    setLocalAssignee(item.assignee || '');
+  }, [item.assignee]);
+
+  useEffect(() => {
+    setLocalDescription(item.description || '');
+  }, [item.description]);
+
+  const today = new Date().toDateString();
+  const isOverdue = item.dueDate && item.status !== 'done' && new Date(item.dueDate) < new Date(today);
+
+  const handleDescriptionBlur = () => {
+    setIsEditingDescription(false);
+    if (localDescription.trim() !== (item.description || '')) {
+      onDescriptionChange(item.id, localDescription.trim());
+    }
+  };
+
+  const handleDescriptionKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      e.target.blur();
+    }
+    if (e.key === 'Escape') {
+      setLocalDescription(item.description || '');
+      e.target.blur();
+    }
+  };
+
+  return (
+    <div className={`action-item-row ${item.status === 'done' ? 'done' : ''}`}>
+      <button 
+        className={`action-item-status-btn ${item.status === 'done' ? 'done' : ''}`}
+        onClick={() => onToggleStatus(item)}
+        title={`Mark as ${item.status === 'open' ? 'done' : 'open'}`}
+      >
+        {item.status === 'done' ? <Check size={14} /> : <Circle size={14} />}
+      </button>
+
+      <div className="action-item-main">
+        {isEditingDescription ? (
+          <textarea
+            className="action-item-description-input"
+            value={localDescription}
+            onChange={(e) => setLocalDescription(e.target.value)}
+            onBlur={handleDescriptionBlur}
+            onKeyDown={handleDescriptionKeyDown}
+            autoFocus
+            rows={Math.max(1, localDescription.split('\n').length)}
+          />
+        ) : (
+          <div 
+            className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}
+            onClick={() => setIsEditingDescription(true)}
+            title="Click to edit"
+          >
+            {item.description}
+          </div>
+        )}
+        <div className="action-item-meta">
+          <input 
+            type="text"
+            className="action-item-assignee-input"
+            placeholder="Unassigned"
+            value={localAssignee}
+            onChange={(e) => setLocalAssignee(e.target.value)}
+            onBlur={() => onAssigneeChange(item.id, localAssignee)}
+            aria-label="Assignee"
+          />
+          <span className="action-item-meta-separator">·</span>
+          <input 
+            type="date"
+            className={`action-item-date-input ${isOverdue ? 'overdue' : ''}`}
+            value={item.dueDate || ''}
+            onChange={(e) => onDueDateChange(item.id, e.target.value)}
+            aria-label="Due date"
+          />
+        </div>
+      </div>
+
+      <button 
+        className="action-item-delete-btn"
+        onClick={() => onDelete(item.id)}
+        title="Delete action item"
+      >
+        <Trash2 size={14} />
+      </button>
+    </div>
+  );
+};
+
+const ActionItemsPanel = ({ isOpen, onClose }) => {
+  const {
+    actionItems,
+    updateActionItemStatus,
+    updateActionItemAssignee,
+    updateActionItemDueDate,
+    updateActionItemDescription,
+    deleteActionItem
+  } = useBoardContext();
+  
+  const { showNotification } = useNotification();
+  const modalRef = useRef(null);
+
+  useFocusTrap(modalRef, isOpen, { onClose });
+
+  const sortedItems = useMemo(() => {
+    const items = Object.entries(actionItems || {}).map(([id, data]) => ({
+      id,
+      ...data
+    }));
+
+    const openItems = items.filter(i => i.status === 'open').sort((a, b) => b.created - a.created);
+    const doneItems = items.filter(i => i.status === 'done').sort((a, b) => b.created - a.created);
+
+    return { openItems, doneItems, allItems: [...openItems, ...doneItems] };
+  }, [actionItems]);
+
+  if (!isOpen) return null;
+
+  const handleToggleStatus = (item) => {
+    const newStatus = item.status === 'open' ? 'done' : 'open';
+    updateActionItemStatus(item.id, newStatus);
+    showNotification(`Marked as ${newStatus}`);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this action item?')) {
+      deleteActionItem(id);
+      showNotification('Action item deleted');
+    }
+  };
+
+  const { openItems, doneItems, allItems } = sortedItems;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div 
+        className="modal-container action-items-modal" 
+        ref={modalRef}
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="action-items-title"
+      >
+        <div className="modal-header">
+          <h2 id="action-items-title">Action Items</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close action items">
+            &times;
+          </button>
+        </div>
+
+        <div className="modal-body">
+          {allItems.length === 0 ? (
+            <div className="action-item-empty">
+              No action items yet. Convert cards to action items using the ✅ button on any card.
+            </div>
+          ) : (
+            <div className="action-items-list">
+              {allItems.map(item => (
+                <ActionItemRow
+                  key={item.id}
+                  item={item}
+                  onToggleStatus={handleToggleStatus}
+                  onAssigneeChange={updateActionItemAssignee}
+                  onDueDateChange={updateActionItemDueDate}
+                  onDescriptionChange={updateActionItemDescription}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="action-items-summary">
+            {openItems.length} open, {doneItems.length} done
+          </div>
+          <button className="btn btn-secondary" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ActionItemsPanel;

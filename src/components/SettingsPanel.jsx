@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { ArrowDown, RotateCcw, ThumbsUp, Settings, Sun, Moon, Link, FileText } from 'react-feather';
+import { ArrowDown, CheckSquare, FileText, Link, Moon, RotateCcw, Settings, Sun, ThumbsUp } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import Timer from './Timer';
 
@@ -54,6 +54,10 @@ const SettingsPanel = ({
   updateShowDisplayNames,
   votesPerUser,
   updateVotesPerUser,
+  onOpenActionItems,
+  actionItemCount,
+  actionItemsEnabled,
+  updateActionItemsEnabled,
   children
 }) => {
   const { showNotification } = useNotification();
@@ -77,6 +81,18 @@ const SettingsPanel = ({
   return (
     <div className="action-buttons">
       <Timer />
+
+      {actionItemsEnabled && (
+        <button
+          className="btn icon-btn action-items-header-btn"
+          onClick={onOpenActionItems}
+          title={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
+          aria-label={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
+        >
+          <CheckSquare size={16} aria-hidden="true" />
+          {actionItemCount > 0 && <span className="action-items-badge">{actionItemCount}</span>}
+        </button>
+      )}
       {children}
       <button
           id="settings-dropdown-button"
@@ -143,9 +159,19 @@ const SettingsPanel = ({
                   >
                     <FileText size={14} /> Export Board
                   </button>
+                  {actionItemsEnabled && (
+                    <button
+                      className="settings-quick-action-btn"
+                      onClick={() => {
+                        if (onOpenActionItems) onOpenActionItems();
+                      }}
+                    >
+                      <CheckSquare size={14} /> Action Items
+                      {actionItemCount > 0 && <span className="action-items-count-badge">{actionItemCount}</span>}
+                    </button>
+                  )}
                 </div>
               </div>
-
               <div className="settings-divider"></div>
 
               {/* Health Check - Prominent */}
@@ -345,6 +371,26 @@ const SettingsPanel = ({
                 </p>
               </div>
 
+              <div className="settings-divider"></div>
+
+              {/* Action Items */}
+              <div className="settings-section">
+                <div className="settings-toggle-row">
+                  <span className="settings-toggle-label">Enable action items?</span>
+                  <button
+                    className="settings-toggle-switch"
+                    role="switch"
+                    aria-checked={actionItemsEnabled}
+                    onClick={() => updateActionItemsEnabled(!actionItemsEnabled)}
+                    aria-label="Enable action items"
+                  >
+                    <span className="settings-toggle-knob"></span>
+                  </button>
+                </div>
+                <p className="settings-hint">
+                  Convert cards into trackable action items with assignees and due dates
+                </p>
+              </div>
 
             </div>
           </div>

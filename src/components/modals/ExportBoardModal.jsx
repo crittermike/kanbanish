@@ -14,7 +14,7 @@ const FORMAT_OPTIONS = [
 const ExportBoardModal = ({ isOpen, onClose }) => {
   const [format, setFormat] = useState('markdown');
   const [exportedContent, setExportedContent] = useState('');
-  const { boardTitle, columns } = useBoardContext();
+  const { boardTitle, columns, actionItems } = useBoardContext();
   const { showNotification } = useNotification();
   const modalRef = useRef(null);
   useFocusTrap(modalRef, isOpen, { onClose });
@@ -281,8 +281,33 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
       markdown += '\n';
     });
 
+    // Export action items
+    const actionItemsList = Object.values(actionItems || {});
+    if (actionItemsList.length > 0) {
+      markdown += `## Action Items\n\n`;
+      const openItems = actionItemsList.filter(i => i.status === 'open');
+      const doneItems = actionItemsList.filter(i => i.status === 'done');
+      if (openItems.length > 0) {
+        markdown += `### Open\n\n`;
+        openItems.forEach(item => {
+          const assignee = item.assignee ? ` (${item.assignee})` : '';
+          const dueDate = item.dueDate ? ` — due ${new Date(item.dueDate).toLocaleDateString()}` : '';
+          markdown += `- [ ] ${item.description}${assignee}${dueDate}\n`;
+        });
+        markdown += '\n';
+      }
+      if (doneItems.length > 0) {
+        markdown += `### Done\n\n`;
+        doneItems.forEach(item => {
+          const assignee = item.assignee ? ` (${item.assignee})` : '';
+          markdown += `- [x] ${item.description}${assignee}\n`;
+        });
+        markdown += '\n';
+      }
+    }
+
     return markdown;
-  }, [getBoardStructure]);
+  }, [getBoardStructure, actionItems]);
 
   const generatePlainTextExport = useCallback(() => {
     const boardData = getBoardStructure();
@@ -383,8 +408,34 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
       text += '\n';
     });
 
+    // Export action items
+    const actionItemsList = Object.values(actionItems || {});
+    if (actionItemsList.length > 0) {
+      text += `Action Items\n${'='.repeat(12)}\n\n`;
+      const openItems = actionItemsList.filter(i => i.status === 'open');
+      const doneItems = actionItemsList.filter(i => i.status === 'done');
+      
+      if (openItems.length > 0) {
+        text += `Open\n----\n\n`;
+        openItems.forEach(item => {
+          const assignee = item.assignee ? ` (${item.assignee})` : '';
+          const dueDate = item.dueDate ? ` — due ${new Date(item.dueDate).toLocaleDateString()}` : '';
+          text += `[ ] ${item.description}${assignee}${dueDate}\n`;
+        });
+        text += '\n';
+      }
+      if (doneItems.length > 0) {
+        text += `Done\n----\n\n`;
+        doneItems.forEach(item => {
+          const assignee = item.assignee ? ` (${item.assignee})` : '';
+          text += `[x] ${item.description}${assignee}\n`;
+        });
+        text += '\n';
+      }
+    }
+
     return text;
-  }, [getBoardStructure]);
+  }, [getBoardStructure, actionItems]);
 
   const generateCsvExport = useCallback(() => {
     const boardData = getBoardStructure();
@@ -468,7 +519,7 @@ const ExportBoardModal = ({ isOpen, onClose }) => {
         setExportedContent('Error generating export. Please try again.');
       }
     }
-  }, [isOpen, format, columns, boardTitle, generateMarkdownExport, generatePlainTextExport, generateCsvExport, generateJsonExport]);
+  }, [isOpen, format, columns, boardTitle, actionItems, generateMarkdownExport, generatePlainTextExport, generateCsvExport, generateJsonExport]);
 
   /**
    * Note on column ordering and card grouping:

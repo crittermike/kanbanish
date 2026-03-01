@@ -1,6 +1,6 @@
 import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { MessageSquare } from 'react-feather';
+import { MessageSquare, CheckSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import { getInitials } from '../utils/avatarColors';
@@ -145,6 +145,10 @@ function Card({
     recordAction,
     undo,
     boardTags,
+    actionItems,
+    actionItemsEnabled,
+    createActionItem,
+    deleteActionItem,
     presenceData,
     displayName,
     userColor,
@@ -258,6 +262,28 @@ function Card({
     ) : {}
   } : cardData;
 
+  const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
+    ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
+  );
+  const hasActionItem = !!actionItemEntry;
+  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
+
+  const commentCount = Object.keys(displayCardData.comments || {}).length;
+  const showCommentBadge = !groupId && commentCount > 0 && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode);
+
+  const handleConvertToActionItem = () => {
+    createActionItem({
+      description: cardData.content,
+      sourceCardId: cardId,
+      sourceColumnId: columnId
+    });
+  };
+
+  const handleRemoveActionItem = () => {
+    if (actionItemId) {
+      deleteActionItem(actionItemId);
+    }
+  };
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
   const canDropOnCard = isGroupingAllowed(workflowPhase, retrospectiveMode);
@@ -369,12 +395,6 @@ function Card({
       onClick={handleCardClick}
       data-card-id={cardId}
     >
-      {/* Show comment indicator badge when card has comments */}
-      {!isEditing && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && Object.keys(displayCardData.comments || {}).length > 0 && (
-        <div className="card-comment-indicator" title={`${Object.keys(displayCardData.comments || {}).length} comment${Object.keys(displayCardData.comments || {}).length === 1 ? '' : 's'}`}>
-          <MessageSquare size={12} />
-        </div>
-      )}
       {isEditing ? (
         <CardEditor
           editedContent={editedContent}
@@ -419,6 +439,9 @@ function Card({
                 currentColor={displayCardData.color}
                 currentTags={displayCardData.tags || []}
                 boardTags={boardTags}
+                onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
+                onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
+                hasActionItem={hasActionItem}
               />
             )}
           </CardContent>
@@ -444,6 +467,22 @@ function Card({
               {displayCardData.tags.map(tag => (
                 <span key={tag} className="card-tag-chip">{tag}</span>
               ))}
+            </div>
+          )}
+
+          {/* Inline badges for action items and comments */}
+          {(hasActionItem || (!isEditing && showCommentBadge)) && (
+            <div className="card-inline-badges">
+              {hasActionItem && (
+                <span className="card-inline-badge action-item-badge" title="Converted to action item">
+                  <CheckSquare size={11} /> Action item
+                </span>
+              )}
+              {!isEditing && showCommentBadge && (
+                <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
+                  <MessageSquare size={11} /> {commentCount}
+                </span>
+              )}
             </div>
           )}
 
