@@ -74,9 +74,10 @@ export function addCard(boardId, columnId, content, user = null, displayName = '
  * @param {string} [params.templateName] - Template name (used for board title)
  * @param {Object} params.user - Firebase user object with uid
  * @param {string} [params.queryString] - URL query string for settings overrides
+ * @param {Object} [params.settingsOverrides] - Direct settings overrides (e.g. from wizard)
  * @returns {Promise<string>} Resolves with the new board ID
  */
-export function createBoardFromTemplate({ columns, templateName = null, user, queryString = '' }) {
+export function createBoardFromTemplate({ columns, templateName = null, user, queryString = '', settingsOverrides = {} }) {
   if (!user || !user.uid) {
     return Promise.reject(new Error('User is required'));
   }
@@ -100,12 +101,21 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
   });
 
   // Only allow a safe subset of settings to be overridden on creation
-  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'actionItemsEnabled'];
   const sanitizedOverrides = {};
   if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
     allowedOverrideKeys.forEach(k => {
       if (parsed.boardSettings[k] !== undefined) {
         sanitizedOverrides[k] = parsed.boardSettings[k];
+      }
+    });
+  }
+
+  // Apply direct overrides (e.g. from the board setup wizard)
+  if (settingsOverrides && typeof settingsOverrides === 'object') {
+    allowedOverrideKeys.forEach(k => {
+      if (settingsOverrides[k] !== undefined) {
+        sanitizedOverrides[k] = settingsOverrides[k];
       }
     });
   }
