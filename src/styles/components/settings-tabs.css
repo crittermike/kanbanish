@@ -1,0 +1,436 @@
+/**
+ * Kanban App - Settings Tabs Styles
+ * 
+ * Tab navigation and panel styles for the settings modal.
+ */
+
+/* ── Tab bar ── */
+.settings-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    background-color: var(--card-bg);
+    padding: 0 var(--space-xs);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.settings-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Individual tab ── */
+.settings-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: var(--space-sm) var(--space-md) calc(var(--space-sm) + 3px);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    color: var(--text-color);
+    opacity: 0.65;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transition-speed) var(--transition-ease),
+                border-color var(--transition-speed) var(--transition-ease),
+                background-color var(--transition-speed) var(--transition-ease),
+                opacity var(--transition-speed) var(--transition-ease);
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.settings-tab svg {
+    opacity: 0.7;
+    flex-shrink: 0;
+    transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.settings-tab:hover {
+    color: var(--text-color);
+    background-color: var(--hover-bg);
+    opacity: 0.9;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.settings-tab:hover svg {
+    opacity: 0.9;
+}
+
+.settings-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.settings-tab-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    opacity: 1;
+    font-weight: 600;
+}
+
+.settings-tab-active svg {
+    opacity: 1;
+}
+
+.settings-tab-active:hover {
+    color: var(--accent);
+    background-color: transparent;
+}
+
+/* ── Tab panel ── */
+.settings-tabpanel {
+    animation: settingsTabFadeIn 0.15s ease;
+    padding: var(--space-md) var(--space-xs) var(--space-xs);
+}
+
+.settings-tabpanel[hidden] {
+    display: none;
+}
+
+@keyframes settingsTabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Section overrides inside tabs ── */
+
+.settings-tabpanel .settings-section {
+    padding: var(--space-sm) 0 var(--space-sm);
+}
+
+.settings-tabpanel .settings-section:first-child {
+    padding-top: 0;
+}
+
+.settings-tabpanel .settings-section:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+
+html.light-mode .settings-tabpanel .settings-section:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.settings-tabpanel .settings-section:last-child {
+    padding-bottom: var(--space-xs);
+}
+
+.settings-tabpanel .settings-section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding-bottom: var(--space-sm);
+    margin: 0;
+    border-bottom: none;
+    line-height: 1.4;
+}
+
+.settings-tabpanel .settings-divider {
+    display: none; /* Hide dividers since sections have borders */
+}
+
+/* ── Boolean option buttons (Theme, Sort) ── */
+
+.settings-tabpanel .settings-boolean-option {
+    display: flex;
+    gap: var(--space-xs);
+    padding: var(--space-xs) 0 0;
+}
+
+.settings-tabpanel .boolean-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px var(--space-md);
+    background: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-tabpanel .boolean-option:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--text-muted);
+}
+
+.settings-tabpanel .boolean-option.selected {
+    background-color: var(--accent);
+    color: var(--text-on-accent);
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.settings-tabpanel .boolean-option svg {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* ── Toggle rows polish ── */
+
+.settings-tabpanel .settings-toggle-row {
+    padding: var(--space-sm) 0 var(--space-xxs);
+    align-items: center;
+}
+
+.settings-tabpanel .settings-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.settings-tabpanel .settings-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+    padding: 0 0 var(--space-xxs);
+    line-height: 1.4;
+    /* 14px icon width + 5px margin-right from .settings-toggle-icon */
+    margin-left: 19px;
+}
+
+/* ── Vote limit in tabs ── */
+
+.settings-tabpanel .settings-vote-limit {
+    padding: var(--space-sm) 0 var(--space-xs);
+}
+
+.settings-tabpanel .vote-limit-preset-buttons {
+    padding: var(--space-xs) 0 0;
+}
+
+.settings-tabpanel .vote-limit-preset.active {
+    border-color: var(--accent);
+    background-color: var(--accent-transparent-lighter);
+    box-shadow: 0 0 0 1px var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* ── Reset votes button polish ── */
+
+.settings-tabpanel .settings-reset-votes-btn {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs) var(--space-sm);
+    margin-top: var(--space-md);
+    opacity: 0.8;
+    border: 1px solid var(--danger-transparent-border);
+    border-radius: var(--radius-md);
+}
+
+.settings-tabpanel .settings-reset-votes-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.settings-tabpanel .settings-reset-votes-btn:hover {
+    opacity: 1;
+}
+
+/* ── Share & Export action cards ── */
+
+.settings-share-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.settings-share-action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-color);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.settings-share-action-btn:hover {
+    border-color: var(--accent);
+    background: var(--hover-bg);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.settings-share-action-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Chevron icon on share action cards */
+.settings-share-action-chevron {
+    margin-left: auto;
+    color: var(--text-color);
+    flex-shrink: 0;
+    opacity: 0.5;
+    stroke-width: 2.5;
+    transition: transform var(--transition-speed) ease, color var(--transition-speed) ease, opacity var(--transition-speed) ease;
+}
+
+.settings-share-action-btn:hover .settings-share-action-chevron {
+    transform: translateX(3px);
+    color: var(--accent);
+    opacity: 1;
+}
+
+.settings-share-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: var(--accent-transparent-lighter);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.settings-share-action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.settings-share-action-title {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.settings-share-action-desc {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* ── Settings toggle icon inline with label ── */
+
+.settings-toggle-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin-right: 6px;
+    opacity: 0.75;
+    flex-shrink: 0;
+    position: relative;
+    top: -0.5px;
+}
+
+/* ── Health check button polish ── */
+
+.settings-tabpanel .settings-health-check-btn {
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-lg);
+    width: 100%;
+    justify-content: center;
+    font-weight: 500;
+    margin-top: var(--space-xxs);
+    border: 1.5px solid var(--border-color);
+    background: var(--hover-bg);
+}
+
+/* ── Mobile responsive ── */
+
+@media (max-width: 480px) {
+    .settings-tabs {
+        padding: 0;
+    }
+
+    /* Hide tab labels on mobile — icon-only for better touch targets */
+    .settings-tab span {
+        display: none;
+    }
+
+    .settings-tab {
+        padding: var(--space-sm) var(--space-md);
+        gap: 0;
+        min-height: 44px;
+    }
+
+    .settings-tab svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .settings-tabpanel {
+        padding: var(--space-sm) var(--space-xxs) var(--space-xxs);
+    }
+
+    .settings-tabpanel .boolean-option {
+        padding: var(--space-sm) var(--space-sm);
+    }
+
+    .settings-share-action-btn {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .settings-share-action-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .settings-share-action-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .settings-share-action-chevron {
+        width: 14px;
+        height: 14px;
+    }
+
+    .settings-tabpanel .vote-limit-preset-buttons {
+        gap: var(--space-xs);
+        flex-wrap: wrap;
+    }
+
+    .settings-tabpanel .vote-limit-preset {
+        flex: 0 1 auto;
+        min-width: 40px;
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--font-size-xs);
+    }
+
+    .settings-tabpanel .vote-limit-custom-inline {
+        flex: 1 0 100%;
+    }
+
+    .settings-tabpanel .vote-limit-custom-inline .vote-limit-input {
+        padding: var(--space-xs);
+        font-size: var(--font-size-xs);
+    }
+}

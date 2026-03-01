@@ -174,29 +174,29 @@ h1 {
     justify-content: center;
     gap: var(--space-sm);
     width: 100%;
-    padding: var(--space-md);
-    background: linear-gradient(135deg, #10b981, #059669);
-    border: none;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    color: white;
-    font-size: var(--font-size-base);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 8px rgba(13, 150, 104, 0.15);
 }
 
 .settings-health-check-btn:hover {
-    background: linear-gradient(135deg, #059669, #047857);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    background: var(--hover-bg);
+    border-color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
     transform: translateY(-1px);
 }
 
 .settings-health-check-btn:active {
     transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+    box-shadow: none;
 }
-
 .health-check-btn-icon {
     font-size: 1.2em;
     line-height: 1;
@@ -277,17 +277,21 @@ h1 {
     background: none;
     border: none;
     color: var(--danger);
-    font-size: 11px;
-    padding: 2px 0;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--danger-transparent-lighter);
+    border: 1px solid var(--danger-transparent-border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    margin-top: var(--space-xs);
-    transition: opacity 0.15s ease;
-    opacity: 0.6;
+    margin-top: var(--space-sm);
+    transition: all 0.2s ease;
 }
 
 .settings-reset-votes-btn:hover {
-    opacity: 1;
-    text-decoration: underline;
+    background-color: var(--danger);
+    color: white;
+    border-color: var(--danger);
 }
 
 .settings-section-title {
@@ -296,13 +300,14 @@ h1 {
     padding: var(--space-xs) 0;
     margin: 0;
     line-height: 1.4;
-    border-bottom: 1px solid var(--border-color-light);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .settings-divider {
     height: 1px;
     background-color: var(--border-color);
     margin: var(--space-sm) 0;
+    opacity: 0.8;
 }
 
 .settings-section-placeholder {
@@ -359,7 +364,7 @@ h1 {
 
 .settings-toggle-label {
     font-size: var(--font-size-sm);
-    color: var(--text-muted);
+    color: var(--text-color);
     font-weight: 500;
 }
 
@@ -610,4 +615,19 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     .total-vote-counter-value {
         font-size: var(--font-size-sm);
     }
+}
+
+
+.modal-header .close-button {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.modal-header .close-button:hover {
+    background: var(--hover-bg);
+    border-radius: 50%;
 }
