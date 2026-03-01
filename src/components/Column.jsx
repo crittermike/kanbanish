@@ -413,8 +413,8 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
               aria-label="Card content"
             />
             <div className="inline-card-actions">
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
               <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
             </div>
           </div>
         ) : (
