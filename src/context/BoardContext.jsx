@@ -1,5 +1,5 @@
 import { ref, onValue, off, set } from 'firebase/database';
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
@@ -41,6 +41,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
+  const [showDisplayNames, setShowDisplayNames] = useState(false); // Default to off
 
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
@@ -58,6 +59,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [hideCardAuthorship, setHideCardAuthorship] = useState(false);
 
+  // Display name and color for user presence
+  const [displayName, setDisplayName] = useState('');
+  const [userColor, setUserColor] = useState('');
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
   // Board owner tracking
   const [boardOwner, setBoardOwner] = useState(null);
 
@@ -70,7 +75,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       if (user) {
         setUser(user);
 
-        // Load user preferences including theme
+        // Load user preferences including theme, display name, and color
         const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
         get(userPrefsRef).then(snapshot => {
           if (snapshot.exists()) {
@@ -81,9 +86,17 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (prefs.hideCardAuthorship !== undefined) {
               setHideCardAuthorship(prefs.hideCardAuthorship);
             }
+            if (prefs.displayName) {
+              setDisplayName(prefs.displayName);
+            }
+            if (prefs.userColor) {
+              setUserColor(prefs.userColor);
+            }
           }
+          setPrefsLoaded(true);
         }).catch(error => {
           console.error('Error loading user preferences:', error);
+          setPrefsLoaded(true);
         });
       } else {
         signInAnonymously(auth)
@@ -154,7 +167,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (boardData.settings.resultsViewIndex !== undefined) {
               setResultsViewIndex(boardData.settings.resultsViewIndex);
             }
+            if (boardData.settings.showDisplayNames !== undefined) {
+              setShowDisplayNames(boardData.settings.showDisplayNames);
+            }
           }
+
 
           // Load poll data
           if (boardData.poll) {
@@ -199,12 +216,66 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Presence and card creation activity tracking
   const {
     activeUsers,
+    presenceData,
     usersAddingCards,
     startCardCreation,
     stopCardCreation,
     getUsersAddingCardsInColumn,
     getAllUsersAddingCards
-  } = usePresence({ boardId, user });
+  } = usePresence({ boardId, user, displayName, userColor });
+
+  // Update display name and color (persists to user prefs)
+  const updateDisplayName = useCallback((newName) => {
+    setDisplayName(newName);
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        set(userPrefsRef, { ...currentPrefs, displayName: newName });
+      }).catch(error => {
+        console.error('Error saving display name:', error);
+      });
+    }
+  }, [user]);
+
+  const updateUserColor = useCallback((newColor) => {
+    setUserColor(newColor);
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        set(userPrefsRef, { ...currentPrefs, userColor: newColor });
+      }).catch(error => {
+        console.error('Error saving user color:', error);
+      });
+    }
+  }, [user]);
+
+  // Clear display name (used when removing name)
+  const clearDisplayName = useCallback(() => {
+    setDisplayName('');
+    setUserColor('');
+    if (user) {
+      const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
+      get(userPrefsRef).then(snapshot => {
+        const currentPrefs = snapshot.exists() ? snapshot.val() : {};
+        const { displayName: _dn, userColor: _uc, ...rest } = currentPrefs;
+        set(userPrefsRef, rest);
+      }).catch(error => {
+        console.error('Error clearing display name:', error);
+      });
+      // Also clear from presence
+      if (boardId) {
+        const presenceRef = ref(database, `boards/${boardId}/presence/${user.uid}`);
+        set(presenceRef, {
+          lastSeen: Date.now(),
+          uid: user.uid,
+          displayName: '',
+          color: ''
+        });
+      }
+    }
+  }, [user, boardId]);
 
   // Notification hook (from NotificationContext, which wraps BoardProvider)
   const { showNotification } = useNotification();
@@ -223,19 +294,20 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateRetrospectiveMode
+    updateRetrospectiveMode,
+    updateShowDisplayNames
   } = useBoardSettings({
     boardId,
     user,
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex
+      workflowPhase, resultsViewIndex, showDisplayNames
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
     }
   });
 
@@ -327,7 +399,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       });
 
       // Only allow a safe subset of settings to be overridden on creation
-      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes'];
+      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames'];
       const sanitizedOverrides = {};
       if (settingsOverride && typeof settingsOverride === 'object') {
         allowedOverrideKeys.forEach(k => {
@@ -350,6 +422,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           retrospectiveMode: false, // Default to disabled (cards are visible)
           workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
           resultsViewIndex: 0, // Default to first result
+          showDisplayNames: false, // Default to off
           // Apply any overrides parsed from URL (validated/whitelisted)
           ...sanitizedOverrides
         }
@@ -436,6 +509,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    showDisplayNames, updateShowDisplayNames,
     boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
       updateDarkMode,
@@ -444,7 +518,15 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       // Screen sharing mode
       hideCardAuthorship,
       updateHideCardAuthorship,
+      // Display name and presence
+      displayName,
+      userColor,
+      updateDisplayName,
+      updateUserColor,
+      clearDisplayName,
+      prefsLoaded,
       activeUsers,
+      presenceData,
       // Workflow phase system
       workflowPhase,
       setWorkflowPhase,
@@ -491,10 +573,13 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
+    showDisplayNames, updateShowDisplayNames,
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,
-    activeUsers, workflowPhase, setWorkflowPhase,
+    displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
+    prefsLoaded,
+    activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,

@@ -21,6 +21,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  * @param {boolean} params.settingsState.retrospectiveMode
  * @param {string} params.settingsState.workflowPhase
  * @param {number} params.settingsState.resultsViewIndex
+ * @param {boolean} params.settingsState.showDisplayNames
  * @param {Object} params.setters - State setter functions
  * @returns {Object} Settings operations
  */
@@ -28,13 +29,13 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   const {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
-    workflowPhase, resultsViewIndex
+    workflowPhase, resultsViewIndex, showDisplayNames
   } = settingsState;
 
   const {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -62,10 +63,13 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.resultsViewIndex !== undefined) {
       setResultsViewIndex(newSettings.resultsViewIndex);
     }
+    if (newSettings.showDisplayNames !== undefined) {
+      setShowDisplayNames(newSettings.showDisplayNames);
+    }
   }, [
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -81,6 +85,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         retrospectiveMode,
         workflowPhase,
         resultsViewIndex,
+        showDisplayNames,
         ...newSettings
       };
 
@@ -98,7 +103,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   }, [
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
-    resultsViewIndex, applySettingsLocally
+    resultsViewIndex, showDisplayNames, applySettingsLocally
   ]);
 
   // Convenience wrappers
@@ -116,6 +121,10 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
 
   const updateVotesPerUser = useCallback((limit) => {
     updateBoardSettings({ votesPerUser: limit });
+  }, [updateBoardSettings]);
+
+  const updateShowDisplayNames = useCallback((enabled) => {
+    updateBoardSettings({ showDisplayNames: enabled });
   }, [updateBoardSettings]);
 
   const setSortByVotes = useCallback((enabled) => {
@@ -146,6 +155,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateRetrospectiveMode
+    updateRetrospectiveMode,
+    updateShowDisplayNames
   };
 };

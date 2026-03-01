@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useBoardContext } from '../context/BoardContext';
+import { getInitials } from '../utils/avatarColors';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
 import MarkdownContent from './MarkdownContent';
 
@@ -42,8 +44,10 @@ const Comments = React.memo(({
   onDeleteComment,
   isCommentAuthor,
   interactionsDisabled = false,
-  disabledReason = null
+  disabledReason = null,
+  presenceData = {}
 }) => {
+  const { showDisplayNames } = useBoardContext();
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
 
@@ -115,7 +119,23 @@ const Comments = React.memo(({
                 deleteComment={() => confirmDelete(commentId)}
               />
             ) : (
-              <div
+              <>
+                {showDisplayNames && (
+                  <div className="comment-author">
+                    <div 
+                      className="comment-author-avatar" 
+                      style={{ 
+                        backgroundColor: presenceData?.[comment.createdBy]?.color || comment.userColor || comment.color || 'var(--text-muted)' 
+                      }}
+                    >
+                      {getInitials(presenceData?.[comment.createdBy]?.displayName || comment.displayName || 'Anonymous')}
+                    </div>
+                    <span className="comment-author-name">
+                      {presenceData?.[comment.createdBy]?.displayName || comment.displayName || 'Anonymous'}
+                    </span>
+                  </div>
+                )}
+                <div
                 className={`comment-content ${isCommentAuthor(comment) && !interactionsDisabled ? 'editable' : ''}`}
                 onClick={e => {
                   e.stopPropagation();
@@ -137,9 +157,10 @@ const Comments = React.memo(({
                     ? commentDisabledMessage
                     : (isCommentAuthor(comment) ? 'Click to edit' : 'Only the author can edit this comment')
                 }
-              >
-                <MarkdownContent content={comment.content} />
-              </div>
+                >
+                  <MarkdownContent content={comment.content} />
+                </div>
+              </>
             )}
           </div>
         ))

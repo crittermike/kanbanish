@@ -3,6 +3,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import { getInitials } from '../utils/avatarColors';
 import {
   getDisabledReason
 } from '../utils/retrospectiveModeUtils';
@@ -143,7 +144,11 @@ function Card({
     hideCardAuthorship,
     recordAction,
     undo,
-    boardTags
+    boardTags,
+    presenceData,
+    displayName,
+    userColor,
+    showDisplayNames
   } = useBoardContext();
   const cardElementRef = useRef(null);
 
@@ -200,7 +205,9 @@ function Card({
     votesPerUser,
     getUserVoteCount,
     recordAction,
-    undo
+    undo,
+    displayName,
+    userColor
   });
   // Calculate disabled reason for interactions
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
@@ -416,6 +423,22 @@ function Card({
             )}
           </CardContent>
 
+          {showDisplayNames && (
+            <div className="card-author">
+              <div 
+                className="card-author-avatar" 
+                style={{ 
+                  backgroundColor: presenceData?.[displayCardData.createdBy]?.color || displayCardData.userColor || 'var(--text-muted)' 
+                }}
+              >
+                {getInitials(presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous')}
+              </div>
+              <span className="card-author-name">
+                {presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous'}
+              </span>
+            </div>
+          )}
+
           {displayCardData.tags && displayCardData.tags.length > 0 && (
             <div className="card-tags">
               {displayCardData.tags.map(tag => (
@@ -445,6 +468,7 @@ function Card({
               isCommentAuthor={isCommentAuthor}
               interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
               disabledReason={disabledReason}
+              presenceData={presenceData}
             />
           )}
         </>
