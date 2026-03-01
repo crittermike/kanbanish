@@ -148,6 +148,7 @@ function Card({
     actionItems,
     actionItemsEnabled,
     createActionItem,
+    deleteActionItem,
     presenceData,
     displayName,
     userColor,
@@ -261,9 +262,11 @@ function Card({
     ) : {}
   } : cardData;
 
-  const hasActionItem = actionItemsEnabled && actionItems && Object.values(actionItems).some(
-    item => item.sourceCardId === cardId && item.sourceColumnId === columnId
+  const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
+    ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
+  const hasActionItem = !!actionItemEntry;
+  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
 
   const commentCount = Object.keys(displayCardData.comments || {}).length;
   const showCommentBadge = !groupId && commentCount > 0 && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode);
@@ -274,6 +277,12 @@ function Card({
       sourceCardId: cardId,
       sourceColumnId: columnId
     });
+  };
+
+  const handleRemoveActionItem = () => {
+    if (actionItemId) {
+      deleteActionItem(actionItemId);
+    }
   };
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
@@ -431,6 +440,7 @@ function Card({
                 currentTags={displayCardData.tags || []}
                 boardTags={boardTags}
                 onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
+                onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
                 hasActionItem={hasActionItem}
               />
             )}

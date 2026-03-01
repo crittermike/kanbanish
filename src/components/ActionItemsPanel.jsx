@@ -4,15 +4,39 @@ import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
-const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange, onDelete }) => {
+const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange, onDescriptionChange, onDelete }) => {
   const [localAssignee, setLocalAssignee] = useState(item.assignee || '');
+  const [localDescription, setLocalDescription] = useState(item.description || '');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
 
   useEffect(() => {
     setLocalAssignee(item.assignee || '');
   }, [item.assignee]);
 
+  useEffect(() => {
+    setLocalDescription(item.description || '');
+  }, [item.description]);
+
   const today = new Date().toDateString();
   const isOverdue = item.dueDate && item.status !== 'done' && new Date(item.dueDate) < new Date(today);
+
+  const handleDescriptionBlur = () => {
+    setIsEditingDescription(false);
+    if (localDescription.trim() !== (item.description || '')) {
+      onDescriptionChange(item.id, localDescription.trim());
+    }
+  };
+
+  const handleDescriptionKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      e.target.blur();
+    }
+    if (e.key === 'Escape') {
+      setLocalDescription(item.description || '');
+      e.target.blur();
+    }
+  };
 
   return (
     <div className={`action-item-row ${item.status === 'done' ? 'done' : ''}`}>
@@ -21,13 +45,29 @@ const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange
         onClick={() => onToggleStatus(item)}
         title={`Mark as ${item.status === 'open' ? 'done' : 'open'}`}
       >
-        {item.status === 'done' ? <Check size={16} /> : <Circle size={16} />}
+        {item.status === 'done' ? <Check size={14} /> : <Circle size={14} />}
       </button>
 
       <div className="action-item-main">
-        <div className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}>
-          {item.description}
-        </div>
+        {isEditingDescription ? (
+          <textarea
+            className="action-item-description-input"
+            value={localDescription}
+            onChange={(e) => setLocalDescription(e.target.value)}
+            onBlur={handleDescriptionBlur}
+            onKeyDown={handleDescriptionKeyDown}
+            autoFocus
+            rows={Math.max(1, localDescription.split('\n').length)}
+          />
+        ) : (
+          <div 
+            className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}
+            onClick={() => setIsEditingDescription(true)}
+            title="Click to edit"
+          >
+            {item.description}
+          </div>
+        )}
         <div className="action-item-meta">
           <input 
             type="text"
@@ -66,6 +106,7 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
     updateActionItemStatus,
     updateActionItemAssignee,
     updateActionItemDueDate,
+    updateActionItemDescription,
     deleteActionItem
   } = useBoardContext();
   
@@ -134,6 +175,7 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
                   onToggleStatus={handleToggleStatus}
                   onAssigneeChange={updateActionItemAssignee}
                   onDueDateChange={updateActionItemDueDate}
+                  onDescriptionChange={updateActionItemDescription}
                   onDelete={handleDelete}
                 />
               ))}

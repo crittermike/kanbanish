@@ -29,8 +29,8 @@
 .action-item-row {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-sm);
-  padding: var(--space-sm);
+  gap: 8px;
+  padding: 8px 10px;
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -59,7 +59,7 @@
   transition: color var(--transition-speed) var(--transition-ease),
               background-color var(--transition-speed) var(--transition-ease);
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .action-item-status-btn:hover {
@@ -79,40 +79,65 @@
 
 /* Content Area */
 .action-item-content {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--text-color);
   word-break: break-word;
   line-height: 1.4;
-  transition: opacity var(--transition-speed) var(--transition-ease);
+  cursor: text;
+  border-radius: var(--radius-sm);
+  padding: 1px 2px;
+  transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.action-item-content:hover {
+  background-color: var(--hover-bg);
 }
 
 .action-item-content.done {
   text-decoration: line-through;
 }
 
+/* Editable description textarea */
+.action-item-description-input {
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  color: var(--text-color);
+  background: var(--hover-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  outline: none;
+  padding: 2px 4px;
+  width: 100%;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 1.6em;
+}
+
 /* Meta row (assignee + due date) */
 .action-item-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  margin-top: 4px;
+  gap: 4px;
+  margin-top: 2px;
   font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 
 .action-item-meta-separator {
   color: var(--border-color);
+  font-size: 10px;
 }
 
 .action-item-assignee-input,
 .action-item-date-input {
   font-size: var(--font-size-xs);
+  font-family: inherit;
   color: var(--text-muted);
   background: transparent;
   border: none;
   border-bottom: 1px solid transparent;
   outline: none;
-  padding: 1px 0;
+  padding: 0;
   transition: all var(--transition-speed) var(--transition-ease);
 }
 
@@ -122,6 +147,7 @@
 
 .action-item-date-input {
   color-scheme: dark;
+  width: auto;
 }
 
 html.light-mode .action-item-date-input {
@@ -157,12 +183,12 @@ html.light-mode .action-item-date-input {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: var(--space-xs);
+  padding: 2px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-speed) var(--transition-ease);
   opacity: 0;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .action-item-row:hover .action-item-delete-btn {
@@ -213,15 +239,13 @@ html.light-mode .action-item-date-input {
   color: var(--accent);
 }
 
-/* Card Hover Action Indicator */
+/* Card Hover Action Indicator (clickable toggle) */
 .action-item-indicator {
-  color: var(--success);
-  opacity: 0.8;
-  cursor: default;
+  color: var(--text-color);
 }
 
 .action-item-action {
-  color: var(--text-muted);
+  color: var(--text-color);
 }
 
 /* Header Button */

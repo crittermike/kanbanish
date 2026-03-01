@@ -28,6 +28,7 @@ const CardHoverActions = React.memo(({
   currentTags,
   boardTags,
   onConvertToActionItem,
+  onRemoveActionItem,
   hasActionItem
 }) => {
   const emojiButtonRef = useRef(null);
@@ -159,10 +160,18 @@ const CardHoverActions = React.memo(({
           <CheckSquare size={16} aria-hidden="true" />
         </button>
       )}
-      {hasActionItem && (
-        <span className="card-hover-action action-item-indicator" title="Has action item">
+      {hasActionItem && onRemoveActionItem && (
+        <button
+          className="card-hover-action action-item-indicator"
+          onClick={e => {
+            e.stopPropagation();
+            onRemoveActionItem();
+          }}
+          title="Remove action item"
+          aria-label="Remove action item"
+        >
           <CheckSquare size={16} aria-hidden="true" />
-        </span>
+        </button>
       )}
 
       {/* Show comment button on hover only */}
