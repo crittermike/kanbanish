@@ -327,6 +327,12 @@
         font-size: var(--font-size-sm);
     }
 
+    /* Icon-only buttons stay compact in action bars */
+    .action-buttons .icon-btn {
+        flex: none;
+        width: auto;
+    }
+
     /* Ensure card/comment edit action buttons are properly sized on mobile */
     .card-edit-actions .btn,
     .comment-edit-actions .btn {
