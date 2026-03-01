@@ -146,6 +146,7 @@ function Card({
     undo,
     boardTags,
     actionItems,
+    actionItemsEnabled,
     createActionItem,
     presenceData,
     displayName,
@@ -260,7 +261,7 @@ function Card({
     ) : {}
   } : cardData;
 
-  const hasActionItem = actionItems && Object.values(actionItems).some(
+  const hasActionItem = actionItemsEnabled && actionItems && Object.values(actionItems).some(
     item => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
 
@@ -429,7 +430,7 @@ function Card({
                 currentColor={displayCardData.color}
                 currentTags={displayCardData.tags || []}
                 boardTags={boardTags}
-                onConvertToActionItem={handleConvertToActionItem}
+                onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
                 hasActionItem={hasActionItem}
               />
             )}

@@ -62,6 +62,8 @@ function Board({ onGoHome }) {
     votesPerUser,
     updateVotesPerUser,
     actionItems,
+    actionItemsEnabled,
+    updateActionItemsEnabled,
     displayName,
     userColor,
     updateDisplayName,
@@ -202,6 +204,8 @@ function Board({ onGoHome }) {
               setSettingsDropdownOpen(false);
             }}
             actionItemCount={actionItemCount}
+            actionItemsEnabled={actionItemsEnabled}
+            updateActionItemsEnabled={updateActionItemsEnabled}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}

@@ -4,7 +4,7 @@
 
 /* Modal Container */
 .modal-container.action-items-modal {
-  max-width: 600px;
+  max-width: 560px;
   width: 90%;
 }
 
@@ -20,7 +20,7 @@
 .action-items-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   margin-top: var(--space-md);
   margin-bottom: var(--space-md);
 }
@@ -28,7 +28,7 @@
 /* Row */
 .action-item-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-sm);
   padding: var(--space-sm);
   background-color: var(--card-bg);
@@ -41,6 +41,10 @@
   background-color: var(--hover-bg);
 }
 
+.action-item-row.done {
+  opacity: 0.6;
+}
+
 /* Status Toggle Button */
 .action-item-status-btn {
   display: flex;
@@ -50,11 +54,12 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: var(--space-xs);
+  padding: 2px;
   border-radius: 50%;
   transition: color var(--transition-speed) var(--transition-ease),
               background-color var(--transition-speed) var(--transition-ease);
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .action-item-status-btn:hover {
@@ -66,74 +71,81 @@
   color: var(--success);
 }
 
+/* Main content area (text + meta row) */
+.action-item-main {
+  flex-grow: 1;
+  min-width: 0;
+}
+
 /* Content Area */
 .action-item-content {
-  flex-grow: 1;
   font-size: var(--font-size-base);
   color: var(--text-color);
   word-break: break-word;
-  padding: var(--space-xs) 0;
+  line-height: 1.4;
   transition: opacity var(--transition-speed) var(--transition-ease);
 }
 
 .action-item-content.done {
   text-decoration: line-through;
-  opacity: 0.6;
 }
 
-/* Inline Inputs (Assignee & Due Date) */
-.action-item-assignee,
-.action-item-due-date {
+/* Meta row (assignee + due date) */
+.action-item-meta {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  font-size: var(--font-size-sm);
+  margin-top: 4px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  padding: var(--space-xs);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-speed) var(--transition-ease);
 }
 
-.action-item-assignee input,
-.action-item-due-date input {
-  font-size: inherit;
+.action-item-meta-separator {
+  color: var(--border-color);
+}
+
+.action-item-assignee-input,
+.action-item-date-input {
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   background: transparent;
   border: none;
+  border-bottom: 1px solid transparent;
   outline: none;
-  width: 100%;
+  padding: 1px 0;
+  transition: all var(--transition-speed) var(--transition-ease);
 }
 
-.action-item-due-date input[type="date"] {
-  color-scheme: dark;
-}
-
-html.light-mode .action-item-due-date input[type="date"] {
-  color-scheme: light;
-}
-
-.action-item-assignee input {
+.action-item-assignee-input {
   width: 80px;
 }
 
-.action-item-assignee:focus-within,
-.action-item-due-date:focus-within {
-  border-color: var(--accent);
-  background-color: var(--bg-color);
+.action-item-date-input {
+  color-scheme: dark;
+}
+
+html.light-mode .action-item-date-input {
+  color-scheme: light;
+}
+
+.action-item-assignee-input:hover,
+.action-item-date-input:hover {
+  border-bottom-color: var(--border-color);
+}
+
+.action-item-assignee-input:focus,
+.action-item-date-input:focus {
+  border-bottom-color: var(--accent);
   color: var(--text-color);
 }
 
-.action-item-assignee:hover,
-.action-item-due-date:hover {
-  border-color: var(--border-color);
-  background-color: var(--bg-color);
+.action-item-assignee-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
-.action-item-assignee::placeholder {
-  color: var(--text-muted);
-  opacity: 0.7;
+.action-item-date-input.overdue {
+  color: var(--danger);
 }
 
 /* Delete Button */
@@ -148,17 +160,19 @@ html.light-mode .action-item-due-date input[type="date"] {
   padding: var(--space-xs);
   border-radius: var(--radius-sm);
   transition: all var(--transition-speed) var(--transition-ease);
-  opacity: 0.5;
+  opacity: 0;
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .action-item-row:hover .action-item-delete-btn {
-  opacity: 1;
+  opacity: 0.6;
 }
 
 .action-item-delete-btn:hover {
+  opacity: 1;
   color: var(--danger);
-  background-color: rgba(248, 81, 73, 0.1); /* Based on --danger variable */
+  background-color: rgba(248, 81, 73, 0.1);
 }
 
 /* Footer Summary */

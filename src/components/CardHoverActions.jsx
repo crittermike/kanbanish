@@ -145,12 +145,12 @@ const CardHoverActions = React.memo(({
         </>
       )}
       
-      {!hideAddButton && !hasActionItem && (
+      {!hideAddButton && !hasActionItem && onConvertToActionItem && (
         <button
           className={`card-hover-action action-item-action ${useDisabledStyling ? 'disabled' : ''}`}
           onClick={disabled ? undefined : e => {
             e.stopPropagation();
-            if (onConvertToActionItem) onConvertToActionItem();
+            onConvertToActionItem();
           }}
           title={disabled ? getReactionDisabledMessage(disabledReason) : 'Convert to action item'}
           aria-label="Convert to action item"

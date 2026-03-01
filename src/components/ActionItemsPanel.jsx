@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { User, Calendar, Trash2, Check, Circle } from 'react-feather';
+import { Trash2, Check, Circle } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -11,40 +11,42 @@ const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange
     setLocalAssignee(item.assignee || '');
   }, [item.assignee]);
 
+  const today = new Date().toDateString();
+  const isOverdue = item.dueDate && item.status !== 'done' && new Date(item.dueDate) < new Date(today);
+
   return (
-    <div className="action-item-row">
+    <div className={`action-item-row ${item.status === 'done' ? 'done' : ''}`}>
       <button 
         className={`action-item-status-btn ${item.status === 'done' ? 'done' : ''}`}
         onClick={() => onToggleStatus(item)}
         title={`Mark as ${item.status === 'open' ? 'done' : 'open'}`}
       >
-        {item.status === 'done' ? <Check size={18} /> : <Circle size={18} />}
+        {item.status === 'done' ? <Check size={16} /> : <Circle size={16} />}
       </button>
 
-      <div className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}>
-        {item.description}
-      </div>
-
-      <div className="action-item-assignee">
-        <User size={14} />
-        <input 
-          type="text"
-          placeholder="Assign to..."
-          value={localAssignee}
-          onChange={(e) => setLocalAssignee(e.target.value)}
-          onBlur={() => onAssigneeChange(item.id, localAssignee)}
-          aria-label="Assignee"
-        />
-      </div>
-
-      <div className="action-item-due-date">
-        <Calendar size={14} />
-        <input 
-          type="date"
-          value={item.dueDate || ''}
-          onChange={(e) => onDueDateChange(item.id, e.target.value)}
-          aria-label="Due date"
-        />
+      <div className="action-item-main">
+        <div className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}>
+          {item.description}
+        </div>
+        <div className="action-item-meta">
+          <input 
+            type="text"
+            className="action-item-assignee-input"
+            placeholder="Unassigned"
+            value={localAssignee}
+            onChange={(e) => setLocalAssignee(e.target.value)}
+            onBlur={() => onAssigneeChange(item.id, localAssignee)}
+            aria-label="Assignee"
+          />
+          <span className="action-item-meta-separator">·</span>
+          <input 
+            type="date"
+            className={`action-item-date-input ${isOverdue ? 'overdue' : ''}`}
+            value={item.dueDate || ''}
+            onChange={(e) => onDueDateChange(item.id, e.target.value)}
+            aria-label="Due date"
+          />
+        </div>
       </div>
 
       <button 
@@ -52,7 +54,7 @@ const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange
         onClick={() => onDelete(item.id)}
         title="Delete action item"
       >
-        <Trash2 size={16} />
+        <Trash2 size={14} />
       </button>
     </div>
   );

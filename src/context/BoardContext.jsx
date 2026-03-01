@@ -72,6 +72,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Action items state
   const [actionItems, setActionItems] = useState({});
+  const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
 
   // Firebase authentication
   useEffect(() => {
@@ -173,6 +174,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.showDisplayNames !== undefined) {
               setShowDisplayNames(boardData.settings.showDisplayNames);
+            }
+            if (boardData.settings.actionItemsEnabled !== undefined) {
+              setActionItemsEnabled(boardData.settings.actionItemsEnabled);
             }
           }
 
@@ -302,19 +306,20 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateVotesPerUser,
     setSortByVotes,
     updateRetrospectiveMode,
-    updateShowDisplayNames
+    updateShowDisplayNames,
+    updateActionItemsEnabled
   } = useBoardSettings({
     boardId,
     user,
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames
+      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
     }
   });
 
@@ -578,7 +583,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       redo,
     canUndo, canRedo, pastCount, futureCount,
       // Action items
-      actionItems,
+      actionItems, actionItemsEnabled, updateActionItemsEnabled,
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
       updateActionItemDueDate, updateActionItemDescription, deleteActionItem
     };
@@ -609,7 +614,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
     getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer,
     resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
-    canUndo, canRedo, pastCount, futureCount, actionItems, createActionItem,
+    canUndo, canRedo, pastCount, futureCount, actionItems, actionItemsEnabled,
+    updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
     updateActionItemDescription, deleteActionItem
   ]);
