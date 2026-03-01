@@ -69,7 +69,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
   const handleConfirm = () => {
     const template = BOARD_TEMPLATES.find(t => t.id === selectedTemplate);
     if (template) {
-      onSelectTemplate(template.columns, template.name);
+      onSelectTemplate(template.columns, template.name, template.tags);
     }
   };
 

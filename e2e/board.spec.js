@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Helper: create a board via the template modal UI flow.
- * Waits for auth, clicks New Board, selects default template, clicks Create Board,
- * then waits for the board view to appear.
+ * Helper: create a board via the template modal + setup wizard UI flow.
+ * Waits for auth, clicks New Board, selects default template, clicks through
+ * the setup wizard, then waits for the board view to appear.
  */
 async function createBoardViaModal(page) {
   await page.goto('/');
@@ -24,8 +24,15 @@ async function createBoardViaModal(page) {
     const modalHeading = page.getByRole('heading', { name: /choose a board template/i });
     await expect(modalHeading).toBeVisible({ timeout: 3000 });
 
-    // The default template should already be selected — click "Create Board"
+    // The default template should already be selected — click "Create Board" to open the wizard
     await page.getByRole('button', { name: /create board/i }).click();
+
+    // Wait for the setup wizard to appear
+    const wizardHeading = page.getByRole('heading', { name: /set up your board/i });
+    await expect(wizardHeading).toBeVisible({ timeout: 3000 });
+
+    // Click "Create Board" in the wizard to actually create the board
+    await page.locator('.wizard-modal').getByRole('button', { name: /create board/i }).click();
 
     // Wait to see if we navigate to the board view
     try {
@@ -33,9 +40,14 @@ async function createBoardViaModal(page) {
       boardLoaded = true;
       break;
     } catch {
-      // Auth wasn't ready yet — the modal's handleTemplateSelected silently returned.
+      // Auth wasn't ready yet — the board creation silently failed.
       // Wait a bit for auth to complete and try again.
-      // Close the modal if it's still open
+      // Close the wizard if it's still open
+      const wizardCloseBtn = page.locator('.wizard-modal').getByRole('button', { name: /close setup wizard/i });
+      if (await wizardCloseBtn.isVisible().catch(() => false)) {
+        await wizardCloseBtn.click();
+      }
+      // Close the template modal if it's still open
       const cancelBtn = page.getByRole('button', { name: /cancel/i });
       if (await cancelBtn.isVisible().catch(() => false)) {
         await cancelBtn.click();

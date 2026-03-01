@@ -3,6 +3,8 @@ import { Clock, Layout, Plus, Star, Trash2, Sun, Moon, Users, Zap, Globe } from 
 import { useRecentBoards } from '../hooks/useRecentBoards';
 import { createBoardFromTemplate } from '../utils/boardUtils';
 import { database, auth, signInAnonymously, get, ref } from '../utils/firebase';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import BoardSetupWizard from './modals/BoardSetupWizard';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 
 /**
@@ -51,6 +53,8 @@ function countCards(columns) {
 function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
   const { recentBoards, removeBoard, togglePin, updateBoardMeta, clearAll } = useRecentBoards();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [joinBoardId, setJoinBoardId] = useState('');
   const [loadingMeta, setLoadingMeta] = useState(new Set());
   const [user, setUser] = useState(null);
@@ -100,24 +104,39 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
     });
   }, [recentBoards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Create a new board with the selected template
-  const handleTemplateSelected = useCallback((templateColumns, templateName = null) => {
-    if (!user) return;
+  // When a template is selected, store it and open the setup wizard
+  const handleTemplateSelected = useCallback((templateColumns, templateName = null, templateTags = []) => {
+    setPendingTemplate({ columns: templateColumns, name: templateName, tags: templateTags });
+    setIsTemplateModalOpen(false);
+    setIsWizardOpen(true);
+  }, []);
+
+  // When wizard is confirmed, create the board with the chosen settings
+  const handleWizardConfirm = useCallback((wizardSettings) => {
+    if (!user || !pendingTemplate) return;
 
     createBoardFromTemplate({
-      columns: templateColumns,
-      templateName,
+      columns: pendingTemplate.columns,
+      templateName: pendingTemplate.name,
       user,
-      queryString: window.location.search
+      queryString: window.location.search,
+      settingsOverrides: {
+        retrospectiveMode: wizardSettings.retrospectiveMode,
+        votingEnabled: wizardSettings.votingEnabled,
+        showDisplayNames: wizardSettings.showDisplayNames,
+        actionItemsEnabled: wizardSettings.actionItemsEnabled,
+        ...(wizardSettings.startHealthCheck && { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK }),
+      }
     })
       .then(newBoardId => {
-        setIsTemplateModalOpen(false);
+        setIsWizardOpen(false);
+        setPendingTemplate(null);
         onOpenBoard(newBoardId);
       })
       .catch(error => {
         console.error('Error creating board:', error);
       });
-  }, [user, onOpenBoard]);
+  }, [user, pendingTemplate, onOpenBoard]);
 
   // Navigate to a board
   const handleOpenBoard = (boardId) => {
@@ -350,6 +369,18 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
         onSelectTemplate={handleTemplateSelected}
+      />
+
+      {/* Board Setup Wizard (Step 2) */}
+      <BoardSetupWizard
+        isOpen={isWizardOpen}
+        onClose={() => {
+          setIsWizardOpen(false);
+          setIsTemplateModalOpen(true);
+        }}
+        onConfirm={handleWizardConfirm}
+        templateName={pendingTemplate?.name}
+        templateTags={pendingTemplate?.tags}
       />
     </div>
   );

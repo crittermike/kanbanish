@@ -27,6 +27,7 @@
 @import 'components/error-handling.css';
 @import 'components/action-items.css';
 @import 'components/display-names.css';
+@import 'components/wizard.css';
 
 /* Utility classes and notifications */
 .notification {
