@@ -1,8 +1,62 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { User, Calendar, Trash2, Check, Circle } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+
+const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange, onDelete }) => {
+  const [localAssignee, setLocalAssignee] = useState(item.assignee || '');
+
+  useEffect(() => {
+    setLocalAssignee(item.assignee || '');
+  }, [item.assignee]);
+
+  return (
+    <div className="action-item-row">
+      <button 
+        className={`action-item-status-btn ${item.status === 'done' ? 'done' : ''}`}
+        onClick={() => onToggleStatus(item)}
+        title={`Mark as ${item.status === 'open' ? 'done' : 'open'}`}
+      >
+        {item.status === 'done' ? <Check size={18} /> : <Circle size={18} />}
+      </button>
+
+      <div className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}>
+        {item.description}
+      </div>
+
+      <div className="action-item-assignee">
+        <User size={14} />
+        <input 
+          type="text"
+          placeholder="Assign to..."
+          value={localAssignee}
+          onChange={(e) => setLocalAssignee(e.target.value)}
+          onBlur={() => onAssigneeChange(item.id, localAssignee)}
+          aria-label="Assignee"
+        />
+      </div>
+
+      <div className="action-item-due-date">
+        <Calendar size={14} />
+        <input 
+          type="date"
+          value={item.dueDate || ''}
+          onChange={(e) => onDueDateChange(item.id, e.target.value)}
+          aria-label="Due date"
+        />
+      </div>
+
+      <button 
+        className="action-item-delete-btn"
+        onClick={() => onDelete(item.id)}
+        title="Delete action item"
+      >
+        <Trash2 size={16} />
+      </button>
+    </div>
+  );
+};
 
 const ActionItemsPanel = ({ isOpen, onClose }) => {
   const {
@@ -36,14 +90,6 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
     const newStatus = item.status === 'open' ? 'done' : 'open';
     updateActionItemStatus(item.id, newStatus);
     showNotification(`Marked as ${newStatus}`);
-  };
-
-  const handleAssigneeChange = (id, newAssignee) => {
-    updateActionItemAssignee(id, newAssignee);
-  };
-
-  const handleDueDateChange = (id, newDueDate) => {
-    updateActionItemDueDate(id, newDueDate);
   };
 
   const handleDelete = (id) => {
@@ -80,48 +126,14 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
           ) : (
             <div className="action-items-list">
               {allItems.map(item => (
-                <div key={item.id} className="action-item-row">
-                  <button 
-                    className={`action-item-status-btn ${item.status === 'done' ? 'done' : ''}`}
-                    onClick={() => handleToggleStatus(item)}
-                    title={`Mark as ${item.status === 'open' ? 'done' : 'open'}`}
-                  >
-                    {item.status === 'done' ? <Check size={18} /> : <Circle size={18} />}
-                  </button>
-
-                  <div className={`action-item-content ${item.status === 'done' ? 'done' : ''}`}>
-                    {item.description}
-                  </div>
-
-                  <div className="action-item-assignee">
-                    <User size={14} />
-                    <input 
-                      type="text"
-                      placeholder="Assign to..."
-                      value={item.assignee || ''}
-                      onChange={(e) => handleAssigneeChange(item.id, e.target.value)}
-                      aria-label="Assignee"
-                    />
-                  </div>
-
-                  <div className="action-item-due-date">
-                    <Calendar size={14} />
-                    <input 
-                      type="date"
-                      value={item.dueDate || ''}
-                      onChange={(e) => handleDueDateChange(item.id, e.target.value)}
-                      aria-label="Due date"
-                    />
-                  </div>
-
-                  <button 
-                    className="action-item-delete-btn"
-                    onClick={() => handleDelete(item.id)}
-                    title="Delete action item"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <ActionItemRow
+                  key={item.id}
+                  item={item}
+                  onToggleStatus={handleToggleStatus}
+                  onAssigneeChange={updateActionItemAssignee}
+                  onDueDateChange={updateActionItemDueDate}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           )}

@@ -257,6 +257,9 @@ function Card({
     item => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
 
+  const commentCount = Object.keys(displayCardData.comments || {}).length;
+  const showCommentBadge = !groupId && commentCount > 0 && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode);
+
   const handleConvertToActionItem = () => {
     createActionItem({
       description: cardData.content,
@@ -375,17 +378,6 @@ function Card({
       onClick={handleCardClick}
       data-card-id={cardId}
     >
-      {/* Show comment indicator badge when card has comments */}
-      {!isEditing && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && Object.keys(displayCardData.comments || {}).length > 0 && (
-        <div className="card-comment-indicator" title={`${Object.keys(displayCardData.comments || {}).length} comment${Object.keys(displayCardData.comments || {}).length === 1 ? '' : 's'}`}>
-          <MessageSquare size={12} />
-        </div>
-      )}
-      {hasActionItem && !isEditing && (
-        <div className="card-action-item-badge" title="Converted to action item">
-          <CheckSquare size={12} />
-        </div>
-      )}
       {isEditing ? (
         <CardEditor
           editedContent={editedContent}
@@ -441,6 +433,22 @@ function Card({
               {displayCardData.tags.map(tag => (
                 <span key={tag} className="card-tag-chip">{tag}</span>
               ))}
+            </div>
+          )}
+
+          {/* Inline badges for action items and comments */}
+          {(hasActionItem || (!isEditing && showCommentBadge)) && (
+            <div className="card-inline-badges">
+              {hasActionItem && (
+                <span className="card-inline-badge action-item-badge" title="Converted to action item">
+                  <CheckSquare size={11} /> Action item
+                </span>
+              )}
+              {!isEditing && showCommentBadge && (
+                <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
+                  <MessageSquare size={11} /> {commentCount}
+                </span>
+              )}
             </div>
           )}
 

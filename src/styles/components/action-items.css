@@ -99,11 +99,19 @@
 .action-item-assignee input,
 .action-item-due-date input {
   font-size: inherit;
-  color: inherit;
+  color: var(--text-muted);
   background: transparent;
   border: none;
   outline: none;
   width: 100%;
+}
+
+.action-item-due-date input[type="date"] {
+  color-scheme: dark;
+}
+
+html.light-mode .action-item-due-date input[type="date"] {
+  color-scheme: light;
 }
 
 .action-item-assignee input {
@@ -161,22 +169,34 @@
   align-items: center;
 }
 
-/* Card Badge */
-.card-action-item-badge {
-  position: absolute;
-  top: -5px;
-  right: 18px; /* offset to left of comment indicator */
-  background-color: var(--success);
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
+/* Card Inline Badges */
+.card-inline-badges {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs);
+  margin-top: var(--space-xs);
+}
+
+.card-inline-badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  z-index: 5;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-round);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.6;
   pointer-events: none;
-  box-shadow: var(--shadow-lg);
+}
+
+.card-inline-badge.action-item-badge {
+  background: rgba(46, 160, 67, 0.15);
+  color: var(--success);
+}
+
+.card-inline-badge.comment-badge {
+  background: var(--accent-transparent-light);
+  color: var(--accent);
 }
 
 /* Card Hover Action Indicator */
@@ -193,10 +213,6 @@
 /* Header Button */
 .action-items-header-btn {
   position: relative;
-}
-
-.action-items-header-btn:hover {
-  color: var(--accent);
 }
 
 /* Header Button Badge */
