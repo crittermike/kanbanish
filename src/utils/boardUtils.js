@@ -101,7 +101,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
   });
 
   // Only allow a safe subset of settings to be overridden on creation
-  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'actionItemsEnabled'];
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'actionItemsEnabled', 'workflowPhase'];
   const sanitizedOverrides = {};
   if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
     allowedOverrideKeys.forEach(k => {

@@ -350,4 +350,18 @@ describe('createBoardFromTemplate', () => {
 
     expect(columnTitles).toEqual(['To Do', 'In Progress', 'Done']);
   });
+
+  it('settingsOverrides with workflowPhase sets the workflow phase', async () => {
+    const user = { uid: 'user-1' };
+    await createBoardFromTemplate({
+      columns: ['A'],
+      user,
+      settingsOverrides: {
+        workflowPhase: 'HEALTH_CHECK'
+      }
+    });
+
+    const boardData = set.mock.calls[0][1];
+    expect(boardData.settings.workflowPhase).toBe('HEALTH_CHECK');
+  });
 });

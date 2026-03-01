@@ -3,6 +3,7 @@ import { Clock, Layout, Plus, Star, Trash2, Sun, Moon, Users, Zap, Globe } from 
 import { useRecentBoards } from '../hooks/useRecentBoards';
 import { createBoardFromTemplate } from '../utils/boardUtils';
 import { database, auth, signInAnonymously, get, ref } from '../utils/firebase';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import BoardSetupWizard from './modals/BoardSetupWizard';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
 
@@ -124,6 +125,7 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         votingEnabled: wizardSettings.votingEnabled,
         showDisplayNames: wizardSettings.showDisplayNames,
         actionItemsEnabled: wizardSettings.actionItemsEnabled,
+        ...(wizardSettings.startHealthCheck && { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK }),
       }
     })
       .then(newBoardId => {
