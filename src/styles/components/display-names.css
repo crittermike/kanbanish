@@ -215,6 +215,11 @@
   margin-bottom: 2px;
 }
 
+.comment-author + .comment-content {
+  margin-top: 0;
+  padding-top: 2px;
+}
+
 /* Card Author Badges */
 .card-author {
   display: flex;
@@ -266,21 +271,66 @@
   text-overflow: ellipsis;
 }
 
-/* Settings Name/Color Editor */
-.settings-name-editor {
+/* Profile Button (Header) */
+.profile-button-wrapper {
+  position: relative;
+}
+
+.profile-toggle-btn {
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.profile-toggle-btn:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.profile-popover-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.profile-popover-title {
+  font-size: var(--font-size-sm, 14px);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.profile-popover-body {
+  padding: 14px;
+}
+
+.profile-popover-preview {
   display: flex;
-  align-items: center;
-  gap: var(--space-sm, 8px);
-  margin-bottom: var(--space-md, 16px);
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
-.settings-name-editor .avatar-circle {
-  width: 32px;
-  height: 32px;
-  font-size: 14px;
+.profile-popover-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
 }
 
-.settings-name-input {
+.profile-popover-name-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.profile-popover-input {
   flex: 1;
   padding: 6px 10px;
   border: 1px solid var(--border-color);
@@ -290,19 +340,19 @@
   font-size: var(--font-size-sm, 14px);
 }
 
-.settings-name-input:focus {
+.profile-popover-input:focus {
   outline: none;
   border-color: var(--accent);
 }
 
-.settings-color-row {
+.profile-popover-colors {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: var(--space-md, 16px);
+  gap: 3px;
+  justify-content: center;
 }
 
-.settings-color-row .display-name-color-swatch {
-  width: 22px;
-  height: 22px;
+.profile-popover-colors .display-name-color-swatch {
+  width: 24px;
+  height: 24px;
 }

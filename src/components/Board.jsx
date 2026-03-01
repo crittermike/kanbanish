@@ -13,6 +13,7 @@ import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
+import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
@@ -191,11 +192,15 @@ function Board({ onGoHome }) {
             updateShowDisplayNames={updateShowDisplayNames}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
-            displayName={displayName}
-            userColor={userColor}
-            updateDisplayName={updateDisplayName}
-            updateUserColor={updateUserColor}
-          />
+          >
+            <ProfileButton
+              showDisplayNames={showDisplayNames}
+              displayName={displayName}
+              userColor={userColor}
+              updateDisplayName={updateDisplayName}
+              updateUserColor={updateUserColor}
+            />
+          </SettingsPanel>
         </div>
       </header>
 
