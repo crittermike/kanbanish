@@ -62,6 +62,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Display name and color for user presence
   const [displayName, setDisplayName] = useState('');
   const [userColor, setUserColor] = useState('');
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
   // Board owner tracking
   const [boardOwner, setBoardOwner] = useState(null);
 
@@ -92,8 +93,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
               setUserColor(prefs.userColor);
             }
           }
+          setPrefsLoaded(true);
         }).catch(error => {
           console.error('Error loading user preferences:', error);
+          setPrefsLoaded(true);
         });
       } else {
         signInAnonymously(auth)
@@ -521,6 +524,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       updateDisplayName,
       updateUserColor,
       clearDisplayName,
+      prefsLoaded,
       activeUsers,
       presenceData,
       // Workflow phase system
@@ -574,6 +578,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,
     displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
+    prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,

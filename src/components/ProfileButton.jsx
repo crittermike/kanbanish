@@ -17,18 +17,28 @@ const ProfileButton = ({
   const [localName, setLocalName] = useState(displayName || '');
   const popoverRef = useRef(null);
   const buttonRef = useRef(null);
+  const localNameRef = useRef(localName);
+
+  useEffect(() => {
+    localNameRef.current = localName;
+  }, [localName]);
 
   useEffect(() => {
     setLocalName(displayName || '');
   }, [displayName]);
 
-  const handleNameBlur = () => {
-    const trimmed = localName.trim();
+  // Save pending name changes
+  const savePendingName = useCallback(() => {
+    const trimmed = localNameRef.current.trim();
     if (trimmed && trimmed !== displayName) {
       updateDisplayName(trimmed);
     } else if (!trimmed) {
       setLocalName(displayName || '');
     }
+  }, [displayName, updateDisplayName]);
+
+  const handleNameBlur = () => {
+    savePendingName();
   };
 
   const handleRandomize = () => {
@@ -50,12 +60,14 @@ const ProfileButton = ({
         popoverRef.current && !popoverRef.current.contains(e.target) &&
         buttonRef.current && !buttonRef.current.contains(e.target)
       ) {
+        savePendingName();
         setIsOpen(false);
       }
     };
 
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
+        savePendingName();
         setIsOpen(false);
       }
     };
@@ -66,7 +78,7 @@ const ProfileButton = ({
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, savePendingName]);
 
   if (!showDisplayNames) return null;
 

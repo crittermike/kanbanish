@@ -225,8 +225,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  margin-top: 6px;
+  margin-bottom: -6px;
 }
 
 .card-author-avatar {
