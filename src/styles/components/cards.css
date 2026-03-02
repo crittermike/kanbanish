@@ -9,11 +9,13 @@
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-sm);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm) var(--space-md);
     cursor: pointer;
-    transition: all var(--transition-speed);
-    box-shadow: var(--card-shadow);
+    transition: border-color var(--transition-speed) var(--transition-ease),
+               box-shadow var(--transition-speed) var(--transition-ease),
+               transform var(--transition-speed) var(--transition-ease);
+    box-shadow: var(--shadow-sm);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -21,6 +23,8 @@
 
 .card:hover {
     border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
 /* Comment indicator badge - shown when card has comments */
@@ -261,8 +265,8 @@
     align-items: center;
     gap: var(--space-xxs);
     padding-right: var(--space-sm);
-    border-right: 1px solid var(--border-color);
-    min-width: 30px;
+    border-right: 1px solid rgba(139, 148, 158, 0.1);
+    min-width: 34px;
 }
 
 .vote-button {
@@ -273,13 +277,17 @@
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    padding: 0.1rem;
-    height: 16px;
-    width: 16px;
+    padding: 2px;
+    height: 22px;
+    width: 22px;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-speed) var(--transition-ease),
+               background-color var(--transition-speed) var(--transition-ease);
 }
 
 .vote-button:hover {
-    color: var(--text-color);
+    color: var(--accent);
+    background-color: var(--accent-transparent-light);
 }
 
 .vote-button.disabled,
@@ -336,8 +344,10 @@
 .vote-count {
     min-width: 1.5rem;
     text-align: center;
-    font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1;
 }
 
 /* Card Comments */
@@ -370,8 +380,17 @@
 
 .comments-section {
     margin-top: var(--space-sm);
-    padding-top: var(--space-xs);
-    border-top: 1px solid var(--border-color);
+    padding-top: var(--space-sm);
+    border-top: 1px solid rgba(139, 148, 158, 0.15);
+}
+
+.comments-section h4 {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-sm) 0;
 }
 
 /* Comments styling */
@@ -384,18 +403,18 @@
 
 .comment {
     background: var(--hover-bg);
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--accent);
-    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    border-left: 2px solid rgba(139, 148, 158, 0.2);
+    padding: var(--space-xs) var(--space-sm);
     margin-bottom: var(--space-xs);
     font-size: var(--font-size-sm);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-speed) var(--transition-ease);
+    transition: background-color var(--transition-speed) var(--transition-ease),
+               border-left-color var(--transition-speed) var(--transition-ease);
 }
 
 .comment:hover {
     background: var(--accent-transparent-lighter);
-    border-left-color: var(--accent-hover);
+    border-left-color: var(--accent);
 }
 
 .comment-content {
@@ -422,22 +441,25 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 120px;
-    margin: 20px 0;
+    height: 80px;
+    margin: var(--space-sm) 0;
     padding: var(--space-sm);
-    border: 1px dashed rgba(139, 148, 158, 0.2);
+    border: none;
     border-radius: var(--radius-md);
     color: var(--text-muted);
     font-style: italic;
     background-color: transparent;
+    opacity: 0.5;
 }
+
 .empty-column-placeholder span:first-child {
-    font-weight: 500;
-    margin-bottom: var(--space-xs);
+    font-weight: 400;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-xxs);
 }
 
 .empty-column-placeholder span:last-child {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
 }
 
 .comment-timestamp {
@@ -450,27 +472,29 @@
 .no-comments {
     color: var(--text-muted);
     font-style: italic;
+    font-size: var(--font-size-xs);
     padding: var(--space-sm);
     text-align: center;
-    border: 1px dashed var(--border-color);
+    opacity: 0.6;
     border-radius: var(--radius-sm);
-    margin: var(--space-xs) 0;
 }
 
 /* Comment Input */
 .comment-form {
-    margin-top: var(--space-sm);
+    margin-top: var(--space-xs);
 }
 
 .comment-input {
     width: 100%;
-    padding: var(--space-xs);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid rgba(139, 148, 158, 0.15);
+    border-radius: var(--radius-md);
     font-family: inherit;
     font-size: var(--font-size-sm);
-    background: var(--input-bg);
+    background: transparent;
     color: var(--text-color);
+    transition: border-color var(--transition-speed) var(--transition-ease),
+               box-shadow var(--transition-speed) var(--transition-ease);
 }
 
 .comment-input:focus {
@@ -486,14 +510,16 @@
 
 .comment-edit-input {
     width: 100%;
-    padding: var(--space-xs);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid rgba(139, 148, 158, 0.15);
+    border-radius: var(--radius-md);
     font-family: inherit;
     font-size: var(--font-size-sm);
-    background: var(--input-bg);
+    background: transparent;
     color: var(--text-color);
     margin-bottom: var(--space-xs);
+    transition: border-color var(--transition-speed) var(--transition-ease),
+               box-shadow var(--transition-speed) var(--transition-ease);
 }
 
 .comment-edit-input:focus {
@@ -504,11 +530,14 @@
 
 .comment-edit-actions {
     margin-top: var(--space-xxs);
+    display: flex;
+    gap: var(--space-xxs);
 }
 
 .btn-sm {
-    padding: 2px 6px;
+    padding: var(--space-xxs) var(--space-xs);
     font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
 }
 
 /* Inline Card Creation and Editing */
@@ -517,8 +546,9 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--space-sm);
-    margin-bottom: var(--space-sm);
+    margin: 0 var(--space-sm) var(--space-sm);
     box-shadow: var(--card-shadow);
+    flex-shrink: 0;
 }
 
 .inline-card-textarea {

@@ -22,6 +22,14 @@ body {
     overflow-x: hidden;
 }
 
+#root,
+.App {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+}
+
 /* Basic element styles */
 h1, h2, h3, h4, h5, h6 {
     margin-bottom: var(--space-sm);

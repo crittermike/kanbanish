@@ -265,25 +265,28 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
-    width: 100%;
-    padding: var(--space-md);
-    border: 1px solid var(--border-color);
+    width: calc(100% - var(--space-sm) * 2);
+    margin: 0 var(--space-sm) var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px dashed var(--border-color);
     border-radius: var(--radius-md);
-    background: var(--hover-bg);
-    color: var(--text-color);
+    background: transparent;
+    color: var(--text-muted);
     font-family: inherit;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-speed) var(--transition-ease);
-    margin-top: auto;
-    height: 44px;
+    flex-shrink: 0;
+    opacity: 0.6;
 }
 
 .add-card:hover {
-    background: var(--card-bg);
+    background: var(--hover-bg);
     border-color: var(--accent);
+    border-style: solid;
     color: var(--accent);
+    opacity: 1;
 }
 
 .add-card svg {
@@ -291,7 +294,7 @@
 }
 
 .add-card:hover svg {
-    transform: scale(1.2);
+    transform: scale(1.15);
 }
 
 /* Mobile responsive button adjustments */
