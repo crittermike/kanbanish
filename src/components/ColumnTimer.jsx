@@ -1,0 +1,233 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Clock, Pause, Play, RotateCcw, Square } from 'react-feather';
+import { useBoardContext } from '../context/BoardContext';
+import { useNotification } from '../context/NotificationContext';
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
+
+/* global requestAnimationFrame, cancelAnimationFrame */
+
+const PRESET_DURATIONS = [
+  { label: '1m', seconds: 60 },
+  { label: '3m', seconds: 180 },
+  { label: '5m', seconds: 300 },
+  { label: '10m', seconds: 600 }
+];
+const RING_RADIUS = 46;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const playDing = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, now);
+    gain1.gain.setValueAtTime(0.4, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 1.2);
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1760, now);
+    gain2.gain.setValueAtTime(0.15, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now);
+    osc2.stop(now + 0.8);
+    setTimeout(() => ctx.close(), 2000);
+  } catch {
+    // Web Audio API not available
+  }
+};
+
+const formatTime = (totalSeconds) => {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = Math.floor(totalSeconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const getUrgencyState = (remaining, total) => {
+  if (total === 0) return 'normal';
+  const ratio = remaining / total;
+  if (ratio <= 0) return 'expired';
+  if (ratio <= 0.2) return 'critical';
+  if (ratio <= 0.5) return 'warning';
+  return 'normal';
+};
+
+const ColumnTimer = ({ columnId, timerData }) => {
+  const { startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer } = useBoardContext();
+  const { showNotification } = useNotification();
+
+  const [remaining, setRemaining] = useState(0);
+  const [showSetup, setShowSetup] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState('');
+
+  const hasNotifiedRef = useRef(false);
+  const animationRef = useRef(null);
+  const setupRef = useRef(null);
+  const lastStartedAtRef = useRef(null);
+
+  useOnClickOutside(setupRef, () => setShowSetup(false));
+
+  const updateRemaining = useCallback(() => {
+    if (!timerData) {
+      setRemaining(0);
+      return;
+    }
+
+    let newRemaining = 0;
+    if (timerData.isRunning && timerData.startedAt) {
+      const now = Date.now();
+      const elapsed = Math.floor((now - timerData.startedAt) / 1000);
+      newRemaining = Math.max(0, timerData.duration - elapsed);
+    } else if (timerData.pausedRemaining !== undefined && timerData.pausedRemaining !== null) {
+      newRemaining = timerData.pausedRemaining;
+    } else {
+      newRemaining = timerData.duration;
+    }
+
+    setRemaining(newRemaining);
+
+    if (
+      newRemaining <= 0 &&
+      !hasNotifiedRef.current &&
+      (timerData.isRunning || (timerData.pausedRemaining !== undefined && timerData.pausedRemaining <= 0))
+    ) {
+      hasNotifiedRef.current = true;
+      playDing();
+      showNotification("⏰ Time's up!", 'info');
+    }
+  }, [timerData, showNotification]);
+
+  useEffect(() => {
+    if (timerData?.startedAt !== lastStartedAtRef.current) {
+      hasNotifiedRef.current = false;
+      lastStartedAtRef.current = timerData?.startedAt;
+    }
+
+    updateRemaining();
+
+    if (timerData?.isRunning) {
+      const loop = () => {
+        updateRemaining();
+        animationRef.current = requestAnimationFrame(loop);
+      };
+      animationRef.current = requestAnimationFrame(loop);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [timerData, updateRemaining]);
+
+  const handleStartPreset = (seconds) => {
+    startColumnTimer(columnId, seconds);
+    setShowSetup(false);
+    hasNotifiedRef.current = false;
+  };
+
+  const handleStartCustom = () => {
+    const mins = parseFloat(customMinutes);
+    if (mins > 0 && mins <= 60) {
+      startColumnTimer(columnId, Math.round(mins * 60));
+      setShowSetup(false);
+      hasNotifiedRef.current = false;
+    }
+  };
+
+  const handleCustomKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleStartCustom();
+    }
+  };
+
+  const handleRestart = () => {
+    restartColumnTimer(columnId, timerData);
+    hasNotifiedRef.current = false;
+  };
+
+  const handleStop = () => {
+    resetColumnTimer(columnId);
+    hasNotifiedRef.current = false;
+  };
+
+  const totalDuration = timerData?.originalDuration || timerData?.duration || 0;
+  const progress = totalDuration > 0 ? remaining / totalDuration : 0;
+  const dashoffset = RING_CIRCUMFERENCE * (1 - progress);
+  const urgency = getUrgencyState(remaining, totalDuration);
+  const isRunning = timerData?.isRunning || false;
+  const isPaused = timerData && !timerData.isRunning && timerData.pausedRemaining > 0;
+  const hasTimer = timerData != null;
+  const timerExpired = hasTimer && remaining <= 0 && (isRunning || (timerData?.pausedRemaining !== null && timerData?.pausedRemaining <= 0));
+
+  if (!hasTimer) {
+    return (
+      <div className="column-timer-setup" ref={setupRef}>
+        <button className="icon-button column-timer-btn" onClick={() => setShowSetup(!showSetup)} title="Set column timer">
+          <Clock />
+        </button>
+        {showSetup && (
+          <div className="column-timer-popover">
+            <div className="column-timer-popover-header">
+              <span className="column-timer-popover-title">Set Timer</span>
+            </div>
+            <div className="column-timer-presets">
+              {PRESET_DURATIONS.map(({ label, seconds }) => (
+                <button key={seconds} className="btn column-timer-preset-btn" onClick={() => handleStartPreset(seconds)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="column-timer-custom">
+              <input type="number" className="column-timer-custom-input" placeholder="min" min="0.5" max="60" step="0.5" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} onKeyDown={handleCustomKeyDown} aria-label="Custom timer duration in minutes" />
+              <button className="btn primary-btn column-timer-custom-start" onClick={handleStartCustom} disabled={!customMinutes || parseFloat(customMinutes) <= 0}>
+                <Play size={12} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`column-timer-active ${urgency} ${timerExpired ? 'expired' : ''}`} role="timer" aria-live="polite" aria-label={`${formatTime(remaining)} remaining`}>
+      <div className="column-timer-ring">
+        <svg className="column-timer-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <circle className="column-timer-ring-bg" cx="50" cy="50" r={RING_RADIUS} />
+          <circle className="column-timer-ring-progress" cx="50" cy="50" r={RING_RADIUS} strokeDasharray={RING_CIRCUMFERENCE} strokeDashoffset={dashoffset} />
+        </svg>
+        <div className="column-timer-display">
+          <span className="column-timer-time">{formatTime(remaining)}</span>
+        </div>
+      </div>
+      <div className="column-timer-controls">
+        {isRunning && remaining > 0 ? (
+          <button className="btn icon-btn column-timer-control-btn" onClick={() => pauseColumnTimer(columnId, timerData)} title="Pause" aria-label="Pause timer">
+            <Pause size={14} />
+          </button>
+        ) : isPaused && remaining > 0 ? (
+          <button className="btn icon-btn column-timer-control-btn" onClick={() => resumeColumnTimer(columnId, timerData)} title="Resume" aria-label="Resume timer">
+            <Play size={14} />
+          </button>
+        ) : null}
+        <button className="btn icon-btn column-timer-control-btn" onClick={handleRestart} title="Restart" aria-label="Restart timer">
+          <RotateCcw size={14} />
+        </button>
+        <button className="btn icon-btn column-timer-control-btn" onClick={handleStop} title="Stop" aria-label="Stop timer">
+          <Square size={14} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ColumnTimer;

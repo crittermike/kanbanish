@@ -22,6 +22,7 @@
 @import 'components/poll.css';
 @import 'components/health-check.css';
 @import 'components/timer.css';
+@import 'components/column-timer.css';
 @import 'components/dashboard.css';
 @import 'components/search.css';
 @import 'components/error-handling.css';

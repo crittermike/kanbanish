@@ -2,11 +2,11 @@ import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { useActionItems } from '../hooks/useActionItems';
 import { useBoardSettings } from '../hooks/useBoardSettings';
+import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
 import { usePoll } from '../hooks/usePoll';
 import { usePresence } from '../hooks/usePresence';
-import { useTimer } from '../hooks/useTimer';
 import { useUndoRedo } from '../hooks/useUndoRedo';
 import { useVoting } from '../hooks/useVoting';
 import { useWorkflow } from '../hooks/useWorkflow';
@@ -67,8 +67,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Board owner tracking
   const [boardOwner, setBoardOwner] = useState(null);
 
-  // Timer state for retrospective phases
-  const [timerData, setTimerData] = useState(null);
 
   // Action items state
   const [actionItems, setActionItems] = useState({});
@@ -142,9 +140,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           if (boardData.owner) {
             setBoardOwner(boardData.owner);
           }
-
-          // Load timer data
-          setTimerData(boardData.timer || null);
 
           // Set voting preferences if available, otherwise use defaults
           if (boardData.settings) {
@@ -359,11 +354,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     resultsViewIndex, removeAllGrouping
   });
 
-  // Timer functions
+  // Per-column timer functions
   const {
-    startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer
-  } = useTimer({
-    boardId, user, timerData, setTimerData, workflowPhase
+    startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer
+  } = useColumnTimer({
+    boardId, user, workflowPhase, columns
   });
 
   // Action items operations
@@ -567,13 +562,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
       getAllUsersAddingCards,
-      // Timer system
-      timerData,
-      startTimer,
-      pauseTimer,
-      resumeTimer,
-      resetTimer,
-      restartTimer,
+      // Per-column timer system
+      startColumnTimer,
+      pauseColumnTimer,
+      resumeColumnTimer,
+      resetColumnTimer,
+      restartColumnTimer,
       // Board ownership
       boardOwner,
       isOwner: user && boardOwner ? user.uid === boardOwner : false,
@@ -612,10 +606,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
-    getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer,
-    resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
-    canUndo, canRedo, pastCount, futureCount, actionItems, actionItemsEnabled,
-    updateActionItemsEnabled, createActionItem,
+    getAllUsersAddingCards, startColumnTimer, pauseColumnTimer, resumeColumnTimer,
+    resetColumnTimer, restartColumnTimer, boardOwner, recordAction, undo, redo,
+    canUndo, canRedo, pastCount, futureCount,
+    actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
     updateActionItemDescription, deleteActionItem
   ]);

@@ -1,0 +1,338 @@
+/**
+ * Column Timer Styles
+ *
+ * Compact per-column countdown timer that lives in the column header.
+ * Includes setup popover, active timer ring, urgency states, and
+ * expired column visual treatment.
+ */
+
+/* When a timer is active, keep column-actions always visible */
+.column-actions:has(.column-timer-active) {
+  opacity: 1;
+}
+
+/* Also keep visible when the timer popover is open */
+.column-actions:has(.column-timer-popover) {
+  opacity: 1;
+}
+
+/* ===== Setup Mode ===== */
+.column-timer-setup {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.column-timer-btn {
+  /* Inherits icon-button base styles for color/hover */
+}
+
+.column-timer-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: dropdown-fade-in 0.2s ease;
+}
+
+.column-timer-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.column-timer-popover-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.column-timer-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.column-timer-preset-btn {
+  font-size: var(--font-size-xs);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+  font-weight: 500;
+  min-width: auto;
+}
+
+.column-timer-preset-btn:hover {
+  background: var(--accent-transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.column-timer-custom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+
+.column-timer-custom-input {
+  flex: 1;
+  padding: 3px 6px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.column-timer-custom-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-transparent);
+}
+
+.column-timer-custom-input::placeholder {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.column-timer-custom-start {
+  padding: 3px 6px;
+  min-width: auto;
+}
+
+.column-timer-custom-start:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+/* ===== Active Timer ===== */
+.column-timer-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.column-timer-ring {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.column-timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.column-timer-ring-bg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 5;
+  opacity: 0.5;
+}
+
+.column-timer-ring-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke 0.5s ease;
+}
+
+.column-timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.column-timer-time {
+  font-size: 0.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-color);
+  transition: color 0.5s ease;
+  letter-spacing: 0.01em;
+}
+
+/* ===== Urgency States ===== */
+.column-timer-active.normal .column-timer-ring-progress {
+  stroke: var(--accent);
+}
+
+.column-timer-active.warning .column-timer-ring-progress {
+  stroke: var(--yellow);
+}
+
+.column-timer-active.warning .column-timer-time {
+  color: var(--yellow);
+}
+
+.column-timer-active.critical .column-timer-ring-progress {
+  stroke: var(--danger);
+  animation: column-timer-pulse-ring 1.5s ease-in-out infinite;
+}
+
+.column-timer-active.critical .column-timer-time {
+  color: var(--danger);
+  animation: column-timer-pulse-text 1.5s ease-in-out infinite;
+}
+
+.column-timer-active.critical .column-timer-ring {
+  animation: column-timer-pulse-scale 1.5s ease-in-out infinite;
+}
+
+.column-timer-active.expired .column-timer-ring-progress {
+  stroke: var(--danger);
+  stroke-dashoffset: 0 !important;
+  opacity: 0.3;
+}
+
+.column-timer-active.expired .column-timer-time {
+  color: var(--danger);
+  animation: column-timer-blink 1s step-end infinite;
+}
+
+.column-timer-active.expired .column-timer-ring {
+  animation: column-timer-expired-glow 2s ease-in-out infinite;
+}
+
+/* ===== Timer Controls ===== */
+.column-timer-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+
+.column-timer-control-btn {
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+  transition: opacity var(--transition-speed) var(--transition-ease),
+              background var(--transition-speed) var(--transition-ease);
+}
+
+.column-timer-control-btn:hover {
+  opacity: 1;
+  background: var(--hover-bg);
+}
+
+/* ===== Expired Column Treatment ===== */
+.column.column-timer-expired {
+  border-color: var(--danger-transparent-border);
+  box-shadow: inset 0 1px 0 rgba(248, 81, 73, 0.05),
+              0 0 0 1px var(--danger-transparent-lighter);
+}
+
+.column.column-timer-expired .column-content {
+  opacity: 0.5;
+  transition: opacity 0.5s ease;
+}
+
+.column.column-timer-expired .column-header {
+  border-bottom-color: var(--danger-transparent-border);
+}
+
+.column.column-timer-expired:hover .column-content {
+  opacity: 0.8;
+}
+
+/* ===== Animations ===== */
+@keyframes column-timer-pulse-ring {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px var(--danger));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px var(--danger));
+  }
+}
+
+@keyframes column-timer-pulse-text {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes column-timer-pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes column-timer-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes column-timer-expired-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(248, 81, 73, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(248, 81, 73, 0.5));
+  }
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .column-timer-ring-progress,
+  .column-timer-time,
+  .column-timer-ring,
+  .column.column-timer-expired .column-content {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .column-timer-popover {
+    min-width: 180px;
+    left: 0;
+    right: auto;
+  }
+
+  .column-timer-presets {
+    flex-wrap: wrap;
+  }
+
+  .column-timer-custom {
+    border-top: 1px solid var(--border-color);
+    padding-top: 6px;
+    width: 100%;
+  }
+}

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
-import Timer from './Timer';
 
 const TABS = [
   { id: 'appearance', label: 'Appearance', icon: Sliders },
@@ -97,7 +96,6 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
-      <Timer />
 
       {actionItemsEnabled && (
         <button

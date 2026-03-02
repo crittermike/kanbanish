@@ -10,6 +10,7 @@ import { database } from '../utils/firebase';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
+import ColumnTimer from './ColumnTimer';
 
 function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds }) {
   const { 
@@ -26,6 +27,14 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     userColor
   } = useBoardContext();
   const { showNotification } = useNotification();
+
+  // Check if column timer has expired
+  const isColumnTimerExpired = columnData.timer && (
+    (columnData.timer.isRunning && columnData.timer.startedAt &&
+      (Date.now() - columnData.timer.startedAt) / 1000 >= columnData.timer.duration) ||
+    (columnData.timer.pausedRemaining !== null && columnData.timer.pausedRemaining !== undefined &&
+      columnData.timer.pausedRemaining <= 0)
+  );
   const [title, setTitle] = useState(columnData.title || 'New Column');
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
@@ -350,7 +359,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   }
 
   return (
-    <div className="column">
+    <div className={`column${isColumnTimerExpired ? ' column-timer-expired' : ''}`}>
       <div className="column-header">
         {isEditing ? (
           <input
@@ -377,6 +386,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           </h2>
         )}
         <div className="column-actions">
+          <ColumnTimer columnId={columnId} timerData={columnData.timer} />
           <button
             className="collapse-toggle icon-button"
             title="Collapse column"
