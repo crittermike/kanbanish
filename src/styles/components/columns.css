@@ -10,30 +10,34 @@ main {
     flex-grow: 1;
     padding: var(--space-md);
     overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .board-container {
-    height: 100%;
-    min-height: 300px;
+    flex-grow: 1;
+    min-height: 0;
 }
 
 .board {
     display: flex;
     height: 100%;
+    min-height: 0;
     gap: var(--space-md);
 }
 
 /* Column styling */
 .column {
     background: var(--column-bg);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     min-width: var(--column-width);
     max-width: var(--column-width);
-    height: fit-content;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    transition: min-width 0.3s ease, max-width 0.3s ease;
+    transition: min-width 0.3s ease, max-width 0.3s ease, border-color var(--transition-speed) ease;
     overflow: hidden;
 }
 /* Collapsed column state */
@@ -121,33 +125,35 @@ main {
 }
 
 .column-header {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--hover-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
 }
 .column-title {
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     padding: var(--space-xxs) var(--space-xs);
     border-radius: var(--radius-sm);
     border: 1px solid transparent;
     width: 100%;
     background: transparent;
-    color: var(--text-color);
+    color: var(--text-muted);
     cursor: text;
-    transition: border-color var(--transition-speed) var(--transition-ease);
+    transition: color var(--transition-speed) var(--transition-ease), border-color var(--transition-speed) var(--transition-ease);
 }
 
 .column-title:focus {
     border-color: var(--accent);
     outline: none;
     background-color: var(--hover-bg);
+    color: var(--text-color);
 }
 
 .column-title:hover:not(:focus) {
@@ -210,6 +216,13 @@ main {
 .column-actions {
     display: flex;
     gap: var(--space-xs);
+    opacity: 0;
+    transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.column:hover .column-actions,
+.column:focus-within .column-actions {
+    opacity: 1;
 }
 
 .add-column-container {
@@ -223,22 +236,24 @@ main {
     justify-content: center;
     gap: var(--space-xs);
     min-width: 160px;
-    padding: var(--space-md);
-    background: var(--hover-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-weight: 500;
     transition: all var(--transition-speed) var(--transition-ease);
-    height: 44px;
+    opacity: 0.6;
 }
 
 .add-column:hover {
-    background: var(--card-bg);
+    background: var(--hover-bg);
     border-color: var(--accent);
+    border-style: solid;
     color: var(--accent);
+    opacity: 1;
 }
 
 .add-column svg {
@@ -246,7 +261,7 @@ main {
 }
 
 .add-column:hover svg {
-    transform: scale(1.2);
+    transform: scale(1.15);
 }
 
 /* Responsive adjustments */

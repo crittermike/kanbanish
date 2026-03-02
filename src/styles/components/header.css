@@ -7,10 +7,9 @@
 
 /* Header & Controls */
 header {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     background: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     position: relative;
     z-index: 10;
 }
@@ -19,7 +18,7 @@ header {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-sm);
 }
 
 @media (min-width: 768px) {
@@ -94,7 +93,9 @@ h1 {
     color: var(--text-color);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
+    padding: var(--space-xxs) var(--space-xs);
     width: 100%;
+    transition: border-color var(--transition-speed) var(--transition-ease);
 }
 
 #board-title:focus {
@@ -489,16 +490,17 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 .user-counter {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px;
+    gap: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: default;
-    transition: all 0.2s ease;
+    transition: color var(--transition-speed) var(--transition-ease),
+               background-color var(--transition-speed) var(--transition-ease);
 }
 
 .user-counter:hover {
@@ -506,15 +508,20 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 }
 
 .user-count {
-    color: var(--text-primary);
+    color: var(--text-color);
     font-weight: 600;
-    min-width: 20px;
+    font-size: var(--font-size-xs);
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
     text-align: center;
+    background: var(--hover-bg);
+    border-radius: var(--radius-round);
 }
 
 /* User counter icon color */
 .user-counter svg {
-    color: var(--text-secondary);
+    color: var(--text-muted);
 }
 
 /* Responsive adjustments for user counter */
