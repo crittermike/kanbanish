@@ -373,6 +373,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             title="Click to edit column title"
           >
             {title}
+            <span className="column-card-count">{getCardCount()}</span>
           </h2>
         )}
         <div className="column-actions">

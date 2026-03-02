@@ -274,6 +274,7 @@
 /* Profile Button (Header) */
 .profile-button-wrapper {
   position: relative;
+  display: flex;
 }
 
 .profile-toggle-btn {

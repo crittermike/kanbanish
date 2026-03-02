@@ -2,56 +2,56 @@
  * Kanban App - Card Component Styles
  * 
  * Styles for cards, including voting, comments, and other card features.
- * Last updated: April 25, 2025
+ * Last updated: March 1, 2026
  */
 
 /* Card styling */
 .card {
     background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
     padding: var(--space-sm) var(--space-md);
     cursor: pointer;
-    transition: border-color var(--transition-speed) var(--transition-ease),
-               box-shadow var(--transition-speed) var(--transition-ease),
-               transform var(--transition-speed) var(--transition-ease);
-    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) var(--transition-ease);
+    box-shadow: var(--card-shadow);
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
 .card:hover {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-md);
+    border-color: var(--border-color);
+    box-shadow: var(--card-shadow-hover);
     transform: translateY(-1px);
 }
 
 /* Comment indicator badge - shown when card has comments */
 .card-comment-indicator {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -4px;
+    right: -4px;
     background-color: var(--accent);
     color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    border-radius: var(--radius-round);
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.6rem;
+    font-weight: var(--font-weight-semibold);
     z-index: 5;
     pointer-events: none;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
 }
 
 /* Card hover actions - shown on hover to save vertical space */
 .card-hover-actions {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: -1px;
+    right: -1px;
     display: none;
-    gap: var(--space-xxs);
+    gap: 2px;
     z-index: 10;
 }
 
@@ -81,21 +81,20 @@
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    width: 2rem;
-    height: 2rem;
+    width: 28px;
+    height: 28px;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--text-muted);
     opacity: 1;
-    transition: opacity var(--transition-speed) var(--transition-ease),
-        background-color var(--transition-speed) var(--transition-ease),
-        transform var(--transition-speed) var(--transition-ease);
-    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-speed) var(--transition-ease);
+    box-shadow: var(--shadow-md);
     position: relative;
 }
 
 .card-hover-action:hover {
     background-color: var(--hover-bg);
-    transform: scale(1.1);
+    color: var(--text-color);
+    transform: scale(1.05);
 }
 
 .card-hover-action.disabled,
@@ -113,7 +112,7 @@
 }
 
 .card-hover-action.emoji-action {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     line-height: 1;
     padding-bottom: 2px;
@@ -130,13 +129,13 @@
 
 .card-hover-action .comment-count {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -3px;
+    right: -3px;
     background-color: var(--accent);
     color: white;
-    font-size: 0.65rem;
-    font-weight: bold;
-    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-round);
     width: 14px;
     height: 14px;
     display: flex;
@@ -160,14 +159,14 @@
 
 .card.groupable:hover {
     border-color: var(--accent);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--card-shadow-hover);
 }
 
 .card.drop-target {
     border-color: var(--accent);
     background: var(--accent-transparent);
     box-shadow: 0 0 0 3px var(--accent-transparent);
-    transform: scale(1.02);
+    transform: scale(1.01);
 }
 
 .card.multi-select-mode {
@@ -184,10 +183,10 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 2px;
     background: linear-gradient(90deg, var(--accent), transparent);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 .card-selection-indicator {
@@ -198,10 +197,10 @@
 }
 
 .selection-checkbox {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border: 2px solid var(--accent);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs);
     background: var(--card-bg);
     display: flex;
     align-items: center;
@@ -220,23 +219,28 @@
 /* Drag and drop styling */
 .card.dragging {
     cursor: grabbing;
-    transform: rotate(2deg) scale(1.02);
-    box-shadow: var(--shadow-lg);
+    transform: rotate(1.5deg) scale(1.02);
+    box-shadow: var(--card-shadow-drag);
     border: 1px solid var(--accent);
     z-index: 100;
+    opacity: 0.85;
 }
 
 .card-header {
     display: flex;
+    align-items: flex-start;
     position: relative;
+    gap: var(--space-xs);
 }
 
 .card-content {
     flex: 1;
     word-break: break-word;
     color: var(--text-color);
-    line-height: 1.4;
-    margin-left: var(--space-sm);
+    line-height: 1.5;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    min-width: 0;
 }
 
 .card-content.obfuscated {
@@ -255,18 +259,17 @@
     justify-content: flex-end;
     align-items: center;
     padding-top: var(--space-xs);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-subtle);
 }
 
-/* Card votes */
+/* Card votes - compact vertical */
 .votes {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-xxs);
-    padding-right: var(--space-sm);
-    border-right: 1px solid rgba(139, 148, 158, 0.1);
-    min-width: 34px;
+    gap: 0;
+    flex-shrink: 0;
+    min-width: 24px;
 }
 
 .vote-button {
@@ -275,19 +278,18 @@
     justify-content: center;
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: rgba(139, 148, 158, 0.35);
     cursor: pointer;
-    padding: 2px;
-    height: 22px;
-    width: 22px;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-speed) var(--transition-ease),
-               background-color var(--transition-speed) var(--transition-ease);
+    padding: 0;
+    height: 16px;
+    width: 20px;
+    border-radius: var(--radius-xs);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .vote-button:hover {
     color: var(--accent);
-    background-color: var(--accent-transparent-light);
+    background-color: var(--accent-subtle);
 }
 
 .vote-button.disabled,
@@ -342,9 +344,9 @@
 }
 
 .vote-count {
-    min-width: 1.5rem;
+    min-width: 1rem;
     text-align: center;
-    font-weight: 700;
+    font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-xs);
     color: var(--text-muted);
     line-height: 1;
@@ -368,7 +370,7 @@
 }
 
 .comments-btn.has-comments {
-    background: var(--accent-transparent);
+    background: var(--accent-subtle);
     color: var(--accent);
     border-radius: var(--radius-sm);
 }
@@ -378,60 +380,60 @@
     color: var(--accent-hover);
 }
 
+/* Comments section */
 .comments-section {
-    margin-top: var(--space-sm);
-    padding-top: var(--space-sm);
-    border-top: 1px solid rgba(139, 148, 158, 0.15);
+    margin-top: var(--space-xs);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border-subtle);
 }
 
 .comments-section h4 {
     font-size: var(--font-size-xs);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
-    margin: 0 0 var(--space-sm) 0;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--text-faint);
+    margin: 0 0 var(--space-xs) 0;
 }
 
 /* Comments styling */
 .comments-container {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
 }
 
 .comment {
-    background: var(--hover-bg);
-    border-radius: var(--radius-md);
-    border-left: 2px solid rgba(139, 148, 158, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--border-subtle);
     padding: var(--space-xs) var(--space-sm);
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-xxs);
     font-size: var(--font-size-sm);
-    transition: background-color var(--transition-speed) var(--transition-ease),
-               border-left-color var(--transition-speed) var(--transition-ease);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .comment:hover {
-    background: var(--accent-transparent-lighter);
+    background: var(--accent-subtle);
     border-left-color: var(--accent);
 }
 
 .comment-content {
     color: var(--text-color);
     word-break: break-word;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .comment-content.editable {
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: var(--border-radius);
-    transition: background-color 0.2s ease;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-speed) var(--transition-ease);
 }
 
 .comment-content.editable:hover {
-    background-color: var(--bg-secondary);
+    background-color: var(--hover-bg);
 }
 
 /* Empty column placeholder */
@@ -441,41 +443,41 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 80px;
-    margin: var(--space-sm) 0;
-    padding: var(--space-sm);
-    border: none;
+    min-height: 80px;
+    margin: var(--space-sm) var(--space-xs);
+    padding: var(--space-md);
+    border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
-    color: var(--text-muted);
-    font-style: italic;
-    background-color: transparent;
-    opacity: 0.5;
+    color: var(--text-faint);
+    font-style: normal;
+    background-color: rgba(255, 255, 255, 0.01);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .empty-column-placeholder span:first-child {
-    font-weight: 400;
+    font-weight: var(--font-weight-medium);
     font-size: var(--font-size-sm);
     margin-bottom: var(--space-xxs);
+    opacity: 0.6;
 }
 
 .empty-column-placeholder span:last-child {
     font-size: var(--font-size-xs);
+    opacity: 0.4;
 }
 
 .comment-timestamp {
-    margin-top: var(--space-xxs);
-    color: var(--text-muted);
+    margin-top: 2px;
+    color: var(--text-faint);
     font-size: var(--font-size-xs);
-    font-style: italic;
 }
 
 .no-comments {
-    color: var(--text-muted);
-    font-style: italic;
+    color: var(--text-faint);
+    font-style: normal;
     font-size: var(--font-size-xs);
-    padding: var(--space-sm);
+    padding: var(--space-xs);
     text-align: center;
-    opacity: 0.6;
     border-radius: var(--radius-sm);
 }
 
@@ -487,20 +489,20 @@
 .comment-input {
     width: 100%;
     padding: var(--space-xs) var(--space-sm);
-    border: 1px solid rgba(139, 148, 158, 0.15);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: var(--font-size-sm);
     background: transparent;
     color: var(--text-color);
-    transition: border-color var(--transition-speed) var(--transition-ease),
-               box-shadow var(--transition-speed) var(--transition-ease);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .comment-input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent-light);
+    background: var(--accent-subtle);
 }
 
 /* Comment edit mode */
@@ -511,21 +513,21 @@
 .comment-edit-input {
     width: 100%;
     padding: var(--space-xs) var(--space-sm);
-    border: 1px solid rgba(139, 148, 158, 0.15);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: var(--font-size-sm);
     background: transparent;
     color: var(--text-color);
     margin-bottom: var(--space-xs);
-    transition: border-color var(--transition-speed) var(--transition-ease),
-               box-shadow var(--transition-speed) var(--transition-ease);
+    transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .comment-edit-input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent-light);
+    background: var(--accent-subtle);
 }
 
 .comment-edit-actions {
@@ -546,7 +548,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--space-sm);
-    margin: 0 var(--space-sm) var(--space-sm);
+    margin: 0 var(--space-xs) var(--space-xs);
     box-shadow: var(--card-shadow);
     flex-shrink: 0;
 }
@@ -555,12 +557,12 @@
     width: 100%;
     min-height: 60px;
     padding: var(--space-xs);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: var(--font-size-base);
     resize: vertical;
-    background: var(--input-bg);
+    background: transparent;
     color: var(--text-color);
     margin-bottom: var(--space-xs);
 }
@@ -568,7 +570,8 @@
 .inline-card-textarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent-light);
+    background: var(--accent-subtle);
 }
 
 /* Card Edit Mode */
@@ -580,12 +583,12 @@
     width: 100%;
     min-height: 60px;
     padding: var(--space-xs);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: var(--font-size-base);
     resize: vertical;
-    background: var(--input-bg);
+    background: transparent;
     color: var(--text-color);
     margin-bottom: var(--space-xs);
 }
@@ -593,7 +596,8 @@
 .card-edit-textarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-transparent);
+    box-shadow: 0 0 0 2px var(--accent-transparent-light);
+    background: var(--accent-subtle);
 }
 
 .card-edit-actions {
@@ -698,14 +702,14 @@
 
 /* Card color strip */
 .card[style*="border-left"] {
-    padding-left: calc(var(--space-sm) - 2px); /* compensate for thicker border */
+    padding-left: calc(var(--space-sm) - 2px);
 }
 
 /* Card tags */
 .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xxs);
+    gap: 3px;
     padding: 0;
     margin-top: var(--space-xs);
     margin-bottom: calc(-1 * var(--space-xxs));
@@ -716,15 +720,16 @@
     align-items: center;
     padding: 1px 8px;
     border-radius: var(--radius-round);
-    background: var(--accent-transparent-light);
+    background: var(--accent-subtle);
     color: var(--accent);
     font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     line-height: 1.6;
     white-space: nowrap;
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
+    border: 1px solid var(--accent-transparent-light);
 }
 
 /* Card color picker */
@@ -835,9 +840,18 @@
 }
 
 .tag-picker-empty {
-    color: var(--text-muted);
+    color: var(--text-faint);
     font-size: var(--font-size-xs);
-    font-style: italic;
+    font-style: normal;
     padding: var(--space-xs);
     text-align: center;
+}
+
+/* Light mode card overrides */
+html.light-mode .card {
+    border: 1px solid var(--border-subtle);
+}
+
+html.light-mode .vote-button {
+    color: var(--text-faint);
 }
