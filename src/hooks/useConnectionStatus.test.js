@@ -66,7 +66,7 @@ describe('useConnectionStatus', () => {
     expect(result.current.isOnline).toBe(true);
   });
 
-  it('sets isOnline to false when snapshot.val() returns false', () => {
+  it('ignores initial false from Firebase handshake (prevents flash)', () => {
     const unsubscribeMock = vi.fn();
     let capturedCallback;
 
@@ -77,15 +77,16 @@ describe('useConnectionStatus', () => {
 
     const { result } = renderHook(() => useConnectionStatus());
 
-    // Simulate Firebase snapshot with false value
+    // Firebase fires false before connection is established
     act(() => {
       capturedCallback({ val: () => false });
     });
 
-    expect(result.current.isOnline).toBe(false);
+    // Should still be true — initial false is ignored to prevent flash
+    expect(result.current.isOnline).toBe(true);
   });
 
-  it('transitions from online to offline', () => {
+  it('sets isOnline to false after a prior connection was established', () => {
     const unsubscribeMock = vi.fn();
     let capturedCallback;
 
@@ -96,21 +97,49 @@ describe('useConnectionStatus', () => {
 
     const { result } = renderHook(() => useConnectionStatus());
 
-    // Start online
+    // First connect
+    act(() => {
+      capturedCallback({ val: () => true });
+    });
+    expect(result.current.isOnline).toBe(true);
+
+    // Then disconnect
+    act(() => {
+      capturedCallback({ val: () => false });
+    });
+    expect(result.current.isOnline).toBe(false);
+  });
+
+  it('transitions from online to offline and back', () => {
+    const unsubscribeMock = vi.fn();
+    let capturedCallback;
+
+    onValue.mockImplementation((refArg, callback) => {
+      capturedCallback = callback;
+      return unsubscribeMock;
+    });
+
+    const { result } = renderHook(() => useConnectionStatus());
+
+    // Start online (default)
+    expect(result.current.isOnline).toBe(true);
+
+    // Establish real connection
+    act(() => {
+      capturedCallback({ val: () => true });
+    });
     expect(result.current.isOnline).toBe(true);
 
     // Go offline
     act(() => {
       capturedCallback({ val: () => false });
     });
-
     expect(result.current.isOnline).toBe(false);
 
     // Go back online
     act(() => {
       capturedCallback({ val: () => true });
     });
-
     expect(result.current.isOnline).toBe(true);
   });
 
@@ -159,17 +188,19 @@ describe('useConnectionStatus', () => {
 
     const { result } = renderHook(() => useConnectionStatus());
 
-    // Rapid state changes
+    // Initial false is ignored
     act(() => {
       capturedCallback({ val: () => false });
     });
-    expect(result.current.isOnline).toBe(false);
+    expect(result.current.isOnline).toBe(true);
 
+    // First true establishes connection
     act(() => {
       capturedCallback({ val: () => true });
     });
     expect(result.current.isOnline).toBe(true);
 
+    // Now false is honored
     act(() => {
       capturedCallback({ val: () => false });
     });
