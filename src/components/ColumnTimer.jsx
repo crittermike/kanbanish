@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Clock, Pause, Play, RotateCcw, Square } from 'react-feather';
+import { ChevronDown, Clock, Pause, Play, RotateCcw, Square } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
@@ -12,6 +12,12 @@ const PRESET_DURATIONS = [
   { label: '5m', seconds: 300 },
   { label: '10m', seconds: 600 }
 ];
+
+const formatDurationLabel = (seconds) => {
+  if (seconds >= 60 && seconds % 60 === 0) return `${seconds / 60}m`;
+  if (seconds >= 60) return `${Math.floor(seconds / 60)}m${seconds % 60}s`;
+  return `${seconds}s`;
+};
 const RING_RADIUS = 46;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
@@ -60,7 +66,7 @@ const getUrgencyState = (remaining, total) => {
   return 'normal';
 };
 
-const ColumnTimer = ({ columnId, timerData }) => {
+const ColumnTimer = ({ columnId, timerData, defaultTimerSeconds }) => {
   const { startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer } = useBoardContext();
   const { showNotification } = useNotification();
 
@@ -169,6 +175,57 @@ const ColumnTimer = ({ columnId, timerData }) => {
   const timerExpired = hasTimer && remaining <= 0 && (isRunning || (timerData?.pausedRemaining !== null && timerData?.pausedRemaining <= 0));
 
   if (!hasTimer) {
+    // Quick-start: if a default is set, clicking the clock icon starts immediately
+    const handleQuickStart = () => {
+      if (defaultTimerSeconds) {
+        startColumnTimer(columnId, defaultTimerSeconds);
+        hasNotifiedRef.current = false;
+      }
+    };
+
+    if (defaultTimerSeconds) {
+      return (
+        <div className="column-timer-setup" ref={setupRef}>
+          <button
+            className="icon-button column-timer-btn column-timer-quick-start"
+            onClick={handleQuickStart}
+            title={`Start ${formatDurationLabel(defaultTimerSeconds)} timer`}
+          >
+            <Clock />
+            <span className="column-timer-default-label">{formatDurationLabel(defaultTimerSeconds)}</span>
+          </button>
+          <button
+            className="icon-button column-timer-expand-btn"
+            onClick={() => setShowSetup(!showSetup)}
+            title="Choose a different duration"
+            aria-label="Choose a different timer duration"
+          >
+            <ChevronDown size={10} />
+          </button>
+          {showSetup && (
+            <div className="column-timer-popover">
+              <div className="column-timer-popover-header">
+                <span className="column-timer-popover-title">Set Timer</span>
+              </div>
+              <div className="column-timer-presets">
+                {PRESET_DURATIONS.map(({ label, seconds }) => (
+                  <button key={seconds} className="btn column-timer-preset-btn" onClick={() => handleStartPreset(seconds)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="column-timer-custom">
+                <input type="number" className="column-timer-custom-input" placeholder="min" min="0.5" max="60" step="0.5" value={customMinutes} onChange={(e) => setCustomMinutes(e.target.value)} onKeyDown={handleCustomKeyDown} aria-label="Custom timer duration in minutes" />
+                <button className="btn primary-btn column-timer-custom-start" onClick={handleStartCustom} disabled={!customMinutes || parseFloat(customMinutes) <= 0}>
+                  <Play size={12} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="column-timer-setup" ref={setupRef}>
         <button className="icon-button column-timer-btn" onClick={() => setShowSetup(!showSetup)} title="Set column timer">

@@ -27,6 +27,37 @@
   /* Inherits icon-button base styles for color/hover */
 }
 
+/* Quick-start variant: column has a default timer duration */
+.column-timer-quick-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.column-timer-default-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  opacity: 0.8;
+  letter-spacing: 0.01em;
+}
+
+.column-timer-expand-btn {
+  padding: 0 2px;
+  min-width: auto;
+  opacity: 0.5;
+  transition: opacity var(--transition-speed) var(--transition-ease);
+}
+
+.column-timer-expand-btn:hover {
+  opacity: 1;
+}
+
+/* Keep column-actions visible when quick-start is hovered */
+.column-actions:has(.column-timer-quick-start:hover),
+.column-actions:has(.column-timer-expand-btn:hover) {
+  opacity: 1;
+}
+
 .column-timer-popover {
   position: absolute;
   top: 100%;

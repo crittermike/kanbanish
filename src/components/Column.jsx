@@ -394,7 +394,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           >
             <ChevronLeft aria-hidden="true" />
           </button>
-          <ColumnTimer columnId={columnId} timerData={columnData.timer} />
+          <ColumnTimer columnId={columnId} timerData={columnData.timer} defaultTimerSeconds={columnData.defaultTimerSeconds} />
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
               <Trash2 aria-hidden="true" />
