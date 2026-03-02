@@ -253,7 +253,7 @@ const BOARD_TEMPLATES = [
     id: 'big-orca',
     name: 'Big Orca',
     description: 'Comprehensive retro covering feelings, commitments, and improvements',
-    columns: [{ title: 'Good stuff', defaultTimerSeconds: 600 }, { title: 'Bad stuff', defaultTimerSeconds: 600 }, 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
+    columns: [{ title: 'Good stuff', defaultTimerSeconds: 600 }, { title: 'Bad stuff', defaultTimerSeconds: 600 }, { title: 'Feelings', defaultTimerSeconds: 600 }, { title: 'Improvements', defaultTimerSeconds: 600 }, 'Past commitments', 'New commitments'],
     icon: '🐋',
     tags: ['retrospective', 'team', 'commitments', 'feelings'],
     skipWizard: true,
