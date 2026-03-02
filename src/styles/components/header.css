@@ -8,9 +8,7 @@
 /* Header & Controls */
 header {
     padding: 6px var(--space-md);
-    background: linear-gradient(180deg, rgba(22, 27, 34, 0.95), rgba(22, 27, 34, 0.85));
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(22, 27, 34, 0.95));
     border-bottom: 1px solid var(--border-subtle);
     position: sticky;
     top: 0;
@@ -18,7 +16,7 @@ header {
 }
 
 html.light-mode header {
-    background: linear-gradient(180deg, rgba(246, 248, 250, 0.95), rgba(246, 248, 250, 0.85));
+    background: linear-gradient(180deg, rgba(246, 248, 250, 0.98), rgba(246, 248, 250, 0.95));
 }
 
 .header-content {
