@@ -69,10 +69,10 @@ describe('BOARD_TEMPLATES', () => {
   it('big-orca template should have exactly the correct columns', () => {
     const bigOrcaTemplate = BOARD_TEMPLATES.find((t) => t.id === 'big-orca');
     const expectedColumns = [
-      'Good stuff',
-      'Bad stuff',
-      'Feelings',
-      'Improvements',
+      { title: 'Good stuff', defaultTimerSeconds: 600 },
+      { title: 'Bad stuff', defaultTimerSeconds: 600 },
+      { title: 'Feelings', defaultTimerSeconds: 600 },
+      { title: 'Improvements', defaultTimerSeconds: 600 },
       'Past commitments',
       'New commitments'
     ];
@@ -109,11 +109,16 @@ describe('BOARD_TEMPLATES', () => {
     expect(findTemplateBySlug('nonexistent')).toBeUndefined();
   });
 
-  it('all column arrays should only contain non-empty strings', () => {
+  it('all column arrays should only contain non-empty strings or column config objects', () => {
     BOARD_TEMPLATES.forEach((template) => {
       template.columns.forEach((column) => {
-        expect(typeof column).toBe('string');
-        expect(column.length).toBeGreaterThan(0);
+        if (typeof column === 'string') {
+          expect(column.length).toBeGreaterThan(0);
+        } else {
+          expect(typeof column).toBe('object');
+          expect(typeof column.title).toBe('string');
+          expect(column.title.length).toBeGreaterThan(0);
+        }
       });
     });
   });

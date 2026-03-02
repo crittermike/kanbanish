@@ -114,11 +114,22 @@ export const useColumnTimer = ({ boardId, user, workflowPhase, columns }) => {
       });
   }, [boardId, user, workflowPhase, clearOtherTimers]);
 
+  const setColumnDefaultTimer = useCallback((columnId, seconds) => {
+    if (!boardId || !columnId) return;
+    const defaultRef = ref(database, `boards/${boardId}/columns/${columnId}/defaultTimerSeconds`);
+    if (seconds === null || seconds === undefined) {
+      remove(defaultRef).catch(() => {});
+    } else {
+      set(defaultRef, seconds).catch(() => {});
+    }
+  }, [boardId]);
+
   return {
     startColumnTimer,
     pauseColumnTimer,
     resumeColumnTimer,
     resetColumnTimer,
-    restartColumnTimer
+    restartColumnTimer,
+    setColumnDefaultTimer
   };
 };

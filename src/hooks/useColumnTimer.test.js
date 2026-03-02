@@ -427,7 +427,7 @@ describe('useColumnTimer', () => {
   });
 
   describe('hook return value', () => {
-    it('should return all 5 timer operations', () => {
+    it('should return all 6 timer operations', () => {
       const { result } = renderHook(() => useColumnTimer(mockProps));
 
       expect(result.current).toHaveProperty('startColumnTimer');
@@ -435,6 +435,7 @@ describe('useColumnTimer', () => {
       expect(result.current).toHaveProperty('resumeColumnTimer');
       expect(result.current).toHaveProperty('resetColumnTimer');
       expect(result.current).toHaveProperty('restartColumnTimer');
+      expect(result.current).toHaveProperty('setColumnDefaultTimer');
     });
 
     it('should return all operations as functions', () => {
@@ -445,6 +446,7 @@ describe('useColumnTimer', () => {
       expect(typeof result.current.resumeColumnTimer).toBe('function');
       expect(typeof result.current.resetColumnTimer).toBe('function');
       expect(typeof result.current.restartColumnTimer).toBe('function');
+      expect(typeof result.current.setColumnDefaultTimer).toBe('function');
     });
 
     it('should return stable function references', () => {
@@ -511,6 +513,62 @@ describe('useColumnTimer', () => {
         result.current.resetColumnTimer(colId);
       });
       expect(remove).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('setColumnDefaultTimer', () => {
+    it('should call set() with seconds value to set a default', async () => {
+      const { result } = renderHook(() => useColumnTimer(mockProps));
+
+      await act(async () => {
+        result.current.setColumnDefaultTimer('col-1', 600);
+      });
+
+      expect(set).toHaveBeenCalledWith('mock-ref', 600);
+    });
+
+    it('should call remove() when seconds is null (clear default)', async () => {
+      const { result } = renderHook(() => useColumnTimer(mockProps));
+
+      await act(async () => {
+        result.current.setColumnDefaultTimer('col-1', null);
+      });
+
+      expect(remove).toHaveBeenCalledWith('mock-ref');
+      expect(set).not.toHaveBeenCalled();
+    });
+
+    it('should call remove() when seconds is undefined (clear default)', async () => {
+      const { result } = renderHook(() => useColumnTimer(mockProps));
+
+      await act(async () => {
+        result.current.setColumnDefaultTimer('col-1', undefined);
+      });
+
+      expect(remove).toHaveBeenCalledWith('mock-ref');
+    });
+
+    it('should return early if boardId is null', async () => {
+      const props = createMockProps({ boardId: null });
+      const { result } = renderHook(() => useColumnTimer(props));
+
+      await act(async () => {
+        result.current.setColumnDefaultTimer('col-1', 600);
+      });
+
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('should return early if columnId is falsy', async () => {
+      const { result } = renderHook(() => useColumnTimer(mockProps));
+
+      await act(async () => {
+        result.current.setColumnDefaultTimer(null, 600);
+      });
+
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
     });
   });
 });
