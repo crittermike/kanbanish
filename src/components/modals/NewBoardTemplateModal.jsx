@@ -56,7 +56,7 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
       template.name.toLowerCase().includes(query) ||
       template.description.toLowerCase().includes(query) ||
       template.tags.some(tag => tag.toLowerCase().includes(query)) ||
-      template.columns.some(column => column.toLowerCase().includes(query))
+      template.columns.some(column => (typeof column === 'string' ? column : column.title).toLowerCase().includes(query))
     );
 
     setFilteredTemplates(filtered);
@@ -192,11 +192,14 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
                 </div>
                 <div className="template-details">
                   <div className="template-columns">
-                    {template.columns.map((col, idx) => (
-                      <span key={idx} className="template-column-pill">
-                        {highlightMatch(col, searchQuery)}
-                      </span>
-                    ))}
+                    {template.columns.map((col, idx) => {
+                      const colTitle = typeof col === 'string' ? col : col.title;
+                      return (
+                        <span key={idx} className="template-column-pill">
+                          {highlightMatch(colTitle, searchQuery)}
+                        </span>
+                      );
+                    })}
                   </div>
                   <div className="template-tags">
                     {template.tags.map((tag, idx) => (
