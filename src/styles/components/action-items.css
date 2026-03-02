@@ -1,5 +1,6 @@
 /**
  * Action Items Styles
+ * Last updated: March 1, 2026
  */
 
 /* Modal Container */
@@ -12,8 +13,9 @@
 .action-item-empty {
   text-align: center;
   padding: var(--space-xl) var(--space-md);
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--text-faint);
+  font-style: normal;
+  font-size: var(--font-size-sm);
 }
 
 /* List Container */
@@ -32,17 +34,18 @@
   gap: 8px;
   padding: 8px 10px;
   background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  transition: background-color var(--transition-speed) var(--transition-ease);
+  transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .action-item-row:hover {
   background-color: var(--hover-bg);
+  border-color: var(--border-color);
 }
 
 .action-item-row.done {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* Status Toggle Button */
@@ -63,7 +66,7 @@
 }
 
 .action-item-status-btn:hover {
-  background-color: var(--border-color);
+  background-color: var(--accent-subtle);
   color: var(--accent);
 }
 
@@ -90,11 +93,12 @@
 }
 
 .action-item-content:hover {
-  background-color: var(--hover-bg);
+  background-color: var(--accent-subtle);
 }
 
 .action-item-content.done {
   text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 /* Editable description textarea */
@@ -102,7 +106,7 @@
   font-size: var(--font-size-sm);
   font-family: inherit;
   color: var(--text-color);
-  background: var(--hover-bg);
+  background: var(--bg-surface);
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   outline: none;
@@ -124,7 +128,7 @@
 }
 
 .action-item-meta-separator {
-  color: var(--border-color);
+  color: var(--border-subtle);
   font-size: 10px;
 }
 
@@ -166,8 +170,7 @@ html.light-mode .action-item-date-input {
 }
 
 .action-item-assignee-input::placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
+  color: var(--text-faint);
 }
 
 .action-item-date-input.overdue {
@@ -198,7 +201,7 @@ html.light-mode .action-item-date-input {
 .action-item-delete-btn:hover {
   opacity: 1;
   color: var(--danger);
-  background-color: rgba(248, 81, 73, 0.1);
+  background-color: var(--danger-transparent);
 }
 
 /* Footer Summary */
@@ -221,23 +224,25 @@ html.light-mode .action-item-date-input {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 1px 7px;
   border-radius: var(--radius-round);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   line-height: 1.5;
   letter-spacing: 0.01em;
   pointer-events: none;
 }
 
 .card-inline-badge.action-item-badge {
-  background: rgba(46, 160, 67, 0.15);
+  background: rgba(46, 160, 67, 0.12);
   color: var(--success);
+  border: 1px solid rgba(46, 160, 67, 0.2);
 }
 
 .card-inline-badge.comment-badge {
-  background: var(--accent-transparent);
+  background: var(--accent-subtle);
   color: var(--accent);
+  border: 1px solid var(--accent-transparent-light);
 }
 
 /* Card Hover Action Indicator (clickable toggle) */
@@ -257,15 +262,16 @@ html.light-mode .action-item-date-input {
 /* Header Button Badge */
 .action-items-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -5px;
+  right: -5px;
   background-color: var(--accent);
   color: white;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 10px;
-  line-height: 1;
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  padding: 1px 5px;
+  border-radius: var(--radius-round);
+  line-height: 1.2;
+  box-shadow: var(--shadow-sm);
 }
 
 /* Settings Quick Action Badge */
@@ -275,9 +281,10 @@ html.light-mode .action-item-date-input {
   justify-content: center;
   background-color: var(--accent);
   color: white;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-left: auto; /* Push to right side of the button */
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  padding: 1px 5px;
+  border-radius: var(--radius-round);
+  margin-left: auto;
+  line-height: 1.2;
 }
