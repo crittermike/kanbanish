@@ -71,8 +71,8 @@ describe('BOARD_TEMPLATES', () => {
     const expectedColumns = [
       { title: 'Good stuff', defaultTimerSeconds: 600 },
       { title: 'Bad stuff', defaultTimerSeconds: 600 },
-      'Feelings',
-      'Improvements',
+      { title: 'Feelings', defaultTimerSeconds: 600 },
+      { title: 'Improvements', defaultTimerSeconds: 600 },
       'Past commitments',
       'New commitments'
     ];
