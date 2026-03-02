@@ -6,10 +6,6 @@
   display: inline-block;
 }
 
-.timer-start-btn {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm);
-}
 
 .timer-setup-popover {
   position: absolute;
