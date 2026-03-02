@@ -97,7 +97,6 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
-      <Timer />
 
       {actionItemsEnabled && (
         <button
@@ -110,6 +109,7 @@ const SettingsPanel = ({
           {actionItemCount > 0 && <span className="action-items-badge">{actionItemCount}</span>}
         </button>
       )}
+      <Timer />
       {children}
       <button
           id="settings-dropdown-button"

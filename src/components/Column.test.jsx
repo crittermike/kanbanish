@@ -37,7 +37,18 @@ vi.mock('react-feather', () => ({
   Trash2: () => <div>trash-icon</div>,
   Plus: () => <div>plus-icon</div>,
   ChevronLeft: () => <div>chevron-left-icon</div>,
-  ChevronRight: () => <div>chevron-right-icon</div>
+  ChevronRight: () => <div>chevron-right-icon</div>,
+  Clock: () => <div>clock-icon</div>,
+  Pause: () => <div>pause-icon</div>,
+  Play: () => <div>play-icon</div>,
+  RotateCcw: () => <div>rotate-icon</div>,
+  Square: () => <div>square-icon</div>,
+  X: () => <div>x-icon</div>
+}));
+
+// Mock useOnClickOutside (used by ColumnTimer)
+vi.mock('../hooks/useOnClickOutside', () => ({
+  useOnClickOutside: vi.fn()
 }));
 
 // Mock utils
@@ -94,7 +105,12 @@ const mockProps = {
     columns: {},
     startCardCreation: vi.fn(),
     stopCardCreation: vi.fn(),
-    getUsersAddingCardsInColumn: vi.fn().mockReturnValue([])
+    getUsersAddingCardsInColumn: vi.fn().mockReturnValue([]),
+    startColumnTimer: vi.fn(),
+    pauseColumnTimer: vi.fn(),
+    resumeColumnTimer: vi.fn(),
+    resetColumnTimer: vi.fn(),
+    restartColumnTimer: vi.fn()
   };
 
   beforeEach(() => {

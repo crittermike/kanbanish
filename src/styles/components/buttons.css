@@ -239,6 +239,13 @@
   background-color: var(--accent-subtle);
 }
 
+/* Column action icon buttons should hover blue, not white */
+.column-actions .icon-button:hover,
+.column-actions .collapse-toggle:hover {
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+}
+
 /* Action buttons */
 .action-buttons {
   display: flex;
