@@ -265,7 +265,8 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
-    width: 100%;
+    width: calc(100% - var(--space-sm) * 2);
+    margin: 0 var(--space-sm) var(--space-sm);
     padding: var(--space-sm) var(--space-md);
     border: 1px dashed var(--border-color);
     border-radius: var(--radius-md);
@@ -276,8 +277,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-speed) var(--transition-ease);
-    margin-top: auto;
-    order: 99;
+    flex-shrink: 0;
     opacity: 0.6;
 }
 

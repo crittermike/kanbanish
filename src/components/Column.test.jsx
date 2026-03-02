@@ -102,28 +102,25 @@ const mockProps = {
     useBoardContext.mockReturnValue(mockBoardContext);
   });
 
-  test('renders add card button at the top before existing cards', () => {
+  test('renders add card button outside scrollable card area', () => {
     render(<Column {...mockProps} />);
     
-    const _columnContent = screen.getByTestId = () => document.querySelector('.column-content');
     const addCardButton = screen.getByRole('button', { name: /add card/i });
     const cards = screen.getAllByTestId('card');
     
     expect(addCardButton).toBeInTheDocument();
     expect(cards).toHaveLength(2);
     
-    // Verify that the add card button appears before the cards in the DOM
-    const columnContentEl = document.querySelector('.column-content');
-    const addCardButtonEl = columnContentEl.querySelector('.add-card');
-    const firstCardEl = columnContentEl.querySelector('[data-testid="card"]');
+    // The add card button should be a direct child of .column, not inside .column-content
+    const columnEl = document.querySelector('.column');
+    const columnContentEl = columnEl.querySelector('.column-content');
+    const addCardButtonEl = columnEl.querySelector('.add-card');
     
-    // The add card button should come before the first card in the DOM order
-    expect(addCardButtonEl.compareDocumentPosition(firstCardEl)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
+    expect(columnContentEl).not.toContainElement(addCardButtonEl);
+    expect(columnEl).toContainElement(addCardButtonEl);
   });
 
-  test('shows add card form at the top when adding a card', () => {
+  test('shows add card form outside scrollable card area when adding a card', () => {
     render(<Column {...mockProps} />);
     
     const addCardButton = screen.getByRole('button', { name: /add card/i });
@@ -135,14 +132,13 @@ const mockProps = {
     expect(textarea).toBeInTheDocument();
     expect(cards).toHaveLength(2);
     
-    // Verify that the form appears before the cards in the DOM
-    const columnContentEl = document.querySelector('.column-content');
-    const formEl = columnContentEl.querySelector('.inline-card-form');
-    const firstCardEl = columnContentEl.querySelector('[data-testid="card"]');
+    // The inline form should be a direct child of .column, not inside .column-content
+    const columnEl = document.querySelector('.column');
+    const columnContentEl = columnEl.querySelector('.column-content');
+    const formEl = columnEl.querySelector('.inline-card-form');
     
-    expect(formEl.compareDocumentPosition(firstCardEl)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
+    expect(columnContentEl).not.toContainElement(formEl);
+    expect(columnEl).toContainElement(formEl);
   });
 
   describe('Column - Collapsed State', () => {

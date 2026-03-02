@@ -156,6 +156,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           setTimeout(() => {
             const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
             if (newCardElement) {
+              newCardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
               // Add a subtle fading highlight effect via CSS animation
               newCardElement.classList.add('card-highlight');
               setTimeout(() => {
@@ -401,31 +402,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           </div>
         )}
 
-        {isAddingCard ? (
-          <div className="inline-card-form">
-            <textarea
-              placeholder="Enter card content..."
-              value={newCardContent}
-              onChange={e => setNewCardContent(e.target.value)}
-              onKeyDown={handleNewCardKeyPress}
-              className="inline-card-textarea"
-              autoFocus
-              aria-label="Card content"
-            />
-            <div className="inline-card-actions">
-              <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
-              <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
-            </div>
-          </div>
-        ) : (
-          isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
-            <button className="add-card" onClick={showAddCardForm}>
-              <Plus />
-              Add Card
-            </button>
-          )
-        )}
-
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
           if (item.type === 'group') {
@@ -491,6 +467,32 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           </div>
         )}
       </div>
+
+      {/* Add Card button / inline form — outside scrollable area so it's always visible */}
+      {isAddingCard ? (
+        <div className="inline-card-form">
+          <textarea
+            placeholder="Enter card content..."
+            value={newCardContent}
+            onChange={e => setNewCardContent(e.target.value)}
+            onKeyDown={handleNewCardKeyPress}
+            className="inline-card-textarea"
+            autoFocus
+            aria-label="Card content"
+          />
+          <div className="inline-card-actions">
+            <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
+            <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+          </div>
+        </div>
+      ) : (
+        isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
+          <button className="add-card" onClick={showAddCardForm}>
+            <Plus />
+            Add Card
+          </button>
+        )
+      )}
     </div>
   );
 }

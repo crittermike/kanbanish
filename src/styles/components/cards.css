@@ -546,10 +546,9 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--space-sm);
-    margin-bottom: var(--space-sm);
+    margin: 0 var(--space-sm) var(--space-sm);
     box-shadow: var(--card-shadow);
-    order: 99;
-    margin-top: auto;
+    flex-shrink: 0;
 }
 
 .inline-card-textarea {
