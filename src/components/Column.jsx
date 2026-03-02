@@ -386,7 +386,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           </h2>
         )}
         <div className="column-actions">
-          <ColumnTimer columnId={columnId} timerData={columnData.timer} />
           <button
             className="collapse-toggle icon-button"
             title="Collapse column"
@@ -395,6 +394,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           >
             <ChevronLeft aria-hidden="true" />
           </button>
+          <ColumnTimer columnId={columnId} timerData={columnData.timer} />
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
               <Trash2 aria-hidden="true" />

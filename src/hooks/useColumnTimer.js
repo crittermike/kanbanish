@@ -18,13 +18,19 @@ import { database } from '../utils/firebase';
  */
 export const useColumnTimer = ({ boardId, user, workflowPhase, columns }) => {
   const clearOtherTimers = useCallback((activeColumnId) => {
-    if (!boardId || !columns) return;
-    Object.keys(columns).forEach((colId) => {
-      if (colId !== activeColumnId && columns[colId]?.timer) {
-        const timerRef = ref(database, `boards/${boardId}/columns/${colId}/timer`);
-        remove(timerRef).catch(() => {});
-      }
-    });
+    if (!boardId) return;
+    // Clear global timer (mutual exclusion)
+    const globalTimerRef = ref(database, `boards/${boardId}/timer`);
+    remove(globalTimerRef).catch(() => {});
+    // Clear other column timers
+    if (columns) {
+      Object.keys(columns).forEach((colId) => {
+        if (colId !== activeColumnId && columns[colId]?.timer) {
+          const timerRef = ref(database, `boards/${boardId}/columns/${colId}/timer`);
+          remove(timerRef).catch(() => {});
+        }
+      });
+    }
   }, [boardId, columns]);
 
   const startColumnTimer = useCallback((columnId, duration) => {
