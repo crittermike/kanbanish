@@ -1,3 +1,5 @@
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+
 /**
  * Board template definitions for the template selection modal.
  * Each template defines the column structure for a new board.
@@ -9,6 +11,8 @@
  * @property {string[]} columns - Column names to create
  * @property {string} icon - Emoji icon for display
  * @property {string[]} tags - Searchable tags
+ * @property {boolean} [skipWizard] - If true, skip the setup wizard and use defaultSettings
+ * @property {Object} [defaultSettings] - Settings to apply when skipWizard is true
  */
 
 /** @type {BoardTemplate[]} */
@@ -251,7 +255,14 @@ const BOARD_TEMPLATES = [
     description: 'Comprehensive retro covering feelings, commitments, and improvements',
     columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
     icon: '🐋',
-    tags: ['retrospective', 'team', 'commitments', 'feelings']
+    tags: ['retrospective', 'team', 'commitments', 'feelings'],
+    skipWizard: true,
+    defaultSettings: {
+      retrospectiveMode: false,
+      showDisplayNames: false,
+      actionItemsEnabled: false,
+      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+    }
   }
 ];
 

@@ -100,7 +100,8 @@ function AppContent() {
           columns: template.columns,
           templateName: template.name,
           user,
-          queryString: window.location.search
+          queryString: window.location.search,
+          ...(template.defaultSettings && { settingsOverrides: template.defaultSettings })
         })
           .then(newBoardId => {
             handleOpenBoard(newBoardId);

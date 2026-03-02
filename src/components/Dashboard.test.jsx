@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, test, beforeEach, expect } from 'vitest';
 import { useRecentBoards } from '../hooks/useRecentBoards';
+import { createBoardFromTemplate } from '../utils/boardUtils';
 import Dashboard from './Dashboard';
 
 // Mock useRecentBoards hook
@@ -25,10 +26,18 @@ vi.mock('firebase/database', () => ({
   set: vi.fn().mockResolvedValue()
 }));
 
-// Mock NewBoardTemplateModal
+// Mock NewBoardTemplateModal — captures onSelectTemplate for test invocation
+let capturedOnSelectTemplate = null;
 vi.mock('./modals/NewBoardTemplateModal', () => ({
-  default: ({ isOpen }) =>
-    isOpen ? <div data-testid="template-modal">Template Modal</div> : null
+  default: ({ isOpen, onSelectTemplate }) => {
+    capturedOnSelectTemplate = onSelectTemplate;
+    return isOpen ? <div data-testid="template-modal">Template Modal</div> : null;
+  }
+}));
+
+// Mock boardUtils
+vi.mock('../utils/boardUtils', () => ({
+  createBoardFromTemplate: vi.fn(() => Promise.resolve('new-board-123'))
 }));
 
 describe('Dashboard Component', () => {
@@ -276,5 +285,75 @@ describe('Dashboard Component', () => {
     fireEvent.click(screen.getByText('Clear all'));
     expect(window.confirm).toHaveBeenCalled();
     expect(mockClearAll).not.toHaveBeenCalled();
+  });
+
+  test('skips wizard and creates board directly when template has skipWizard', async () => {
+    renderDashboard();
+
+    // Open template modal to capture onSelectTemplate
+    fireEvent.click(screen.getByText('New Board'));
+    expect(capturedOnSelectTemplate).toBeDefined();
+
+    // Simulate selecting a template with skipWizard and defaultSettings
+    const skipWizardTemplate = {
+      id: 'big-orca',
+      name: 'Big Orca',
+      columns: ['Good stuff', 'Bad stuff'],
+      tags: ['retrospective'],
+      skipWizard: true,
+      defaultSettings: {
+        retrospectiveMode: false,
+        showDisplayNames: false,
+        actionItemsEnabled: false,
+        workflowPhase: 'HEALTH_CHECK'
+      }
+    };
+
+    capturedOnSelectTemplate(
+      skipWizardTemplate.columns,
+      skipWizardTemplate.name,
+      skipWizardTemplate.tags,
+      skipWizardTemplate
+    );
+
+    // createBoardFromTemplate should be called directly with defaultSettings
+    await waitFor(() => {
+      expect(createBoardFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['Good stuff', 'Bad stuff'],
+          templateName: 'Big Orca',
+          settingsOverrides: {
+            retrospectiveMode: false,
+            showDisplayNames: false,
+            actionItemsEnabled: false,
+            workflowPhase: 'HEALTH_CHECK'
+          }
+        })
+      );
+    });
+
+    // Board should be opened after creation
+    await waitFor(() => {
+      expect(mockOnOpenBoard).toHaveBeenCalledWith('new-board-123');
+    });
+  });
+
+  test('opens wizard normally when template does not have skipWizard', () => {
+    renderDashboard();
+
+    // Open template modal to capture onSelectTemplate
+    fireEvent.click(screen.getByText('New Board'));
+    expect(capturedOnSelectTemplate).toBeDefined();
+
+    // Simulate selecting a regular template (no skipWizard)
+    capturedOnSelectTemplate(
+      ['Topics', 'Discussing', 'Done'],
+      'Lean Coffee',
+      ['discussion'],
+      { id: 'lean-coffee', name: 'Lean Coffee', columns: ['Topics', 'Discussing', 'Done'], tags: ['discussion'] }
+    );
+
+    // createBoardFromTemplate should NOT be called (wizard should open instead)
+    expect(createBoardFromTemplate).not.toHaveBeenCalled();
   });
 });

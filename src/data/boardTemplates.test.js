@@ -85,6 +85,20 @@ describe('BOARD_TEMPLATES', () => {
     expect(bigOrcaTemplate.tags).toContain('team');
   });
 
+  it('big-orca template should have skipWizard enabled', () => {
+    const bigOrcaTemplate = BOARD_TEMPLATES.find((t) => t.id === 'big-orca');
+    expect(bigOrcaTemplate.skipWizard).toBe(true);
+  });
+
+  it('big-orca template should have correct defaultSettings', () => {
+    const bigOrcaTemplate = BOARD_TEMPLATES.find((t) => t.id === 'big-orca');
+    expect(bigOrcaTemplate.defaultSettings).toBeDefined();
+    expect(bigOrcaTemplate.defaultSettings.retrospectiveMode).toBe(false);
+    expect(bigOrcaTemplate.defaultSettings.showDisplayNames).toBe(false);
+    expect(bigOrcaTemplate.defaultSettings.actionItemsEnabled).toBe(false);
+    expect(bigOrcaTemplate.defaultSettings.workflowPhase).toBe('HEALTH_CHECK');
+  });
+
   it('should support findTemplateBySlug lookup by id', () => {
     const findTemplateBySlug = (slug) => BOARD_TEMPLATES.find((t) => t.id === slug);
 

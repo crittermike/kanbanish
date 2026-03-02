@@ -93,6 +93,21 @@ vi.mock('./data/boardTemplates', () => ({
       columns: ['Topics', 'Discussing', 'Done'],
       icon: '☕',
       tags: ['discussion', 'meeting', 'agenda']
+    },
+    {
+      id: 'big-orca',
+      name: 'Big Orca',
+      description: 'Comprehensive retro covering feelings, commitments, and improvements',
+      columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
+      icon: '🐋',
+      tags: ['retrospective', 'team', 'commitments', 'feelings'],
+      skipWizard: true,
+      defaultSettings: {
+        retrospectiveMode: false,
+        showDisplayNames: false,
+        actionItemsEnabled: false,
+        workflowPhase: 'HEALTH_CHECK'
+      }
     }
   ]
 }));
@@ -209,5 +224,42 @@ describe('App Component', () => {
 
     // Dashboard should NOT be rendered
     expect(screen.queryByTestId('dashboard')).not.toBeInTheDocument();
+  });
+
+  test('passes settingsOverrides when template has defaultSettings (big-orca)', async () => {
+    // Set URL with big-orca template param
+    delete window.location;
+    window.location = { ...originalLocation, search: '?template=big-orca', href: 'http://localhost/?template=big-orca' };
+
+    // Mock pushState so handleOpenBoard doesn't throw in jsdom
+    const pushStateSpy = vi.spyOn(window.history, 'pushState').mockImplementation(() => {});
+
+    const { createBoardFromTemplate } = await import('./utils/boardUtils');
+    const createBoardMock = vi.mocked(createBoardFromTemplate);
+
+    render(<App />);
+
+    // Wait for createBoardFromTemplate to have been called with settingsOverrides
+    await waitFor(() => {
+      expect(createBoardMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
+          templateName: 'Big Orca',
+          settingsOverrides: {
+            retrospectiveMode: false,
+            showDisplayNames: false,
+            actionItemsEnabled: false,
+            workflowPhase: 'HEALTH_CHECK'
+          }
+        })
+      );
+    }, { timeout: 2000 });
+
+    // After template board is created, the app should navigate to the board
+    await waitFor(() => {
+      expect(screen.getByTestId('board')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    pushStateSpy.mockRestore();
   });
 });
