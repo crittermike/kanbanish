@@ -366,7 +366,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Per-column timer functions
   const {
-    startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer
+    startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer, setColumnDefaultTimer
   } = useColumnTimer({
     boardId, user, workflowPhase, columns
   });
@@ -584,6 +584,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       resumeColumnTimer,
       resetColumnTimer,
       restartColumnTimer,
+      setColumnDefaultTimer,
       // Global timer system
       timerData,
       startTimer,
@@ -630,7 +631,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
     getAllUsersAddingCards, startColumnTimer, pauseColumnTimer, resumeColumnTimer,
-    resetColumnTimer, restartColumnTimer, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
+    resetColumnTimer, restartColumnTimer, setColumnDefaultTimer, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
     canUndo, canRedo, pastCount, futureCount,
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,

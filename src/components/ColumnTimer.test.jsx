@@ -32,13 +32,15 @@ describe('ColumnTimer Component', () => {
   const mockResumeColumnTimer = vi.fn();
   const mockResetColumnTimer = vi.fn();
   const mockRestartColumnTimer = vi.fn();
+  const mockSetColumnDefaultTimer = vi.fn();
 
   const defaultMockContext = {
     startColumnTimer: mockStartColumnTimer,
     pauseColumnTimer: mockPauseColumnTimer,
     resumeColumnTimer: mockResumeColumnTimer,
     resetColumnTimer: mockResetColumnTimer,
-    restartColumnTimer: mockRestartColumnTimer
+    restartColumnTimer: mockRestartColumnTimer,
+    setColumnDefaultTimer: mockSetColumnDefaultTimer
   };
 
   beforeEach(() => {
@@ -61,10 +63,12 @@ describe('ColumnTimer Component', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
 
-      expect(screen.getByText('1m')).toBeInTheDocument();
-      expect(screen.getByText('3m')).toBeInTheDocument();
-      expect(screen.getByText('5m')).toBeInTheDocument();
-      expect(screen.getByText('10m')).toBeInTheDocument();
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      expect(presetBtns).toHaveLength(4);
+      expect(presetBtns[0]).toHaveTextContent('1m');
+      expect(presetBtns[1]).toHaveTextContent('3m');
+      expect(presetBtns[2]).toHaveTextContent('5m');
+      expect(presetBtns[3]).toHaveTextContent('10m');
     });
 
     test('shows custom input in setup popover', () => {
@@ -77,7 +81,8 @@ describe('ColumnTimer Component', () => {
     test('starts timer with preset duration when preset button is clicked', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('5m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[2]); // 5m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('col1', 300);
     });
@@ -85,7 +90,8 @@ describe('ColumnTimer Component', () => {
     test('starts timer with 1 minute preset', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('1m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[0]); // 1m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('col1', 60);
     });
@@ -93,7 +99,8 @@ describe('ColumnTimer Component', () => {
     test('starts timer with 3 minute preset', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('3m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[1]); // 3m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('col1', 180);
     });
@@ -101,7 +108,8 @@ describe('ColumnTimer Component', () => {
     test('starts timer with 10 minute preset', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('10m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[3]); // 10m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('col1', 600);
     });
@@ -176,13 +184,13 @@ describe('ColumnTimer Component', () => {
       fireEvent.click(screen.getByTitle('Set column timer'));
 
       // Verify setup is shown
-      expect(screen.getByText('1m')).toBeInTheDocument();
+      expect(document.querySelectorAll('.column-timer-preset-btn').length).toBeGreaterThan(0);
 
       // Click the clock button again to toggle closed
       fireEvent.click(screen.getByTitle('Set column timer'));
 
       // Setup should be hidden
-      expect(screen.queryByText('1m')).not.toBeInTheDocument();
+      expect(document.querySelectorAll('.column-timer-preset-btn')).toHaveLength(0);
     });
 
     test('toggles setup popover on repeated clicks', () => {
@@ -191,22 +199,23 @@ describe('ColumnTimer Component', () => {
 
       // Open
       fireEvent.click(btn);
-      expect(screen.getByText('1m')).toBeInTheDocument();
+      expect(document.querySelectorAll('.column-timer-preset-btn').length).toBeGreaterThan(0);
 
       // Close
       fireEvent.click(btn);
-      expect(screen.queryByText('1m')).not.toBeInTheDocument();
+      expect(document.querySelectorAll('.column-timer-preset-btn')).toHaveLength(0);
     });
 
     test('hides setup popover after starting a timer', () => {
       render(<ColumnTimer columnId="col1" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('5m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[2]); // 5m
 
       // After starting, the popover logic closes (setup hidden)
       // The component will re-render with timerData from parent, but in this test
       // timerData is still null so setup button shows again without popover
-      expect(screen.queryByText('1m')).not.toBeInTheDocument();
+      expect(document.querySelectorAll('.column-timer-preset-btn')).toHaveLength(0);
     });
   });
 
@@ -386,7 +395,8 @@ describe('ColumnTimer Component', () => {
     test('passes correct columnId for col-a', () => {
       render(<ColumnTimer columnId="a_abc123" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('5m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[2]); // 5m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('a_abc123', 300);
     });
@@ -394,7 +404,8 @@ describe('ColumnTimer Component', () => {
     test('passes correct columnId for col-b', () => {
       render(<ColumnTimer columnId="b_def456" timerData={null} />);
       fireEvent.click(screen.getByTitle('Set column timer'));
-      fireEvent.click(screen.getByText('3m'));
+      const presetBtns = document.querySelectorAll('.column-timer-preset-btn');
+      fireEvent.click(presetBtns[1]); // 3m
 
       expect(mockStartColumnTimer).toHaveBeenCalledWith('b_def456', 180);
     });
@@ -518,6 +529,75 @@ describe('ColumnTimer Component', () => {
         );
         expect(screen.getByText(expected)).toBeInTheDocument();
         unmount();
+      });
+    });
+  });
+
+  describe('default timer management', () => {
+    describe('quick-start mode (default set)', () => {
+      test('renders quick-start button with default duration label', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        expect(screen.getByTitle('Start 10m timer')).toBeInTheDocument();
+        expect(screen.getByText('10m')).toBeInTheDocument();
+      });
+
+      test('clicking quick-start immediately starts the timer', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        fireEvent.click(screen.getByTitle('Start 10m timer'));
+        expect(mockStartColumnTimer).toHaveBeenCalledWith('col1', 600);
+      });
+
+      test('renders chevron dropdown button', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        expect(screen.getByLabelText('Choose a different timer duration')).toBeInTheDocument();
+      });
+
+      test('clicking chevron opens popover with presets', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        fireEvent.click(screen.getByLabelText('Choose a different timer duration'));
+        expect(screen.getByText('1m')).toBeInTheDocument();
+        expect(screen.getByText('3m')).toBeInTheDocument();
+        expect(screen.getByText('5m')).toBeInTheDocument();
+      });
+
+      test('shows clear default button in popover', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        fireEvent.click(screen.getByLabelText('Choose a different timer duration'));
+        expect(screen.getByTitle('Clear default timer')).toBeInTheDocument();
+      });
+
+      test('clicking clear default calls setColumnDefaultTimer with null', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} defaultTimerSeconds={600} />);
+        fireEvent.click(screen.getByLabelText('Choose a different timer duration'));
+        fireEvent.click(screen.getByTitle('Clear default timer'));
+        expect(mockSetColumnDefaultTimer).toHaveBeenCalledWith('col1', null);
+      });
+    });
+
+    describe('standard mode (no default set)', () => {
+      test('shows set column default section in popover', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} />);
+        fireEvent.click(screen.getByTitle('Set column timer'));
+        expect(screen.getByText('Set Column Default')).toBeInTheDocument();
+      });
+
+      test('clicking a default preset calls setColumnDefaultTimer', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} />);
+        fireEvent.click(screen.getByTitle('Set column timer'));
+
+        // The default presets have check icons + labels
+        const defaultPresets = document.querySelectorAll('.column-timer-default-preset-btn');
+        expect(defaultPresets).toHaveLength(4);
+
+        // Click the 5m default preset
+        fireEvent.click(defaultPresets[2]);
+        expect(mockSetColumnDefaultTimer).toHaveBeenCalledWith('col1', 300);
+      });
+
+      test('does not show clear default button when no default is set', () => {
+        render(<ColumnTimer columnId="col1" timerData={null} />);
+        fireEvent.click(screen.getByTitle('Set column timer'));
+        expect(screen.queryByTitle('Clear default timer')).not.toBeInTheDocument();
       });
     });
   });

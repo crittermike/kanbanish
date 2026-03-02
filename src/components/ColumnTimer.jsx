@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronDown, Clock, Pause, Play, RotateCcw, Square } from 'react-feather';
+import { Check, ChevronDown, Clock, Pause, Play, RotateCcw, Square, X } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
@@ -67,7 +67,7 @@ const getUrgencyState = (remaining, total) => {
 };
 
 const ColumnTimer = ({ columnId, timerData, defaultTimerSeconds }) => {
-  const { startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer } = useBoardContext();
+  const { startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer, setColumnDefaultTimer } = useBoardContext();
   const { showNotification } = useNotification();
 
   const [remaining, setRemaining] = useState(0);
@@ -220,6 +220,22 @@ const ColumnTimer = ({ columnId, timerData, defaultTimerSeconds }) => {
                   <Play size={12} />
                 </button>
               </div>
+              <div className="column-timer-default-section">
+                <div className="column-timer-default-header">
+                  <span className="column-timer-popover-title">Column Default</span>
+                </div>
+                <div className="column-timer-default-current">
+                  <span className="column-timer-default-value">{formatDurationLabel(defaultTimerSeconds)}</span>
+                  <button
+                    className="btn column-timer-clear-default"
+                    onClick={() => { setColumnDefaultTimer(columnId, null); setShowSetup(false); }}
+                    title="Clear default timer"
+                  >
+                    <X size={10} />
+                    <span>Clear</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -248,6 +264,23 @@ const ColumnTimer = ({ columnId, timerData, defaultTimerSeconds }) => {
               <button className="btn primary-btn column-timer-custom-start" onClick={handleStartCustom} disabled={!customMinutes || parseFloat(customMinutes) <= 0}>
                 <Play size={12} />
               </button>
+            </div>
+            <div className="column-timer-default-section">
+              <div className="column-timer-default-header">
+                <span className="column-timer-popover-title">Set Column Default</span>
+              </div>
+              <div className="column-timer-default-presets">
+                {PRESET_DURATIONS.map(({ label, seconds }) => (
+                  <button
+                    key={seconds}
+                    className="btn column-timer-default-preset-btn"
+                    onClick={() => { setColumnDefaultTimer(columnId, seconds); setShowSetup(false); }}
+                  >
+                    <Check size={10} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
