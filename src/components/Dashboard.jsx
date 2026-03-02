@@ -105,11 +105,45 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
   }, [recentBoards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When a template is selected, store it and open the setup wizard
-  const handleTemplateSelected = useCallback((templateColumns, templateName = null, templateTags = []) => {
-    setPendingTemplate({ columns: templateColumns, name: templateName, tags: templateTags });
+  // If the template has skipWizard, bypass the wizard and create the board directly
+  const handleTemplateSelected = useCallback((templateColumns, templateName = null, templateTags = [], templateObj = null) => {
+    const template = { columns: templateColumns, name: templateName, tags: templateTags };
+
+    if (templateObj?.skipWizard && templateObj?.defaultSettings) {
+      // Skip wizard — create board directly with template's default settings
+      const createDirectly = (currentUser) => {
+        createBoardFromTemplate({
+          columns: template.columns,
+          templateName: template.name,
+          user: currentUser,
+          queryString: window.location.search,
+          settingsOverrides: templateObj.defaultSettings
+        })
+          .then(newBoardId => {
+            setIsTemplateModalOpen(false);
+            onOpenBoard(newBoardId);
+          })
+          .catch(error => {
+            console.error('Error creating board:', error);
+          });
+      };
+
+      if (user) {
+        createDirectly(user);
+      } else {
+        signInAnonymously(auth)
+          .then(result => createDirectly(result.user))
+          .catch(error => {
+            console.error('Error signing in for template creation:', error);
+          });
+      }
+      return;
+    }
+
+    setPendingTemplate(template);
     setIsTemplateModalOpen(false);
     setIsWizardOpen(true);
-  }, []);
+  }, [user, onOpenBoard]);
 
   // When wizard is confirmed, create the board with the chosen settings
   const handleWizardConfirm = useCallback((wizardSettings) => {
