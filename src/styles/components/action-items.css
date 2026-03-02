@@ -247,11 +247,11 @@ html.light-mode .action-item-date-input {
 
 /* Card Hover Action Indicator (clickable toggle) */
 .action-item-indicator {
-  color: var(--text-color);
+  color: var(--text-muted);
 }
 
 .action-item-action {
-  color: var(--text-color);
+  color: var(--text-muted);
 }
 
 /* Header Button */

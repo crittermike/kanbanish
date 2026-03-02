@@ -279,6 +279,10 @@
 .profile-toggle-btn {
   transition: all var(--transition-speed) var(--transition-ease);
 }
+.profile-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
 
 .profile-toggle-btn:hover {
   box-shadow: var(--shadow-sm);
