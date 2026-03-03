@@ -12,6 +12,7 @@ const WorkflowControls = () => {
   
   const {
     workflowPhase,
+    initialWorkflowPhase,
     votesPerUser,
     updateVotesPerUser,
     startGroupingPhase,
@@ -116,6 +117,7 @@ const WorkflowControls = () => {
                 <Eye size={16} />
                 Reveal Cards & Start Grouping
               </button>
+              {initialWorkflowPhase === WORKFLOW_PHASES.HEALTH_CHECK && (
               <button
                 className="btn secondary-btn"
                 onClick={handleGoToPreviousPhase}
@@ -123,6 +125,7 @@ const WorkflowControls = () => {
                 <Heart size={16} />
                 Back to Health Check
               </button>
+              )}
             </div>
           </div>
         );
