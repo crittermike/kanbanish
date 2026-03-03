@@ -12,7 +12,7 @@ import Card from './Card';
 import CardGroup from './CardGroup';
 import ColumnTimer from './ColumnTimer';
 
-function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds }) {
+function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds, onExpandCard }) {
   const { 
     boardId, 
     moveCard, 
@@ -427,6 +427,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
                 dimmed={isFiltering && matchingGroupIds && !matchingGroupIds.has(item.data.id)}
                 isFiltering={isFiltering}
                 matchingCardIds={matchingCardIds}
+                onExpandCard={onExpandCard}
               />
             );
           } else {
@@ -438,6 +439,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
                 columnId={columnId}
                 onCardDropOnCard={handleCardDropOnCard}
                 dimmed={isFiltering && matchingCardIds && !matchingCardIds.has(item.data.id)}
+                onExpandCard={onExpandCard}
               />
             );
           }

@@ -244,6 +244,18 @@ html.light-mode .action-item-date-input {
   color: var(--accent);
   border: 1px solid var(--accent-transparent-light);
 }
+.card-inline-badge.timer-badge {
+  background: rgba(227, 137, 0, 0.12);
+  color: var(--warning-color, #e38900);
+  border: 1px solid rgba(227, 137, 0, 0.2);
+  animation: timer-pulse 2s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 
 /* Card Hover Action Indicator (clickable toggle) */
 .action-item-indicator {
