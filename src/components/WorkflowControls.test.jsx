@@ -48,9 +48,7 @@ describe('WorkflowControls', () => {
     initialWorkflowPhase: 'CREATION',
     skipRevealPhase: false,
     votesPerUser: 3,
-    updateVotesPerUser: vi.fn(),
     startGroupingPhase: vi.fn(),
-    startInteractionsPhase: vi.fn(),
     startInteractionRevealPhase: vi.fn(),
     startResultsPhase: vi.fn(),
     startPollPhase: vi.fn(),
@@ -125,10 +123,6 @@ describe('WorkflowControls', () => {
       votesPerUser: 5,
       workflowPhase: 'INTERACTIONS'
     });
-
-    // Should NOT call startInteractionsPhase or updateVotesPerUser separately
-    expect(defaultContext.startInteractionsPhase).not.toHaveBeenCalled();
-    expect(defaultContext.updateVotesPerUser).not.toHaveBeenCalled();
   });
 
   test('vote limit confirm shows notification with vote count', () => {
