@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
+import { getBackgroundById } from '../data/boardBackgrounds';
 import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
@@ -68,7 +69,13 @@ function Board({ onGoHome }) {
     userColor,
     updateDisplayName,
     updateUserColor,
-    boardTags
+    boardTags,
+    backgroundId,
+    customBackgroundCss,
+    setBoardBackground,
+    setCustomBackground,
+    customBackgroundSize,
+    setCustomBackgroundSize
   } = useBoardContext();
 
   // Search state
@@ -160,8 +167,33 @@ function Board({ onGoHome }) {
 
   const actionItemCount = Object.values(actionItems || {}).filter(i => i.status === 'open').length;
 
+  // Resolve background CSS
+  const bgDef = getBackgroundById(backgroundId);
+  const backgroundCss = backgroundId === 'custom' ? customBackgroundCss : bgDef?.css || '';
+  const hasBackground = backgroundId && backgroundId !== 'none' && backgroundCss;
+
+  const backgroundStyle = { background: backgroundCss };
+  if (backgroundId === 'custom') {
+    if (customBackgroundSize === 'tile') {
+      backgroundStyle.backgroundSize = 'auto';
+      backgroundStyle.backgroundRepeat = 'repeat';
+      backgroundStyle.backgroundPosition = 'top left';
+    } else if (customBackgroundSize === 'stretch') {
+      backgroundStyle.backgroundSize = '100% 100%';
+      backgroundStyle.backgroundRepeat = 'no-repeat';
+      backgroundStyle.backgroundPosition = 'center';
+    } else {
+      // 'cover' (default)
+      backgroundStyle.backgroundSize = 'cover';
+      backgroundStyle.backgroundRepeat = 'no-repeat';
+      backgroundStyle.backgroundPosition = 'center';
+    }
+  }
+
   return (
-    <>
+    <div className={hasBackground ? 'board-has-background' : ''}>
+      {hasBackground && <div className="board-background-layer" style={backgroundStyle} />}
+
       <header>
         <div className="header-content">
           <BoardHeader
@@ -207,6 +239,12 @@ function Board({ onGoHome }) {
             actionItemCount={actionItemCount}
             actionItemsEnabled={actionItemsEnabled}
             updateActionItemsEnabled={updateActionItemsEnabled}
+            backgroundId={backgroundId}
+            setBoardBackground={setBoardBackground}
+            customBackgroundCss={customBackgroundCss}
+            setCustomBackground={setCustomBackground}
+            customBackgroundSize={customBackgroundSize}
+            setCustomBackgroundSize={setCustomBackgroundSize}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
@@ -289,7 +327,7 @@ function Board({ onGoHome }) {
 
 
       <DisplayNamePrompt />
-    </>
+    </div>
   );
 }
 

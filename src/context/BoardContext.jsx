@@ -1,6 +1,7 @@
 import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { useActionItems } from '../hooks/useActionItems';
+import { useBoardBackground } from '../hooks/useBoardBackground';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
@@ -75,6 +76,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [actionItems, setActionItems] = useState({});
   const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
 
+  // Board background state
+  const [backgroundId, setBackgroundId] = useState('none');
+  const [customBackgroundCss, setCustomBackgroundCss] = useState('');
+  const [customBackgroundSizeState, setCustomBackgroundSizeState] = useState('cover');
   // Firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -175,6 +180,15 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.actionItemsEnabled !== undefined) {
               setActionItemsEnabled(boardData.settings.actionItemsEnabled);
+            }
+            if (boardData.settings.backgroundId !== undefined) {
+              setBackgroundId(boardData.settings.backgroundId);
+            }
+            if (boardData.settings.customBackgroundCss !== undefined) {
+              setCustomBackgroundCss(boardData.settings.customBackgroundCss);
+            }
+            if (boardData.settings.customBackgroundSize !== undefined) {
+              setCustomBackgroundSizeState(boardData.settings.customBackgroundSize);
             }
           }
 
@@ -319,13 +333,22 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
+      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+      backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+      setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState
     }
+  });
+
+  // Board background hook
+  const {
+    setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
+  } = useBoardBackground({
+    updateBoardSettings
   });
 
   // Poll and health check hooks
@@ -603,8 +626,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       // Action items
       actionItems, actionItemsEnabled, updateActionItemsEnabled,
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
-      updateActionItemDueDate, updateActionItemDescription, deleteActionItem
-    };
+      updateActionItemDueDate, updateActionItemDescription, deleteActionItem,
+      // Board background
+      backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState,
+      setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
+  };
   }, [
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
     sortByVotes, setSortByVotes, votingEnabled,
@@ -635,7 +661,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     canUndo, canRedo, pastCount, futureCount,
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
-    updateActionItemDescription, deleteActionItem
+    updateActionItemDescription, deleteActionItem,
+    backgroundId, customBackgroundCss, customBackgroundSizeState, setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };
