@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBackgroundById } from '../data/boardBackgrounds';
+import useFocusMode from '../hooks/useFocusMode';
 import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
@@ -11,6 +12,7 @@ import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import DisplayNamePrompt from './DisplayNamePrompt';
+import FocusMode from './FocusMode';
 import HealthCheckVoting from './HealthCheckVoting';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
@@ -80,6 +82,9 @@ function Board({ onGoHome }) {
 
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
+
+  // Focus mode state
+  const focusMode = useFocusMode({ columns, sortByVotes });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -203,6 +208,7 @@ function Board({ onGoHome }) {
             onGoHome={onGoHome}
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
+            onFocusModeEnter={focusMode.enter}
           />
           <SettingsPanel
             handleStartHealthCheck={() => {
@@ -327,6 +333,10 @@ function Board({ onGoHome }) {
 
 
       <DisplayNamePrompt />
+
+      {/* Focus Mode overlay */}
+      <FocusMode {...focusMode} />
+
     </div>
   );
 }

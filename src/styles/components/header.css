@@ -647,3 +647,22 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     .modal-header .close-button:hover {
     background: var(--hover-bg);
 }
+
+/* Focus mode trigger button in the header */
+.focus-mode-trigger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs);
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.focus-mode-trigger-btn:hover {
+    color: var(--accent);
+    background: var(--hover-bg);
+}
