@@ -1,0 +1,247 @@
+/**
+ * Background Picker - Settings panel background selection UI
+ */
+
+/* Category tab bar */
+.bg-picker-categories {
+  display: flex;
+  gap: var(--space-xxs);
+  margin-bottom: var(--space-sm);
+}
+
+.bg-picker-category-tab {
+  flex: 1;
+  padding: var(--space-xxs) var(--space-xs);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+  text-align: center;
+}
+
+.bg-picker-category-tab:hover {
+  color: var(--text-color);
+  border-color: var(--border-color);
+  background: var(--hover-bg);
+}
+
+.bg-picker-category-tab-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bg-picker-category-tab-active:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* Swatch grid */
+.bg-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+}
+
+/* Individual swatch button */
+.bg-picker-swatch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: 0;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.bg-picker-swatch:hover {
+  transform: translateY(-1px);
+}
+
+.bg-picker-swatch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Swatch preview (the color/gradient rectangle) */
+.bg-picker-swatch-preview {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-speed) var(--transition-ease),
+    box-shadow var(--transition-speed) var(--transition-ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-color);
+  overflow: hidden;
+}
+
+.bg-picker-swatch:hover .bg-picker-swatch-preview {
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.bg-picker-swatch-selected .bg-picker-swatch-preview {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* "None" swatch X icon */
+.bg-picker-swatch-none {
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selected checkmark */
+.bg-picker-swatch-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+/* Pro lock badge */
+.bg-picker-swatch-lock {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+/* Pro swatch overlay effect */
+.bg-picker-swatch-pro .bg-picker-swatch-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  transition: background var(--transition-speed) var(--transition-ease);
+}
+
+.bg-picker-swatch-pro:hover .bg-picker-swatch-preview::after {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Swatch name label */
+.bg-picker-swatch-name {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.3;
+  padding-bottom: 2px;
+}
+
+.bg-picker-swatch-selected .bg-picker-swatch-name {
+  color: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ── Pro Upgrade Prompt ─────────────────────────────────────────── */
+
+.bg-picker-pro-prompt {
+  margin-top: var(--space-sm);
+  border: 1px solid var(--accent-transparent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.bg-picker-pro-prompt-preview {
+  height: 48px;
+  width: 100%;
+}
+
+.bg-picker-pro-prompt-content {
+  padding: var(--space-sm);
+}
+
+.bg-picker-pro-prompt-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-color);
+  margin: 0 0 var(--space-xxs) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.bg-picker-pro-prompt-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm) 0;
+  line-height: 1.5;
+}
+
+.bg-picker-pro-prompt-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.bg-picker-pro-upgrade-btn {
+  flex: 1;
+  padding: var(--space-xxs) var(--space-sm);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-speed) var(--transition-ease);
+}
+
+.bg-picker-pro-upgrade-btn:hover {
+  background: var(--accent-hover);
+}
+
+.bg-picker-pro-dismiss-btn {
+  padding: var(--space-xxs) var(--space-sm);
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.bg-picker-pro-dismiss-btn:hover {
+  color: var(--text-color);
+  border-color: var(--border-color);
+}

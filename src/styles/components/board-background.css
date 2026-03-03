@@ -1,0 +1,25 @@
+/**
+ * Board Background - Applied to the main board area
+ *
+ * The board background is set via an inline style on #board-content.
+ * These rules ensure it covers the entire viewport properly and
+ * that card/column readability is preserved.
+ */
+
+/* Board background layer */
+.board-has-background {
+  position: relative;
+}
+
+.board-has-background #board-content {
+  position: relative;
+}
+
+/* Ensure background covers full viewport height */
+.board-background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
+import BackgroundPicker from './BackgroundPicker';
 import InsightsContent from './InsightsContent';
 import Timer from './Timer';
 
@@ -44,7 +45,9 @@ const SettingsPanel = ({
   actionItemCount,
   actionItemsEnabled,
   updateActionItemsEnabled,
-  children
+  children,
+  backgroundId,
+  setBoardBackground,
 }) => {
   const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState('appearance');
@@ -208,6 +211,14 @@ const SettingsPanel = ({
                     </button>
                   </div>
                 </div>
+
+                <div className="settings-divider" />
+
+                {/* Board Background */}
+                <BackgroundPicker
+                  currentBackgroundId={backgroundId}
+                  onSelectBackground={setBoardBackground}
+                />
               </div>
 
               {/* Voting Tab */}

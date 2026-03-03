@@ -1,6 +1,7 @@
 import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { useActionItems } from '../hooks/useActionItems';
+import { useBoardBackground } from '../hooks/useBoardBackground';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
@@ -74,6 +75,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Action items state
   const [actionItems, setActionItems] = useState({});
   const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
+
+  // Board background state
+  const [backgroundId, setBackgroundId] = useState('none');
+  const [customBackgroundCss, setCustomBackgroundCss] = useState('');
 
   // Firebase authentication
   useEffect(() => {
@@ -175,6 +180,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.actionItemsEnabled !== undefined) {
               setActionItemsEnabled(boardData.settings.actionItemsEnabled);
+            }
+            if (boardData.settings.backgroundId !== undefined) {
+              setBackgroundId(boardData.settings.backgroundId);
+            }
+            if (boardData.settings.customBackgroundCss !== undefined) {
+              setCustomBackgroundCss(boardData.settings.customBackgroundCss);
             }
           }
 
@@ -319,13 +330,22 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
+      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+      backgroundId, customBackgroundCss
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+      setBackgroundId, setCustomBackgroundCss
     }
+  });
+
+  // Board background hook
+  const {
+    setBoardBackground, setCustomBackground, clearBackground
+  } = useBoardBackground({
+    updateBoardSettings
   });
 
   // Poll and health check hooks
@@ -603,8 +623,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       // Action items
       actionItems, actionItemsEnabled, updateActionItemsEnabled,
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
-      updateActionItemDueDate, updateActionItemDescription, deleteActionItem
-    };
+      updateActionItemDueDate, updateActionItemDescription, deleteActionItem,
+      // Board background
+      backgroundId, customBackgroundCss,
+      setBoardBackground, setCustomBackground, clearBackground
+  };
   }, [
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
     sortByVotes, setSortByVotes, votingEnabled,
@@ -635,7 +658,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     canUndo, canRedo, pastCount, futureCount,
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
-    updateActionItemDescription, deleteActionItem
+    updateActionItemDescription, deleteActionItem,
+    backgroundId, customBackgroundCss, setBoardBackground, setCustomBackground, clearBackground
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };

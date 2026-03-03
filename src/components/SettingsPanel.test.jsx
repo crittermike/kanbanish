@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, beforeEach, expect } from 'vitest';
 import SettingsPanel from './SettingsPanel';
@@ -73,7 +73,9 @@ describe('SettingsPanel - Tab Navigation', () => {
     onOpenActionItems: vi.fn(),
     actionItemCount: 0,
     actionItemsEnabled: false,
-    updateActionItemsEnabled: vi.fn()
+    updateActionItemsEnabled: vi.fn(),
+    backgroundId: 'none',
+    setBoardBackground: vi.fn(),
   };
 
   beforeEach(() => {
@@ -87,7 +89,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       expect(tablist).toBeInTheDocument();
 
-      const tabs = screen.getAllByRole('tab');
+      const tabs = within(tablist).getAllByRole('tab');
       expect(tabs).toHaveLength(5);
     });
 
@@ -104,7 +106,8 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('active tab has tabIndex 0, inactive tabs have tabIndex -1', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tabs = screen.getAllByRole('tab');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
+      const tabs = within(tablist).getAllByRole('tab');
       const activeTab = tabs.find(tab => tab.getAttribute('aria-selected') === 'true');
       const inactiveTabs = tabs.filter(tab => tab.getAttribute('aria-selected') === 'false');
 
@@ -132,7 +135,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('each tabpanel has role="tabpanel"', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const panels = screen.getAllByRole('tabpanel', { hidden: true });
+      const panels = screen.getAllByRole('tabpanel', { hidden: true }).filter(p => p.id.startsWith('settings-tabpanel-'));
       expect(panels).toHaveLength(5);
     });
 
@@ -207,7 +210,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('ArrowRight moves to next tab', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'ArrowRight' });
 
       expect(screen.getByRole('tab', { name: /Voting/i })).toHaveAttribute('aria-selected', 'true');
@@ -218,7 +221,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       // Start on Appearance (first tab), press ArrowLeft
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
 
       expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
@@ -228,7 +231,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       // Navigate to last tab first
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.click(screen.getByRole('tab', { name: /Insights/i }));
 
       // Press ArrowRight — should wrap to first
@@ -242,7 +245,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       // Navigate to Features tab
       fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
 
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'Home' });
 
       expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'true');
@@ -251,7 +254,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('End key moves to last tab', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'End' });
 
       expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
@@ -260,7 +263,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('sequential ArrowRight navigates through all tabs', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tablist = screen.getByRole('tablist');
+      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Insights/i, /Appearance/i];
 
       expectedOrder.forEach(name => {

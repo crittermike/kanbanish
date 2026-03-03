@@ -29,13 +29,15 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   const {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
-    workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled
+    workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+    backgroundId, customBackgroundCss
   } = settingsState;
 
   const {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+    setBackgroundId, setCustomBackgroundCss
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -69,10 +71,17 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.actionItemsEnabled !== undefined) {
       setActionItemsEnabled(newSettings.actionItemsEnabled);
     }
+    if (newSettings.backgroundId !== undefined) {
+      setBackgroundId(newSettings.backgroundId);
+    }
+    if (newSettings.customBackgroundCss !== undefined) {
+      setCustomBackgroundCss(newSettings.customBackgroundCss);
+    }
   }, [
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+    setBackgroundId, setCustomBackgroundCss
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -90,6 +99,8 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         resultsViewIndex,
         showDisplayNames,
         actionItemsEnabled,
+        backgroundId,
+        customBackgroundCss,
         ...newSettings
       };
 
@@ -107,7 +118,8 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   }, [
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
-    resultsViewIndex, showDisplayNames, actionItemsEnabled, applySettingsLocally
+    resultsViewIndex, showDisplayNames, actionItemsEnabled,
+    backgroundId, customBackgroundCss, applySettingsLocally
   ]);
 
   // Convenience wrappers

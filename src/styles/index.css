@@ -31,6 +31,8 @@
 @import 'components/wizard.css';
 @import 'components/settings-tabs.css';
 @import 'components/insights.css';
+@import 'components/background-picker.css';
+@import 'components/board-background.css';
 
 /* Utility classes and notifications */
 .notification {
