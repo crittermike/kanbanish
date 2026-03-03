@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowDown, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
+import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import Timer from './Timer';
 
@@ -40,6 +40,7 @@ const SettingsPanel = ({
   updateVotesPerUser,
   onOpenActionItems,
   actionItemCount,
+  onOpenInsights,
   actionItemsEnabled,
   updateActionItemsEnabled,
   children
@@ -498,6 +499,21 @@ const SettingsPanel = ({
                         <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
                       </button>
                     )}
+                    <button
+                      className="settings-share-action-btn"
+                      onClick={() => {
+                        if (onOpenInsights) onOpenInsights();
+                      }}
+                    >
+                      <div className="settings-share-action-icon">
+                        <BarChart2 size={20} aria-hidden="true" />
+                      </div>
+                      <div className="settings-share-action-text">
+                        <span className="settings-share-action-title">Board Insights</span>
+                        <span className="settings-share-action-desc">View analytics, themes, and sentiment analysis</span>
+                      </div>
+                      <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
+                    </button>
                   </div>
                 </div>
               </div>

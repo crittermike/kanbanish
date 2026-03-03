@@ -30,6 +30,7 @@
 @import 'components/display-names.css';
 @import 'components/wizard.css';
 @import 'components/settings-tabs.css';
+@import 'components/insights.css';
 
 /* Utility classes and notifications */
 .notification {

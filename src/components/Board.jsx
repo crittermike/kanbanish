@@ -11,6 +11,7 @@ import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import DisplayNamePrompt from './DisplayNamePrompt';
 import HealthCheckVoting from './HealthCheckVoting';
+import InsightsPanel from './InsightsPanel';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
@@ -29,6 +30,7 @@ function Board({ onGoHome }) {
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isActionItemsPanelOpen, setIsActionItemsPanelOpen] = useState(false);
+  const [isInsightsPanelOpen, setIsInsightsPanelOpen] = useState(false);
 
   // Get context values from BoardContext
   const {
@@ -205,6 +207,10 @@ function Board({ onGoHome }) {
               setSettingsDropdownOpen(false);
             }}
             actionItemCount={actionItemCount}
+            onOpenInsights={() => {
+              setIsInsightsPanelOpen(true);
+              setSettingsDropdownOpen(false);
+            }}
             actionItemsEnabled={actionItemsEnabled}
             updateActionItemsEnabled={updateActionItemsEnabled}
           >
@@ -285,6 +291,11 @@ function Board({ onGoHome }) {
       <ActionItemsPanel
         isOpen={isActionItemsPanelOpen}
         onClose={() => setIsActionItemsPanelOpen(false)}
+      />
+
+      <InsightsPanel
+        isOpen={isInsightsPanelOpen}
+        onClose={() => setIsInsightsPanelOpen(false)}
       />
 
       <DisplayNamePrompt />
