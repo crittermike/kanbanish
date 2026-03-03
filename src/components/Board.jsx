@@ -287,6 +287,7 @@ function Board({ onGoHome }) {
         onClose={() => setIsActionItemsPanelOpen(false)}
       />
 
+
       <DisplayNamePrompt />
     </>
   );

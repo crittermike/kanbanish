@@ -11,6 +11,34 @@ vi.mock('../context/NotificationContext', () => ({
   })
 }));
 
+// Mock BoardContext (used by InsightsContent)
+vi.mock('../context/BoardContext', () => ({
+  useBoardContext: () => ({
+    columns: {},
+    actionItems: {},
+    activeUsers: []
+  })
+}));
+
+// Mock useBoardInsights (used by InsightsContent)
+vi.mock('../hooks/useBoardInsights', () => ({
+  useBoardInsights: () => ({
+    stats: {},
+    columnDistribution: [],
+    themes: [],
+    sentiment: {},
+    topVotedCards: [],
+    topVotedGroups: [],
+    mostDiscussed: [],
+    mostReacted: [],
+    actionItemsSummary: { total: 0 },
+    engagementScore: 0,
+    engagementFactors: {},
+    summary: '',
+    isEmpty: true
+  })
+}));
+
 // Mock Timer component
 vi.mock('./Timer', () => ({
   default: () => <div data-testid="timer" />
@@ -60,7 +88,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       expect(tablist).toBeInTheDocument();
 
       const tabs = screen.getAllByRole('tab');
-      expect(tabs).toHaveLength(4);
+      expect(tabs).toHaveLength(5);
     });
 
     test('defaults to Appearance tab on open', () => {
@@ -89,7 +117,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('each tab has matching aria-controls and tabpanel id', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tabIds = ['appearance', 'voting', 'features', 'share'];
+      const tabIds = ['appearance', 'voting', 'features', 'share', 'insights'];
       tabIds.forEach(id => {
         const tab = document.getElementById(`settings-tab-${id}`);
         expect(tab).toBeInTheDocument();
@@ -105,7 +133,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       const panels = screen.getAllByRole('tabpanel', { hidden: true });
-      expect(panels).toHaveLength(4);
+      expect(panels).toHaveLength(5);
     });
 
     test('only the active tabpanel is visible', () => {
@@ -114,7 +142,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       const activePanel = document.getElementById('settings-tabpanel-appearance');
       expect(activePanel).not.toHaveAttribute('hidden');
 
-      const hiddenPanels = ['voting', 'features', 'share'];
+      const hiddenPanels = ['voting', 'features', 'share', 'insights'];
       hiddenPanels.forEach(id => {
         const panel = document.getElementById(`settings-tabpanel-${id}`);
         expect(panel).toHaveAttribute('hidden');
@@ -193,7 +221,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       const tablist = screen.getByRole('tablist');
       fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
 
-      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
     });
 
     test('ArrowRight wraps from last to first tab', () => {
@@ -201,7 +229,7 @@ describe('SettingsPanel - Tab Navigation', () => {
 
       // Navigate to last tab first
       const tablist = screen.getByRole('tablist');
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
+      fireEvent.click(screen.getByRole('tab', { name: /Insights/i }));
 
       // Press ArrowRight — should wrap to first
       fireEvent.keyDown(tablist, { key: 'ArrowRight' });
@@ -226,14 +254,14 @@ describe('SettingsPanel - Tab Navigation', () => {
       const tablist = screen.getByRole('tablist');
       fireEvent.keyDown(tablist, { key: 'End' });
 
-      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
     });
 
     test('sequential ArrowRight navigates through all tabs', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       const tablist = screen.getByRole('tablist');
-      const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Appearance/i];
+      const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Insights/i, /Appearance/i];
 
       expectedOrder.forEach(name => {
         fireEvent.keyDown(tablist, { key: 'ArrowRight' });

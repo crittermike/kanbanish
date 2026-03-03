@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowDown, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
+import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
+import InsightsContent from './InsightsContent';
 import Timer from './Timer';
 
 const TABS = [
@@ -8,10 +9,11 @@ const TABS = [
   { id: 'voting', label: 'Voting', icon: ThumbsUp },
   { id: 'features', label: 'Features', icon: Zap },
   { id: 'share', label: 'Share & Export', icon: Share2 },
+  { id: 'insights', label: 'Insights', icon: BarChart2 },
 ];
 
 /**
- * Settings modal organized with tabs: Appearance, Voting, Features, Share & Export.
+ * Settings modal organized with tabs: Appearance, Voting, Features, Share & Export, Insights.
  */
 const SettingsPanel = ({
   handleStartHealthCheck,
@@ -500,6 +502,17 @@ const SettingsPanel = ({
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Insights Tab */}
+              <div
+                id="settings-tabpanel-insights"
+                role="tabpanel"
+                aria-labelledby="settings-tab-insights"
+                className="settings-tabpanel"
+                hidden={activeTab !== 'insights'}
+              >
+                <InsightsContent />
               </div>
             </div>
           </div>
