@@ -67,11 +67,12 @@ function Board({ onGoHome }) {
     displayName,
     userColor,
     updateDisplayName,
-    updateUserColor
+    updateUserColor,
+    boardTags
   } = useBoardContext();
 
   // Search state
-  const searchFilter = useSearchFilter({ columns });
+  const searchFilter = useSearchFilter({ columns, userId: user?.uid });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -228,6 +229,15 @@ function Board({ onGoHome }) {
           totalCards={searchFilter.totalCards}
           closeSearch={searchFilter.closeSearch}
           searchInputRef={searchFilter.searchInputRef}
+          isFilterPanelOpen={searchFilter.isFilterPanelOpen}
+          toggleFilterPanel={searchFilter.toggleFilterPanel}
+          filters={searchFilter.filters}
+          hasActiveFilters={searchFilter.hasActiveFilters}
+          activeFilterCount={searchFilter.activeFilterCount}
+          toggleFilterValue={searchFilter.toggleFilterValue}
+          setFilterValue={searchFilter.setFilterValue}
+          clearFilters={searchFilter.clearFilters}
+          boardTags={boardTags}
         />
       )}
 

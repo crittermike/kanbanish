@@ -1,8 +1,13 @@
 /**
- * Kanban App - Search Bar Styles
+ * Kanban App - Search & Filter Styles
  *
- * Styles for the card search feature.
+ * Styles for the card search and structured filter feature.
+ * Uses existing CSS custom properties from variables.css.
  */
+
+/* ============================================================
+   SEARCH BAR CONTAINER
+   ============================================================ */
 
 /* Search bar container — sits below the header */
 .search-filter-bar {
@@ -26,7 +31,11 @@
     }
 }
 
-/* Search input + actions row */
+/* ============================================================
+   SEARCH INPUT ROW
+   ============================================================ */
+
+/* Search input + filter toggle + actions row */
 .search-input-row {
     display: flex;
     align-items: center;
@@ -143,7 +152,317 @@
     background: var(--hover-bg);
 }
 
-/* Dimming for cards/groups that don't match the search */
+/* ============================================================
+   FILTER TOGGLE BUTTON
+   ============================================================ */
+
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.filter-toggle-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--hover-bg);
+}
+
+.filter-toggle-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-transparent);
+}
+
+.filter-toggle-btn.has-filters {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Filter count badge */
+.filter-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    background: var(--accent);
+    border-radius: var(--radius-round);
+    pointer-events: none;
+}
+
+/* ============================================================
+   FILTER CHIPS ROW (Active filters summary)
+   ============================================================ */
+
+.filter-chips-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-xxs);
+    padding-top: 2px;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px 2px 8px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-transparent);
+    border: 1px solid transparent;
+    border-radius: var(--radius-round);
+    white-space: nowrap;
+    line-height: 1.4;
+    animation: filter-chip-in 0.15s ease;
+}
+
+@keyframes filter-chip-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.filter-chip-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.filter-chip-label {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-chip-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    border-radius: 50%;
+    opacity: 0.7;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.filter-chip-remove:hover {
+    opacity: 1;
+    background: rgba(var(--accent-rgb, 88, 166, 255), 0.2);
+}
+
+.filter-clear-all-btn {
+    padding: 2px 8px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-round);
+    white-space: nowrap;
+    transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.filter-clear-all-btn:hover {
+    color: var(--text-color);
+    background: var(--hover-bg);
+}
+
+/* ============================================================
+   FILTER PANEL (Collapsible)
+   ============================================================ */
+
+.filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
+    padding: var(--space-sm) 0 var(--space-xxs);
+    border-top: 1px solid var(--border-color);
+    animation: filter-panel-in 0.2s ease;
+}
+
+@keyframes filter-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Each filter section (Tags, Author, Votes, etc.) */
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+    min-width: 0;
+}
+
+.filter-section-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary, var(--text-muted));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.filter-section-label svg {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.filter-options {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* ============================================================
+   FILTER PRESET BUTTONS (Votes, Author, Comments, etc.)
+   ============================================================ */
+
+.filter-preset-btn {
+    padding: 3px 10px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-speed) var(--transition-ease);
+    line-height: 1.5;
+}
+
+.filter-preset-btn:hover {
+    color: var(--text-color);
+    border-color: var(--text-muted);
+    background: var(--hover-bg);
+}
+
+.filter-preset-btn.active {
+    color: var(--accent);
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+}
+
+/* ============================================================
+   FILTER TAG CHIPS
+   ============================================================ */
+
+.filter-tags-list {
+    max-width: 360px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-tags-list::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-tag-chip {
+    padding: 3px 10px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all var(--transition-speed) var(--transition-ease);
+    line-height: 1.5;
+}
+
+.filter-tag-chip:hover {
+    color: var(--text-color);
+    border-color: var(--text-muted);
+    background: var(--hover-bg);
+}
+
+.filter-tag-chip.active {
+    color: var(--accent);
+    background: var(--accent-transparent);
+    border-color: var(--accent);
+}
+
+/* ============================================================
+   FILTER COLOR SWATCHES
+   ============================================================ */
+
+.filter-color-list {
+    gap: 6px;
+}
+
+.filter-color-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: all var(--transition-speed) var(--transition-ease);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.filter-color-swatch:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px var(--bg-color),
+                0 0 0 3px currentColor;
+}
+
+.filter-color-swatch.active {
+    transform: scale(1.1);
+    border-color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--bg-color),
+                0 0 0 3px var(--text-color);
+}
+
+/* ============================================================
+   DIMMING (Cards/Groups that don't match)
+   ============================================================ */
+
 .card.card-filtered-out {
     opacity: 0.2;
     pointer-events: none;
@@ -156,9 +475,48 @@
     transition: opacity var(--transition-speed) var(--transition-ease);
 }
 
-/* Responsive */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
 @media (max-width: 768px) {
     .search-filter-bar {
         padding: var(--space-sm);
+    }
+
+    .filter-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-sm);
+    }
+
+    .filter-section {
+        width: auto;
+    }
+
+    /* Color section spans full width so swatches have room */
+    .filter-section:has(.filter-color-list) {
+        grid-column: 1 / -1;
+    }
+
+    .filter-color-swatch {
+        width: 28px;
+        height: 28px;
+    }
+
+    .filter-color-list {
+        gap: 8px;
+    }
+
+    .filter-tags-list {
+        max-width: 100%;
+    }
+
+    .search-result-count {
+        display: none;
+    }
+
+    .filter-preset-btn {
+        padding: 4px 10px;
     }
 }
