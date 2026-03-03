@@ -7,8 +7,8 @@ describe('BOARD_TEMPLATES', () => {
     expect(BOARD_TEMPLATES.length).toBeGreaterThan(0);
   });
 
-  it('should have 30 templates', () => {
-    expect(BOARD_TEMPLATES.length).toBe(30);
+  it('should have 31 templates', () => {
+    expect(BOARD_TEMPLATES.length).toBe(31);
   });
 
   it('should have all required fields on every template', () => {
@@ -55,9 +55,9 @@ describe('BOARD_TEMPLATES', () => {
     expect(bigOrcaTemplate).toBeDefined();
   });
 
-  it('should have big-orca as the last template (easter egg)', () => {
+  it('should have copilot-voyager as the last template', () => {
     const lastTemplate = BOARD_TEMPLATES[BOARD_TEMPLATES.length - 1];
-    expect(lastTemplate.id).toBe('big-orca');
+    expect(lastTemplate.id).toBe('copilot-voyager');
   });
 
   it('big-orca template should have correct name and icon', () => {
