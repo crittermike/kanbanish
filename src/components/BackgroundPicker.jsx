@@ -10,7 +10,14 @@ import BOARD_BACKGROUNDS, { BACKGROUND_CATEGORIES } from '../data/boardBackgroun
  * @param {string} props.currentBackgroundId - Currently selected background ID
  * @param {Function} props.onSelectBackground - Callback when a background is selected
  */
-const BackgroundPicker = ({ currentBackgroundId, onSelectBackground, customBackgroundCss, onSetCustomBackground }) => {
+const BackgroundPicker = ({ 
+  currentBackgroundId, 
+  onSelectBackground, 
+  customBackgroundCss, 
+  onSetCustomBackground,
+  customBackgroundSize = 'cover',
+  onSetCustomBackgroundSize
+}) => {
   const [activeCategory, setActiveCategory] = useState('solid');
   const [customUrl, setCustomUrl] = useState('');
 
@@ -61,12 +68,46 @@ const BackgroundPicker = ({ currentBackgroundId, onSelectBackground, customBackg
           </div>
           <p className="settings-hint bg-picker-custom-hint">Paste any public image URL</p>
 
+          {currentBackgroundId === 'custom' && customBackgroundCss && (
+            <div className="bg-picker-size-section">
+              <h5 className="bg-picker-size-title">Image sizing</h5>
+              <div className="bg-picker-size-toggle">
+                <button
+                  className={`bg-picker-size-option ${customBackgroundSize === 'tile' ? 'selected' : ''}`}
+                  onClick={() => onSetCustomBackgroundSize('tile')}
+                  title="Repeat pattern"
+                >
+                  Tile
+                </button>
+                <button
+                  className={`bg-picker-size-option ${customBackgroundSize === 'cover' ? 'selected' : ''}`}
+                  onClick={() => onSetCustomBackgroundSize('cover')}
+                  title="Fill, may crop"
+                >
+                  Cover
+                </button>
+                <button
+                  className={`bg-picker-size-option ${customBackgroundSize === 'stretch' ? 'selected' : ''}`}
+                  onClick={() => onSetCustomBackgroundSize('stretch')}
+                  title="Fill, may warp"
+                >
+                  Stretch
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-picker-custom-preview-area">
             {currentBackgroundId === 'custom' && customBackgroundCss ? (
               <>
                 <div 
                   className="bg-picker-custom-preview-image" 
-                  style={{ background: customBackgroundCss, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                  style={{ 
+                    background: customBackgroundCss, 
+                    backgroundSize: customBackgroundSize === 'tile' ? 'auto' : customBackgroundSize === 'stretch' ? '100% 100%' : 'cover',
+                    backgroundRepeat: customBackgroundSize === 'tile' ? 'repeat' : 'no-repeat',
+                    backgroundPosition: customBackgroundSize === 'tile' ? 'top left' : 'center'
+                  }}
                 />
                 <button
                   className="bg-picker-custom-clear btn"

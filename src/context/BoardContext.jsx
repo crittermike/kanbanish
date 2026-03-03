@@ -79,7 +79,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Board background state
   const [backgroundId, setBackgroundId] = useState('none');
   const [customBackgroundCss, setCustomBackgroundCss] = useState('');
-
+  const [customBackgroundSizeState, setCustomBackgroundSizeState] = useState('cover');
   // Firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -186,6 +186,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.customBackgroundCss !== undefined) {
               setCustomBackgroundCss(boardData.settings.customBackgroundCss);
+            }
+            if (boardData.settings.customBackgroundSize !== undefined) {
+              setCustomBackgroundSizeState(boardData.settings.customBackgroundSize);
             }
           }
 
@@ -331,19 +334,19 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
       workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
-      backgroundId, customBackgroundCss
+      backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
       setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
-      setBackgroundId, setCustomBackgroundCss
+      setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState
     }
   });
 
   // Board background hook
   const {
-    setBoardBackground, setCustomBackground, clearBackground
+    setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   } = useBoardBackground({
     updateBoardSettings
   });
@@ -625,8 +628,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
       updateActionItemDueDate, updateActionItemDescription, deleteActionItem,
       // Board background
-      backgroundId, customBackgroundCss,
-      setBoardBackground, setCustomBackground, clearBackground
+      backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState,
+      setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   };
   }, [
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
@@ -659,7 +662,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
     updateActionItemDescription, deleteActionItem,
-    backgroundId, customBackgroundCss, setBoardBackground, setCustomBackground, clearBackground
+    backgroundId, customBackgroundCss, customBackgroundSizeState, setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;
 };

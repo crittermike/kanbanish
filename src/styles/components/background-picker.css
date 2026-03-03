@@ -124,6 +124,55 @@
 }
 
 /* Custom Background Section */
+.bg-picker-size-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.bg-picker-size-title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.bg-picker-size-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--border-subtle);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.bg-picker-size-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.bg-picker-size-option:hover {
+  color: var(--text-color);
+}
+
+.bg-picker-size-option.selected {
+  background: var(--card-bg);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Custom Background Section */
 .bg-picker-custom {
   display: flex;
   flex-direction: column;

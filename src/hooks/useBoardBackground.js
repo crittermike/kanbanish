@@ -29,11 +29,15 @@ export const useBoardBackground = ({ updateBoardSettings }) => {
    * Stores both the custom flag and the raw CSS.
    * @param {string} customCss - Raw CSS background value
    */
-  const setCustomBackground = useCallback((customCss) => {
-    updateBoardSettings({
+  const setCustomBackground = useCallback((customCss, sizeMode) => {
+    const settings = {
       backgroundId: 'custom',
       customBackgroundCss: customCss
-    });
+    };
+    if (sizeMode !== undefined) {
+      settings.customBackgroundSize = sizeMode;
+    }
+    updateBoardSettings(settings);
   }, [updateBoardSettings]);
 
   /**
@@ -46,9 +50,18 @@ export const useBoardBackground = ({ updateBoardSettings }) => {
     });
   }, [updateBoardSettings]);
 
+  /**
+   * Set the background size mode for custom backgrounds.
+   * @param {string} sizeMode - 'cover', 'tile', or 'stretch'
+   */
+  const setCustomBackgroundSize = useCallback((sizeMode) => {
+    updateBoardSettings({ customBackgroundSize: sizeMode });
+  }, [updateBoardSettings]);
+
   return {
     setBoardBackground,
     setCustomBackground,
+    setCustomBackgroundSize,
     clearBackground
   };
 };

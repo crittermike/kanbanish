@@ -73,7 +73,9 @@ function Board({ onGoHome }) {
     backgroundId,
     customBackgroundCss,
     setBoardBackground,
-    setCustomBackground
+    setCustomBackground,
+    customBackgroundSize,
+    setCustomBackgroundSize
   } = useBoardContext();
 
   // Search state
@@ -170,9 +172,27 @@ function Board({ onGoHome }) {
   const backgroundCss = backgroundId === 'custom' ? customBackgroundCss : bgDef?.css || '';
   const hasBackground = backgroundId && backgroundId !== 'none' && backgroundCss;
 
+  const backgroundStyle = { background: backgroundCss };
+  if (backgroundId === 'custom') {
+    if (customBackgroundSize === 'tile') {
+      backgroundStyle.backgroundSize = 'auto';
+      backgroundStyle.backgroundRepeat = 'repeat';
+      backgroundStyle.backgroundPosition = 'top left';
+    } else if (customBackgroundSize === 'stretch') {
+      backgroundStyle.backgroundSize = '100% 100%';
+      backgroundStyle.backgroundRepeat = 'no-repeat';
+      backgroundStyle.backgroundPosition = 'center';
+    } else {
+      // 'cover' (default)
+      backgroundStyle.backgroundSize = 'cover';
+      backgroundStyle.backgroundRepeat = 'no-repeat';
+      backgroundStyle.backgroundPosition = 'center';
+    }
+  }
+
   return (
     <div className={hasBackground ? 'board-has-background' : ''}>
-      {hasBackground && <div className="board-background-layer" style={{ background: backgroundCss }} />}
+      {hasBackground && <div className="board-background-layer" style={backgroundStyle} />}
 
       <header>
         <div className="header-content">
@@ -223,6 +243,8 @@ function Board({ onGoHome }) {
             setBoardBackground={setBoardBackground}
             customBackgroundCss={customBackgroundCss}
             setCustomBackground={setCustomBackground}
+            customBackgroundSize={customBackgroundSize}
+            setCustomBackgroundSize={setCustomBackgroundSize}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}

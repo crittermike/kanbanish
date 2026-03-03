@@ -49,7 +49,9 @@ const SettingsPanel = ({
   backgroundId,
   setBoardBackground,
   customBackgroundCss,
-  setCustomBackground
+  setCustomBackground,
+  customBackgroundSize,
+  setCustomBackgroundSize
 }) => {
   const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState('appearance');
@@ -222,6 +224,8 @@ const SettingsPanel = ({
                   onSelectBackground={setBoardBackground}
                   customBackgroundCss={customBackgroundCss}
                   onSetCustomBackground={setCustomBackground}
+                  customBackgroundSize={customBackgroundSize}
+                  onSetCustomBackgroundSize={setCustomBackgroundSize}
                 />
               </div>
               {/* Voting Tab */}
