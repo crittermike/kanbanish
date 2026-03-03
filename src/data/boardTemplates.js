@@ -263,6 +263,20 @@ const BOARD_TEMPLATES = [
       actionItemsEnabled: false,
       workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
     }
+  },
+  {
+    id: 'copilot-voyager',
+    name: 'Copilot Voyager Retrospective',
+    description: 'Reflect on past work and plan improvements',
+    columns: ['Went Well', 'Could Improve', 'Curious About', 'How Are You Feeling?'],
+    icon: '🚀',
+    tags: ['agile', 'reflection', 'team'],
+    skipWizard: true,
+    defaultSettings: {
+      retrospectiveMode: true,
+      multipleVotesAllowed: true,
+      workflowPhase: WORKFLOW_PHASES.CREATION
+    }
   }
 ];
 
