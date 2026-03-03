@@ -25,7 +25,7 @@ export const useBoardBackground = ({ updateBoardSettings }) => {
   }, [updateBoardSettings]);
 
   /**
-   * Set a custom background CSS value (Pro feature).
+   * Set a custom background CSS value.
    * Stores both the custom flag and the raw CSS.
    * @param {string} customCss - Raw CSS background value
    */

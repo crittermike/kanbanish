@@ -48,6 +48,8 @@ const SettingsPanel = ({
   children,
   backgroundId,
   setBoardBackground,
+  customBackgroundCss,
+  setCustomBackground
 }) => {
   const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState('appearance');
@@ -218,9 +220,10 @@ const SettingsPanel = ({
                 <BackgroundPicker
                   currentBackgroundId={backgroundId}
                   onSelectBackground={setBoardBackground}
+                  customBackgroundCss={customBackgroundCss}
+                  onSetCustomBackground={setCustomBackground}
                 />
               </div>
-
               {/* Voting Tab */}
               <div
                 id="settings-tabpanel-voting"

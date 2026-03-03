@@ -72,7 +72,8 @@ function Board({ onGoHome }) {
     boardTags,
     backgroundId,
     customBackgroundCss,
-    setBoardBackground
+    setBoardBackground,
+    setCustomBackground
   } = useBoardContext();
 
   // Search state
@@ -220,6 +221,8 @@ function Board({ onGoHome }) {
             updateActionItemsEnabled={updateActionItemsEnabled}
             backgroundId={backgroundId}
             setBoardBackground={setBoardBackground}
+            customBackgroundCss={customBackgroundCss}
+            setCustomBackground={setCustomBackground}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
