@@ -45,6 +45,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
   const [showDisplayNames, setShowDisplayNames] = useState(false); // Default to off
+  const [skipRevealPhase, setSkipRevealPhase] = useState(false); // Default to showing reveal phase
 
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
@@ -187,6 +188,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.showDisplayNames !== undefined) {
               setShowDisplayNames(boardData.settings.showDisplayNames);
+            }
+            if (boardData.settings.skipRevealPhase !== undefined) {
+              setSkipRevealPhase(boardData.settings.skipRevealPhase);
             }
             if (boardData.settings.actionItemsEnabled !== undefined) {
               setActionItemsEnabled(boardData.settings.actionItemsEnabled);
@@ -344,12 +348,14 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
       workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+      skipRevealPhase,
       backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
       setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+      setSkipRevealPhase,
       setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState
     }
   });
@@ -394,7 +400,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     navigateResults, getSortedItemsForResults
   } = useWorkflow({
     updateBoardSettings, columns, workflowPhase,
-    resultsViewIndex, removeAllGrouping
+    resultsViewIndex, removeAllGrouping, skipRevealPhase
   });
 
   // Per-column timer functions
@@ -591,6 +597,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       presenceData,
       // Workflow phase system
       workflowPhase,
+      skipRevealPhase,
       setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
@@ -658,6 +665,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
     prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
+    skipRevealPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,

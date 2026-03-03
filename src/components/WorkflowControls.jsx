@@ -13,6 +13,7 @@ const WorkflowControls = () => {
   const {
     workflowPhase,
     initialWorkflowPhase,
+    skipRevealPhase,
     votesPerUser,
     updateVotesPerUser,
     startGroupingPhase,
@@ -166,10 +167,10 @@ const WorkflowControls = () => {
             <div className="phase-controls">
               <button
                 className="btn primary-btn"
-                onClick={handleRevealInteractions}
+                onClick={skipRevealPhase ? handleStartResults : handleRevealInteractions}
               >
                 <Eye size={16} />
-                Reveal Votes
+                {skipRevealPhase ? 'View Results' : 'Reveal Votes'}
               </button>
               <button
                 className="btn secondary-btn"

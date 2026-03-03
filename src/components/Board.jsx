@@ -49,6 +49,7 @@ function Board({ onGoHome }) {
     retrospectiveMode,
     updateRetrospectiveMode,
     resetAllVotes,
+    updateBoardSettings,
     updateBoardTitle,
     user,
     darkMode,
@@ -65,6 +66,7 @@ function Board({ onGoHome }) {
     actionItems,
     actionItemsEnabled,
     updateActionItemsEnabled,
+    skipRevealPhase,
     displayName,
     userColor,
     updateDisplayName,
@@ -239,6 +241,8 @@ function Board({ onGoHome }) {
             actionItemCount={actionItemCount}
             actionItemsEnabled={actionItemsEnabled}
             updateActionItemsEnabled={updateActionItemsEnabled}
+            skipRevealPhase={skipRevealPhase}
+            updateSkipRevealPhase={(enabled) => updateBoardSettings({ skipRevealPhase: enabled })}
             backgroundId={backgroundId}
             setBoardBackground={setBoardBackground}
             customBackgroundCss={customBackgroundCss}
