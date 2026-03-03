@@ -41,8 +41,12 @@ const WorkflowControls = () => {
   };
 
   const handleVoteLimitConfirm = (newVotesPerUser) => {
-    updateVotesPerUser(newVotesPerUser);
-    startInteractionsPhase();
+    // Combine vote limit and phase transition into a single settings update
+    // to avoid a race condition where the phase transition overwrites the vote limit
+    updateBoardSettings({
+      votesPerUser: newVotesPerUser,
+      workflowPhase: WORKFLOW_PHASES.INTERACTIONS
+    });
     showNotification(`Voting phase started - each user can cast ${newVotesPerUser} votes`);
   };
 
