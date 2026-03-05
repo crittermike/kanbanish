@@ -378,6 +378,18 @@
   align-items: center;
 }
 
+/* Reset CardReactions component styles inside modal */
+.card-detail-reactions-row .emoji-reactions {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  display: contents;
+}
+
+.card-detail-reactions-row .emoji-reactions .reactions-left {
+  display: contents;
+}
+
 .card-detail-reactions-empty {
   font-size: var(--font-size-sm, 13px);
   color: var(--text-faint, rgba(139, 148, 158, 0.5));
