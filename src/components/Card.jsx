@@ -1,6 +1,6 @@
 import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { MessageSquare, CheckSquare } from 'react-feather';
+import { MessageSquare, CheckSquare, Clock } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import { getInitials } from '../utils/avatarColors';
@@ -129,7 +129,8 @@ function Card({
   columnId,
   groupId = null,
   onCardDropOnCard = null,
-  dimmed = false
+  dimmed = false,
+  onExpandCard = null
 }) {
   const { 
     boardId, 
@@ -442,6 +443,7 @@ function Card({
                 onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
                 onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
                 hasActionItem={hasActionItem}
+                onExpandCard={onExpandCard ? () => onExpandCard(cardId, columnId) : undefined}
               />
             )}
           </CardContent>
@@ -470,9 +472,14 @@ function Card({
             </div>
           )}
 
-          {/* Inline badges for action items and comments */}
-          {(hasActionItem || (!isEditing && showCommentBadge)) && (
+          {/* Inline badges for action items, timer, and comments */}
+          {(hasActionItem || cardData.timer?.isRunning || (!isEditing && showCommentBadge)) && (
             <div className="card-inline-badges">
+              {cardData.timer?.isRunning && (
+                <span className="card-inline-badge timer-badge" title="Timer running">
+                  <Clock size={11} /> Timer
+                </span>
+              )}
               {hasActionItem && (
                 <span className="card-inline-badge action-item-badge" title="Converted to action item">
                   <CheckSquare size={11} /> Action item

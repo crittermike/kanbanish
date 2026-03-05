@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { MessageSquare, Smile, Droplet, Tag, CheckSquare } from 'react-feather';
+import { MessageSquare, Smile, Droplet, Tag, CheckSquare, Maximize2 } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
@@ -29,7 +29,8 @@ const CardHoverActions = React.memo(({
   boardTags,
   onConvertToActionItem,
   onRemoveActionItem,
-  hasActionItem
+  hasActionItem,
+  onExpandCard
 }) => {
   const emojiButtonRef = useRef(null);
   const colorButtonRef = useRef(null);
@@ -171,6 +172,20 @@ const CardHoverActions = React.memo(({
           aria-label="Remove action item"
         >
           <CheckSquare size={16} aria-hidden="true" />
+        </button>
+      )}
+
+      {onExpandCard && (
+        <button
+          className="card-hover-action expand-action"
+          onClick={e => {
+            e.stopPropagation();
+            onExpandCard();
+          }}
+          title="Open card details"
+          aria-label="Open card details"
+        >
+          <Maximize2 size={16} aria-hidden="true" />
         </button>
       )}
 

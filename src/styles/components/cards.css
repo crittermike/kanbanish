@@ -144,6 +144,12 @@
     line-height: 1;
 }
 
+.card-hover-action.expand-action:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+
 /* Card selection styles */
 .card.selected {
     border-color: var(--accent);

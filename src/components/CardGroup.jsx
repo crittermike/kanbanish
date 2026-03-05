@@ -22,7 +22,8 @@ function CardGroup({
   sortByVotes,
   dimmed = false,
   isFiltering = false,
-  matchingCardIds = null
+  matchingCardIds = null,
+  onExpandCard = null
 }) {
   const { showNotification } = useNotification();
   const {
@@ -383,6 +384,7 @@ function CardGroup({
                 columnId={columnId}
                 groupId={groupId}
                 dimmed={isFiltering && matchingCardIds && !matchingCardIds.has(card.id)}
+                onExpandCard={onExpandCard}
               />
             ))
           )}

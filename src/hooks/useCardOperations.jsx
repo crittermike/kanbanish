@@ -312,7 +312,7 @@ export function useCardOperations({
   }, [boardId, columnId, cardId, user?.uid]);
 
   const addReaction = useCallback(async (e, emoji) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
 
     if (!boardId || !user) {
       return;
