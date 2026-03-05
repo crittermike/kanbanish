@@ -1,6 +1,6 @@
 import { ref, set } from 'firebase/database';
-import { useRef, useState, useCallback } from 'react';
-import { X, Clock, Play, Pause, Square, Smile } from 'react-feather';
+import { useRef, useState, useCallback, useMemo } from 'react';
+import { X, Clock, Play, Pause, Square, Smile, ChevronLeft, ChevronRight } from 'react-feather';
 import { useBoardContext } from '../../context/BoardContext';
 import { useCardOperations } from '../../hooks/useCardOperations';
 import { useCardTimer } from '../../hooks/useCardTimer';
@@ -33,7 +33,8 @@ const CardDetailModal = ({
   isOpen,
   onClose,
   cardId,
-  columnId
+  columnId,
+  onNavigateCard
 }) => {
   const modalRef = useRef(null);
   useFocusTrap(modalRef, isOpen, { onClose });
@@ -59,7 +60,8 @@ const CardDetailModal = ({
     presenceData,
     displayName,
     userColor,
-    _showDisplayNames
+    _showDisplayNames,
+    sortByVotes
   } = useBoardContext();
 
   // Look up card data from columns
@@ -138,6 +140,59 @@ const CardDetailModal = ({
       editingDisabled = true;
     }
   }
+  // Pager data
+  const allCardsList = useMemo(() => {
+    if (!columns) return [];
+    const list = [];
+    // Sort columns by ID
+    const sortedCols = Object.entries(columns).sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [colId, colData] of sortedCols) {
+      if (!colData.cards) continue;
+      // Get ungrouped cards
+      const ungrouped = Object.entries(colData.cards)
+        .filter(([_id, data]) => !data.groupId)
+        .map(([id, data]) => ({ id, colId, ...data }));
+      // Get groups
+      const groups = colData.groups
+        ? Object.entries(colData.groups).map(([id, data]) => ({ id, colId, ...data, _isGroup: true }))
+        : [];
+      // Combine and sort (same as Column.jsx getSortedItems)
+      const items = [];
+      if (sortByVotes) {
+        items.push(...[...ungrouped.map(c => ({ type: 'card', data: c })), ...groups.map(g => ({ type: 'group', data: g }))].sort((a, b) => (b.data.votes || 0) - (a.data.votes || 0)));
+      } else {
+        items.push(...[...groups.map(g => ({ type: 'group', data: g })), ...ungrouped.map(c => ({ type: 'card', data: c }))].sort((a, b) => (b.data.created || 0) - (a.data.created || 0)));
+      }
+      // Flatten: ungrouped cards directly, group cards in cardIds order
+      for (const item of items) {
+        if (item.type === 'card') {
+          list.push({ cardId: item.data.id, columnId: colId });
+        } else {
+          // Group: iterate cardIds to get cards in group order
+          const group = item.data;
+          if (group.cardIds && colData.cards) {
+            for (const cId of group.cardIds) {
+              if (colData.cards[cId]) {
+                list.push({ cardId: cId, columnId: colId });
+              }
+            }
+          }
+        }
+      }
+    }
+    return list;
+  }, [columns, sortByVotes]);
+
+  const currentIndex = allCardsList.findIndex(c => c.cardId === cardId && c.columnId === columnId);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < allCardsList.length - 1;
+
+  const handleNavigate = useCallback((direction) => {
+    const targetIndex = currentIndex + direction;
+    if (targetIndex >= 0 && targetIndex < allCardsList.length) {
+      onNavigateCard(allCardsList[targetIndex].cardId, allCardsList[targetIndex].columnId);
+    }
+  }, [currentIndex, allCardsList, onNavigateCard]);
 
   const handleEditStart = useCallback(() => {
     if (editingDisabled) return;
@@ -177,8 +232,12 @@ const CardDetailModal = ({
         e.stopPropagation();
         handleEditSave();
       }
+    } else if (e.key === 'ArrowLeft' && !isEditingContent) {
+      if (hasPrev) handleNavigate(-1);
+    } else if (e.key === 'ArrowRight' && !isEditingContent) {
+      if (hasNext) handleNavigate(1);
     }
-  }, [isEditingContent, handleEditCancel, handleEditSave, onClose]);
+  }, [isEditingContent, handleEditCancel, handleEditSave, onClose, hasPrev, hasNext, handleNavigate]);
 
   const toggleEmojiPicker = (e) => {
     if (interactionsDisabled) return;
@@ -215,6 +274,7 @@ const CardDetailModal = ({
   // Obfuscation check
   const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
 
+
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div
@@ -228,13 +288,37 @@ const CardDetailModal = ({
       >
         <div className="card-detail-header">
           <div className="card-detail-column-badge">{columnTitle}</div>
+          {allCardsList.length > 1 && (
+            <div className="card-detail-pager">
+              <button
+                className="card-detail-pager-btn"
+                onClick={() => handleNavigate(-1)}
+                disabled={!hasPrev}
+                aria-label="Previous card"
+                title="Previous card (←)"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="card-detail-pager-count">
+                {currentIndex + 1} / {allCardsList.length}
+              </span>
+              <button
+                className="card-detail-pager-btn"
+                onClick={() => handleNavigate(1)}
+                disabled={!hasNext}
+                aria-label="Next card"
+                title="Next card (→)"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
           <button className="close-button" onClick={onClose} aria-label="Close" title="Close (Esc)">
             <X size={18} />
           </button>
         </div>
 
         <div className="card-detail-body">
-          <div className="card-detail-main">
             {/* Main Content Area */}
           <section className="card-detail-section">
             <h3 id="card-detail-title" className="visually-hidden">Card Details</h3>
@@ -284,28 +368,16 @@ const CardDetailModal = ({
               )}
             </div>
 
+            {/* Tags (moved inline inside the same section) */}
+            {cardData.tags && cardData.tags.length > 0 && (
+              <div className="card-detail-tags">
+                {cardData.tags.map(tag => (
+                  <span key={tag} className="card-detail-tag">{tag}</span>
+                ))}
+              </div>
+            )}
           </section>
-          {/* Comments Section */}
-          <section className="card-detail-section">
-            <h4 className="card-detail-section-title">Comments ({cardData.comments ? Object.keys(cardData.comments).length : 0})</h4>
-            <div className="card-detail-comments">
-              <Comments
-                comments={cardData.comments}
-                onAddComment={addComment}
-                newComment={newComment}
-                onCommentChange={setNewComment}
-                onEditComment={editComment}
-                onDeleteComment={deleteComment}
-                isCommentAuthor={isCommentAuthor}
-                interactionsDisabled={interactionsDisabled}
-                disabledReason={disabledReason}
-                presenceData={presenceData}
-              />
-            </div>
-          </section>
-        </div>
 
-        <div className="card-detail-sidebar">
           {/* Timer Section */}
           <section className="card-detail-section">
             <h4 className="card-detail-section-title"><Clock size={14} /> Timer</h4>
@@ -401,19 +473,25 @@ const CardDetailModal = ({
             </div>
           </section>
 
-          {/* Tags */}
-          {cardData.tags && cardData.tags.length > 0 && (
-            <section className="card-detail-section">
-              <h4 className="card-detail-section-title">Tags</h4>
-              <div className="card-detail-tags">
-                {cardData.tags.map(tag => (
-                  <span key={tag} className="card-detail-tag">{tag}</span>
-                ))}
-              </div>
-            </section>
-          )}
+          {/* Comments Section (moved to end) */}
+          <section className="card-detail-section">
+            <h4 className="card-detail-section-title">Comments ({cardData.comments ? Object.keys(cardData.comments).length : 0})</h4>
+            <div className="card-detail-comments">
+              <Comments
+                comments={cardData.comments}
+                onAddComment={addComment}
+                newComment={newComment}
+                onCommentChange={setNewComment}
+                onEditComment={editComment}
+                onDeleteComment={deleteComment}
+                isCommentAuthor={isCommentAuthor}
+                interactionsDisabled={interactionsDisabled}
+                disabledReason={disabledReason}
+                presenceData={presenceData}
+              />
+            </div>
+          </section>
         </div>
-      </div>
       </div>
 
       {/* Emoji Picker Popover */}

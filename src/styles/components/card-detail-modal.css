@@ -1,7 +1,7 @@
 /* src/styles/components/card-detail-modal.css */
 
 .card-detail-modal {
-  max-width: 900px;
+  max-width: 600px;
   width: 95%;
   max-height: 90vh;
   display: flex;
@@ -69,31 +69,52 @@
   line-height: 1.5;
 }
 
+/* Card Pager */
+.card-detail-pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  margin-right: var(--space-sm, 10px);
+}
+
+.card-detail-pager-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #8b949e);
+  cursor: pointer;
+  transition: all var(--transition-speed, 0.15s) var(--transition-ease);
+}
+
+.card-detail-pager-btn:hover:not(:disabled) {
+  background-color: var(--hover-bg, #1e2430);
+  color: var(--text-color, #e1e4e8);
+}
+
+.card-detail-pager-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.card-detail-pager-count {
+  font-size: var(--font-size-xs, 11px);
+  color: var(--text-muted, #8b949e);
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: center;
+}
+
 /* Body */
 .card-detail-body {
   flex: 1;
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  overscroll-behavior: contain;
-}
-
-.card-detail-main {
-  flex: 1;
-  min-width: 0;
   overflow-y: auto;
   padding: var(--space-md, 16px) var(--space-lg, 24px) var(--space-lg, 24px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md, 16px);
-}
-
-.card-detail-sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding: var(--space-md, 16px) var(--space-lg, 24px);
-  border-left: 1px solid var(--border-subtle, rgba(48, 54, 61, 0.3));
   display: flex;
   flex-direction: column;
   gap: var(--space-md, 16px);
@@ -191,7 +212,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: var(--space-xs, 6px);
+  margin-top: var(--space-sm, 10px);
+  padding-left: 20px;
 }
 
 .card-detail-tag {
@@ -324,9 +346,9 @@
 /* Interactions — inline row */
 .card-detail-interactions {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-md, 16px);
-  align-items: stretch;
+  flex-direction: row;
+  gap: var(--space-lg, 24px);
+  align-items: flex-start;
 }
 
 .card-detail-votes {
@@ -418,17 +440,7 @@
     overflow-y: auto;
   }
 
-  .card-detail-main,
-  .card-detail-sidebar {
-    width: 100%;
-    overflow: visible;
-    padding: var(--space-md, 16px);
-  }
 
-  .card-detail-sidebar {
-    border-left: none;
-    border-top: 1px solid var(--border-subtle, rgba(48, 54, 61, 0.3));
-  }
   
   .card-detail-timer {
     flex-wrap: wrap;

@@ -342,15 +342,16 @@ function Board({ onGoHome }) {
         onClose={() => setIsActionItemsPanelOpen(false)}
       />
 
-{/* Card Detail Modal */}
-{expandedCard && (
-  <CardDetailModal
-    isOpen={true}
-    onClose={() => setExpandedCard(null)}
-    cardId={expandedCard.cardId}
-    columnId={expandedCard.columnId}
-  />
-)}
+      {/* Card Detail Modal */}
+      {expandedCard && (
+        <CardDetailModal
+          isOpen={true}
+          onClose={() => setExpandedCard(null)}
+          cardId={expandedCard.cardId}
+          columnId={expandedCard.columnId}
+          onNavigateCard={(cardId, columnId) => setExpandedCard({ cardId, columnId })}
+        />
+      )}
 
       <DisplayNamePrompt />
 
