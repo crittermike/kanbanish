@@ -144,13 +144,9 @@
     line-height: 1;
 }
 
-.card-hover-action.expand-action {
-    color: var(--accent, #0052cc);
-}
-
 .card-hover-action.expand-action:hover {
-    background-color: var(--accent-transparent, rgba(0, 82, 204, 0.1));
-    color: var(--accent, #0052cc);
+  background-color: var(--hover-bg);
+  color: var(--text-color);
 }
 
 
