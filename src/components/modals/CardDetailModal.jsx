@@ -234,7 +234,8 @@ const CardDetailModal = ({
         </div>
 
         <div className="card-detail-body">
-          {/* Main Content Area */}
+          <div className="card-detail-main">
+            {/* Main Content Area */}
           <section className="card-detail-section">
             <h3 id="card-detail-title" className="visually-hidden">Card Details</h3>
 
@@ -283,16 +284,28 @@ const CardDetailModal = ({
               )}
             </div>
 
-            {/* Tags */}
-            {cardData.tags && cardData.tags.length > 0 && (
-              <div className="card-detail-tags">
-                {cardData.tags.map(tag => (
-                  <span key={tag} className="card-detail-tag">{tag}</span>
-                ))}
-              </div>
-            )}
           </section>
+          {/* Comments Section */}
+          <section className="card-detail-section">
+            <h4 className="card-detail-section-title">Comments ({cardData.comments ? Object.keys(cardData.comments).length : 0})</h4>
+            <div className="card-detail-comments">
+              <Comments
+                comments={cardData.comments}
+                onAddComment={addComment}
+                newComment={newComment}
+                onCommentChange={setNewComment}
+                onEditComment={editComment}
+                onDeleteComment={deleteComment}
+                isCommentAuthor={isCommentAuthor}
+                interactionsDisabled={interactionsDisabled}
+                disabledReason={disabledReason}
+                presenceData={presenceData}
+              />
+            </div>
+          </section>
+        </div>
 
+        <div className="card-detail-sidebar">
           {/* Timer Section */}
           <section className="card-detail-section">
             <h4 className="card-detail-section-title"><Clock size={14} /> Timer</h4>
@@ -388,25 +401,19 @@ const CardDetailModal = ({
             </div>
           </section>
 
-          {/* Comments Section */}
-          <section className="card-detail-section">
-            <h4 className="card-detail-section-title">Comments ({cardData.comments ? Object.keys(cardData.comments).length : 0})</h4>
-            <div className="card-detail-comments">
-              <Comments
-                comments={cardData.comments}
-                onAddComment={addComment}
-                newComment={newComment}
-                onCommentChange={setNewComment}
-                onEditComment={editComment}
-                onDeleteComment={deleteComment}
-                isCommentAuthor={isCommentAuthor}
-                interactionsDisabled={interactionsDisabled}
-                disabledReason={disabledReason}
-                presenceData={presenceData}
-              />
-            </div>
-          </section>
+          {/* Tags */}
+          {cardData.tags && cardData.tags.length > 0 && (
+            <section className="card-detail-section">
+              <h4 className="card-detail-section-title">Tags</h4>
+              <div className="card-detail-tags">
+                {cardData.tags.map(tag => (
+                  <span key={tag} className="card-detail-tag">{tag}</span>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
+      </div>
       </div>
 
       {/* Emoji Picker Popover */}
