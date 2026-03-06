@@ -147,16 +147,15 @@ const CardHoverActions = React.memo(({
         </>
       )}
       
-      {!hideAddButton && !hasActionItem && onConvertToActionItem && (
+      {!hasActionItem && onConvertToActionItem && (
         <button
-          className={`card-hover-action action-item-action ${useDisabledStyling ? 'disabled' : ''}`}
-          onClick={disabled ? undefined : e => {
+          className="card-hover-action action-item-action"
+          onClick={e => {
             e.stopPropagation();
             onConvertToActionItem();
           }}
-          title={disabled ? getReactionDisabledMessage(disabledReason) : 'Convert to action item'}
+          title="Convert to action item"
           aria-label="Convert to action item"
-          disabled={useDisabledStyling}
         >
           <CheckSquare size={16} aria-hidden="true" />
         </button>
