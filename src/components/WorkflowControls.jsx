@@ -13,10 +13,9 @@ const WorkflowControls = () => {
   const {
     workflowPhase,
     initialWorkflowPhase,
+    skipRevealPhase,
     votesPerUser,
-    updateVotesPerUser,
     startGroupingPhase,
-    startInteractionsPhase,
     startInteractionRevealPhase,
     startResultsPhase,
     startPollPhase,
@@ -40,8 +39,12 @@ const WorkflowControls = () => {
   };
 
   const handleVoteLimitConfirm = (newVotesPerUser) => {
-    updateVotesPerUser(newVotesPerUser);
-    startInteractionsPhase();
+    // Combine vote limit and phase transition into a single settings update
+    // to avoid a race condition where the phase transition overwrites the vote limit
+    updateBoardSettings({
+      votesPerUser: newVotesPerUser,
+      workflowPhase: WORKFLOW_PHASES.INTERACTIONS
+    });
     showNotification(`Voting phase started - each user can cast ${newVotesPerUser} votes`);
   };
 
@@ -166,10 +169,10 @@ const WorkflowControls = () => {
             <div className="phase-controls">
               <button
                 className="btn primary-btn"
-                onClick={handleRevealInteractions}
+                onClick={skipRevealPhase ? handleStartResults : handleRevealInteractions}
               >
                 <Eye size={16} />
-                Reveal Votes
+                {skipRevealPhase ? 'View Results' : 'Reveal Votes'}
               </button>
               <button
                 className="btn secondary-btn"

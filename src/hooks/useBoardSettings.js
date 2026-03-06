@@ -30,6 +30,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
     workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+    skipRevealPhase,
     backgroundId, customBackgroundCss
   } = settingsState;
 
@@ -37,6 +38,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+    setSkipRevealPhase,
     setBackgroundId, setCustomBackgroundCss
   } = setters;
 
@@ -71,6 +73,9 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.actionItemsEnabled !== undefined) {
       setActionItemsEnabled(newSettings.actionItemsEnabled);
     }
+    if (newSettings.skipRevealPhase !== undefined) {
+      setSkipRevealPhase(newSettings.skipRevealPhase);
+    }
     if (newSettings.backgroundId !== undefined) {
       setBackgroundId(newSettings.backgroundId);
     }
@@ -81,6 +86,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+    setSkipRevealPhase,
     setBackgroundId, setCustomBackgroundCss
   ]);
 
@@ -99,6 +105,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         resultsViewIndex,
         showDisplayNames,
         actionItemsEnabled,
+        skipRevealPhase,
         backgroundId,
         customBackgroundCss,
         ...newSettings
@@ -119,6 +126,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
     resultsViewIndex, showDisplayNames, actionItemsEnabled,
+    skipRevealPhase,
     backgroundId, customBackgroundCss, applySettingsLocally
   ]);
 

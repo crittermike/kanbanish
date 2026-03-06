@@ -17,7 +17,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  */
 export const useWorkflow = ({
   updateBoardSettings, columns, workflowPhase,
-  resultsViewIndex, removeAllGrouping
+  resultsViewIndex, removeAllGrouping, skipRevealPhase
 }) => {
   const startGroupingPhase = useCallback(() => {
     updateBoardSettings({
@@ -126,7 +126,7 @@ export const useWorkflow = ({
         break;
       case WORKFLOW_PHASES.RESULTS:
         updateBoardSettings({
-          workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
+          workflowPhase: skipRevealPhase ? WORKFLOW_PHASES.INTERACTIONS : WORKFLOW_PHASES.INTERACTION_REVEAL
         });
         break;
       case WORKFLOW_PHASES.POLL:
@@ -143,7 +143,7 @@ export const useWorkflow = ({
         // If we're in CREATION or any unknown phase, do nothing
         break;
     }
-  }, [workflowPhase, columns, updateBoardSettings, removeAllGrouping]);
+  }, [workflowPhase, columns, updateBoardSettings, removeAllGrouping, skipRevealPhase]);
 
   // Get sorted items (cards and groups) for results view
   const getSortedItemsForResults = useCallback(() => {

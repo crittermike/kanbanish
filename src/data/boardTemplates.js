@@ -275,6 +275,7 @@ const BOARD_TEMPLATES = [
     defaultSettings: {
       retrospectiveMode: true,
       multipleVotesAllowed: true,
+      skipRevealPhase: true,
       workflowPhase: WORKFLOW_PHASES.CREATION
     }
   }
