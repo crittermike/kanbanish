@@ -3,6 +3,8 @@ import {
   WORKFLOW_PHASES,
   isGroupingAllowed,
   areInteractionsAllowed,
+  areReactionsAllowed,
+  areReactionsVisible,
   areInteractionsVisible,
   areReviewToolsVisible,
   areCommentsAllowed,
@@ -127,6 +129,27 @@ describe('areInteractionsVisible', () => {
   });
 });
 
+describe('areReactionsVisible', () => {
+  it('returns true when retrospective mode is off', () => {
+    ALL_PHASES.forEach(phase => {
+      expect(areReactionsVisible(phase)).toBe(true);
+      expect(areReactionsVisible(phase, false)).toBe(true);
+    });
+  });
+
+  it('returns true throughout revealed retro review phases', () => {
+    expect(areReactionsVisible(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
+    expect(areReactionsVisible(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
+    expect(areReactionsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+    expect(areReactionsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('returns false before retro cards are revealed', () => {
+    expect(areReactionsVisible(WORKFLOW_PHASES.CREATION, true)).toBe(false);
+    expect(areReactionsVisible(WORKFLOW_PHASES.HEALTH_CHECK, true)).toBe(false);
+  });
+});
+
 describe('areReviewToolsVisible', () => {
   it('returns true when retrospective mode is off', () => {
     ALL_PHASES.forEach(phase => {
@@ -157,6 +180,27 @@ describe('areReviewToolsVisible', () => {
   });
 });
 
+describe('areReactionsAllowed', () => {
+  it('matches revealed review phases in normal mode', () => {
+    ALL_PHASES.forEach(phase => {
+      expect(areReactionsAllowed(phase)).toBe(true);
+      expect(areReactionsAllowed(phase, false)).toBe(true);
+    });
+  });
+
+  it('allows reactions throughout revealed retro review phases', () => {
+    expect(areReactionsAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
+    expect(areReactionsAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
+    expect(areReactionsAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+    expect(areReactionsAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('disallows reactions before cards are revealed', () => {
+    expect(areReactionsAllowed(WORKFLOW_PHASES.CREATION, true)).toBe(false);
+    expect(areReactionsAllowed(WORKFLOW_PHASES.HEALTH_CHECK, true)).toBe(false);
+  });
+});
+
 describe('areCommentsAllowed', () => {
   it('matches review tool visibility in normal mode', () => {
     ALL_PHASES.forEach(phase => {
@@ -177,6 +221,7 @@ describe('areCommentsAllowed', () => {
     expect(areCommentsAllowed(WORKFLOW_PHASES.HEALTH_CHECK, true)).toBe(false);
   });
 });
+
 
 describe('areOthersInteractionsVisible', () => {
   it('returns true when retrospective mode is off', () => {

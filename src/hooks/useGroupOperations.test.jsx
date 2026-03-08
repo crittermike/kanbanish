@@ -1,5 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
+import { remove, set } from 'firebase/database';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { areReactionsAllowed } from '../utils/workflowUtils';
 import { useGroupOperations } from './useGroupOperations';
 
 // Mock Firebase
@@ -19,8 +21,7 @@ vi.mock('../utils/ids', () => ({
 }));
 
 vi.mock('../utils/workflowUtils', () => ({
-  areInteractionsAllowed: vi.fn(() => true),
-  areInteractionsRevealed: vi.fn(() => false),
+  areReactionsAllowed: vi.fn(() => true),
   areCommentsAllowed: vi.fn(() => true)
 }));
 const { mockShowNotification } = vi.hoisted(() => ({
@@ -56,6 +57,7 @@ const mockProps = {
 describe('useGroupOperations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    areReactionsAllowed.mockReturnValue(true);
   });
 
   describe('Initial State', () => {
@@ -86,6 +88,45 @@ describe('useGroupOperations', () => {
       const { result } = renderHook(() => useGroupOperations(propsWithoutReactions));
 
       expect(result.current.hasUserReactedWithEmoji('👍')).toBe(false);
+    });
+
+    it('shows a revealed-cards notification when reactions are not available yet', async () => {
+      areReactionsAllowed.mockReturnValue(false);
+      const { result } = renderHook(() => useGroupOperations(mockProps));
+
+      await act(async () => {
+        await result.current.addReaction({ stopPropagation: vi.fn() }, '👍');
+      });
+
+      expect(mockShowNotification).toHaveBeenCalledWith('Reactions are disabled until cards are revealed');
+    });
+
+    it('allows reactions during review phases', async () => {
+      const props = {
+        ...mockProps,
+        retrospectiveMode: true,
+        workflowPhase: 'RESULTS',
+        groupData: {}
+      };
+      const { result } = renderHook(() => useGroupOperations(props));
+
+      await act(async () => {
+        await result.current.addReaction({ stopPropagation: vi.fn() }, '👍');
+      });
+
+      expect(set).toHaveBeenCalled();
+      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
+    });
+
+    it('removes an existing reaction', async () => {
+      const { result } = renderHook(() => useGroupOperations(mockProps));
+
+      await act(async () => {
+        await result.current.addReaction({ stopPropagation: vi.fn() }, '👍');
+      });
+
+      expect(remove).toHaveBeenCalled();
+      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
     });
   });
 

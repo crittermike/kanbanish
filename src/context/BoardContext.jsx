@@ -45,6 +45,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
   const [retrospectiveMode, setRetrospectiveMode] = useState(false); // Retrospective mode - default to disabled (cards are visible)
   const [showDisplayNames, setShowDisplayNames] = useState(false); // Default to off
+  const [detailNavigationHintsDismissed, setDetailNavigationHintsDismissed] = useState(false);
 
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
@@ -178,6 +179,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (boardData.settings.showDisplayNames !== undefined) {
               setShowDisplayNames(boardData.settings.showDisplayNames);
             }
+            setDetailNavigationHintsDismissed(!!boardData.settings.detailNavigationHintsDismissed);
             if (boardData.settings.actionItemsEnabled !== undefined) {
               setActionItemsEnabled(boardData.settings.actionItemsEnabled);
             }
@@ -190,6 +192,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             if (boardData.settings.customBackgroundSize !== undefined) {
               setCustomBackgroundSizeState(boardData.settings.customBackgroundSize);
             }
+          } else {
+            setDetailNavigationHintsDismissed(false);
           }
 
           // Load global timer data
@@ -333,13 +337,13 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
+      workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed, actionItemsEnabled,
       backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed, setActionItemsEnabled,
       setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState
     }
   });
@@ -475,6 +479,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
           resultsViewIndex: 0, // Default to first result
           showDisplayNames: false, // Default to off
+          detailNavigationHintsDismissed: false,
           // Apply any overrides parsed from URL (validated/whitelisted)
           ...sanitizedOverrides
         }
@@ -561,7 +566,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
-    showDisplayNames, updateShowDisplayNames,
+    showDisplayNames, updateShowDisplayNames, detailNavigationHintsDismissed,
     boardRef, createNewBoard, openExistingBoard, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode,
       updateDarkMode,
@@ -639,7 +644,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     setMultipleVotesAllowed, updateMultipleVotesAllowed, votesPerUser,
     setVotesPerUser, updateVotesPerUser, retrospectiveMode,
     setRetrospectiveMode, updateRetrospectiveMode, updateBoardSettings,
-    showDisplayNames, updateShowDisplayNames,
+    showDisplayNames, updateShowDisplayNames, detailNavigationHintsDismissed,
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
     hideCardAuthorship,

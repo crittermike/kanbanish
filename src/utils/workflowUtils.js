@@ -29,7 +29,7 @@ export const isGroupingAllowed = (workflowPhase, retrospectiveMode = false) => {
 };
 
 /**
- * Determines if interactions (voting, comments, reactions) are allowed
+ * Determines if vote interactions are allowed.
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
  * @returns {boolean}
@@ -39,6 +39,26 @@ export const areInteractionsAllowed = (workflowPhase, retrospectiveMode = false)
     return true;
   } // Allow when retrospective mode is disabled (normal behavior)
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS;
+};
+
+/**
+ * Determines if reactions should be visible.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReactionsVisible = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
+};
+
+/**
+ * Determines if reactions can be added or removed.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReactionsAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
 };
 
 /**

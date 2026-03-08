@@ -160,7 +160,7 @@ describe('Card Comment Revealing and Freezing', () => {
     expect(screen.getByText('My comment')).toBeInTheDocument();
   });
 
-  it('shows emoji reactions without disabled styling when interactions are frozen', () => {
+  it('keeps emoji reactions interactive when voting is frozen', () => {
     const frozenInteractionsContext = {
       boardId: 'test-board',
       user: { uid: 'user123' },
@@ -185,15 +185,10 @@ describe('Card Comment Revealing and Freezing', () => {
     // Find the emoji reaction
     const emojiReaction = screen.getByTestId('emoji-reaction');
 
-    // Should not have disabled class when frozen (should look normal but not be clickable)
+    // Reactions should stay enabled during review.
     expect(emojiReaction).not.toHaveClass('disabled');
-
-    // Should have a tooltip indicating it's frozen
-    expect(emojiReaction).toHaveAttribute('title', 'Interactions are now frozen - no more changes allowed');
-
-    // Add reaction button should be hidden when interactions are frozen
-    const addReactionButton = screen.queryByRole('button', { name: '+' });
-    expect(addReactionButton).not.toBeInTheDocument();
+    expect(emojiReaction).toHaveAttribute('title', 'Click to remove your reaction');
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
   });
 
   it('allows opening comments during grouping for revealed cards', () => {
@@ -212,6 +207,7 @@ describe('Card Comment Revealing and Freezing', () => {
     const commentsButton = screen.getByTitle('Toggle comments');
     fireEvent.click(commentsButton);
 
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByText('My comment')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Add a comment...')).toBeInTheDocument();
   });

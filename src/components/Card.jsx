@@ -13,6 +13,8 @@ import {
   isGroupingAllowed,
   areInteractionsAllowed,
   areInteractionsVisible,
+  areReactionsAllowed,
+  areReactionsVisible,
   areOthersInteractionsVisible,
   areReviewToolsVisible,
   isCardMetadataEditingAllowed,
@@ -260,8 +262,9 @@ function Card({
   const reviewToolsVisible = !groupId && areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = !groupId && areCommentsAllowed(workflowPhase, retrospectiveMode);
   const metadataEditingAllowed = !groupId && isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
-  const reactionsVisible = !groupId && areInteractionsVisible(workflowPhase, retrospectiveMode);
-  const reactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionsVisible = !groupId && areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const showCommentBadge = !groupId && commentCount > 0 && reviewToolsVisible;
 
   const handleConvertToActionItem = () => {
@@ -423,7 +426,7 @@ function Card({
                 hasUserReactedWithEmoji={hasUserReactedWithEmoji}
                 commentCount={Object.keys(displayCardData.comments || {}).length}
                 reactionDisabled={reactionsDisabled}
-                reactionDisabledReason={disabledReason}
+                reactionDisabledReason={reactionDisabledReason}
                 metadataDisabled={!metadataEditingAllowed}
                 showEmojiAction={reactionsVisible}
                 showMetadataActions={metadataEditingAllowed}
@@ -492,7 +495,7 @@ function Card({
               userId={user?.uid}
               addReaction={addReaction}
               disabled={reactionsDisabled}
-              disabledReason={disabledReason}
+              disabledReason={reactionDisabledReason}
             />
           )}
 

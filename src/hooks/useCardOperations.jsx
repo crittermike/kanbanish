@@ -5,6 +5,7 @@ import { database } from '../utils/firebase';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
 import {
   areCommentsAllowed,
+  areReactionsAllowed,
   areInteractionsRevealed,
   isCardEditingAllowed,
   isCardMetadataEditingAllowed
@@ -59,6 +60,10 @@ export function useCardOperations({
 
   const isCommentingAllowed = useCallback(() => {
     return areCommentsAllowed(workflowPhase, retrospectiveMode);
+  }, [workflowPhase, retrospectiveMode]);
+
+  const isReactionAllowed = useCallback(() => {
+    return areReactionsAllowed(workflowPhase, retrospectiveMode);
   }, [workflowPhase, retrospectiveMode]);
 
   const isMetadataEditingAllowed = useCallback(() => {
@@ -331,13 +336,8 @@ export function useCardOperations({
       return;
     }
 
-    // Check if interactions are disabled due to reveal mode
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Reactions are disabled until cards are revealed');
-      }
+    if (!isReactionAllowed()) {
+      showNotification('Reactions are disabled until cards are revealed');
       return;
     }
 
@@ -359,7 +359,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error managing reaction:', error);
     }
-  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isReactionAllowed]);
 
   // Comment operations
   const addComment = useCallback(async () => {

@@ -16,6 +16,8 @@ import {
   areInteractionsVisible,
   areOthersInteractionsVisible,
   areInteractionsAllowed,
+  areReactionsAllowed,
+  areReactionsVisible,
   areReviewToolsVisible,
   isGroupingAllowed
 } from '../utils/workflowUtils';
@@ -81,11 +83,14 @@ function CardGroup({
   // Create filtered group data for display
   const displayGroupData = filterVisibleInteractionData(groupData, user?.uid, shouldHideOthersInteractions);
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
-  const interactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const votingDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionsVisible = areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const commentsVisible = areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
-  const hideReactionComposer = shouldHideFeature(disabledReason);
-  const useReactionDisabledStyling = shouldUseDisabledStyling(interactionsDisabled, disabledReason);
+  const hideReactionComposer = !reactionsVisible || shouldHideFeature(reactionDisabledReason);
+  const useReactionDisabledStyling = shouldUseDisabledStyling(reactionsDisabled, reactionDisabledReason);
 
   // Set up drop target for cards to be added to this group
   const [{ isOver }, drop] = useDrop(() => ({
@@ -249,7 +254,7 @@ function CardGroup({
               onUpvote={handleUpvoteGroup}
               onDownvote={handleDownvoteGroup}
               showDownvoteButton={downvotingEnabled}
-              disabled={interactionsDisabled}
+              disabled={votingDisabled}
               disabledReason={disabledReason}
             />
           )}
@@ -276,24 +281,24 @@ function CardGroup({
       </div>
 
       {/* Group Interactions Section - Comments and Reactions buttons */}
-      {(areInteractionsVisible(workflowPhase, retrospectiveMode) || commentsVisible) && (
+      {(reactionsVisible || commentsVisible) && (
         <div className="group-interactions-section">
           <div className="group-interactions-left">
             {/* Existing Group Reactions - inline like cards */}
-            {areInteractionsVisible(workflowPhase, retrospectiveMode) && displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
+            {reactionsVisible && displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
               if (reactionData.count <= 0) return null;
               const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
               return (
                 <button 
                   key={emoji} 
-                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''} ${useReactionDisabledStyling ? 'disabled' : ''} ${disabledReason === 'frozen' ? 'frozen' : ''}`}
-                  onClick={interactionsDisabled ? undefined : e => {
+                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''} ${useReactionDisabledStyling ? 'disabled' : ''} ${reactionDisabledReason === 'frozen' ? 'frozen' : ''}`}
+                  onClick={reactionsDisabled ? undefined : e => {
                     e.stopPropagation();
                     groupOperations.addReaction(e, emoji);
                   }}
-                  title={interactionsDisabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
-                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'vote' : 'votes'}${hasUserReacted ? ', you reacted' : ''}`}
-                  disabled={interactionsDisabled}
+                  title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
+                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'reaction' : 'reactions'}${hasUserReacted ? ', you reacted' : ''}`}
+                  disabled={reactionsDisabled}
                 >
                   {emoji} {reactionData.count}
                 </button>
@@ -301,10 +306,10 @@ function CardGroup({
             })}
             
             {/* Group Reactions Button - add button like cards */}
-            {areInteractionsVisible(workflowPhase, retrospectiveMode) && !hideReactionComposer && (
+            {reactionsVisible && !hideReactionComposer && (
               <button
                 className={`interaction-btn reactions-btn ${useReactionDisabledStyling ? 'disabled' : ''}`}
-                onClick={interactionsDisabled ? undefined : e => {
+                onClick={reactionsDisabled ? undefined : e => {
                   e.stopPropagation();
                   if (groupOperations.emojiButtonRef?.current) {
                     const buttonRect = groupOperations.emojiButtonRef.current.getBoundingClientRect();
@@ -315,7 +320,7 @@ function CardGroup({
                   }
                   groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
                 }}
-                title={interactionsDisabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
+                title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
                 aria-label="Add reaction to group"
                 ref={groupOperations.emojiButtonRef}
                 disabled={useReactionDisabledStyling}

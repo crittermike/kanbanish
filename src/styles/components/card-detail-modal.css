@@ -161,12 +161,12 @@
 .card-detail-toolbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-bottom: var(--space-sm, 10px);
 }
 
-.card-detail-shortcuts,
-.card-detail-phase-note {
+.card-detail-shortcuts {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -175,6 +175,26 @@
   font-size: var(--font-size-xs, 11px);
   color: var(--text-muted, #8b949e);
   background-color: var(--hover-bg, #1e2430);
+}
+
+.card-detail-toolbar-dismiss {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-round, 100px);
+  background-color: transparent;
+  color: var(--text-muted, #8b949e);
+  cursor: pointer;
+  transition: all var(--transition-speed, 0.15s) var(--transition-ease);
+}
+
+.card-detail-toolbar-dismiss:hover {
+  background-color: var(--hover-bg, #1e2430);
+  color: var(--text-color, #e1e4e8);
 }
 
 /* Content Area */
@@ -531,6 +551,11 @@
   .card-detail-review-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .card-detail-toolbar-dismiss {
+    margin-left: 0;
+    align-self: flex-end;
   }
 
 

@@ -1,9 +1,8 @@
 import { ref, set } from 'firebase/database';
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { X, Clock, Play, Pause, Square, Smile, ChevronLeft, ChevronRight, Droplet, Tag, CheckSquare } from 'react-feather';
+import { X, Clock, Smile, ChevronLeft, ChevronRight, Droplet, Tag, CheckSquare } from 'react-feather';
 import { useBoardContext } from '../../context/BoardContext';
 import { useCardOperations } from '../../hooks/useCardOperations';
-import { useCardTimer } from '../../hooks/useCardTimer';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { database } from '../../utils/firebase';
 import {
@@ -15,6 +14,8 @@ import {
   areInteractionsAllowed,
   areInteractionsVisible,
   areOthersInteractionsVisible,
+  areReactionsAllowed,
+  areReactionsVisible,
   areReviewToolsVisible,
   isCardMetadataEditingAllowed,
   isCardEditingAllowed,
@@ -23,18 +24,12 @@ import {
 import CardColorPicker from '../CardColorPicker';
 import CardReactions from '../CardReactions';
 import CardTagPicker from '../CardTagPicker';
+import CardTimerControls from '../CardTimerControls';
 import Comments from '../Comments';
 import EmojiPicker from '../EmojiPicker';
 import MarkdownContent from '../MarkdownContent';
 import VotingControls from '../VotingControls';
 import '../../styles/components/card-detail-modal.css';
-
-const formatTime = (seconds) => {
-  if (seconds == null) return '00:00';
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-};
 
 const CardDetailModal = ({
   isOpen,
@@ -69,7 +64,9 @@ const CardDetailModal = ({
     presenceData,
     displayName,
     userColor,
-    sortByVotes
+    sortByVotes,
+    detailNavigationHintsDismissed,
+    updateBoardSettings
   } = useBoardContext();
 
   // Look up card data from columns
@@ -116,15 +113,6 @@ const CardDetailModal = ({
     userColor
   });
 
-  // Card timer hook
-  const cardTimer = useCardTimer({
-    boardId,
-    columnId,
-    cardId,
-    timerData: cardData?.timer,
-    user
-  });
-
   // Local editing state for the modal (independent from Card.jsx inline editing)
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editContent, setEditContent] = useState('');
@@ -138,6 +126,9 @@ const CardDetailModal = ({
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
   const interactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
   const interactionsVisible = areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsVisible = areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const reviewToolsVisible = areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
   const metadataEditingAllowed = isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
@@ -269,7 +260,7 @@ const CardDetailModal = ({
   }, [isEditingContent, handleEditCancel, handleEditSave, onClose, hasPrev, hasNext, handleNavigate]);
 
   const toggleEmojiPicker = (e) => {
-    if (interactionsDisabled) return;
+    if (reactionsDisabled) return;
     const rect = e.currentTarget.getBoundingClientRect();
     setEmojiPickerPosition({
       top: rect.bottom + window.scrollY + 8,
@@ -313,15 +304,12 @@ const CardDetailModal = ({
     setShowEmojiPicker(false);
   };
 
-  if (!isOpen || !cardData) return null;
+  const dismissNavigationHints = useCallback((e) => {
+    e.stopPropagation();
+    updateBoardSettings({ detailNavigationHintsDismissed: true });
+  }, [updateBoardSettings]);
 
-  // Timer derived values
-  const { startCardTimer, pauseCardTimer, resumeCardTimer, resetCardTimer, remainingSeconds, isRunning, isPaused, hasTimer } = cardTimer;
-  const timerClass = [hasTimer && isRunning ? 'active' : '', hasTimer && remainingSeconds !== null && remainingSeconds <= 30 && remainingSeconds > 0 ? 'warning' : remainingSeconds === 0 ? 'expired' : ''].filter(Boolean).join(' ');
-  const totalDuration = cardData.timer?.duration || 0;
-  const progressPercent = totalDuration > 0 && remainingSeconds !== null
-    ? Math.max(0, 100 - (remainingSeconds / totalDuration) * 100)
-    : 0;
+  if (!isOpen || !cardData) return null;
 
   // Action items
   const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
@@ -336,6 +324,7 @@ const CardDetailModal = ({
   const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
   const reviewCommentCount = Object.keys(displayCardData.comments || {}).length;
   const reviewCardListSize = allCardsList.length;
+  const showNavigationHints = reviewCardListSize > 1 && !detailNavigationHintsDismissed;
 
   const handleConvertToActionItem = () => {
     if (!createActionItem || !cardData) {
@@ -406,18 +395,19 @@ const CardDetailModal = ({
         <div className="card-detail-body">
           <section className="card-detail-section">
             <h3 id="card-detail-title" className="visually-hidden">Card Details</h3>
-            <div className="card-detail-toolbar">
-              {reviewCardListSize > 1 && (
+            {showNavigationHints && (
+              <div className="card-detail-toolbar">
                 <span className="card-detail-shortcuts">Use ← and → to review cards</span>
-              )}
-              {retrospectiveMode && (
-                <span className="card-detail-phase-note">
-                  {interactionsVisible
-                    ? (interactionsDisabled ? 'Voting is frozen for review' : 'Voting and reactions are open')
-                    : 'Review details stay available while voting is hidden'}
-                </span>
-              )}
-            </div>
+                <button
+                  className="card-detail-toolbar-dismiss"
+                  onClick={dismissNavigationHints}
+                  aria-label="Dismiss review tips"
+                  title="Dismiss review tips for this board"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
 
             <div
               className="card-detail-content"
@@ -515,48 +505,13 @@ const CardDetailModal = ({
           {/* Timer Section */}
           <section className="card-detail-section">
             <h4 className="card-detail-section-title"><Clock size={14} /> Timer</h4>
-            <div className="card-detail-timer">
-              <div className="card-detail-timer-display-wrapper">
-                <div className={`card-detail-timer-display ${timerClass}`}>
-                  {formatTime(remainingSeconds)}
-                </div>
-
-                <div className="card-detail-timer-presets">
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(60)} disabled={isRunning && !isPaused}>1m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(180)} disabled={isRunning && !isPaused}>3m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(300)} disabled={isRunning && !isPaused}>5m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(600)} disabled={isRunning && !isPaused}>10m</button>
-                </div>
-              </div>
-
-              <div className="card-detail-timer-controls">
-                {hasTimer && isRunning && (
-                  <button className="card-detail-timer-btn icon-only" onClick={pauseCardTimer} title="Pause">
-                    <Pause size={16} />
-                  </button>
-                )}
-                {hasTimer && isPaused && (
-                  <button className="card-detail-timer-btn icon-only" onClick={resumeCardTimer} title="Resume">
-                    <Play size={16} />
-                  </button>
-                )}
-                {hasTimer && (
-                  <button className="card-detail-timer-btn icon-only" onClick={resetCardTimer} title="Reset">
-                    <Square size={16} />
-                  </button>
-                )}
-              </div>
-
-              {/* Progress Bar */}
-              {hasTimer && (
-                <div className="card-detail-timer-progress">
-                  <div
-                    className={`card-detail-timer-progress-bar ${timerClass}`}
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              )}
-            </div>
+            <CardTimerControls
+              boardId={boardId}
+              columnId={columnId}
+              cardId={cardId}
+              timerData={cardData.timer}
+              user={user}
+            />
           </section>
 
           {/* Voting & Reactions */}
@@ -582,7 +537,7 @@ const CardDetailModal = ({
               </div>
             ) : null}
 
-            {interactionsVisible ? (
+            {reactionsVisible ? (
               <div className="card-detail-reactions-container">
                 <h4 className="card-detail-section-title">Reactions</h4>
                 <div className="card-detail-reactions-row">
@@ -590,16 +545,17 @@ const CardDetailModal = ({
                     reactions={displayCardData.reactions}
                     userId={user?.uid}
                     addReaction={addReaction}
-                    disabled={interactionsDisabled}
-                    disabledReason={disabledReason}
+                    disabled={reactionsDisabled}
+                    disabledReason={reactionDisabledReason}
                   />
                   {!displayCardData.reactions || Object.keys(displayCardData.reactions).length === 0 ? (
                     <span className="card-detail-reactions-empty">No reactions yet</span>
                   ) : null}
-                  {!interactionsDisabled && (
+                  {!reactionsDisabled && (
                     <button
                       className="card-detail-add-reaction-btn"
                       onClick={toggleEmojiPicker}
+                      aria-label="Add reaction"
                       title="Add reaction"
                     >
                       <Smile size={14} /> Add
@@ -611,7 +567,7 @@ const CardDetailModal = ({
               <div className="card-detail-reactions-container">
                 <h4 className="card-detail-section-title">Reactions</h4>
                 <div className="card-detail-hidden-notice">
-                  Reactions stay hidden until the interaction phase.
+                  Reactions are available once cards are revealed.
                 </div>
               </div>
             )}

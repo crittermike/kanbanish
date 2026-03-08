@@ -3,7 +3,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import { generateId } from '../utils/ids';
-import { areCommentsAllowed, areInteractionsAllowed, areInteractionsRevealed } from '../utils/workflowUtils';
+import { areCommentsAllowed, areReactionsAllowed } from '../utils/workflowUtils';
 
 /**
  * Custom hook for group-specific operations (comments, reactions)
@@ -31,8 +31,8 @@ export function useGroupOperations({
   const emojiButtonRef = useRef(null);
 
   // Check if interactions are disabled due to workflow phase
-  const isInteractionDisabled = useCallback(() => {
-    return !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const isReactionDisabled = useCallback(() => {
+    return !areReactionsAllowed(workflowPhase, retrospectiveMode);
   }, [workflowPhase, retrospectiveMode]);
 
   const isCommentingAllowed = useCallback(() => {
@@ -64,13 +64,8 @@ export function useGroupOperations({
       return;
     }
 
-    // Check if interactions are disabled due to reveal mode
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Reactions are disabled until cards are revealed');
-      }
+    if (isReactionDisabled()) {
+      showNotification('Reactions are disabled until cards are revealed');
       return;
     }
 
@@ -92,7 +87,7 @@ export function useGroupOperations({
     } catch (error) {
       console.error('Error managing reaction:', error);
     }
-  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isReactionDisabled]);
 
   // Comment operations
   const addComment = useCallback(async () => {
