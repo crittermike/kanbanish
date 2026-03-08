@@ -155,7 +155,7 @@ const CardHoverActions = React.memo(({
           <Smile size={16} aria-hidden="true" />
         </button>
       )}
-      
+
       {showMetadataActions && !hasActionItem && onConvertToActionItem && (
         <button
           className={`card-hover-action action-item-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}

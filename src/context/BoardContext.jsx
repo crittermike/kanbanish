@@ -1,5 +1,5 @@
 import { ref, onValue, off, set } from 'firebase/database';
-import { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useCallback, useContext, useRef, useState, useEffect, useMemo } from 'react';
 import { useActionItems } from '../hooks/useActionItems';
 import { useBoardBackground } from '../hooks/useBoardBackground';
 import { useBoardSettings } from '../hooks/useBoardSettings';
@@ -76,6 +76,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Action items state
   const [actionItems, setActionItems] = useState({});
   const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
+  const initialWorkflowPhaseRef = useRef(null); // Captures the workflowPhase on first board load
+  const [initialWorkflowPhase, setInitialWorkflowPhase] = useState(null);
 
   // Board background state
   const [backgroundId, setBackgroundId] = useState('none');
@@ -135,6 +137,9 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     if (boardId && user) {
       const newBoardRef = ref(database, `boards/${boardId}`);
       setBoardRef(newBoardRef);
+      // Reset initial workflow phase tracking for the new board
+      initialWorkflowPhaseRef.current = null;
+      setInitialWorkflowPhase(null);
 
       // Listen for changes to the board
       onValue(newBoardRef, snapshot => {
@@ -172,6 +177,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
             if (boardData.settings.workflowPhase !== undefined) {
               setWorkflowPhase(boardData.settings.workflowPhase);
+              // Capture initial workflow phase on first load
+              if (initialWorkflowPhaseRef.current === null) {
+                initialWorkflowPhaseRef.current = boardData.settings.workflowPhase;
+                setInitialWorkflowPhase(boardData.settings.workflowPhase);
+              }
             }
             if (boardData.settings.resultsViewIndex !== undefined) {
               setResultsViewIndex(boardData.settings.resultsViewIndex);
@@ -628,6 +638,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       undo,
       redo,
     canUndo, canRedo, pastCount, futureCount,
+      // Health check
+      initialWorkflowPhase,
       // Action items
       actionItems, actionItemsEnabled, updateActionItemsEnabled,
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
@@ -664,6 +676,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     getAllUsersAddingCards, startColumnTimer, pauseColumnTimer, resumeColumnTimer,
     resetColumnTimer, restartColumnTimer, setColumnDefaultTimer, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
     canUndo, canRedo, pastCount, futureCount,
+    initialWorkflowPhase,
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
     updateActionItemDescription, deleteActionItem,
