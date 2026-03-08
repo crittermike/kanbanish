@@ -3,7 +3,12 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
-import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
+import {
+  areCommentsAllowed,
+  areInteractionsRevealed,
+  isCardEditingAllowed,
+  isCardMetadataEditingAllowed
+} from '../utils/workflowUtils';
 
 export function useCardOperations({
   boardId,
@@ -51,6 +56,14 @@ export function useCardOperations({
   const isInteractionDisabled = useCallback(() => {
     return areInteractionsDisabled(retrospectiveMode, workflowPhase);
   }, [retrospectiveMode, workflowPhase]);
+
+  const isCommentingAllowed = useCallback(() => {
+    return areCommentsAllowed(workflowPhase, retrospectiveMode);
+  }, [workflowPhase, retrospectiveMode]);
+
+  const isMetadataEditingAllowed = useCallback(() => {
+    return isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
+  }, [workflowPhase, retrospectiveMode]);
 
   // Memoized database reference
   const cardRef = useMemo(() =>
@@ -355,12 +368,8 @@ export function useCardOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Comments are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comments are disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comments are disabled until cards are revealed');
       return;
     }
 
@@ -380,7 +389,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error adding comment:', error);
     }
-  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid, isInteractionDisabled, workflowPhase, retrospectiveMode, displayName, userColor]);
+  }, [boardId, columnId, cardId, newComment, showNotification, user?.uid, isCommentingAllowed, displayName, userColor]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !commentId || !newContent.trim()) {
@@ -388,12 +397,8 @@ export function useCardOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Comments are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comment editing is disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comment editing is disabled until cards are revealed');
       return;
     }
 
@@ -429,7 +434,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error updating comment:', error);
     }
-  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode, recordAction]);
+  }, [boardId, columnId, cardId, cardData.comments, showNotification, isCommentAuthor, isCommentingAllowed, recordAction]);
 
   const deleteComment = useCallback(async commentId => {
     if (!boardId || !commentId) {
@@ -437,12 +442,8 @@ export function useCardOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Comments are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comment deletion is disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comment deletion is disabled until cards are revealed');
       return;
     }
 
@@ -480,7 +481,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
-  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor, isInteractionDisabled, workflowPhase, retrospectiveMode, recordAction, undo]);
+  }, [boardId, columnId, cardId, showNotification, cardData.comments, isCommentAuthor, isCommentingAllowed, recordAction, undo]);
 
   const toggleComments = useCallback(() => {
     setShowComments(!showComments);
@@ -507,6 +508,10 @@ export function useCardOperations({
 
   const setCardColor = useCallback(async color => {
     if (!boardId) return;
+    if (!isMetadataEditingAllowed()) {
+      showNotification('Card labels and colors are unavailable until cards are revealed');
+      return;
+    }
     try {
       const colorRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/color`);
       if (color) {
@@ -517,10 +522,14 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error setting card color:', error);
     }
-  }, [boardId, columnId, cardId]);
+  }, [boardId, columnId, cardId, isMetadataEditingAllowed, showNotification]);
 
   const setCardTags = useCallback(async tags => {
     if (!boardId) return;
+    if (!isMetadataEditingAllowed()) {
+      showNotification('Card labels and colors are unavailable until cards are revealed');
+      return;
+    }
     try {
       const tagsRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/tags`);
       if (tags && tags.length > 0) {
@@ -531,7 +540,7 @@ export function useCardOperations({
     } catch (error) {
       console.error('Error setting card tags:', error);
     }
-  }, [boardId, columnId, cardId]);
+  }, [boardId, columnId, cardId, isMetadataEditingAllowed, showNotification]);
 
   return {
     // State

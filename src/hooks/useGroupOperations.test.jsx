@@ -20,7 +20,8 @@ vi.mock('../utils/ids', () => ({
 
 vi.mock('../utils/workflowUtils', () => ({
   areInteractionsAllowed: vi.fn(() => true),
-  areInteractionsRevealed: vi.fn(() => false)
+  areInteractionsRevealed: vi.fn(() => false),
+  areCommentsAllowed: vi.fn(() => true)
 }));
 const { mockShowNotification } = vi.hoisted(() => ({
   mockShowNotification: vi.fn()

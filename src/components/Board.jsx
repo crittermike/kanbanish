@@ -175,8 +175,8 @@ function Board({ onGoHome }) {
   };
 
   // Handle card expand for card detail modal
-  const handleExpandCard = useCallback((cardId, columnId) => {
-    setExpandedCard({ cardId, columnId });
+  const handleExpandCard = useCallback((cardId, columnId, options = {}) => {
+    setExpandedCard({ cardId, columnId, ...options });
   }, []);
 
 
@@ -311,7 +311,7 @@ function Board({ onGoHome }) {
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
-          <ResultsView />
+          <ResultsView onExpandCard={handleExpandCard} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
@@ -349,7 +349,13 @@ function Board({ onGoHome }) {
           onClose={() => setExpandedCard(null)}
           cardId={expandedCard.cardId}
           columnId={expandedCard.columnId}
-          onNavigateCard={(cardId, columnId) => setExpandedCard({ cardId, columnId })}
+          cardList={expandedCard.cardList}
+          contextLabel={expandedCard.contextLabel}
+          onNavigateCard={(cardId, columnId) => setExpandedCard(current => ({
+            ...current,
+            cardId,
+            columnId
+          }))}
         />
       )}
 

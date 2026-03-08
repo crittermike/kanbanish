@@ -104,7 +104,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });
 
-  it('hides interactions in GROUPING phase', () => {
+  it('keeps review tools visible in GROUPING phase while voting stays hidden', () => {
     const groupingPhaseContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
@@ -126,10 +126,12 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     render(<Card {...baseProps} />);
 
-    // Interactions should not be visible at all in grouping phase
+    // Voting and reactions stay hidden, but review tools should remain available.
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.queryByText('+')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
+    expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
+    expect(screen.getByLabelText('Set color')).toBeInTheDocument();
+    expect(screen.getByLabelText('Add tags')).toBeInTheDocument();
     expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });

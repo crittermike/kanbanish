@@ -1,10 +1,10 @@
-import { ChevronLeft, ChevronRight } from 'react-feather';
+import { ChevronLeft, ChevronRight, Clock, Maximize2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
 
-const ResultsView = () => {
+const ResultsView = ({ onExpandCard = null }) => {
   const {
     workflowPhase,
     resultsViewIndex,
@@ -53,11 +53,38 @@ const ResultsView = () => {
   }
 
   const columnData = columns[currentItem.columnId];
+  const reviewCardList = sortedItems.flatMap(item => {
+    if (item.type === 'card') {
+      return [{ cardId: item.id, columnId: item.columnId }];
+    }
+
+    return (item.data.cardIds || [])
+      .filter(cardId => columns[item.columnId]?.cards?.[cardId])
+      .map(cardId => ({ cardId, columnId: item.columnId }));
+  });
+
+  const handleExpandResultCard = (nextCardId, nextColumnId) => {
+    if (!onExpandCard) {
+      return;
+    }
+
+    onExpandCard(nextCardId, nextColumnId, {
+      cardList: reviewCardList,
+      contextLabel: 'Retro review'
+    });
+  };
+
+  const primaryResultCardId = currentItem.type === 'group'
+    ? currentItem.data.cardIds?.find(cardId => columns[currentItem.columnId]?.cards?.[cardId])
+    : currentItem.id;
 
   return (
     <div className="results-view">
       <div className="results-header">
         <h2>Results</h2>
+        <p className="results-subtitle">
+          Review the board one card at a time, then open detail view for timers, labels, and discussion.
+        </p>
       </div>
 
       <div className="results-navigation">
@@ -102,6 +129,22 @@ const ResultsView = () => {
             </div>
           </div>
 
+          {onExpandCard && primaryResultCardId && (
+            <div className="result-review-actions">
+              <button
+                className="btn secondary-btn result-detail-btn"
+                onClick={() => handleExpandResultCard(primaryResultCardId, currentItem.columnId)}
+              >
+                <Maximize2 size={16} />
+                {currentItem.type === 'group' ? 'Review cards in detail' : 'Open detail view'}
+              </button>
+              <span className="result-review-hint">
+                <Clock size={14} />
+                Use the detail view timer while you walk through each item.
+              </span>
+            </div>
+          )}
+
           <div className="result-display">
             {currentItem.type === 'group' ? (
               <CardGroup
@@ -111,6 +154,7 @@ const ResultsView = () => {
                 columnId={currentItem.columnId}
                 columnData={columnData}
                 sortByVotes={true}
+                onExpandCard={handleExpandResultCard}
               />
             ) : (
               <Card
@@ -118,6 +162,7 @@ const ResultsView = () => {
                 cardId={currentItem.id}
                 cardData={currentItem.data}
                 columnId={currentItem.columnId}
+                onExpandCard={handleExpandResultCard}
               />
             )}
           </div>

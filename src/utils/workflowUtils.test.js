@@ -4,11 +4,14 @@ import {
   isGroupingAllowed,
   areInteractionsAllowed,
   areInteractionsVisible,
+  areReviewToolsVisible,
+  areCommentsAllowed,
   areOthersInteractionsVisible,
   shouldObfuscateCards,
   areCardsRevealed,
   areInteractionsRevealed,
   isCardEditingAllowed,
+  isCardMetadataEditingAllowed,
   isCardCreationAllowed,
   isCardDraggingAllowed,
   isPollAllowed,
@@ -121,6 +124,57 @@ describe('areInteractionsVisible', () => {
       .forEach(phase => {
         expect(areInteractionsVisible(phase, true)).toBe(false);
       });
+  });
+});
+
+describe('areReviewToolsVisible', () => {
+  it('returns true when retrospective mode is off', () => {
+    ALL_PHASES.forEach(phase => {
+      expect(areReviewToolsVisible(phase)).toBe(true);
+      expect(areReviewToolsVisible(phase, false)).toBe(true);
+    });
+  });
+
+  it('returns true during revealed board phases in retro mode', () => {
+    expect(areReviewToolsVisible(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
+    expect(areReviewToolsVisible(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
+    expect(areReviewToolsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+    expect(areReviewToolsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('returns false during unrevealed or non-board retro phases', () => {
+    const hiddenPhases = [
+      WORKFLOW_PHASES.HEALTH_CHECK,
+      WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
+      WORKFLOW_PHASES.CREATION,
+      WORKFLOW_PHASES.POLL,
+      WORKFLOW_PHASES.POLL_RESULTS
+    ];
+
+    hiddenPhases.forEach(phase => {
+      expect(areReviewToolsVisible(phase, true)).toBe(false);
+    });
+  });
+});
+
+describe('areCommentsAllowed', () => {
+  it('matches review tool visibility in normal mode', () => {
+    ALL_PHASES.forEach(phase => {
+      expect(areCommentsAllowed(phase)).toBe(true);
+      expect(areCommentsAllowed(phase, false)).toBe(true);
+    });
+  });
+
+  it('allows comments throughout revealed retro review phases', () => {
+    expect(areCommentsAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
+    expect(areCommentsAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
+    expect(areCommentsAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+    expect(areCommentsAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('disallows comments before cards are revealed', () => {
+    expect(areCommentsAllowed(WORKFLOW_PHASES.CREATION, true)).toBe(false);
+    expect(areCommentsAllowed(WORKFLOW_PHASES.HEALTH_CHECK, true)).toBe(false);
   });
 });
 
@@ -250,6 +304,27 @@ describe('isCardEditingAllowed', () => {
       .forEach(phase => {
         expect(isCardEditingAllowed(phase, true)).toBe(false);
       });
+  });
+});
+
+describe('isCardMetadataEditingAllowed', () => {
+  it('returns true when retrospective mode is off', () => {
+    ALL_PHASES.forEach(phase => {
+      expect(isCardMetadataEditingAllowed(phase)).toBe(true);
+      expect(isCardMetadataEditingAllowed(phase, false)).toBe(true);
+    });
+  });
+
+  it('returns true for revealed retro phases', () => {
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('returns false before cards are revealed in retro mode', () => {
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.CREATION, true)).toBe(false);
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.POLL, true)).toBe(false);
   });
 });
 

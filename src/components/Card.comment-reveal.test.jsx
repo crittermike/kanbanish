@@ -101,7 +101,7 @@ describe('Card Comment Revealing and Freezing', () => {
     expect(screen.getByText('Other user comment')).toBeInTheDocument();
   });
 
-  it('disables comment editing when interactions are frozen', () => {
+  it('keeps comment discussion available when votes are frozen', () => {
     const frozenContext = {
       boardId: 'test-board',
       user: { uid: 'user123' },
@@ -124,9 +124,8 @@ describe('Card Comment Revealing and Freezing', () => {
     const myComment = screen.getByText('My comment');
     fireEvent.click(myComment);
 
-    // Should NOT show alert when frozen (silent behavior)
-    // Comment form should be completely hidden when frozen
-    expect(screen.queryByPlaceholderText('Add a comment...')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Edit comment')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Add a comment...')).toBeInTheDocument();
   });
 
   it('allows comment editing when interactions are not frozen', () => {
@@ -195,5 +194,25 @@ describe('Card Comment Revealing and Freezing', () => {
     // Add reaction button should be hidden when interactions are frozen
     const addReactionButton = screen.queryByRole('button', { name: '+' });
     expect(addReactionButton).not.toBeInTheDocument();
+  });
+
+  it('allows opening comments during grouping for revealed cards', () => {
+    useBoardContext.mockReturnValue({
+      boardId: 'test-board',
+      user: { uid: 'user123' },
+      votingEnabled: true,
+      downvotingEnabled: false,
+      multipleVotesAllowed: false,
+      retrospectiveMode: true,
+      workflowPhase: 'GROUPING'
+    });
+
+    render(<Card {...baseProps} />);
+
+    const commentsButton = screen.getByTitle('Toggle comments');
+    fireEvent.click(commentsButton);
+
+    expect(screen.getByText('My comment')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Add a comment...')).toBeInTheDocument();
   });
 });

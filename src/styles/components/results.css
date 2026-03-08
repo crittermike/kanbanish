@@ -20,6 +20,12 @@
   font-size: 1.8rem;
 }
 
+.results-subtitle {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  max-width: 46rem;
+}
+
 .results-controls {
   display: flex;
   gap: 10px;
@@ -94,6 +100,28 @@
   flex-wrap: wrap;
 }
 
+.result-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.result-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-review-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
 .result-type {
   background: var(--primary-color);
   color: white;
@@ -161,5 +189,10 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  .result-review-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

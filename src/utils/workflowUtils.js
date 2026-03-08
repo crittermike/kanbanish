@@ -57,6 +57,43 @@ export const areInteractionsVisible = (workflowPhase, retrospectiveMode = false)
 };
 
 /**
+ * Determines if review-oriented tools (detail view, comments, labels, colors)
+ * should be visible for revealed cards.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReviewToolsVisible = (workflowPhase, retrospectiveMode = false) => {
+  if (!retrospectiveMode) {
+    return true;
+  }
+  return workflowPhase === WORKFLOW_PHASES.GROUPING ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
+         workflowPhase === WORKFLOW_PHASES.RESULTS;
+};
+
+/**
+ * Determines if comments can be added or edited in the current workflow phase.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areCommentsAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
+};
+
+/**
+ * Determines if review metadata (labels, colors, action item conversion) can be edited.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const isCardMetadataEditingAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
+};
+
+/**
  * Determines if others' interactions should be visible (revealed)
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
