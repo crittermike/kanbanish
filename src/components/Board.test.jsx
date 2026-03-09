@@ -73,7 +73,7 @@ describe('Board Component', () => {
     retrospectiveMode: true,
     setRetrospectiveMode: vi.fn(),
     updateRetrospectiveMode: vi.fn(),
-    workflowPhase: 'INTERACTION_REVEAL', // Cards revealed, interactions frozen
+    workflowPhase: 'INTERACTIONS', // Cards revealed, voting active
     setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
     updateBoardTitle: vi.fn(),
@@ -334,7 +334,7 @@ describe('Board Component', () => {
     const contextWithRetrospectiveMode = {
       ...mockContextValue,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL'
+      workflowPhase: 'INTERACTIONS'
     };
 
     useBoardContext.mockReturnValue(contextWithRetrospectiveMode);

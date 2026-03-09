@@ -17,7 +17,6 @@ const WorkflowControls = () => {
     updateVotesPerUser,
     startGroupingPhase,
     startInteractionsPhase,
-    startInteractionRevealPhase,
     startResultsPhase,
     startPollPhase,
     startPollResultsPhase,
@@ -46,11 +45,6 @@ const WorkflowControls = () => {
   };
 
   const handleRevealInteractions = () => {
-    startInteractionRevealPhase();
-    showNotification('Votes revealed! Voting is now frozen.');
-  };
-
-  const handleStartResults = () => {
     startResultsPhase();
     showNotification('Results phase started - view top items by votes');
   };
@@ -70,8 +64,7 @@ const WorkflowControls = () => {
       [WORKFLOW_PHASES.CREATION]: 'Returned to health check',
       [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
       [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
-      [WORKFLOW_PHASES.INTERACTION_REVEAL]: 'Returned to voting phase',
-      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting results phase',
+      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting phase',
       [WORKFLOW_PHASES.POLL]: 'Returned to results phase',
       [WORKFLOW_PHASES.POLL_RESULTS]: 'Returned to poll phase'
     };
@@ -167,32 +160,6 @@ const WorkflowControls = () => {
               <button
                 className="btn primary-btn"
                 onClick={handleRevealInteractions}
-              >
-                <Eye size={16} />
-                Reveal Votes
-              </button>
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.INTERACTION_REVEAL:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Voting Results Phase</h3>
-              <p>All votes are now visible. Continue discussing with comments and open card details for timers while you review.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartResults}
               >
                 <Award size={16} />
                 View Results

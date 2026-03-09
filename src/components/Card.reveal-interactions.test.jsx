@@ -171,7 +171,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(addReactionButton).not.toBeDisabled();
   });
 
-  it('keeps reactions open while voting is frozen in INTERACTION_REVEAL phase', () => {
+  it('keeps reactions open while voting is frozen in RESULTS phase', () => {
     const interactionRevealPhaseContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
@@ -179,7 +179,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
       downvotingEnabled: false,
       multipleVotesAllowed: false,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL',
+      workflowPhase: 'RESULTS',
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,

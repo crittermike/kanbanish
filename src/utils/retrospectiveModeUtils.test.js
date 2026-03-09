@@ -18,7 +18,6 @@ const ALL_PHASES = [
   WORKFLOW_PHASES.CREATION,
   WORKFLOW_PHASES.GROUPING,
   WORKFLOW_PHASES.INTERACTIONS,
-  WORKFLOW_PHASES.INTERACTION_REVEAL,
   WORKFLOW_PHASES.RESULTS,
   WORKFLOW_PHASES.POLL,
   WORKFLOW_PHASES.POLL_RESULTS
@@ -48,8 +47,7 @@ describe('getRevealPhase', () => {
     expect(getRevealPhase(true, WORKFLOW_PHASES.INTERACTIONS)).toBe('interactive');
   });
 
-  it('returns "frozen" during INTERACTION_REVEAL and RESULTS (interactions revealed)', () => {
-    expect(getRevealPhase(true, WORKFLOW_PHASES.INTERACTION_REVEAL)).toBe('frozen');
+  it('returns "frozen" during RESULTS (interactions revealed)', () => {
     expect(getRevealPhase(true, WORKFLOW_PHASES.RESULTS)).toBe('frozen');
   });
 });
@@ -79,7 +77,6 @@ describe('shouldObfuscateContent', () => {
     const revealedPhases = [
       WORKFLOW_PHASES.GROUPING,
       WORKFLOW_PHASES.INTERACTIONS,
-      WORKFLOW_PHASES.INTERACTION_REVEAL,
       WORKFLOW_PHASES.RESULTS
     ];
     revealedPhases.forEach(phase => {
@@ -118,8 +115,7 @@ describe('areInteractionsDisabled', () => {
     expect(areInteractionsDisabled(true, WORKFLOW_PHASES.INTERACTIONS)).toBe(false);
   });
 
-  it('returns true during INTERACTION_REVEAL and RESULTS (interactions revealed/frozen)', () => {
-    expect(areInteractionsDisabled(true, WORKFLOW_PHASES.INTERACTION_REVEAL)).toBe(true);
+  it('returns true during RESULTS (interactions revealed/frozen)', () => {
     expect(areInteractionsDisabled(true, WORKFLOW_PHASES.RESULTS)).toBe(true);
   });
 });
@@ -131,8 +127,7 @@ describe('getDisabledReason', () => {
     expect(getDisabledReason(true, WORKFLOW_PHASES.INTERACTIONS)).toBeNull();
   });
 
-  it('returns "frozen" when interactions are revealed (INTERACTION_REVEAL, RESULTS)', () => {
-    expect(getDisabledReason(true, WORKFLOW_PHASES.INTERACTION_REVEAL)).toBe('frozen');
+  it('returns "frozen" when interactions are revealed (RESULTS)', () => {
     expect(getDisabledReason(true, WORKFLOW_PHASES.RESULTS)).toBe('frozen');
   });
 

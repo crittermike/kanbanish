@@ -32,12 +32,6 @@ export const useWorkflow = ({
     });
   }, [updateBoardSettings]);
 
-  const startInteractionRevealPhase = useCallback(() => {
-    updateBoardSettings({
-      workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
-    });
-  }, [updateBoardSettings]);
-
   const startResultsPhase = useCallback(() => {
     updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.RESULTS,
@@ -119,14 +113,9 @@ export const useWorkflow = ({
           workflowPhase: WORKFLOW_PHASES.GROUPING
         });
         break;
-      case WORKFLOW_PHASES.INTERACTION_REVEAL:
-        updateBoardSettings({
-          workflowPhase: WORKFLOW_PHASES.INTERACTIONS
-        });
-        break;
       case WORKFLOW_PHASES.RESULTS:
         updateBoardSettings({
-          workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
+          workflowPhase: WORKFLOW_PHASES.INTERACTIONS
         });
         break;
       case WORKFLOW_PHASES.POLL:
@@ -205,7 +194,6 @@ export const useWorkflow = ({
   return {
     startGroupingPhase,
     startInteractionsPhase,
-    startInteractionRevealPhase,
     startResultsPhase,
     startPollPhase,
     startPollResultsPhase,
