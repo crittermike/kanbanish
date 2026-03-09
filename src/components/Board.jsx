@@ -19,7 +19,6 @@ import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ProfileButton from './ProfileButton';
-import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
 import WorkflowControls from './WorkflowControls';
@@ -81,7 +80,8 @@ function Board({ onGoHome }) {
     setBoardBackground,
     setCustomBackground,
     customBackgroundSize,
-    setCustomBackgroundSize
+    setCustomBackgroundSize,
+    getSortedItemsForResults
   } = useBoardContext();
 
   // Search state
@@ -178,6 +178,29 @@ function Board({ onGoHome }) {
   const handleExpandCard = useCallback((cardId, columnId, options = {}) => {
     setExpandedCard({ cardId, columnId, ...options });
   }, []);
+
+  // Auto-open CardDetailModal when entering RESULTS phase
+  useEffect(() => {
+    if (retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS && columns) {
+      const sortedItems = getSortedItemsForResults();
+      const reviewCardList = sortedItems.flatMap(item => {
+        if (item.type === 'card') {
+          return [{ cardId: item.id, columnId: item.columnId }];
+        }
+        return (item.data.cardIds || [])
+          .filter(cardId => columns[item.columnId]?.cards?.[cardId])
+          .map(cardId => ({ cardId, columnId: item.columnId }));
+      });
+      if (reviewCardList.length > 0) {
+        setExpandedCard({
+          cardId: reviewCardList[0].cardId,
+          columnId: reviewCardList[0].columnId,
+          cardList: reviewCardList,
+          contextLabel: 'Retro review'
+        });
+      }
+    }
+  }, [workflowPhase, retrospectiveMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   const actionItemCount = Object.values(actionItems || {}).filter(i => i.status === 'open').length;
@@ -310,8 +333,6 @@ function Board({ onGoHome }) {
       <main id="board-content">
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
-          <ResultsView onExpandCard={handleExpandCard} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
