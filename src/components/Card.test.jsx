@@ -111,8 +111,8 @@ describe('Card Component', () => {
   test('allows editing card content', async () => {
     render(<Card {...mockProps} />);
 
-    // Click the card to enter edit mode
-    fireEvent.click(screen.getByText('Test card content'));
+    // Click the edit button to enter edit mode
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Check if textarea appears
     const textarea = screen.getByRole('textbox');
@@ -255,8 +255,8 @@ describe('Card Component', () => {
   test('allows deleting the card', async () => {
     render(<Card {...mockProps} />);
 
-    // Enter edit mode
-    fireEvent.click(screen.getByText('Test card content'));
+    // Enter edit mode via edit button
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Click delete button
     fireEvent.click(screen.getByText('Delete'));
@@ -381,9 +381,9 @@ describe('Card Component', () => {
 
     render(<Card {...mockProps} />);
 
-    // Enter edit mode
-    const cardContent = screen.getByTestId('card-content');
-    fireEvent.click(cardContent);
+    // Enter edit mode via edit button
+    const _cardContent = screen.getByTestId('card-content');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Edit content
     const textarea = screen.getByRole('textbox');
@@ -405,8 +405,7 @@ describe('Card Component', () => {
     });
 
     // Enter edit mode again
-    const updatedCardContent = screen.getByTestId('card-content');
-    fireEvent.click(updatedCardContent);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Cancel with Escape key
     const textareaAfterClick = screen.getByRole('textbox');
@@ -442,9 +441,8 @@ describe('Card Component', () => {
     window.confirm.mockReturnValueOnce(false);
     render(<Card {...mockProps} />);
 
-    // Enter edit mode by clicking the card content
-    const cardContent = screen.getByTestId('card-content');
-    fireEvent.click(cardContent);
+    // Enter edit mode via edit button
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Click delete button
     fireEvent.click(screen.getByText('Delete'));
@@ -510,9 +508,8 @@ describe('Card Component', () => {
   test('deletes card when saving empty content', async () => {
     render(<Card {...mockProps} />);
 
-    // Enter edit mode
-    const cardContent = screen.getByTestId('card-content');
-    fireEvent.click(cardContent);
+    // Enter edit mode via edit button
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Clear the content
     const textarea = screen.getByRole('textbox');

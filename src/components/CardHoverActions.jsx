@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { MessageSquare, Smile, Droplet, Tag, CheckSquare, Maximize2 } from 'react-feather';
+import { MessageSquare, Smile, Droplet, Tag, CheckSquare, Edit2 } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
@@ -35,7 +35,7 @@ const CardHoverActions = React.memo(({
   onConvertToActionItem,
   onRemoveActionItem,
   hasActionItem,
-  onExpandCard
+  onEdit
 }) => {
   const emojiButtonRef = useRef(null);
   const colorButtonRef = useRef(null);
@@ -184,17 +184,17 @@ const CardHoverActions = React.memo(({
         </button>
       )}
 
-      {onExpandCard && (
+      {onEdit && (
         <button
-          className="card-hover-action expand-action"
+          className="card-hover-action edit-action"
           onClick={e => {
             e.stopPropagation();
-            onExpandCard();
+            onEdit();
           }}
-          title="Open card details"
-          aria-label="Open card details"
+          title="Edit card"
+          aria-label="Edit card"
         >
-          <Maximize2 size={16} aria-hidden="true" />
+          <Edit2 size={16} aria-hidden="true" />
         </button>
       )}
 

@@ -70,7 +70,8 @@ const CardDetailModal = ({
     userColor,
     sortByVotes,
     detailNavigationHintsDismissed,
-    updateBoardSettings
+    updateBoardSettings,
+    showDisplayNames
   } = useBoardContext();
 
   const columnData = columns?.[columnId];
@@ -470,12 +471,14 @@ const CardDetailModal = ({
               </div>
 
               <div className="card-detail-comment-area">
-                <div
-                  className="card-detail-user-avatar"
-                  style={{ backgroundColor: userColor || 'var(--accent, #58a6ff)' }}
-                >
-                  {getInitials(displayName || 'Anonymous')}
-                </div>
+                {showDisplayNames && (
+                  <div
+                    className="card-detail-user-avatar"
+                    style={{ backgroundColor: userColor || 'var(--accent, #58a6ff)' }}
+                  >
+                    {getInitials(displayName || 'Anonymous')}
+                  </div>
+                )}
                 <div className="card-detail-comment-input-wrapper">
                   <input
                     type="text"

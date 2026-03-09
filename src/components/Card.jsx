@@ -312,12 +312,10 @@ function Card({
     })
   }), [canDropOnCard, onCardDropOnCard, cardId]);
 
-  // Handle card click - enter edit mode when appropriate
+  // Handle card click - open detail modal when appropriate
   const handleCardClick = () => {
-    if (!isEditing && !canDropOnCard) {
-      // Always allow toggleEditMode to handle authorship check and show notifications
-      // The toggleEditMode function will handle both authorship and workflow restrictions
-      toggleEditMode();
+    if (!isEditing && !canDropOnCard && onExpandCard) {
+      onExpandCard(cardId, columnId);
     }
   };
 
@@ -439,7 +437,7 @@ function Card({
                 onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
                 onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
                 hasActionItem={hasActionItem}
-                onExpandCard={onExpandCard ? () => onExpandCard(cardId, columnId) : undefined}
+                onEdit={toggleEditMode}
               />
             )}
           </CardContent>

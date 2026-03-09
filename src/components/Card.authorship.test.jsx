@@ -94,9 +94,8 @@ describe('Card Authorship Tests', () => {
   it('allows card author to edit their card', () => {
     render(<Card {...baseProps} />);
 
-    // Click to edit the card
-    const cardContent = screen.getByTestId('card-content');
-    fireEvent.click(cardContent);
+    // Click edit button to edit the card
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Should enter edit mode (textarea appears)
     const textarea = screen.getByRole('textbox');
@@ -113,9 +112,8 @@ describe('Card Authorship Tests', () => {
 
     render(<Card {...baseProps} />);
 
-    // Click to edit the card
-    const cardContent = screen.getByTestId('card-content');
-    fireEvent.click(cardContent);
+    // Click edit button to try editing
+    fireEvent.click(screen.getByRole('button', { name: 'Edit card' }));
 
     // Should NOT enter edit mode and show notification
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
