@@ -314,6 +314,19 @@
     color: var(--accent);
 }
 
+.group-interactions-left .reaction-item.disabled,
+.group-interactions-left .reaction-item:disabled,
+.interaction-btn.disabled,
+.interaction-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.group-interactions-left .reaction-item.frozen {
+    opacity: 1;
+}
+
 .group-interactions-right {
     display: flex;
     gap: var(--space-xs);

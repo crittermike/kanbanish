@@ -2,7 +2,13 @@ import { renderHook, act } from '@testing-library/react';
 import { ref, set, remove } from 'firebase/database';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { areInteractionsDisabled } from '../utils/retrospectiveModeUtils';
-import { areInteractionsRevealed, isCardEditingAllowed } from '../utils/workflowUtils';
+import {
+  areCommentsAllowed,
+  areReactionsAllowed,
+  areInteractionsRevealed,
+  isCardEditingAllowed,
+  isCardMetadataEditingAllowed
+} from '../utils/workflowUtils';
 import { useCardOperations } from './useCardOperations';
 
 // Mock Firebase
@@ -27,7 +33,10 @@ vi.mock('../utils/retrospectiveModeUtils', () => ({
 
 vi.mock('../utils/workflowUtils', () => ({
   areInteractionsRevealed: vi.fn(() => false),
-  isCardEditingAllowed: vi.fn(() => true)
+  isCardEditingAllowed: vi.fn(() => true),
+  areCommentsAllowed: vi.fn(() => true),
+  areReactionsAllowed: vi.fn(() => true),
+  isCardMetadataEditingAllowed: vi.fn(() => true)
 }));
 // Mock the NotificationContext
 const { mockShowNotification } = vi.hoisted(() => ({
@@ -70,6 +79,9 @@ describe('useCardOperations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockProps = createMockProps();
+    areCommentsAllowed.mockReturnValue(true);
+    areReactionsAllowed.mockReturnValue(true);
+    isCardMetadataEditingAllowed.mockReturnValue(true);
   });
 
   describe('Initial State', () => {
@@ -506,7 +518,7 @@ describe('useCardOperations', () => {
     });
 
     it('should show notification when adding reaction with interactions disabled', async () => {
-      areInteractionsDisabled.mockReturnValue(true);
+      areReactionsAllowed.mockReturnValue(false);
 
       const { result } = renderHook(() => useCardOperations(mockProps));
       const mockEvent = { stopPropagation: vi.fn() };
@@ -517,10 +529,10 @@ describe('useCardOperations', () => {
 
       expect(mockShowNotification).toHaveBeenCalledWith('Reactions are disabled until cards are revealed');
 
-      areInteractionsDisabled.mockReturnValue(false);
+      areReactionsAllowed.mockReturnValue(true);
     });
 
-    it('should show frozen message for reactions when interactions are revealed', async () => {
+    it('allows reactions even when voting is frozen for review', async () => {
       areInteractionsDisabled.mockReturnValue(true);
       areInteractionsRevealed.mockReturnValue(true);
 
@@ -531,7 +543,8 @@ describe('useCardOperations', () => {
         await result.current.addReaction(mockEvent, '👍');
       });
 
-      expect(mockShowNotification).toHaveBeenCalledWith('Interactions are now frozen - no more changes allowed');
+      expect(set).toHaveBeenCalled();
+      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
 
       areInteractionsDisabled.mockReturnValue(false);
       areInteractionsRevealed.mockReturnValue(false);
@@ -628,7 +641,7 @@ describe('useCardOperations', () => {
     });
 
     it('should show notification when adding comment with interactions disabled', async () => {
-      areInteractionsDisabled.mockReturnValue(true);
+      areCommentsAllowed.mockReturnValue(false);
 
       const { result } = renderHook(() => useCardOperations(mockProps));
 
@@ -641,8 +654,6 @@ describe('useCardOperations', () => {
       });
 
       expect(mockShowNotification).toHaveBeenCalledWith('Comments are disabled until cards are revealed');
-
-      areInteractionsDisabled.mockReturnValue(false);
     });
 
     it('should add a comment via Firebase set()', async () => {
@@ -763,7 +774,7 @@ describe('useCardOperations', () => {
     });
 
     it('should not edit comment when interactions are disabled', async () => {
-      areInteractionsDisabled.mockReturnValue(true);
+      areCommentsAllowed.mockReturnValue(false);
 
       const props = createMockProps({
         cardData: {
@@ -780,12 +791,10 @@ describe('useCardOperations', () => {
       });
 
       expect(mockShowNotification).toHaveBeenCalledWith('Comment editing is disabled until cards are revealed');
-
-      areInteractionsDisabled.mockReturnValue(false);
     });
 
     it('should not delete comment when interactions are disabled', async () => {
-      areInteractionsDisabled.mockReturnValue(true);
+      areCommentsAllowed.mockReturnValue(false);
 
       const props = createMockProps({
         cardData: {
@@ -802,8 +811,6 @@ describe('useCardOperations', () => {
       });
 
       expect(mockShowNotification).toHaveBeenCalledWith('Comment deletion is disabled until cards are revealed');
-
-      areInteractionsDisabled.mockReturnValue(false);
     });
 
     it('should not edit nonexistent comment', async () => {
@@ -824,6 +831,56 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Metadata editing', () => {
+    it('should update card color when metadata editing is allowed', async () => {
+      const { result } = renderHook(() => useCardOperations(mockProps));
+
+      await act(async () => {
+        await result.current.setCardColor('#58a6ff');
+      });
+
+      expect(set).toHaveBeenCalled();
+      expect(mockShowNotification).not.toHaveBeenCalledWith('Card labels and colors are unavailable until cards are revealed');
+    });
+
+    it('should block card color updates before cards are revealed', async () => {
+      isCardMetadataEditingAllowed.mockReturnValue(false);
+      const { result } = renderHook(() => useCardOperations(mockProps));
+
+      await act(async () => {
+        await result.current.setCardColor('#58a6ff');
+      });
+
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+      expect(mockShowNotification).toHaveBeenCalledWith('Card labels and colors are unavailable until cards are revealed');
+    });
+
+    it('should update card tags when metadata editing is allowed', async () => {
+      const { result } = renderHook(() => useCardOperations(mockProps));
+
+      await act(async () => {
+        await result.current.setCardTags(['bug', 'retro']);
+      });
+
+      expect(set).toHaveBeenCalled();
+      expect(mockShowNotification).not.toHaveBeenCalledWith('Card labels and colors are unavailable until cards are revealed');
+    });
+
+    it('should block card tag updates before cards are revealed', async () => {
+      isCardMetadataEditingAllowed.mockReturnValue(false);
+      const { result } = renderHook(() => useCardOperations(mockProps));
+
+      await act(async () => {
+        await result.current.setCardTags(['bug', 'retro']);
+      });
+
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+      expect(mockShowNotification).toHaveBeenCalledWith('Card labels and colors are unavailable until cards are revealed');
     });
   });
 

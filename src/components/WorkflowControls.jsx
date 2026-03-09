@@ -135,7 +135,7 @@ const WorkflowControls = () => {
           <div className="workflow-phase">
             <div className="phase-info">
               <h3>Grouping Phase</h3>
-              <p>Cards are revealed. Group related cards together by dragging them onto each other.</p>
+              <p>Cards are revealed. Group related cards together, add comments, and use labels or colors to organize themes.</p>
             </div>
             <div className="phase-controls">
               <button
@@ -187,7 +187,7 @@ const WorkflowControls = () => {
           <div className="workflow-phase">
             <div className="phase-info">
               <h3>Voting Results Phase</h3>
-              <p>All votes are now visible. Review the feedback and votes.</p>
+              <p>All votes are now visible. Continue discussing with comments and open card details for timers while you review.</p>
             </div>
             <div className="phase-controls">
               <button
@@ -213,7 +213,7 @@ const WorkflowControls = () => {
           <div className="workflow-phase">
             <div className="phase-info">
               <h3>Results Phase</h3>
-              <p>Viewing the top-voted cards and groups. Use navigation to browse all results.</p>
+              <p>Viewing the top-voted cards and groups. Use detail view to walk through each item with timers, labels, and comments.</p>
             </div>
             <div className="phase-controls">
               <button

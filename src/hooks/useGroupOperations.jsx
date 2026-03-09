@@ -3,7 +3,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useNotification } from '../context/NotificationContext';
 import { database } from '../utils/firebase';
 import { generateId } from '../utils/ids';
-import { areInteractionsAllowed, areInteractionsRevealed } from '../utils/workflowUtils';
+import { areCommentsAllowed, areReactionsAllowed } from '../utils/workflowUtils';
 
 /**
  * Custom hook for group-specific operations (comments, reactions)
@@ -31,8 +31,12 @@ export function useGroupOperations({
   const emojiButtonRef = useRef(null);
 
   // Check if interactions are disabled due to workflow phase
-  const isInteractionDisabled = useCallback(() => {
-    return !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const isReactionDisabled = useCallback(() => {
+    return !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  }, [workflowPhase, retrospectiveMode]);
+
+  const isCommentingAllowed = useCallback(() => {
+    return areCommentsAllowed(workflowPhase, retrospectiveMode);
   }, [workflowPhase, retrospectiveMode]);
 
   // Reaction operations
@@ -60,13 +64,8 @@ export function useGroupOperations({
       return;
     }
 
-    // Check if interactions are disabled due to reveal mode
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Reactions are disabled until cards are revealed');
-      }
+    if (isReactionDisabled()) {
+      showNotification('Reactions are disabled until cards are revealed');
       return;
     }
 
@@ -88,7 +87,7 @@ export function useGroupOperations({
     } catch (error) {
       console.error('Error managing reaction:', error);
     }
-  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, user, getReactionRefs, hasUserReactedWithEmoji, getReactionCount, showNotification, isReactionDisabled]);
 
   // Comment operations
   const addComment = useCallback(async () => {
@@ -97,12 +96,8 @@ export function useGroupOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comments are disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comments are disabled until cards are revealed');
       return;
     }
 
@@ -125,7 +120,7 @@ export function useGroupOperations({
       console.error('Error adding comment:', error);
       showNotification('Error adding comment');
     }
-  }, [boardId, columnId, groupId, newComment, user, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode, displayName, userColor]);
+  }, [boardId, columnId, groupId, newComment, user, showNotification, isCommentingAllowed, displayName, userColor]);
 
   const editComment = useCallback(async (commentId, newContent) => {
     if (!boardId || !newContent.trim()) {
@@ -133,12 +128,8 @@ export function useGroupOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comments are disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comments are disabled until cards are revealed');
       return;
     }
 
@@ -151,7 +142,7 @@ export function useGroupOperations({
       console.error('Error updating comment:', error);
       showNotification('Error updating comment');
     }
-  }, [boardId, columnId, groupId, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, groupId, showNotification, isCommentingAllowed]);
 
   const deleteComment = useCallback(async commentId => {
     if (!boardId) {
@@ -159,12 +150,8 @@ export function useGroupOperations({
     }
 
     // Check if interactions are disabled
-    if (isInteractionDisabled()) {
-      if (areInteractionsRevealed(workflowPhase, retrospectiveMode)) {
-        showNotification('Interactions are now frozen - no more changes allowed');
-      } else {
-        showNotification('Comments are disabled until cards are revealed');
-      }
+    if (!isCommentingAllowed()) {
+      showNotification('Comments are disabled until cards are revealed');
       return;
     }
 
@@ -177,7 +164,7 @@ export function useGroupOperations({
       console.error('Error deleting comment:', error);
       showNotification('Error deleting comment');
     }
-  }, [boardId, columnId, groupId, showNotification, isInteractionDisabled, workflowPhase, retrospectiveMode]);
+  }, [boardId, columnId, groupId, showNotification, isCommentingAllowed]);
 
   const toggleComments = useCallback(() => {
     setShowComments(!showComments);

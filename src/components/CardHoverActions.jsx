@@ -19,8 +19,13 @@ const CardHoverActions = React.memo(({
   addReaction,
   hasUserReactedWithEmoji,
   commentCount = 0,
-  disabled = false,
-  disabledReason = 'cards-not-revealed',
+  reactionDisabled = false,
+  reactionDisabledReason = 'cards-not-revealed',
+  metadataDisabled = false,
+  metadataDisabledReason = null,
+  showEmojiAction = true,
+  showMetadataActions = true,
+  showCommentAction = true,
   onColorSelect,
   onTagAdd,
   onTagRemove,
@@ -42,8 +47,10 @@ const CardHoverActions = React.memo(({
   const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
 
   // Use utility functions for consistent logic
-  const useDisabledStyling = shouldUseDisabledStyling(disabled, disabledReason);
-  const hideAddButton = shouldHideFeature(disabledReason);
+  const useReactionDisabledStyling = shouldUseDisabledStyling(reactionDisabled, reactionDisabledReason);
+  const useMetadataDisabledStyling = shouldUseDisabledStyling(metadataDisabled, metadataDisabledReason);
+  const hideReactionAction = !showEmojiAction || shouldHideFeature(reactionDisabledReason);
+  const metadataDisabledTitle = metadataDisabled ? 'Labels and colors are unavailable until cards are revealed' : '';
 
   return (
     <div className="card-hover-actions">
@@ -73,11 +80,11 @@ const CardHoverActions = React.memo(({
           onClose={() => setShowTagPicker(false)}
         />
       )}
-      {!hideAddButton && (
+      {showMetadataActions && (
         <>
           <button
-            className={`card-hover-action color-action ${useDisabledStyling ? 'disabled' : ''}`}
-            onClick={disabled ? undefined : e => {
+            className={`card-hover-action color-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
+            onClick={metadataDisabled ? undefined : e => {
               e.stopPropagation();
               if (colorButtonRef.current) {
                 const buttonRect = colorButtonRef.current.getBoundingClientRect();
@@ -91,16 +98,16 @@ const CardHoverActions = React.memo(({
               setShowTagPicker(false);
               setShowComments(false);
             }}
-            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Set color'}
+            title={metadataDisabled ? metadataDisabledTitle : 'Set color'}
             aria-label="Set color"
             ref={colorButtonRef}
-            disabled={useDisabledStyling}
+            disabled={useMetadataDisabledStyling}
           >
             <Droplet size={16} aria-hidden="true" />
           </button>
           <button
-            className={`card-hover-action tag-action ${useDisabledStyling ? 'disabled' : ''}`}
-            onClick={disabled ? undefined : e => {
+            className={`card-hover-action tag-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
+            onClick={metadataDisabled ? undefined : e => {
               e.stopPropagation();
               if (tagButtonRef.current) {
                 const buttonRect = tagButtonRef.current.getBoundingClientRect();
@@ -114,48 +121,51 @@ const CardHoverActions = React.memo(({
               setShowColorPicker(false);
               setShowComments(false);
             }}
-            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add tags'}
+            title={metadataDisabled ? metadataDisabledTitle : 'Add tags'}
             aria-label="Add tags"
             ref={tagButtonRef}
-            disabled={useDisabledStyling}
+            disabled={useMetadataDisabledStyling}
           >
             <Tag size={16} aria-hidden="true" />
           </button>
-          <button
-            className={`card-hover-action emoji-action ${useDisabledStyling ? 'disabled' : ''}`}
-            onClick={disabled ? undefined : e => {
-              e.stopPropagation();
-              if (emojiButtonRef.current) {
-                const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-                setEmojiPickerPosition({
-                  top: buttonRect.bottom + window.scrollY + 5,
-                  left: buttonRect.left + window.scrollX
-                });
-              }
-              setShowEmojiPicker(!showEmojiPicker);
-              setShowColorPicker(false);
-              setShowTagPicker(false);
-              setShowComments(false);
-            }}
-            title={disabled ? getReactionDisabledMessage(disabledReason) : 'Add reaction'}
-            aria-label="Add reaction"
-            ref={emojiButtonRef}
-            disabled={useDisabledStyling}
-          >
-            <Smile size={16} aria-hidden="true" />
-          </button>
         </>
       )}
-      
-      {!hasActionItem && onConvertToActionItem && (
+      {!hideReactionAction && (
         <button
-          className="card-hover-action action-item-action"
-          onClick={e => {
+          className={`card-hover-action emoji-action ${useReactionDisabledStyling ? 'disabled' : ''}`}
+          onClick={reactionDisabled ? undefined : e => {
+            e.stopPropagation();
+            if (emojiButtonRef.current) {
+              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+              setEmojiPickerPosition({
+                top: buttonRect.bottom + window.scrollY + 5,
+                left: buttonRect.left + window.scrollX
+              });
+            }
+            setShowEmojiPicker(!showEmojiPicker);
+            setShowColorPicker(false);
+            setShowTagPicker(false);
+            setShowComments(false);
+          }}
+          title={reactionDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
+          aria-label="Add reaction"
+          ref={emojiButtonRef}
+          disabled={useReactionDisabledStyling}
+        >
+          <Smile size={16} aria-hidden="true" />
+        </button>
+      )}
+
+      {showMetadataActions && !hasActionItem && onConvertToActionItem && (
+        <button
+          className={`card-hover-action action-item-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
+          onClick={metadataDisabled ? undefined : e => {
             e.stopPropagation();
             onConvertToActionItem();
           }}
-          title="Convert to action item"
+          title={metadataDisabled ? metadataDisabledTitle : 'Convert to action item'}
           aria-label="Convert to action item"
+          disabled={useMetadataDisabledStyling}
         >
           <CheckSquare size={16} aria-hidden="true" />
         </button>
@@ -188,19 +198,23 @@ const CardHoverActions = React.memo(({
         </button>
       )}
 
-      {/* Show comment button on hover only */}
-      <button
-        className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}
-        onClick={e => {
-          e.stopPropagation();
-          toggleComments();
-        }}
-        title="Toggle comments"
-        aria-label={commentCount > 0 ? `Toggle comments (${commentCount})` : 'Toggle comments'}
-      >
-        <MessageSquare size={16} aria-hidden="true" />
-        {commentCount > 0 && <span className="comment-count">{commentCount}</span>}
-      </button>
+      {showCommentAction && (
+        <button
+          className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}
+          onClick={e => {
+            e.stopPropagation();
+            setShowColorPicker(false);
+            setShowTagPicker(false);
+            setShowEmojiPicker(false);
+            toggleComments();
+          }}
+          title="Toggle comments"
+          aria-label={commentCount > 0 ? `Toggle comments (${commentCount})` : 'Toggle comments'}
+        >
+          <MessageSquare size={16} aria-hidden="true" />
+          {commentCount > 0 && <span className="comment-count">{commentCount}</span>}
+        </button>
+      )}
     </div>
   );
 });

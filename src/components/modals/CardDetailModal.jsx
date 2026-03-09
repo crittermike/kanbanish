@@ -1,40 +1,44 @@
 import { ref, set } from 'firebase/database';
-import { useRef, useState, useCallback, useMemo } from 'react';
-import { X, Clock, Play, Pause, Square, Smile, ChevronLeft, ChevronRight } from 'react-feather';
+import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { X, Clock, Smile, ChevronLeft, ChevronRight, Droplet, Tag, CheckSquare } from 'react-feather';
 import { useBoardContext } from '../../context/BoardContext';
 import { useCardOperations } from '../../hooks/useCardOperations';
-import { useCardTimer } from '../../hooks/useCardTimer';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { database } from '../../utils/firebase';
 import {
+  filterVisibleInteractionData,
   getDisabledReason
 } from '../../utils/retrospectiveModeUtils';
 import {
+  areCommentsAllowed,
   areInteractionsAllowed,
   areInteractionsVisible,
+  areOthersInteractionsVisible,
+  areReactionsAllowed,
+  areReactionsVisible,
+  areReviewToolsVisible,
+  isCardMetadataEditingAllowed,
   isCardEditingAllowed,
   shouldObfuscateCards
 } from '../../utils/workflowUtils';
+import CardColorPicker from '../CardColorPicker';
 import CardReactions from '../CardReactions';
+import CardTagPicker from '../CardTagPicker';
+import CardTimerControls from '../CardTimerControls';
 import Comments from '../Comments';
 import EmojiPicker from '../EmojiPicker';
 import MarkdownContent from '../MarkdownContent';
 import VotingControls from '../VotingControls';
 import '../../styles/components/card-detail-modal.css';
 
-const formatTime = (seconds) => {
-  if (seconds == null) return '00:00';
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-};
-
 const CardDetailModal = ({
   isOpen,
   onClose,
   cardId,
   columnId,
-  onNavigateCard
+  onNavigateCard,
+  cardList = null,
+  contextLabel = ''
 }) => {
   const modalRef = useRef(null);
   useFocusTrap(modalRef, isOpen, { onClose });
@@ -52,16 +56,17 @@ const CardDetailModal = ({
     workflowPhase,
     recordAction,
     undo,
-    _boardTags,
+    boardTags,
     actionItems,
     actionItemsEnabled,
-    _createActionItem,
-    _deleteActionItem,
+    createActionItem,
+    deleteActionItem,
     presenceData,
     displayName,
     userColor,
-    _showDisplayNames,
-    sortByVotes
+    sortByVotes,
+    detailNavigationHintsDismissed,
+    updateBoardSettings
   } = useBoardContext();
 
   // Look up card data from columns
@@ -89,10 +94,8 @@ const CardDetailModal = ({
     deleteComment,
     isCardAuthor,
     isCommentAuthor,
-    setCardColor: _setCardColor,
-    setCardTags: _setCardTags,
-    saveCardChanges: _saveCardChanges,
-    deleteCard: _deleteCard
+    setCardColor,
+    setCardTags
   } = useCardOperations({
     boardId,
     columnId,
@@ -110,22 +113,25 @@ const CardDetailModal = ({
     userColor
   });
 
-  // Card timer hook
-  const cardTimer = useCardTimer({
-    boardId,
-    columnId,
-    cardId,
-    timerData: cardData?.timer,
-    user
-  });
-
   // Local editing state for the modal (independent from Card.jsx inline editing)
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0 });
+  const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
+  const colorButtonRef = useRef(null);
+  const tagButtonRef = useRef(null);
 
   const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
   const interactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
   const interactionsVisible = areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsVisible = areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
+  const reviewToolsVisible = areReviewToolsVisible(workflowPhase, retrospectiveMode);
+  const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
+  const metadataEditingAllowed = isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
 
   // Determine editing disabled state
   const isCreator = isCardAuthor();
@@ -142,6 +148,11 @@ const CardDetailModal = ({
   }
   // Pager data
   const allCardsList = useMemo(() => {
+    if (cardList?.length) {
+      return cardList.filter(({ cardId: listedCardId, columnId: listedColumnId }) =>
+        columns?.[listedColumnId]?.cards?.[listedCardId]
+      );
+    }
     if (!columns) return [];
     const list = [];
     // Sort columns by ID
@@ -181,11 +192,12 @@ const CardDetailModal = ({
       }
     }
     return list;
-  }, [columns, sortByVotes]);
+  }, [cardList, columns, sortByVotes]);
 
   const currentIndex = allCardsList.findIndex(c => c.cardId === cardId && c.columnId === columnId);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allCardsList.length - 1;
+  const pagerIndex = currentIndex >= 0 ? currentIndex + 1 : 1;
 
   const handleNavigate = useCallback((direction) => {
     const targetIndex = currentIndex + direction;
@@ -219,6 +231,14 @@ const CardDetailModal = ({
     setEditContent('');
   }, []);
 
+  useEffect(() => {
+    setIsEditingContent(false);
+    setEditContent('');
+    setShowEmojiPicker(false);
+    setShowColorPicker(false);
+    setShowTagPicker(false);
+  }, [cardId, columnId, setShowEmojiPicker]);
+
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Escape') {
       if (isEditingContent) {
@@ -240,7 +260,7 @@ const CardDetailModal = ({
   }, [isEditingContent, handleEditCancel, handleEditSave, onClose, hasPrev, hasNext, handleNavigate]);
 
   const toggleEmojiPicker = (e) => {
-    if (interactionsDisabled) return;
+    if (reactionsDisabled) return;
     const rect = e.currentTarget.getBoundingClientRect();
     setEmojiPickerPosition({
       top: rect.bottom + window.scrollY + 8,
@@ -249,30 +269,79 @@ const CardDetailModal = ({
     setShowEmojiPicker(!showEmojiPicker);
   };
 
+  const openColorPicker = useCallback((e) => {
+    if (!metadataEditingAllowed || !colorButtonRef.current) {
+      return;
+    }
+    e.stopPropagation();
+    const rect = colorButtonRef.current.getBoundingClientRect();
+    setColorPickerPosition({
+      top: rect.bottom + window.scrollY + 8,
+      left: rect.left + window.scrollX
+    });
+    setShowColorPicker(!showColorPicker);
+    setShowTagPicker(false);
+    setShowEmojiPicker(false);
+  }, [metadataEditingAllowed, setShowEmojiPicker, showColorPicker]);
+
+  const openTagPicker = useCallback((e) => {
+    if (!metadataEditingAllowed || !tagButtonRef.current) {
+      return;
+    }
+    e.stopPropagation();
+    const rect = tagButtonRef.current.getBoundingClientRect();
+    setTagPickerPosition({
+      top: rect.bottom + window.scrollY + 8,
+      left: rect.left + window.scrollX
+    });
+    setShowTagPicker(!showTagPicker);
+    setShowColorPicker(false);
+    setShowEmojiPicker(false);
+  }, [metadataEditingAllowed, setShowEmojiPicker, showTagPicker]);
+
   const handleEmojiSelect = (_e, emoji) => {
     addReaction(null, emoji);
     setShowEmojiPicker(false);
   };
 
-  if (!isOpen || !cardData) return null;
+  const dismissNavigationHints = useCallback((e) => {
+    e.stopPropagation();
+    updateBoardSettings({ detailNavigationHintsDismissed: true });
+  }, [updateBoardSettings]);
 
-  // Timer derived values
-  const { startCardTimer, pauseCardTimer, resumeCardTimer, resetCardTimer, remainingSeconds, isRunning, isPaused, hasTimer } = cardTimer;
-  const timerClass = [hasTimer && isRunning ? 'active' : '', hasTimer && remainingSeconds !== null && remainingSeconds <= 30 && remainingSeconds > 0 ? 'warning' : remainingSeconds === 0 ? 'expired' : ''].filter(Boolean).join(' ');
-  const totalDuration = cardData.timer?.duration || 0;
-  const progressPercent = totalDuration > 0 && remainingSeconds !== null
-    ? Math.max(0, 100 - (remainingSeconds / totalDuration) * 100)
-    : 0;
+  if (!isOpen || !cardData) return null;
 
   // Action items
   const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
     ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
-  const _hasActionItem = !!actionItemEntry;
-  const _actionItemId = actionItemEntry ? actionItemEntry[0] : null;
+  const hasActionItem = !!actionItemEntry;
+  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
 
   // Obfuscation check
   const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
+  const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
+  const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
+  const reviewCommentCount = Object.keys(displayCardData.comments || {}).length;
+  const reviewCardListSize = allCardsList.length;
+  const showNavigationHints = reviewCardListSize > 1 && !detailNavigationHintsDismissed;
+
+  const handleConvertToActionItem = () => {
+    if (!createActionItem || !cardData) {
+      return;
+    }
+    createActionItem({
+      description: cardData.content,
+      sourceCardId: cardId,
+      sourceColumnId: columnId
+    });
+  };
+
+  const handleRemoveActionItem = () => {
+    if (actionItemId && deleteActionItem) {
+      deleteActionItem(actionItemId);
+    }
+  };
 
 
   return (
@@ -287,8 +356,13 @@ const CardDetailModal = ({
         aria-labelledby="card-detail-title"
       >
         <div className="card-detail-header">
-          <div className="card-detail-column-badge">{columnTitle}</div>
-          {allCardsList.length > 1 && (
+          <div className="card-detail-header-meta">
+            <div className="card-detail-column-badge">{columnTitle}</div>
+            {contextLabel && (
+              <div className="card-detail-context-badge">{contextLabel}</div>
+            )}
+          </div>
+          {reviewCardListSize > 1 && (
             <div className="card-detail-pager">
               <button
                 className="card-detail-pager-btn"
@@ -300,7 +374,7 @@ const CardDetailModal = ({
                 <ChevronLeft size={16} />
               </button>
               <span className="card-detail-pager-count">
-                {currentIndex + 1} / {allCardsList.length}
+                {pagerIndex} / {reviewCardListSize}
               </span>
               <button
                 className="card-detail-pager-btn"
@@ -319,13 +393,25 @@ const CardDetailModal = ({
         </div>
 
         <div className="card-detail-body">
-            {/* Main Content Area */}
           <section className="card-detail-section">
             <h3 id="card-detail-title" className="visually-hidden">Card Details</h3>
+            {showNavigationHints && (
+              <div className="card-detail-toolbar">
+                <span className="card-detail-shortcuts">Use ← and → to review cards</span>
+                <button
+                  className="card-detail-toolbar-dismiss"
+                  onClick={dismissNavigationHints}
+                  aria-label="Dismiss review tips"
+                  title="Dismiss review tips for this board"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
 
             <div
               className="card-detail-content"
-              style={{ '--card-color': cardData.color || 'var(--accent, #0052cc)' }}
+              style={{ '--card-color': displayCardData.color || 'var(--accent, #0052cc)' }}
             >
               {isEditingContent ? (
                 <div className="card-detail-edit-container">
@@ -362,76 +448,79 @@ const CardDetailModal = ({
                   {showObfuscated ? (
                     <span className="obfuscated">Content hidden</span>
                   ) : (
-                    <MarkdownContent content={cardData.content} />
+                    <MarkdownContent content={displayCardData.content} />
                   )}
                 </div>
               )}
             </div>
 
-            {/* Tags (moved inline inside the same section) */}
-            {cardData.tags && cardData.tags.length > 0 && (
+            {displayCardData.tags && displayCardData.tags.length > 0 && (
               <div className="card-detail-tags">
-                {cardData.tags.map(tag => (
+                {displayCardData.tags.map(tag => (
                   <span key={tag} className="card-detail-tag">{tag}</span>
                 ))}
               </div>
             )}
           </section>
 
+          {reviewToolsVisible && (
+            <section className="card-detail-section">
+              <h4 className="card-detail-section-title">Review tools</h4>
+              <div className="card-detail-review-actions">
+                <button
+                  className="card-detail-meta-btn color-action"
+                  onClick={openColorPicker}
+                  ref={colorButtonRef}
+                  disabled={!metadataEditingAllowed}
+                  title={metadataEditingAllowed ? 'Set card color' : 'Labels and colors are unavailable until cards are revealed'}
+                >
+                  <Droplet size={14} />
+                  {displayCardData.color ? 'Change color' : 'Add color'}
+                </button>
+                <button
+                  className="card-detail-meta-btn tag-action"
+                  onClick={openTagPicker}
+                  ref={tagButtonRef}
+                  disabled={!metadataEditingAllowed}
+                  title={metadataEditingAllowed ? 'Manage labels' : 'Labels and colors are unavailable until cards are revealed'}
+                >
+                  <Tag size={14} />
+                  {displayCardData.tags?.length ? `${displayCardData.tags.length} label${displayCardData.tags.length === 1 ? '' : 's'}` : 'Add labels'}
+                </button>
+                {actionItemsEnabled && (
+                  <button
+                    className={`card-detail-meta-btn ${hasActionItem ? 'active' : ''}`}
+                    onClick={hasActionItem ? handleRemoveActionItem : handleConvertToActionItem}
+                    disabled={!metadataEditingAllowed}
+                    title={hasActionItem ? 'Remove action item' : 'Convert to action item'}
+                  >
+                    <CheckSquare size={14} />
+                    {hasActionItem ? 'Action item' : 'Make action item'}
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* Timer Section */}
           <section className="card-detail-section">
             <h4 className="card-detail-section-title"><Clock size={14} /> Timer</h4>
-            <div className="card-detail-timer">
-              <div className="card-detail-timer-display-wrapper">
-                <div className={`card-detail-timer-display ${timerClass}`}>
-                  {formatTime(remainingSeconds)}
-                </div>
-
-                <div className="card-detail-timer-presets">
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(60)} disabled={isRunning && !isPaused}>1m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(180)} disabled={isRunning && !isPaused}>3m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(300)} disabled={isRunning && !isPaused}>5m</button>
-                  <button className="card-detail-timer-btn" onClick={() => startCardTimer(600)} disabled={isRunning && !isPaused}>10m</button>
-                </div>
-              </div>
-
-              <div className="card-detail-timer-controls">
-                {hasTimer && isRunning && (
-                  <button className="card-detail-timer-btn icon-only" onClick={pauseCardTimer} title="Pause">
-                    <Pause size={16} />
-                  </button>
-                )}
-                {hasTimer && isPaused && (
-                  <button className="card-detail-timer-btn icon-only" onClick={resumeCardTimer} title="Resume">
-                    <Play size={16} />
-                  </button>
-                )}
-                {hasTimer && (
-                  <button className="card-detail-timer-btn icon-only" onClick={resetCardTimer} title="Reset">
-                    <Square size={16} />
-                  </button>
-                )}
-              </div>
-
-              {/* Progress Bar */}
-              {hasTimer && (
-                <div className="card-detail-timer-progress">
-                  <div
-                    className={`card-detail-timer-progress-bar ${timerClass}`}
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              )}
-            </div>
+            <CardTimerControls
+              boardId={boardId}
+              columnId={columnId}
+              cardId={cardId}
+              timerData={cardData.timer}
+              user={user}
+            />
           </section>
 
           {/* Voting & Reactions */}
           <section className="card-detail-section card-detail-interactions">
-            {votingEnabled && (
+            {votingEnabled && interactionsVisible ? (
               <div className="card-detail-votes">
                 <h4 className="card-detail-section-title">Votes</h4>
                 <VotingControls
-                  votes={cardData.votes}
+                  votes={displayCardData.votes}
                   onUpvote={upvoteCard}
                   onDownvote={downvoteCard}
                   showDownvoteButton={downvotingEnabled}
@@ -439,58 +528,70 @@ const CardDetailModal = ({
                   disabledReason={disabledReason}
                 />
               </div>
-            )}
+            ) : votingEnabled ? (
+              <div className="card-detail-votes">
+                <h4 className="card-detail-section-title">Votes</h4>
+                <div className="card-detail-hidden-notice">
+                  Voting is hidden until the interaction phase.
+                </div>
+              </div>
+            ) : null}
 
-            <div className="card-detail-reactions-container">
-              <h4 className="card-detail-section-title">Reactions</h4>
-              {interactionsVisible ? (
+            {reactionsVisible ? (
+              <div className="card-detail-reactions-container">
+                <h4 className="card-detail-section-title">Reactions</h4>
                 <div className="card-detail-reactions-row">
                   <CardReactions
-                    reactions={cardData.reactions}
+                    reactions={displayCardData.reactions}
                     userId={user?.uid}
                     addReaction={addReaction}
-                    disabled={interactionsDisabled}
-                    disabledReason={disabledReason}
+                    disabled={reactionsDisabled}
+                    disabledReason={reactionDisabledReason}
                   />
-                  {!cardData.reactions && (
+                  {!displayCardData.reactions || Object.keys(displayCardData.reactions).length === 0 ? (
                     <span className="card-detail-reactions-empty">No reactions yet</span>
-                  )}
-                  {!interactionsDisabled && (
+                  ) : null}
+                  {!reactionsDisabled && (
                     <button
                       className="card-detail-add-reaction-btn"
                       onClick={toggleEmojiPicker}
+                      aria-label="Add reaction"
                       title="Add reaction"
                     >
                       <Smile size={14} /> Add
                     </button>
                   )}
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="card-detail-reactions-container">
+                <h4 className="card-detail-section-title">Reactions</h4>
                 <div className="card-detail-hidden-notice">
-                  Reactions hidden in this phase
+                  Reactions are available once cards are revealed.
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </section>
 
-          {/* Comments Section (moved to end) */}
-          <section className="card-detail-section">
-            <h4 className="card-detail-section-title">Comments ({cardData.comments ? Object.keys(cardData.comments).length : 0})</h4>
-            <div className="card-detail-comments">
-              <Comments
-                comments={cardData.comments}
-                onAddComment={addComment}
-                newComment={newComment}
-                onCommentChange={setNewComment}
-                onEditComment={editComment}
-                onDeleteComment={deleteComment}
-                isCommentAuthor={isCommentAuthor}
-                interactionsDisabled={interactionsDisabled}
-                disabledReason={disabledReason}
-                presenceData={presenceData}
-              />
-            </div>
-          </section>
+          {reviewToolsVisible && (
+            <section className="card-detail-section">
+              <h4 className="card-detail-section-title">Comments ({reviewCommentCount})</h4>
+              <div className="card-detail-comments">
+                <Comments
+                  comments={displayCardData.comments}
+                  onAddComment={addComment}
+                  newComment={newComment}
+                  onCommentChange={setNewComment}
+                  onEditComment={editComment}
+                  onDeleteComment={deleteComment}
+                  isCommentAuthor={isCommentAuthor}
+                  interactionsDisabled={!commentsAllowed}
+                  disabledReason={!commentsAllowed ? 'cards-not-revealed' : null}
+                  presenceData={presenceData}
+                />
+              </div>
+            </section>
+          )}
         </div>
       </div>
 
@@ -501,6 +602,24 @@ const CardDetailModal = ({
           onEmojiSelect={handleEmojiSelect}
           onClose={() => setShowEmojiPicker(false)}
           hasUserReactedWithEmoji={hasUserReactedWithEmoji}
+        />
+      )}
+      {showColorPicker && (
+        <CardColorPicker
+          position={colorPickerPosition}
+          onColorSelect={setCardColor}
+          onClose={() => setShowColorPicker(false)}
+          currentColor={displayCardData.color}
+        />
+      )}
+      {showTagPicker && (
+        <CardTagPicker
+          position={tagPickerPosition}
+          onTagAdd={tag => setCardTags([...(displayCardData.tags || []), tag])}
+          onTagRemove={tag => setCardTags((displayCardData.tags || []).filter(existingTag => existingTag !== tag))}
+          currentTags={displayCardData.tags || []}
+          boardTags={boardTags}
+          onClose={() => setShowTagPicker(false)}
         />
       )}
     </div>

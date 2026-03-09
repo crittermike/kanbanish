@@ -22,6 +22,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  * @param {string} params.settingsState.workflowPhase
  * @param {number} params.settingsState.resultsViewIndex
  * @param {boolean} params.settingsState.showDisplayNames
+ * @param {boolean} params.settingsState.detailNavigationHintsDismissed
  * @param {Object} params.setters - State setter functions
  * @returns {Object} Settings operations
  */
@@ -29,15 +30,15 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   const {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
-    workflowPhase, resultsViewIndex, showDisplayNames, actionItemsEnabled,
-    backgroundId, customBackgroundCss
+    workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed, actionItemsEnabled,
+    backgroundId, customBackgroundCss, customBackgroundSize
   } = settingsState;
 
   const {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
-    setBackgroundId, setCustomBackgroundCss
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed, setActionItemsEnabled,
+    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -68,6 +69,9 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.showDisplayNames !== undefined) {
       setShowDisplayNames(newSettings.showDisplayNames);
     }
+    if (newSettings.detailNavigationHintsDismissed !== undefined) {
+      setDetailNavigationHintsDismissed(newSettings.detailNavigationHintsDismissed);
+    }
     if (newSettings.actionItemsEnabled !== undefined) {
       setActionItemsEnabled(newSettings.actionItemsEnabled);
     }
@@ -77,11 +81,14 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.customBackgroundCss !== undefined) {
       setCustomBackgroundCss(newSettings.customBackgroundCss);
     }
+    if (newSettings.customBackgroundSize !== undefined) {
+      setCustomBackgroundSize(newSettings.customBackgroundSize);
+    }
   }, [
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setActionItemsEnabled,
-    setBackgroundId, setCustomBackgroundCss
+    setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed, setActionItemsEnabled,
+    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -98,9 +105,11 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         workflowPhase,
         resultsViewIndex,
         showDisplayNames,
+        detailNavigationHintsDismissed,
         actionItemsEnabled,
         backgroundId,
         customBackgroundCss,
+        customBackgroundSize,
         ...newSettings
       };
 
@@ -118,8 +127,8 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
   }, [
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
-    resultsViewIndex, showDisplayNames, actionItemsEnabled,
-    backgroundId, customBackgroundCss, applySettingsLocally
+    resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed, actionItemsEnabled,
+    backgroundId, customBackgroundCss, customBackgroundSize, applySettingsLocally
   ]);
 
   // Convenience wrappers
