@@ -28,15 +28,14 @@ const ALL_PHASES = [
   WORKFLOW_PHASES.CREATION,
   WORKFLOW_PHASES.GROUPING,
   WORKFLOW_PHASES.INTERACTIONS,
-  WORKFLOW_PHASES.INTERACTION_REVEAL,
   WORKFLOW_PHASES.RESULTS,
   WORKFLOW_PHASES.POLL,
   WORKFLOW_PHASES.POLL_RESULTS
 ];
 
 describe('WORKFLOW_PHASES', () => {
-  it('has all 9 phases', () => {
-    expect(Object.keys(WORKFLOW_PHASES)).toHaveLength(9);
+  it('has all 8 phases', () => {
+    expect(Object.keys(WORKFLOW_PHASES)).toHaveLength(8);
   });
 
   it('contains the expected phase keys', () => {
@@ -46,7 +45,6 @@ describe('WORKFLOW_PHASES', () => {
       CREATION: 'CREATION',
       GROUPING: 'GROUPING',
       INTERACTIONS: 'INTERACTIONS',
-      INTERACTION_REVEAL: 'INTERACTION_REVEAL',
       RESULTS: 'RESULTS',
       POLL: 'POLL',
       POLL_RESULTS: 'POLL_RESULTS'
@@ -109,16 +107,14 @@ describe('areInteractionsVisible', () => {
     });
   });
 
-  it('returns true during INTERACTIONS, INTERACTION_REVEAL, and RESULTS in retro mode', () => {
+  it('returns true during INTERACTIONS and RESULTS in retro mode', () => {
     expect(areInteractionsVisible(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areInteractionsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areInteractionsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
   it('returns false for all other phases in retro mode', () => {
     const visiblePhases = [
       WORKFLOW_PHASES.INTERACTIONS,
-      WORKFLOW_PHASES.INTERACTION_REVEAL,
       WORKFLOW_PHASES.RESULTS
     ];
     ALL_PHASES
@@ -231,14 +227,12 @@ describe('areOthersInteractionsVisible', () => {
     });
   });
 
-  it('returns true during INTERACTION_REVEAL and RESULTS in retro mode', () => {
-    expect(areOthersInteractionsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+  it('returns true during RESULTS in retro mode', () => {
     expect(areOthersInteractionsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
   it('returns false for all other phases in retro mode', () => {
     const visiblePhases = [
-      WORKFLOW_PHASES.INTERACTION_REVEAL,
       WORKFLOW_PHASES.RESULTS
     ];
     ALL_PHASES
@@ -278,10 +272,9 @@ describe('areCardsRevealed', () => {
     });
   });
 
-  it('returns true during GROUPING, INTERACTIONS, INTERACTION_REVEAL, and RESULTS in retro mode', () => {
+  it('returns true during GROUPING, INTERACTIONS, and RESULTS in retro mode', () => {
     expect(areCardsRevealed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(areCardsRevealed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areCardsRevealed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areCardsRevealed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
@@ -289,7 +282,6 @@ describe('areCardsRevealed', () => {
     const revealedPhases = [
       WORKFLOW_PHASES.GROUPING,
       WORKFLOW_PHASES.INTERACTIONS,
-      WORKFLOW_PHASES.INTERACTION_REVEAL,
       WORKFLOW_PHASES.RESULTS
     ];
     ALL_PHASES
@@ -308,14 +300,12 @@ describe('areInteractionsRevealed', () => {
     });
   });
 
-  it('returns true during INTERACTION_REVEAL and RESULTS in retro mode', () => {
-    expect(areInteractionsRevealed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
+  it('returns true during RESULTS in retro mode', () => {
     expect(areInteractionsRevealed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
   it('returns false for all other phases in retro mode', () => {
     const revealedPhases = [
-      WORKFLOW_PHASES.INTERACTION_REVEAL,
       WORKFLOW_PHASES.RESULTS
     ];
     ALL_PHASES
@@ -517,8 +507,6 @@ describe('getPhaseDescription', () => {
       .toBe('Group related cards together');
     expect(getPhaseDescription(WORKFLOW_PHASES.INTERACTIONS))
       .toBe('Add comments, votes, and reactions');
-    expect(getPhaseDescription(WORKFLOW_PHASES.INTERACTION_REVEAL))
-      .toBe('Review all interactions and feedback');
     expect(getPhaseDescription(WORKFLOW_PHASES.RESULTS))
       .toBe('View top-voted items');
     expect(getPhaseDescription(WORKFLOW_PHASES.POLL))

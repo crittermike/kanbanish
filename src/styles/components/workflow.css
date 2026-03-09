@@ -61,10 +61,6 @@
   color: var(--primary-color);
 }
 
-.workflow-phase[data-phase="INTERACTION_REVEAL"] .phase-info h3 {
-  color: var(--success-color);
-}
-
 .workflow-phase[data-phase="RESULTS"] .phase-info h3 {
   color: var(--accent-alt);
 }
@@ -74,19 +70,19 @@
   .workflow-controls {
     padding: 12px 15px;
   }
-  
+
   .workflow-phase {
     flex-direction: column;
     align-items: stretch;
     gap: 15px;
     text-align: center;
   }
-  
+
   .phase-controls {
     justify-content: center;
     flex-wrap: wrap;
   }
-  
+
   .phase-controls .btn {
     flex: 1;
     min-width: 140px;

@@ -85,7 +85,7 @@ describe('Card Comment Revealing and Freezing', () => {
       downvotingEnabled: false,
       multipleVotesAllowed: false,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL' // All interactions revealed and frozen
+      workflowPhase: 'RESULTS' // All interactions revealed and frozen
     };
 
     useBoardContext.mockReturnValue(revealedContext);
@@ -109,7 +109,7 @@ describe('Card Comment Revealing and Freezing', () => {
       downvotingEnabled: false,
       multipleVotesAllowed: false,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL' // Interactions revealed = frozen
+      workflowPhase: 'RESULTS' // Interactions revealed = frozen
     };
 
     useBoardContext.mockReturnValue(frozenContext);
@@ -168,7 +168,7 @@ describe('Card Comment Revealing and Freezing', () => {
       downvotingEnabled: false,
       multipleVotesAllowed: false,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL', // Frozen state
+      workflowPhase: 'RESULTS', // Frozen state
       updateCard: mockUpdateCard,
       deleteCard: mockDeleteCard,
       addComment: mockAddComment,

@@ -391,7 +391,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Workflow phase transitions and results navigation
   const {
-    startGroupingPhase, startInteractionsPhase, startInteractionRevealPhase,
+    startGroupingPhase, startInteractionsPhase,
     startResultsPhase, startPollPhase, startPollResultsPhase,
     goToCreationPhase, goToPreviousPhase,
     startHealthCheckPhase, startHealthCheckResultsPhase,
@@ -598,7 +598,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       workflowPhase,
       setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
-    startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
+    startInteractionsPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
       // Poll system
@@ -664,7 +664,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
-    startInteractionsPhase, startInteractionRevealPhase, startResultsPhase,
+    startInteractionsPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
     pollVotes, userPollVote, submitPollVote, getPollStats,

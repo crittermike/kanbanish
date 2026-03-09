@@ -47,19 +47,6 @@ describe('useWorkflow', () => {
       });
     });
 
-    it('should call updateBoardSettings with INTERACTION_REVEAL for startInteractionRevealPhase', () => {
-      mockProps = createMockProps();
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.startInteractionRevealPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
-      });
-    });
-
     it('should call updateBoardSettings with RESULTS and resultsViewIndex 0 for startResultsPhase', () => {
       mockProps = createMockProps();
       const { result } = renderHook(() => useWorkflow(mockProps));
@@ -238,22 +225,7 @@ describe('useWorkflow', () => {
       });
     });
 
-    it('should go from INTERACTION_REVEAL to INTERACTIONS', () => {
-      mockProps = createMockProps({
-        workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
-      });
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.goToPreviousPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.INTERACTIONS
-      });
-    });
-
-    it('should go from RESULTS to INTERACTION_REVEAL', () => {
+    it('should go from RESULTS to INTERACTIONS', () => {
       mockProps = createMockProps({
         workflowPhase: WORKFLOW_PHASES.RESULTS
       });
@@ -264,7 +236,7 @@ describe('useWorkflow', () => {
       });
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.INTERACTION_REVEAL
+        workflowPhase: WORKFLOW_PHASES.INTERACTIONS
       });
     });
 
