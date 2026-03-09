@@ -2,8 +2,8 @@ import { ref, remove, set } from 'firebase/database';
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import {
   X, CheckSquare, Tag,
-  AlignLeft, MessageSquare, MoreHorizontal,
-  Plus, Archive, Sliders, Paperclip, AtSign
+  AlignLeft, MessageSquare,
+  Plus, Sliders
 } from 'react-feather';
 import { useBoardContext } from '../../context/BoardContext';
 import { useCardOperations } from '../../hooks/useCardOperations';
@@ -195,7 +195,6 @@ const CardDetailModal = ({
   const currentIndex = allCardsList.findIndex(c => c.cardId === cardId && c.columnId === columnId);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allCardsList.length - 1;
-  const pagerIndex = currentIndex >= 0 ? currentIndex + 1 : 1;
   const reviewCardListSize = allCardsList.length;
   const showNavigationHints = reviewCardListSize > 1 && !detailNavigationHintsDismissed;
 
@@ -242,21 +241,6 @@ const CardDetailModal = ({
       remove(descRef);
     }
   }, [description, cardData?.description, boardId, columnId, cardId]);
-
-  const handleArchiveCard = useCallback(() => {
-    if (!cardData) return;
-    if (window.confirm('Archive this card? This action can be undone.')) {
-      const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
-      const savedData = { ...cardData };
-      recordAction(
-        'Archived card',
-        () => set(cardRef, savedData),
-        () => remove(cardRef)
-      );
-      remove(cardRef);
-      onClose();
-    }
-  }, [boardId, columnId, cardId, cardData, recordAction, onClose]);
 
   useEffect(() => {
     setIsEditingContent(false);
@@ -379,12 +363,8 @@ const CardDetailModal = ({
         <div className="card-detail-header">
           <div className="card-detail-header-meta">
             <span className="card-detail-column-badge">{contextLabel || columnTitle}</span>
-            <span className="card-detail-card-id">CARD-{pagerIndex}</span>
           </div>
           <div className="card-detail-header-actions">
-            <button className="card-detail-more-btn" aria-label="More options" title="More options">
-              <MoreHorizontal size={18} />
-            </button>
             <button className="close-button" onClick={onClose} aria-label="Close" title="Close (Esc)">
               <X size={18} />
             </button>
@@ -497,7 +477,7 @@ const CardDetailModal = ({
               <div className="card-detail-comment-area">
                 <div
                   className="card-detail-user-avatar"
-                  style={{ backgroundColor: userColor || 'var(--accent-alt, #8b5cf6)' }}
+                  style={{ backgroundColor: userColor || 'var(--accent, #58a6ff)' }}
                 >
                   {getInitials(displayName || 'Anonymous')}
                 </div>
@@ -518,10 +498,6 @@ const CardDetailModal = ({
                     }}
                     disabled={!commentsAllowed}
                   />
-                  <div className="card-detail-comment-icons">
-                    <Paperclip size={16} />
-                    <AtSign size={16} />
-                  </div>
                 </div>
               </div>
 
@@ -653,12 +629,6 @@ const CardDetailModal = ({
               disabled={!metadataEditingAllowed}
             >
               <Sliders size={18} /> Card Color
-            </button>
-            <button
-              className="card-detail-sidebar-menu-item"
-              onClick={handleArchiveCard}
-            >
-              <Archive size={18} /> Archive Card
             </button>
           </div>
         </div>
