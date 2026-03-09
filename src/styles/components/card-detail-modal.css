@@ -4,9 +4,10 @@
 /* Card Detail Modal — Two-Column Layout */
 /* ===================================== */
 
-.card-detail-modal {
+.modal-container.card-detail-modal {
   max-width: 1100px;
   width: 95%;
+  max-height: 90vh;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
