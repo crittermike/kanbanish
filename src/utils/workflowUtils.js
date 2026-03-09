@@ -9,7 +9,6 @@ export const WORKFLOW_PHASES = {
   CREATION: 'CREATION',
   GROUPING: 'GROUPING',
   INTERACTIONS: 'INTERACTIONS',
-  INTERACTION_REVEAL: 'INTERACTION_REVEAL',
   RESULTS: 'RESULTS',
   POLL: 'POLL',
   POLL_RESULTS: 'POLL_RESULTS'
@@ -52,7 +51,6 @@ export const areInteractionsVisible = (workflowPhase, retrospectiveMode = false)
     return true;
   } // Always visible when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
-         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -66,8 +64,7 @@ export const areOthersInteractionsVisible = (workflowPhase, retrospectiveMode = 
   if (!retrospectiveMode) {
     return true;
   } // Always visible when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
-         workflowPhase === WORKFLOW_PHASES.RESULTS;
+  return workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
 /**
@@ -95,7 +92,6 @@ export const areCardsRevealed = (workflowPhase, retrospectiveMode = false) => {
   } // Always revealed when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.GROUPING ||
          workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
-         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
@@ -109,8 +105,7 @@ export const areInteractionsRevealed = (workflowPhase, retrospectiveMode = false
   if (!retrospectiveMode) {
     return false;
   } // Never revealed when retrospective mode is disabled
-  return workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
-         workflowPhase === WORKFLOW_PHASES.RESULTS;
+  return workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 
 /**
@@ -204,8 +199,6 @@ export const getPhaseDescription = workflowPhase => {
       return 'Group related cards together';
     case WORKFLOW_PHASES.INTERACTIONS:
       return 'Add comments, votes, and reactions';
-    case WORKFLOW_PHASES.INTERACTION_REVEAL:
-      return 'Review all interactions and feedback';
     case WORKFLOW_PHASES.RESULTS:
       return 'View top-voted items';
     case WORKFLOW_PHASES.POLL:

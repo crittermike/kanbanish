@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowDown, BarChart2, CheckSquare, ChevronRight, Eye, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
+import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import BackgroundPicker from './BackgroundPicker';
 import InsightsContent from './InsightsContent';
@@ -45,8 +45,6 @@ const SettingsPanel = ({
   actionItemCount,
   actionItemsEnabled,
   updateActionItemsEnabled,
-  skipRevealPhase,
-  updateSkipRevealPhase,
   children,
   backgroundId,
   setBoardBackground,
@@ -438,27 +436,6 @@ const SettingsPanel = ({
                   </div>
                   <p className="settings-hint">
                     Convert cards into trackable action items with assignees and due dates
-                  </p>
-                </div>
-
-                <div className="settings-section">
-                  <div className="settings-toggle-row">
-                    <span className="settings-toggle-label">
-                      <Eye size={14} aria-hidden="true" className="settings-toggle-icon" />
-                      Skip reveal phase
-                    </span>
-                    <button
-                      className="settings-toggle-switch"
-                      role="switch"
-                      aria-checked={skipRevealPhase}
-                      onClick={() => updateSkipRevealPhase(!skipRevealPhase)}
-                      aria-label="Skip the vote reveal phase and go straight to results"
-                    >
-                      <span className="settings-toggle-knob"></span>
-                    </button>
-                  </div>
-                  <p className="settings-hint">
-                    Go straight from voting to results, skipping the separate reveal step
                   </p>
                 </div>
 

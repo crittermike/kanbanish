@@ -46,10 +46,8 @@ describe('WorkflowControls', () => {
   const defaultContext = {
     workflowPhase: 'CREATION',
     initialWorkflowPhase: 'CREATION',
-    skipRevealPhase: false,
     votesPerUser: 3,
     startGroupingPhase: vi.fn(),
-    startInteractionRevealPhase: vi.fn(),
     startResultsPhase: vi.fn(),
     startPollPhase: vi.fn(),
     startPollResultsPhase: vi.fn(),
@@ -140,48 +138,23 @@ describe('WorkflowControls', () => {
     );
   });
 
-  test('interactions phase shows Reveal Votes when skipRevealPhase is false', () => {
+  test('interactions phase shows View Results button', () => {
     useBoardContext.mockReturnValue({
       ...defaultContext,
-      workflowPhase: 'INTERACTIONS',
-      skipRevealPhase: false
-    });
-    render(<WorkflowControls />);
-    expect(screen.getByText('Reveal Votes')).toBeInTheDocument();
-  });
-
-  test('interactions phase shows View Results when skipRevealPhase is true', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'INTERACTIONS',
-      skipRevealPhase: true
+      workflowPhase: 'INTERACTIONS'
     });
     render(<WorkflowControls />);
     expect(screen.getByText('View Results')).toBeInTheDocument();
-    expect(screen.queryByText('Reveal Votes')).not.toBeInTheDocument();
   });
 
-  test('clicking View Results calls startResultsPhase when skipRevealPhase is true', () => {
+  test('clicking View Results calls startResultsPhase', () => {
     useBoardContext.mockReturnValue({
       ...defaultContext,
-      workflowPhase: 'INTERACTIONS',
-      skipRevealPhase: true
+      workflowPhase: 'INTERACTIONS'
     });
     render(<WorkflowControls />);
 
     fireEvent.click(screen.getByText('View Results'));
     expect(defaultContext.startResultsPhase).toHaveBeenCalled();
-  });
-
-  test('clicking Reveal Votes calls startInteractionRevealPhase when skipRevealPhase is false', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'INTERACTIONS',
-      skipRevealPhase: false
-    });
-    render(<WorkflowControls />);
-
-    fireEvent.click(screen.getByText('Reveal Votes'));
-    expect(defaultContext.startInteractionRevealPhase).toHaveBeenCalled();
   });
 });

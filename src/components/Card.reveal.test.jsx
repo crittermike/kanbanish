@@ -352,7 +352,7 @@ describe('Card Reveal Mode', () => {
       downvotingEnabled: true,
       multipleVotesAllowed: false,
       retrospectiveMode: true,
-      workflowPhase: 'INTERACTION_REVEAL' // Interactions revealed (frozen)
+      workflowPhase: 'RESULTS' // Interactions revealed (frozen)
     });
 
     renderCard({ cardData: cardDataFromOtherUser });

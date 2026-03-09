@@ -61,10 +61,6 @@
   color: var(--primary-color);
 }
 
-.workflow-phase[data-phase="INTERACTION_REVEAL"] .phase-info h3 {
-  color: var(--success-color);
-}
-
 .workflow-phase[data-phase="RESULTS"] .phase-info h3 {
   color: var(--accent-alt);
 }
