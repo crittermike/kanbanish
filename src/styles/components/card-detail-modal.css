@@ -482,9 +482,7 @@
 
 .card-detail-timer-card .card-detail-timer-progress {
   position: relative;
-  left: -16px;
   width: calc(100% + 32px);
-  margin-top: 14px;
   margin-bottom: -20px;
   border-radius: 0 0 12px 12px;
 }
