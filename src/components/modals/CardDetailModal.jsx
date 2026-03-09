@@ -97,7 +97,8 @@ const CardDetailModal = ({
     isCardAuthor,
     isCommentAuthor,
     setCardColor,
-    setCardTags
+    setCardTags,
+    deleteCard
   } = useCardOperations({
     boardId,
     columnId,
@@ -123,7 +124,6 @@ const CardDetailModal = ({
   const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0 });
   const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
   const [description, setDescription] = useState('');
-  const [showActivityDetails, setShowActivityDetails] = useState(false);
   const colorButtonRef = useRef(null);
   const tagButtonRef = useRef(null);
 
@@ -249,7 +249,6 @@ const CardDetailModal = ({
     setShowColorPicker(false);
     setShowTagPicker(false);
     setDescription(cardData?.description || '');
-    setShowActivityDetails(false);
   }, [cardId, columnId, setShowEmojiPicker, cardData?.description]);
 
   const handleKeyDown = useCallback((e) => {
@@ -400,15 +399,14 @@ const CardDetailModal = ({
                     placeholder="Enter card content..."
                   />
                   <div className="card-detail-edit-actions">
+                    <button className="btn danger-btn" onClick={() => { deleteCard(); onClose(); }}>Delete</button>
+                    <button className="btn secondary-btn" onClick={handleEditCancel}>Cancel</button>
                     <button
                       className="btn success-btn"
                       onClick={handleEditSave}
                       disabled={!editContent.trim()}
                     >
                       Save
-                    </button>
-                    <button className="btn secondary-btn" onClick={handleEditCancel}>
-                      Cancel
                     </button>
                     <span className="card-detail-edit-hint">
                       {editContent.length} chars • Ctrl+Enter to save
@@ -466,12 +464,6 @@ const CardDetailModal = ({
               <div className="card-detail-section-header">
                 <MessageSquare size={18} />
                 <h3>Activity</h3>
-                <button
-                  className="card-detail-show-details-btn"
-                  onClick={() => setShowActivityDetails(!showActivityDetails)}
-                >
-                  {showActivityDetails ? 'Hide Details' : 'Show Details'}
-                </button>
               </div>
 
               <div className="card-detail-comment-area">
@@ -501,15 +493,7 @@ const CardDetailModal = ({
                 </div>
               </div>
 
-              <button
-                className="card-detail-save-btn"
-                onClick={() => { if (newComment.trim()) addComment(); }}
-                disabled={!newComment.trim() || !commentsAllowed}
-              >
-                Save
-              </button>
-
-              {showActivityDetails && reviewToolsVisible && (
+              {reviewToolsVisible && (
                 <div className="card-detail-comments">
                   <Comments
                     comments={displayCardData.comments}

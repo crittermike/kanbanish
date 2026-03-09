@@ -5,7 +5,7 @@
 /* ===================================== */
 
 .card-detail-modal {
-  max-width: 960px;
+  max-width: 1100px;
   width: 95%;
   max-height: 90vh;
   display: flex;
@@ -191,6 +191,10 @@
   align-items: center;
 }
 
+.card-detail-edit-actions .danger-btn {
+  margin-right: auto;
+}
+
 .card-detail-edit-hint {
   margin-left: auto;
   font-size: 11px;
@@ -269,28 +273,6 @@
   border-color: var(--accent);
 }
 
-/* Activity section */
-.card-detail-show-details-btn {
-  margin-left: auto;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-color);
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.card-detail-show-details-btn:hover {
-  background-color: var(--hover-bg);
-}
-
-.light-mode .card-detail-show-details-btn {
-  border-color: #d8dce3;
-}
-
 /* Comment area */
 .card-detail-comment-area {
   display: flex;
@@ -346,31 +328,6 @@
 
 .light-mode .card-detail-comment-input:focus {
   border-color: var(--accent);
-}
-
-/* Save button */
-.card-detail-save-btn {
-  margin-top: 10px;
-  padding: 8px 22px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: var(--accent, #3b82f6);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  align-self: flex-start;
-}
-
-.card-detail-save-btn:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.card-detail-save-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 /* Comments list */
