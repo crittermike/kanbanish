@@ -1,12 +1,10 @@
-import React, { useRef, useState } from 'react';
-import { MessageSquare, Smile, Droplet, Tag, CheckSquare, Edit2 } from 'react-feather';
+import React, { useRef } from 'react';
+import { MessageSquare, Smile, Edit2 } from 'react-feather';
 import {
   shouldUseDisabledStyling,
   shouldHideFeature,
   getReactionDisabledMessage
 } from '../utils/retrospectiveModeUtils';
-import CardColorPicker from './CardColorPicker';
-import CardTagPicker from './CardTagPicker';
 import EmojiPicker from './EmojiPicker';
 
 const CardHoverActions = React.memo(({
@@ -18,39 +16,16 @@ const CardHoverActions = React.memo(({
   emojiPickerPosition,
   addReaction,
   hasUserReactedWithEmoji,
-  commentCount = 0,
   reactionDisabled = false,
   reactionDisabledReason = 'cards-not-revealed',
-  metadataDisabled = false,
-  metadataDisabledReason = null,
   showEmojiAction = true,
-  showMetadataActions = true,
   showCommentAction = true,
-  onColorSelect,
-  onTagAdd,
-  onTagRemove,
-  currentColor,
-  currentTags,
-  boardTags,
-  onConvertToActionItem,
-  onRemoveActionItem,
-  hasActionItem,
   onEdit
 }) => {
   const emojiButtonRef = useRef(null);
-  const colorButtonRef = useRef(null);
-  const tagButtonRef = useRef(null);
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showTagPicker, setShowTagPicker] = useState(false);
-  const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0 });
-  const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
-
-  // Use utility functions for consistent logic
   const useReactionDisabledStyling = shouldUseDisabledStyling(reactionDisabled, reactionDisabledReason);
-  const useMetadataDisabledStyling = shouldUseDisabledStyling(metadataDisabled, metadataDisabledReason);
   const hideReactionAction = !showEmojiAction || shouldHideFeature(reactionDisabledReason);
-  const metadataDisabledTitle = metadataDisabled ? 'Labels and colors are unavailable until cards are revealed' : '';
 
   return (
     <div className="card-hover-actions">
@@ -61,127 +36,6 @@ const CardHoverActions = React.memo(({
           onClose={() => setShowEmojiPicker(false)}
           hasUserReactedWithEmoji={hasUserReactedWithEmoji}
         />
-      )}
-      {showColorPicker && (
-        <CardColorPicker
-          position={colorPickerPosition}
-          onColorSelect={onColorSelect}
-          onClose={() => setShowColorPicker(false)}
-          currentColor={currentColor}
-        />
-      )}
-      {showTagPicker && (
-        <CardTagPicker
-          position={tagPickerPosition}
-          onTagAdd={onTagAdd}
-          onTagRemove={onTagRemove}
-          currentTags={currentTags}
-          boardTags={boardTags}
-          onClose={() => setShowTagPicker(false)}
-        />
-      )}
-      {showMetadataActions && (
-        <>
-          <button
-            className={`card-hover-action color-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
-            onClick={metadataDisabled ? undefined : e => {
-              e.stopPropagation();
-              if (colorButtonRef.current) {
-                const buttonRect = colorButtonRef.current.getBoundingClientRect();
-                setColorPickerPosition({
-                  top: buttonRect.bottom + window.scrollY + 5,
-                  left: buttonRect.left + window.scrollX
-                });
-              }
-              setShowColorPicker(!showColorPicker);
-              setShowEmojiPicker(false);
-              setShowTagPicker(false);
-              setShowComments(false);
-            }}
-            title={metadataDisabled ? metadataDisabledTitle : 'Set color'}
-            aria-label="Set color"
-            ref={colorButtonRef}
-            disabled={useMetadataDisabledStyling}
-          >
-            <Droplet size={16} aria-hidden="true" />
-          </button>
-          <button
-            className={`card-hover-action tag-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
-            onClick={metadataDisabled ? undefined : e => {
-              e.stopPropagation();
-              if (tagButtonRef.current) {
-                const buttonRect = tagButtonRef.current.getBoundingClientRect();
-                setTagPickerPosition({
-                  top: buttonRect.bottom + window.scrollY + 5,
-                  left: buttonRect.left + window.scrollX
-                });
-              }
-              setShowTagPicker(!showTagPicker);
-              setShowEmojiPicker(false);
-              setShowColorPicker(false);
-              setShowComments(false);
-            }}
-            title={metadataDisabled ? metadataDisabledTitle : 'Add tags'}
-            aria-label="Add tags"
-            ref={tagButtonRef}
-            disabled={useMetadataDisabledStyling}
-          >
-            <Tag size={16} aria-hidden="true" />
-          </button>
-        </>
-      )}
-      {!hideReactionAction && (
-        <button
-          className={`card-hover-action emoji-action ${useReactionDisabledStyling ? 'disabled' : ''}`}
-          onClick={reactionDisabled ? undefined : e => {
-            e.stopPropagation();
-            if (emojiButtonRef.current) {
-              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
-              setEmojiPickerPosition({
-                top: buttonRect.bottom + window.scrollY + 5,
-                left: buttonRect.left + window.scrollX
-              });
-            }
-            setShowEmojiPicker(!showEmojiPicker);
-            setShowColorPicker(false);
-            setShowTagPicker(false);
-            setShowComments(false);
-          }}
-          title={reactionDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
-          aria-label="Add reaction"
-          ref={emojiButtonRef}
-          disabled={useReactionDisabledStyling}
-        >
-          <Smile size={16} aria-hidden="true" />
-        </button>
-      )}
-
-      {showMetadataActions && !hasActionItem && onConvertToActionItem && (
-        <button
-          className={`card-hover-action action-item-action ${useMetadataDisabledStyling ? 'disabled' : ''}`}
-          onClick={metadataDisabled ? undefined : e => {
-            e.stopPropagation();
-            onConvertToActionItem();
-          }}
-          title={metadataDisabled ? metadataDisabledTitle : 'Convert to action item'}
-          aria-label="Convert to action item"
-          disabled={useMetadataDisabledStyling}
-        >
-          <CheckSquare size={16} aria-hidden="true" />
-        </button>
-      )}
-      {hasActionItem && onRemoveActionItem && (
-        <button
-          className="card-hover-action action-item-indicator"
-          onClick={e => {
-            e.stopPropagation();
-            onRemoveActionItem();
-          }}
-          title="Remove action item"
-          aria-label="Remove action item"
-        >
-          <CheckSquare size={16} aria-hidden="true" />
-        </button>
       )}
 
       {onEdit && (
@@ -198,21 +52,42 @@ const CardHoverActions = React.memo(({
         </button>
       )}
 
+      {!hideReactionAction && (
+        <button
+          className={`card-hover-action emoji-action ${useReactionDisabledStyling ? 'disabled' : ''}`}
+          onClick={reactionDisabled ? undefined : e => {
+            e.stopPropagation();
+            if (emojiButtonRef.current) {
+              const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+              setEmojiPickerPosition({
+                top: buttonRect.bottom + window.scrollY + 5,
+                left: buttonRect.left + window.scrollX
+              });
+            }
+            setShowEmojiPicker(!showEmojiPicker);
+            setShowComments(false);
+          }}
+          title={reactionDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
+          aria-label="Add reaction"
+          ref={emojiButtonRef}
+          disabled={useReactionDisabledStyling}
+        >
+          <Smile size={16} aria-hidden="true" />
+        </button>
+      )}
+
       {showCommentAction && (
         <button
-          className={`card-hover-action comment-action ${commentCount > 0 ? 'has-comments' : ''}`}
+          className="card-hover-action comment-action"
           onClick={e => {
             e.stopPropagation();
-            setShowColorPicker(false);
-            setShowTagPicker(false);
             setShowEmojiPicker(false);
             toggleComments();
           }}
           title="Toggle comments"
-          aria-label={commentCount > 0 ? `Toggle comments (${commentCount})` : 'Toggle comments'}
+          aria-label="Toggle comments"
         >
           <MessageSquare size={16} aria-hidden="true" />
-          {commentCount > 0 && <span className="comment-count">{commentCount}</span>}
         </button>
       )}
     </div>

@@ -146,14 +146,10 @@ describe('Card Component', () => {
     expect(screen.getByText('Test comment')).toBeInTheDocument();
   });
 
-  test('comments button has special styling when comments exist', () => {
+  test('comments button does not have special styling', () => {
     render(<Card {...mockProps} />);
-
-    // Find the comments button
     const commentsButton = screen.getByTitle('Toggle comments');
-    
-    // Check that it has the 'has-comments' class when there are comments
-    expect(commentsButton).toHaveClass('has-comments');
+    expect(commentsButton).not.toHaveClass('has-comments');
   });
 
   test('comments button does not have special styling when no comments exist', () => {

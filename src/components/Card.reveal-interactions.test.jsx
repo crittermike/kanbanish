@@ -126,12 +126,10 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     render(<Card {...baseProps} />);
 
-    // Voting stays hidden, but review tools and reactions should remain available.
+    // Voting stays hidden, but reactions and comments should remain available.
     expect(screen.getByText('👍')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
-    expect(screen.getByLabelText('Set color')).toBeInTheDocument();
-    expect(screen.getByLabelText('Add tags')).toBeInTheDocument();
     expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });
