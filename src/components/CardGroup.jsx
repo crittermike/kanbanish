@@ -4,7 +4,23 @@ import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-f
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useGroupOperations } from '../hooks/useGroupOperations';
-import { areInteractionsVisible, areOthersInteractionsVisible, areInteractionsAllowed, isGroupingAllowed } from '../utils/workflowUtils';
+import {
+  filterVisibleInteractionData,
+  getDisabledReason,
+  getReactionDisabledMessage,
+  shouldHideFeature,
+  shouldUseDisabledStyling
+} from '../utils/retrospectiveModeUtils';
+import {
+  areCommentsAllowed,
+  areInteractionsVisible,
+  areOthersInteractionsVisible,
+  areInteractionsAllowed,
+  areReactionsAllowed,
+  areReactionsVisible,
+  areReviewToolsVisible,
+  isGroupingAllowed
+} from '../utils/workflowUtils';
 import Card from './Card';
 import Comments from './Comments';
 import EmojiPicker from './EmojiPicker';
@@ -22,7 +38,8 @@ function CardGroup({
   sortByVotes,
   dimmed = false,
   isFiltering = false,
-  matchingCardIds = null
+  matchingCardIds = null,
+  onExpandCard = null
 }) {
   const { showNotification } = useNotification();
   const {
@@ -64,30 +81,16 @@ function CardGroup({
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
 
   // Create filtered group data for display
-  const displayGroupData = shouldHideOthersInteractions ? {
-    ...groupData,
-    // Filter votes to only show user's own vote count
-    votes: groupData.voters && user?.uid && groupData.voters[user.uid] ? Math.abs(groupData.voters[user.uid]) : 0,
-    voters: groupData.voters && user?.uid ? { [user.uid]: groupData.voters[user.uid] } : {},
-    // Filter reactions to only show user's own reactions
-    reactions: groupData.reactions ? Object.fromEntries(
-      Object.entries(groupData.reactions).filter(([_emoji, reactionData]) => 
-        reactionData.users && user?.uid && reactionData.users[user.uid]
-      ).map(([emoji, _reactionData]) => [
-        emoji,
-        {
-          count: 1, // Only show count of 1 for user's own reactions
-          users: { [user.uid]: true }
-        }
-      ])
-    ) : {},
-    // Filter comments to only show user's own comments
-    comments: groupData.comments ? Object.fromEntries(
-      Object.entries(groupData.comments).filter(([_commentId, comment]) => 
-        comment.createdBy === user?.uid
-      )
-    ) : {}
-  } : groupData;
+  const displayGroupData = filterVisibleInteractionData(groupData, user?.uid, shouldHideOthersInteractions);
+  const disabledReason = getDisabledReason(retrospectiveMode, workflowPhase);
+  const votingDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionsVisible = areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
+  const commentsVisible = areReviewToolsVisible(workflowPhase, retrospectiveMode);
+  const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
+  const hideReactionComposer = !reactionsVisible || shouldHideFeature(reactionDisabledReason);
+  const useReactionDisabledStyling = shouldUseDisabledStyling(reactionsDisabled, reactionDisabledReason);
 
   // Set up drop target for cards to be added to this group
   const [{ isOver }, drop] = useDrop(() => ({
@@ -251,7 +254,8 @@ function CardGroup({
               onUpvote={handleUpvoteGroup}
               onDownvote={handleDownvoteGroup}
               showDownvoteButton={downvotingEnabled}
-              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+              disabled={votingDisabled}
+              disabledReason={disabledReason}
             />
           )}
 
@@ -277,22 +281,24 @@ function CardGroup({
       </div>
 
       {/* Group Interactions Section - Comments and Reactions buttons */}
-      {areInteractionsVisible(workflowPhase, retrospectiveMode) && (
+      {(reactionsVisible || commentsVisible) && (
         <div className="group-interactions-section">
           <div className="group-interactions-left">
             {/* Existing Group Reactions - inline like cards */}
-            {displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
+            {reactionsVisible && displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
               if (reactionData.count <= 0) return null;
               const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
               return (
                 <button 
                   key={emoji} 
-                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''}`}
-                  onClick={e => {
+                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''} ${useReactionDisabledStyling ? 'disabled' : ''} ${reactionDisabledReason === 'frozen' ? 'frozen' : ''}`}
+                  onClick={reactionsDisabled ? undefined : e => {
                     e.stopPropagation();
                     groupOperations.addReaction(e, emoji);
                   }}
-                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'vote' : 'votes'}${hasUserReacted ? ', you reacted' : ''}`}
+                  title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
+                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'reaction' : 'reactions'}${hasUserReacted ? ', you reacted' : ''}`}
+                  disabled={reactionsDisabled}
                 >
                   {emoji} {reactionData.count}
                 </button>
@@ -300,42 +306,47 @@ function CardGroup({
             })}
             
             {/* Group Reactions Button - add button like cards */}
-            <button
-              className="interaction-btn reactions-btn"
-              onClick={e => {
-                e.stopPropagation();
-                if (groupOperations.emojiButtonRef?.current) {
-                  const buttonRect = groupOperations.emojiButtonRef.current.getBoundingClientRect();
-                  groupOperations.setEmojiPickerPosition({
-                    top: buttonRect.bottom + window.scrollY + 5,
-                    left: buttonRect.left + window.scrollX
-                  });
-                }
-                groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
-              }}
-              title="Add reaction"
-              aria-label="Add reaction to group"
-              ref={groupOperations.emojiButtonRef}
-            >
-              +
-            </button>
+            {reactionsVisible && !hideReactionComposer && (
+              <button
+                className={`interaction-btn reactions-btn ${useReactionDisabledStyling ? 'disabled' : ''}`}
+                onClick={reactionsDisabled ? undefined : e => {
+                  e.stopPropagation();
+                  if (groupOperations.emojiButtonRef?.current) {
+                    const buttonRect = groupOperations.emojiButtonRef.current.getBoundingClientRect();
+                    groupOperations.setEmojiPickerPosition({
+                      top: buttonRect.bottom + window.scrollY + 5,
+                      left: buttonRect.left + window.scrollX
+                    });
+                  }
+                  groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
+                }}
+                title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
+                aria-label="Add reaction to group"
+                ref={groupOperations.emojiButtonRef}
+                disabled={useReactionDisabledStyling}
+              >
+                +
+              </button>
+            )}
           </div>
           <div className="group-interactions-right">
             {/* Group Comments Button - right aligned like cards */}
-            <button
-              className={`interaction-btn comments-btn ${Object.keys(displayGroupData.comments || {}).length > 0 ? 'has-comments' : ''}`}
-              onClick={e => {
-                e.stopPropagation();
-                groupOperations.toggleComments();
-              }}
-              title="Toggle comments"
-              aria-label="Toggle group comments"
-            >
-              <MessageSquare size={16} aria-hidden="true" />
-              {Object.keys(displayGroupData.comments || {}).length > 0 && (
-                <span className="interaction-count">{Object.keys(displayGroupData.comments || {}).length}</span>
-              )}
-            </button>
+            {commentsVisible && (
+              <button
+                className={`interaction-btn comments-btn ${Object.keys(displayGroupData.comments || {}).length > 0 ? 'has-comments' : ''}`}
+                onClick={e => {
+                  e.stopPropagation();
+                  groupOperations.toggleComments();
+                }}
+                title="Toggle comments"
+                aria-label="Toggle group comments"
+              >
+                <MessageSquare size={16} aria-hidden="true" />
+                {Object.keys(displayGroupData.comments || {}).length > 0 && (
+                  <span className="interaction-count">{Object.keys(displayGroupData.comments || {}).length}</span>
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -351,7 +362,7 @@ function CardGroup({
       )}
 
       {/* Group Comments Section - only show when comments are toggled on */}
-      {areInteractionsVisible(workflowPhase, retrospectiveMode) && groupOperations.showComments && (
+      {commentsVisible && groupOperations.showComments && (
         <div className="group-comments-section">
           <Comments
             comments={displayGroupData.comments}
@@ -361,7 +372,8 @@ function CardGroup({
             onEditComment={groupOperations.editComment}
             onDeleteComment={groupOperations.deleteComment}
             isCommentAuthor={groupOperations.isCommentAuthor}
-            interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
+            interactionsDisabled={!commentsAllowed}
+            disabledReason={!commentsAllowed ? 'cards-not-revealed' : null}
             presenceData={presenceData}
           />
         </div>
@@ -383,6 +395,7 @@ function CardGroup({
                 columnId={columnId}
                 groupId={groupId}
                 dimmed={isFiltering && matchingCardIds && !matchingCardIds.has(card.id)}
+                onExpandCard={onExpandCard}
               />
             ))
           )}

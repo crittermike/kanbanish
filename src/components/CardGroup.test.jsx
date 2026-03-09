@@ -289,6 +289,26 @@ describe('CardGroup Component', () => {
     expect(downvoteButton).toBeInTheDocument();
   });
 
+  test('shows group comments during grouping review', () => {
+    const groupingContext = {
+      ...mockBoardContext,
+      retrospectiveMode: true,
+      workflowPhase: 'GROUPING'
+    };
+    useBoardContext.mockReturnValue(groupingContext);
+
+    const groupDataWithComments = {
+      ...mockGroupData,
+      comments: {
+        comment1: { content: 'Theme note', createdBy: 'user1' }
+      }
+    };
+
+    render(<CardGroup {...mockProps} groupData={groupDataWithComments} />);
+
+    expect(screen.getByLabelText('Toggle group comments')).toBeInTheDocument();
+  });
+
   test('calls upvoteGroup when upvote button is clicked', () => {
     // Override context for interactions phase
     const interactionsContext = { ...mockBoardContext, workflowPhase: 'INTERACTIONS' };

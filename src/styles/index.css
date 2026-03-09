@@ -33,6 +33,8 @@
 @import 'components/insights.css';
 @import 'components/background-picker.css';
 @import 'components/board-background.css';
+@import 'components/focus-mode.css';
+@import 'components/card-detail-modal.css';
 
 /* Utility classes and notifications */
 .notification {

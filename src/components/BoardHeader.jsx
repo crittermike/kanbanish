@@ -1,4 +1,4 @@
-import { Home, Search } from 'react-feather';
+import { Home, Maximize2, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import UserCounter from './UserCounter';
 /**
@@ -9,7 +9,7 @@ import UserCounter from './UserCounter';
  * @param {Function} props.handleBoardTitleChange - Called on title input change
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, onFocusModeEnter }) => (
   <div className="board-title-container">
     {onGoHome && (
       <button
@@ -39,6 +39,16 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
         aria-label="Search cards"
       >
         <Search size={16} />
+      </button>
+    )}
+    {onFocusModeEnter && (
+      <button
+        className="focus-mode-trigger-btn"
+        onClick={onFocusModeEnter}
+        title="Focus mode"
+        aria-label="Enter focus mode"
+      >
+        <Maximize2 size={16} />
       </button>
     )}
     <div className="action-buttons">

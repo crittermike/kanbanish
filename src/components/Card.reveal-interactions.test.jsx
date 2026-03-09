@@ -104,7 +104,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });
 
-  it('hides interactions in GROUPING phase', () => {
+  it('keeps review tools and reactions visible in GROUPING phase while voting stays hidden', () => {
     const groupingPhaseContext = {
       boardId: 'test-board',
       user: { uid: 'user1' },
@@ -126,10 +126,10 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     render(<Card {...baseProps} />);
 
-    // Interactions should not be visible at all in grouping phase
-    expect(screen.queryByText('👍')).not.toBeInTheDocument();
-    expect(screen.queryByText('+')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
+    // Voting stays hidden, but reactions and comments should remain available.
+    expect(screen.getByText('👍')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
+    expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });
@@ -193,16 +193,18 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
 
     render(<Card {...baseProps} />);
 
-    // Interactions should be visible but disabled (frozen)
+    // Voting is frozen, but reactions remain open for review.
     expect(screen.getByText('👍')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     // Check that voting buttons show the frozen message
     expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(2);
 
-    // Reactions should exist but be disabled for frozen state
+    // Reactions should remain enabled during the reveal/review phases.
     const existingReaction = screen.getByText('👍').closest('.emoji-reaction');
     expect(existingReaction).toBeInTheDocument();
-    // In frozen state, reactions don't get disabled styling but are not clickable
+    expect(existingReaction).not.toHaveClass('disabled');
+    expect(screen.getByRole('button', { name: 'Add reaction' })).not.toBeDisabled();
   });
 
   it('shows interactions when reveal mode is disabled (normal mode)', () => {

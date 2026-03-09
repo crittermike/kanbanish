@@ -113,3 +113,35 @@ export const getCommentDisabledMessage = disabledReason => {
       return 'Comments are disabled until cards are revealed';
   }
 };
+
+/**
+ * Filters votes, reactions, and comments so a user only sees their own
+ * interaction data while retro interactions are still hidden.
+ * @param {Object} itemData - Card or group data
+ * @param {string} userId - Current user id
+ * @param {boolean} shouldHideOthersInteractions - Whether to hide others' interactions
+ * @returns {Object}
+ */
+export const filterVisibleInteractionData = (itemData, userId, shouldHideOthersInteractions) => {
+  if (!itemData || !shouldHideOthersInteractions) {
+    return itemData;
+  }
+
+  return {
+    ...itemData,
+    votes: itemData.voters && userId && itemData.voters[userId] ? Math.abs(itemData.voters[userId]) : 0,
+    voters: itemData.voters && userId && itemData.voters[userId] !== undefined
+      ? { [userId]: itemData.voters[userId] }
+      : {},
+    reactions: itemData.reactions ? Object.fromEntries(
+      Object.entries(itemData.reactions).filter(([_emoji, data]) =>
+        data.users && userId && data.users[userId]
+      ).map(([emoji]) => [emoji, { count: 1, users: { [userId]: true } }])
+    ) : {},
+    comments: itemData.comments ? Object.fromEntries(
+      Object.entries(itemData.comments).filter(([_commentId, comment]) =>
+        comment.createdBy === userId
+      )
+    ) : {}
+  };
+};

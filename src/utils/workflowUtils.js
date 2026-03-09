@@ -28,7 +28,7 @@ export const isGroupingAllowed = (workflowPhase, retrospectiveMode = false) => {
 };
 
 /**
- * Determines if interactions (voting, comments, reactions) are allowed
+ * Determines if vote interactions are allowed.
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
  * @returns {boolean}
@@ -38,6 +38,26 @@ export const areInteractionsAllowed = (workflowPhase, retrospectiveMode = false)
     return true;
   } // Allow when retrospective mode is disabled (normal behavior)
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS;
+};
+
+/**
+ * Determines if reactions should be visible.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReactionsVisible = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
+};
+
+/**
+ * Determines if reactions can be added or removed.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReactionsAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
 };
 
 /**
@@ -52,6 +72,43 @@ export const areInteractionsVisible = (workflowPhase, retrospectiveMode = false)
   } // Always visible when retrospective mode is disabled
   return workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
+};
+
+/**
+ * Determines if review-oriented tools (detail view, comments, labels, colors)
+ * should be visible for revealed cards.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areReviewToolsVisible = (workflowPhase, retrospectiveMode = false) => {
+  if (!retrospectiveMode) {
+    return true;
+  }
+  return workflowPhase === WORKFLOW_PHASES.GROUPING ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
+         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
+         workflowPhase === WORKFLOW_PHASES.RESULTS;
+};
+
+/**
+ * Determines if comments can be added or edited in the current workflow phase.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const areCommentsAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
+};
+
+/**
+ * Determines if review metadata (labels, colors, action item conversion) can be edited.
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const isCardMetadataEditingAllowed = (workflowPhase, retrospectiveMode = false) => {
+  return areReviewToolsVisible(workflowPhase, retrospectiveMode);
 };
 
 /**

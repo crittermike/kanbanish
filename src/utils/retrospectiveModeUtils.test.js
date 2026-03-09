@@ -7,7 +7,8 @@ import {
   shouldUseDisabledStyling,
   shouldHideFeature,
   getReactionDisabledMessage,
-  getCommentDisabledMessage
+  getCommentDisabledMessage,
+  filterVisibleInteractionData
 } from './retrospectiveModeUtils';
 import { WORKFLOW_PHASES } from './workflowUtils';
 
@@ -204,5 +205,78 @@ describe('getCommentDisabledMessage', () => {
       .toBe('Comments are disabled until cards are revealed');
     expect(getCommentDisabledMessage(undefined))
       .toBe('Comments are disabled until cards are revealed');
+  });
+});
+
+describe('filterVisibleInteractionData', () => {
+  const itemData = {
+    votes: 4,
+    voters: {
+      self: 2,
+      other: 2
+    },
+    reactions: {
+      '👍': {
+        count: 2,
+        users: {
+          self: true,
+          other: true
+        }
+      },
+      '🎉': {
+        count: 1,
+        users: {
+          other: true
+        }
+      }
+    },
+    comments: {
+      mine: {
+        content: 'My note',
+        createdBy: 'self'
+      },
+      theirs: {
+        content: 'Other note',
+        createdBy: 'other'
+      }
+    }
+  };
+
+  it('returns the original item when filtering is disabled', () => {
+    expect(filterVisibleInteractionData(itemData, 'self', false)).toBe(itemData);
+  });
+
+  it('filters votes, reactions, and comments down to the current user', () => {
+    expect(filterVisibleInteractionData(itemData, 'self', true)).toEqual({
+      ...itemData,
+      votes: 2,
+      voters: {
+        self: 2
+      },
+      reactions: {
+        '👍': {
+          count: 1,
+          users: {
+            self: true
+          }
+        }
+      },
+      comments: {
+        mine: {
+          content: 'My note',
+          createdBy: 'self'
+        }
+      }
+    });
+  });
+
+  it('handles missing user data safely', () => {
+    expect(filterVisibleInteractionData(itemData, null, true)).toEqual({
+      ...itemData,
+      votes: 0,
+      voters: {},
+      reactions: {},
+      comments: {}
+    });
   });
 });

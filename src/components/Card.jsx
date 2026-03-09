@@ -1,17 +1,22 @@
 import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { MessageSquare, CheckSquare } from 'react-feather';
+import { MessageSquare, CheckSquare, Clock } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import { getInitials } from '../utils/avatarColors';
 import {
+  filterVisibleInteractionData,
   getDisabledReason
 } from '../utils/retrospectiveModeUtils';
 import {
+  areCommentsAllowed,
   isGroupingAllowed,
   areInteractionsAllowed,
   areInteractionsVisible,
+  areReactionsAllowed,
+  areReactionsVisible,
   areOthersInteractionsVisible,
+  areReviewToolsVisible,
   shouldObfuscateCards,
   isCardEditingAllowed,
   isCardDraggingAllowed,
@@ -60,7 +65,6 @@ const CardContent = ({
   retrospectiveMode,
   groupId,
   workflowPhase = 'CREATION',
-  user,
   disabledReason,
   children
 }) => {
@@ -98,6 +102,7 @@ const CardContent = ({
 
   // Determine if interactions should be visible
   const interactionsVisible = areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const votesVisible = votingEnabled && !groupId && interactionsVisible;
 
   const displayContent = showObfuscatedText ?
     generateObfuscatedText(cardData.content) :
@@ -105,7 +110,7 @@ const CardContent = ({
 
   return (
     <div className="card-header">
-      {votingEnabled && !groupId && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && interactionsVisible && (
+      {votesVisible && (
         <VotingControls
           votes={cardData.votes}
           onUpvote={interactionsDisabled ? () => { } : upvoteCard}
@@ -115,7 +120,7 @@ const CardContent = ({
           disabledReason={disabledReason}
         />
       )}
-      <div className={`card-content ${!votingEnabled || groupId || !interactionsVisible || (retrospectiveMode && workflowPhase === 'CREATION' && user) ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
+      <div className={`card-content ${!votesVisible ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
         {showObfuscatedText ? displayContent : <MarkdownContent content={displayContent} />}
       </div>
       {children}
@@ -129,7 +134,8 @@ function Card({
   columnId,
   groupId = null,
   onCardDropOnCard = null,
-  dimmed = false
+  dimmed = false,
+  onExpandCard = null
 }) {
   const { 
     boardId, 
@@ -144,11 +150,8 @@ function Card({
     hideCardAuthorship,
     recordAction,
     undo,
-    boardTags,
     actionItems,
     actionItemsEnabled,
-    createActionItem,
-    deleteActionItem,
     presenceData,
     displayName,
     userColor,
@@ -178,8 +181,6 @@ function Card({
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-    setCardColor,
-    setCardTags,
     // Voting operations
     upvoteCard,
     downvoteCard,
@@ -243,47 +244,21 @@ function Card({
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
 
   // Create filtered card data for display
-  const displayCardData = shouldHideOthersInteractions ? {
-    ...cardData,
-    // Filter votes to only show user's own vote count
-    votes: cardData.voters && user?.uid && cardData.voters[user.uid] ? Math.abs(cardData.voters[user.uid]) : 0,
-    voters: cardData.voters && user?.uid ? { [user.uid]: cardData.voters[user.uid] } : {},
-    // Filter reactions to only show user's own
-    reactions: cardData.reactions ? Object.fromEntries(
-      Object.entries(cardData.reactions).filter(([_emoji, data]) =>
-        data.users && user?.uid && data.users[user.uid]
-      ).map(([emoji, _data]) => [emoji, { count: 1, users: { [user.uid]: true } }])
-    ) : {},
-    // Filter comments to only show user's own when interactions are hidden
-    comments: cardData.comments ? Object.fromEntries(
-      Object.entries(cardData.comments).filter(([_commentId, comment]) =>
-        comment.createdBy === user?.uid
-      )
-    ) : {}
-  } : cardData;
+  const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
 
   const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
     ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
   const hasActionItem = !!actionItemEntry;
-  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
 
   const commentCount = Object.keys(displayCardData.comments || {}).length;
-  const showCommentBadge = !groupId && commentCount > 0 && !(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const reviewToolsVisible = !groupId && areReviewToolsVisible(workflowPhase, retrospectiveMode);
+  const commentsAllowed = !groupId && areCommentsAllowed(workflowPhase, retrospectiveMode);
+  const reactionsVisible = !groupId && areReactionsVisible(workflowPhase, retrospectiveMode);
+  const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
+  const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
+  const showCommentBadge = !groupId && commentCount > 0 && reviewToolsVisible;
 
-  const handleConvertToActionItem = () => {
-    createActionItem({
-      description: cardData.content,
-      sourceCardId: cardId,
-      sourceColumnId: columnId
-    });
-  };
-
-  const handleRemoveActionItem = () => {
-    if (actionItemId) {
-      deleteActionItem(actionItemId);
-    }
-  };
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
   const canDropOnCard = isGroupingAllowed(workflowPhase, retrospectiveMode);
@@ -316,12 +291,10 @@ function Card({
     })
   }), [canDropOnCard, onCardDropOnCard, cardId]);
 
-  // Handle card click - enter edit mode when appropriate
+  // Handle card click - open detail modal when appropriate
   const handleCardClick = () => {
-    if (!isEditing && !canDropOnCard) {
-      // Always allow toggleEditMode to handle authorship check and show notifications
-      // The toggleEditMode function will handle both authorship and workflow restrictions
-      toggleEditMode();
+    if (!isEditing && !canDropOnCard && onExpandCard) {
+      onExpandCard(cardId, columnId);
     }
   };
 
@@ -416,11 +389,9 @@ function Card({
             retrospectiveMode={retrospectiveMode}
             groupId={groupId}
             workflowPhase={workflowPhase}
-            user={user}
             disabledReason={disabledReason}
           >
-            {/* Show hover actions inside card-header when interactions are allowed and we're not in a group */}
-            {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+            {reviewToolsVisible && (
               <CardHoverActions
                 showEmojiPicker={showEmojiPicker}
                 setShowEmojiPicker={setShowEmojiPicker}
@@ -430,18 +401,10 @@ function Card({
                 emojiPickerPosition={emojiPickerPosition}
                 addReaction={addReaction}
                 hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-                commentCount={Object.keys(displayCardData.comments || {}).length}
-                disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
-                disabledReason={disabledReason}
-                onColorSelect={setCardColor}
-                onTagAdd={(tag) => setCardTags([...(displayCardData.tags || []), tag])}
-                onTagRemove={(tag) => setCardTags((displayCardData.tags || []).filter(t => t !== tag))}
-                currentColor={displayCardData.color}
-                currentTags={displayCardData.tags || []}
-                boardTags={boardTags}
-                onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
-                onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
-                hasActionItem={hasActionItem}
+                reactionDisabled={reactionsDisabled}
+                reactionDisabledReason={reactionDisabledReason}
+                showEmojiAction={reactionsVisible}
+                onEdit={toggleEditMode}
               />
             )}
           </CardContent>
@@ -470,9 +433,14 @@ function Card({
             </div>
           )}
 
-          {/* Inline badges for action items and comments */}
-          {(hasActionItem || (!isEditing && showCommentBadge)) && (
+          {/* Inline badges for action items, timer, and comments */}
+          {(hasActionItem || cardData.timer?.isRunning || (!isEditing && showCommentBadge)) && (
             <div className="card-inline-badges">
+              {cardData.timer?.isRunning && (
+                <span className="card-inline-badge timer-badge" title="Timer running">
+                  <Clock size={11} /> Timer
+                </span>
+              )}
               {hasActionItem && (
                 <span className="card-inline-badge action-item-badge" title="Converted to action item">
                   <CheckSquare size={11} /> Action item
@@ -486,17 +454,17 @@ function Card({
             </div>
           )}
 
-          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && (
+          {reactionsVisible && (
             <CardReactions
               reactions={displayCardData.reactions}
               userId={user?.uid}
               addReaction={addReaction}
-              disabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
-              disabledReason={disabledReason}
+              disabled={reactionsDisabled}
+              disabledReason={reactionDisabledReason}
             />
           )}
 
-          {!(retrospectiveMode && workflowPhase === 'CREATION' && user) && areInteractionsVisible(workflowPhase, retrospectiveMode) && !groupId && showComments && (
+          {reviewToolsVisible && showComments && (
             <Comments
               comments={displayCardData.comments}
               onAddComment={addComment}
@@ -505,8 +473,8 @@ function Card({
               onEditComment={editComment}
               onDeleteComment={deleteComment}
               isCommentAuthor={isCommentAuthor}
-              interactionsDisabled={!areInteractionsAllowed(workflowPhase, retrospectiveMode)}
-              disabledReason={disabledReason}
+              interactionsDisabled={!commentsAllowed}
+              disabledReason={!commentsAllowed ? 'cards-not-revealed' : null}
               presenceData={presenceData}
             />
           )}

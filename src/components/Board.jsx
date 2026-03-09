@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBackgroundById } from '../data/boardBackgrounds';
+import useFocusMode from '../hooks/useFocusMode';
 import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
@@ -11,7 +12,9 @@ import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import DisplayNamePrompt from './DisplayNamePrompt';
+import FocusMode from './FocusMode';
 import HealthCheckVoting from './HealthCheckVoting';
+import CardDetailModal from './modals/CardDetailModal';
 import ExportBoardModal from './modals/ExportBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
@@ -30,6 +33,9 @@ function Board({ onGoHome }) {
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isActionItemsPanelOpen, setIsActionItemsPanelOpen] = useState(false);
+
+  // State for card detail modal
+  const [expandedCard, setExpandedCard] = useState(null);
 
   // Get context values from BoardContext
   const {
@@ -80,6 +86,9 @@ function Board({ onGoHome }) {
 
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
+
+  // Focus mode state
+  const focusMode = useFocusMode({ columns, sortByVotes });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -165,6 +174,12 @@ function Board({ onGoHome }) {
     showNotification('Preparing board export...');
   };
 
+  // Handle card expand for card detail modal
+  const handleExpandCard = useCallback((cardId, columnId, options = {}) => {
+    setExpandedCard({ cardId, columnId, ...options });
+  }, []);
+
+
   const actionItemCount = Object.values(actionItems || {}).filter(i => i.status === 'open').length;
 
   // Resolve background CSS
@@ -203,6 +218,7 @@ function Board({ onGoHome }) {
             onGoHome={onGoHome}
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
+            onFocusModeEnter={focusMode.enter}
           />
           <SettingsPanel
             handleStartHealthCheck={() => {
@@ -295,7 +311,7 @@ function Board({ onGoHome }) {
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
-          <ResultsView />
+          <ResultsView onExpandCard={handleExpandCard} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
@@ -308,6 +324,7 @@ function Board({ onGoHome }) {
             isFiltering={searchFilter.isFiltering}
             matchingCardIds={searchFilter.matchingCardIds}
             matchingGroupIds={searchFilter.matchingGroupIds}
+            onExpandCard={handleExpandCard}
           />
         )}
       </main>
@@ -325,8 +342,28 @@ function Board({ onGoHome }) {
         onClose={() => setIsActionItemsPanelOpen(false)}
       />
 
+      {/* Card Detail Modal */}
+      {expandedCard && (
+        <CardDetailModal
+          isOpen={true}
+          onClose={() => setExpandedCard(null)}
+          cardId={expandedCard.cardId}
+          columnId={expandedCard.columnId}
+          cardList={expandedCard.cardList}
+          contextLabel={expandedCard.contextLabel}
+          onNavigateCard={(cardId, columnId) => setExpandedCard(current => ({
+            ...current,
+            cardId,
+            columnId
+          }))}
+        />
+      )}
 
       <DisplayNamePrompt />
+
+      {/* Focus Mode overlay */}
+      <FocusMode {...focusMode} />
+
     </div>
   );
 }

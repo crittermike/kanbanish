@@ -1,0 +1,439 @@
+/**
+ * Focus Mode — Full-screen presentation overlay
+ *
+ * Designed for facilitator-led walkthroughs of board cards.
+ * Uses the app's design system variables for theme consistency.
+ */
+
+/* ────────────────────── Overlay ────────────────────── */
+.focus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  animation: focus-fade-in 0.25s var(--transition-ease);
+}
+
+@keyframes focus-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ────────────────────── Top bar ────────────────────── */
+.focus-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  flex-shrink: 0;
+  min-height: 48px;
+  gap: var(--space-md);
+}
+
+/* Breadcrumb */
+.focus-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.focus-breadcrumb-column {
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.focus-breadcrumb-separator {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.focus-breadcrumb-group {
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Counter */
+.focus-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-size: var(--font-size-base);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.focus-counter-current {
+  color: var(--accent);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+}
+
+.focus-counter-sep {
+  color: var(--text-faint);
+  margin: 0 2px;
+}
+
+.focus-counter-total {
+  color: var(--text-muted);
+}
+
+/* Top-bar actions */
+.focus-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+/* ────────────────────── Shared button ────────────────────── */
+.focus-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-speed) var(--transition-ease),
+              background-color var(--transition-speed) var(--transition-ease);
+}
+
+.focus-btn:hover {
+  color: var(--text-color);
+  background: var(--hover-bg);
+}
+
+.focus-btn-icon {
+  padding: var(--space-xs);
+}
+
+.focus-close-btn:hover {
+  color: var(--danger);
+  background: var(--danger-transparent);
+}
+
+/* ────────────────────── Progress bar ────────────────────── */
+.focus-progress {
+  height: 3px;
+  background: var(--border-subtle);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.focus-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s var(--transition-ease);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ────────────────────── Body / card area ────────────────────── */
+.focus-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-xl) var(--space-lg);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Nav buttons */
+.focus-nav-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-speed) var(--transition-ease);
+  box-shadow: var(--shadow-sm);
+}
+
+.focus-nav-btn:hover:not(:disabled) {
+  background: var(--hover-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.05);
+}
+
+.focus-nav-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.focus-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* ────────────────────── Card spotlight ────────────────────── */
+.focus-card-container {
+  flex: 1;
+  max-width: 680px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: focus-card-enter 0.3s var(--transition-ease);
+}
+
+@keyframes focus-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.focus-card {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  position: relative;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/* Vote badge */
+.focus-vote-badge {
+  position: absolute;
+  top: calc(-1 * var(--space-sm));
+  right: var(--space-lg);
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-round);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow-sm);
+}
+
+.focus-vote-badge.positive {
+  background: var(--success);
+  color: white;
+}
+
+.focus-vote-badge.negative {
+  background: var(--danger);
+  color: white;
+}
+
+/* Card content */
+.focus-card-content {
+  font-size: var(--font-size-lg);
+  line-height: 1.6;
+  color: var(--text-color);
+  word-break: break-word;
+}
+
+.focus-card-content .markdown-content {
+  font-size: var(--font-size-lg);
+}
+
+.focus-card-content .markdown-content p {
+  margin: 0 0 0.5em;
+}
+
+.focus-card-content .markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Tags */
+.focus-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.focus-card-tag {
+  display: inline-block;
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-round);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: var(--accent-transparent-light);
+  color: var(--accent);
+  border: 1px solid var(--accent-transparent);
+}
+
+/* Reactions */
+.focus-card-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.focus-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-round);
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  font-size: var(--font-size-sm);
+}
+
+.focus-reaction.active {
+  border-color: var(--accent-transparent);
+  background: var(--accent-transparent-light);
+}
+
+.focus-reaction-emoji {
+  font-size: 1rem;
+}
+
+.focus-reaction-count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Comments count */
+.focus-card-comments {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* ────────────────────── Footer ────────────────────── */
+.focus-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg) var(--space-md);
+}
+
+/* Minimap */
+.focus-minimap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.focus-minimap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border-color);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-speed) var(--transition-ease);
+  flex-shrink: 0;
+}
+
+.focus-minimap-dot:hover {
+  background: var(--accent);
+  transform: scale(1.4);
+}
+
+.focus-minimap-dot.visited {
+  background: var(--accent-transparent);
+}
+
+.focus-minimap-dot.active {
+  background: var(--accent);
+  transform: scale(1.5);
+  box-shadow: 0 0 0 3px var(--accent-transparent-light);
+}
+
+/* Keyboard hint */
+.focus-keyboard-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-faint);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* ────────────────────── Responsive ────────────────────── */
+@media (max-width: 768px) {
+  .focus-topbar {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .focus-body {
+    padding: var(--space-md) var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .focus-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .focus-nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .focus-card {
+    padding: var(--space-lg);
+  }
+
+  .focus-card-content {
+    font-size: var(--font-size-base);
+  }
+
+  .focus-card-content .markdown-content {
+    font-size: var(--font-size-base);
+  }
+
+  .focus-keyboard-hint {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .focus-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .focus-card {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
+  .focus-vote-badge {
+    top: calc(-1 * var(--space-xs));
+    right: var(--space-md);
+  }
+}

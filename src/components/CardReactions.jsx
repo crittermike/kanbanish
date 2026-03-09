@@ -41,7 +41,7 @@ const CardReactions = React.memo(({
               data-testid="emoji-reaction"
               onClick={disabled ? undefined : e => addReaction(e, emoji)}
               title={disabled ? getReactionDisabledMessage(disabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
-              aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'vote' : 'votes'}${hasUserReacted ? ', you reacted' : ''}`}
+              aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'reaction' : 'reactions'}${hasUserReacted ? ', you reacted' : ''}`}
               disabled={disabled}
             >
               <span className="emoji">{emoji}</span>
