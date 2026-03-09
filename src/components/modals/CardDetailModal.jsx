@@ -388,7 +388,10 @@ const CardDetailModal = ({
             )}
 
             {/* Title */}
-            <div className="card-detail-title-section">
+            <div
+              className="card-detail-title-section"
+              style={{ '--card-color': displayCardData.color || undefined }}
+            >
               {isEditingContent ? (
                 <div className="card-detail-edit-container">
                   <textarea
@@ -612,7 +615,7 @@ const CardDetailModal = ({
               ref={colorButtonRef}
               disabled={!metadataEditingAllowed}
             >
-              <Sliders size={18} /> Card Color
+              <Sliders size={18} /> Color
             </button>
           </div>
         </div>

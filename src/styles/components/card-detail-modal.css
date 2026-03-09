@@ -139,6 +139,23 @@
 }
 
 /* Title */
+.card-detail-title-section {
+  position: relative;
+  padding-left: 16px;
+}
+
+.card-detail-title-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background-color: var(--card-color, var(--accent));
+  transition: background-color 0.2s ease;
+}
+
 .card-detail-title {
   font-size: 28px;
   font-weight: 700;
