@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CardHoverActions from './CardHoverActions';
 
-describe('CardHoverActions - Action Item Button Visibility', () => {
+describe('CardHoverActions', () => {
   const defaultProps = {
     showEmojiPicker: false,
     setShowEmojiPicker: vi.fn(),
@@ -12,67 +12,59 @@ describe('CardHoverActions - Action Item Button Visibility', () => {
     emojiPickerPosition: { top: 0, left: 0 },
     addReaction: vi.fn(),
     hasUserReactedWithEmoji: vi.fn(() => false),
-    commentCount: 0,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('shows action item button when onConvertToActionItem is provided and hasActionItem is false', () => {
+  it('shows edit, reaction, and comment buttons', () => {
     render(
       <CardHoverActions
         {...defaultProps}
-        onConvertToActionItem={vi.fn()}
-        onRemoveActionItem={vi.fn()}
-        hasActionItem={false}
-        disabled={true}
-        disabledReason="frozen"
+        onEdit={vi.fn()}
       />
     );
 
-    expect(screen.getByLabelText('Convert to action item')).toBeInTheDocument();
+    expect(screen.getByLabelText('Edit card')).toBeInTheDocument();
+    expect(screen.getByLabelText('Add reaction')).toBeInTheDocument();
+    expect(screen.getByLabelText('Toggle comments')).toBeInTheDocument();
   });
 
-  it('does not show action item button when hasActionItem is true', () => {
+  it('calls onEdit when edit button is clicked', () => {
+    const onEdit = vi.fn();
     render(
       <CardHoverActions
         {...defaultProps}
-        onConvertToActionItem={vi.fn()}
-        onRemoveActionItem={vi.fn()}
-        hasActionItem={true}
+        onEdit={onEdit}
       />
     );
 
-    expect(screen.queryByLabelText('Convert to action item')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Remove action item')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Edit card'));
+    expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('does not show action item button when onConvertToActionItem is not provided', () => {
+  it('calls toggleComments when comment button is clicked', () => {
     render(
       <CardHoverActions
         {...defaultProps}
-        hasActionItem={false}
+        onEdit={vi.fn()}
       />
     );
 
-    expect(screen.queryByLabelText('Convert to action item')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Toggle comments'));
+    expect(defaultProps.toggleComments).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onConvertToActionItem when action item button is clicked', () => {
-    const onConvertToActionItem = vi.fn();
-
+  it('hides reaction button when showEmojiAction is false', () => {
     render(
       <CardHoverActions
         {...defaultProps}
-        onConvertToActionItem={onConvertToActionItem}
-        onRemoveActionItem={vi.fn()}
-        hasActionItem={false}
+        showEmojiAction={false}
+        onEdit={vi.fn()}
       />
     );
 
-    fireEvent.click(screen.getByLabelText('Convert to action item'));
-
-    expect(onConvertToActionItem).toHaveBeenCalledTimes(1);
+    expect(screen.queryByLabelText('Add reaction')).not.toBeInTheDocument();
   });
 });

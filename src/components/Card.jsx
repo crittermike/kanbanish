@@ -17,7 +17,6 @@ import {
   areReactionsVisible,
   areOthersInteractionsVisible,
   areReviewToolsVisible,
-  isCardMetadataEditingAllowed,
   shouldObfuscateCards,
   isCardEditingAllowed,
   isCardDraggingAllowed,
@@ -151,11 +150,8 @@ function Card({
     hideCardAuthorship,
     recordAction,
     undo,
-    boardTags,
     actionItems,
     actionItemsEnabled,
-    createActionItem,
-    deleteActionItem,
     presenceData,
     displayName,
     userColor,
@@ -185,8 +181,6 @@ function Card({
     saveCardChanges,
     deleteCard,
     handleKeyPress,
-    setCardColor,
-    setCardTags,
     // Voting operations
     upvoteCard,
     downvoteCard,
@@ -256,30 +250,15 @@ function Card({
     ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
   );
   const hasActionItem = !!actionItemEntry;
-  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
 
   const commentCount = Object.keys(displayCardData.comments || {}).length;
   const reviewToolsVisible = !groupId && areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = !groupId && areCommentsAllowed(workflowPhase, retrospectiveMode);
-  const metadataEditingAllowed = !groupId && isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
   const reactionsVisible = !groupId && areReactionsVisible(workflowPhase, retrospectiveMode);
   const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
   const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const showCommentBadge = !groupId && commentCount > 0 && reviewToolsVisible;
 
-  const handleConvertToActionItem = () => {
-    createActionItem({
-      description: cardData.content,
-      sourceCardId: cardId,
-      sourceColumnId: columnId
-    });
-  };
-
-  const handleRemoveActionItem = () => {
-    if (actionItemId) {
-      deleteActionItem(actionItemId);
-    }
-  };
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
   const canDropOnCard = isGroupingAllowed(workflowPhase, retrospectiveMode);
@@ -312,12 +291,10 @@ function Card({
     })
   }), [canDropOnCard, onCardDropOnCard, cardId]);
 
-  // Handle card click - enter edit mode when appropriate
+  // Handle card click - open detail modal when appropriate
   const handleCardClick = () => {
-    if (!isEditing && !canDropOnCard) {
-      // Always allow toggleEditMode to handle authorship check and show notifications
-      // The toggleEditMode function will handle both authorship and workflow restrictions
-      toggleEditMode();
+    if (!isEditing && !canDropOnCard && onExpandCard) {
+      onExpandCard(cardId, columnId);
     }
   };
 
@@ -424,22 +401,10 @@ function Card({
                 emojiPickerPosition={emojiPickerPosition}
                 addReaction={addReaction}
                 hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-                commentCount={Object.keys(displayCardData.comments || {}).length}
                 reactionDisabled={reactionsDisabled}
                 reactionDisabledReason={reactionDisabledReason}
-                metadataDisabled={!metadataEditingAllowed}
                 showEmojiAction={reactionsVisible}
-                showMetadataActions={metadataEditingAllowed}
-                onColorSelect={setCardColor}
-                onTagAdd={(tag) => setCardTags([...(displayCardData.tags || []), tag])}
-                onTagRemove={(tag) => setCardTags((displayCardData.tags || []).filter(t => t !== tag))}
-                currentColor={displayCardData.color}
-                currentTags={displayCardData.tags || []}
-                boardTags={boardTags}
-                onConvertToActionItem={actionItemsEnabled ? handleConvertToActionItem : undefined}
-                onRemoveActionItem={actionItemsEnabled ? handleRemoveActionItem : undefined}
-                hasActionItem={hasActionItem}
-                onExpandCard={onExpandCard ? () => onExpandCard(cardId, columnId) : undefined}
+                onEdit={toggleEditMode}
               />
             )}
           </CardContent>

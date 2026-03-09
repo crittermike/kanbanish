@@ -39,7 +39,8 @@ vi.mock('../../utils/firebase', () => ({
 
 vi.mock('firebase/database', () => ({
   ref: vi.fn(),
-  set: vi.fn(() => Promise.resolve())
+  set: vi.fn(() => Promise.resolve()),
+  remove: vi.fn(() => Promise.resolve())
 }));
 
 vi.mock('../CardTimerControls', () => ({
@@ -72,6 +73,10 @@ vi.mock('../MarkdownContent', () => ({
 
 vi.mock('../VotingControls', () => ({
   default: () => <div>Votes</div>
+}));
+
+vi.mock('../../utils/avatarColors', () => ({
+  getInitials: vi.fn(() => 'AN')
 }));
 
 describe('CardDetailModal', () => {
