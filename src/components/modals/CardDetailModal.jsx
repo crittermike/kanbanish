@@ -1,9 +1,14 @@
-import { ref, set } from 'firebase/database';
+import { ref, remove, set } from 'firebase/database';
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { X, Clock, Smile, ChevronLeft, ChevronRight, Droplet, Tag, CheckSquare } from 'react-feather';
+import {
+  X, CheckSquare, Tag,
+  AlignLeft, MessageSquare, MoreHorizontal,
+  Plus, Archive, Sliders, Paperclip, AtSign
+} from 'react-feather';
 import { useBoardContext } from '../../context/BoardContext';
 import { useCardOperations } from '../../hooks/useCardOperations';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { getInitials } from '../../utils/avatarColors';
 import { database } from '../../utils/firebase';
 import {
   filterVisibleInteractionData,
@@ -28,7 +33,6 @@ import CardTimerControls from '../CardTimerControls';
 import Comments from '../Comments';
 import EmojiPicker from '../EmojiPicker';
 import MarkdownContent from '../MarkdownContent';
-import VotingControls from '../VotingControls';
 import '../../styles/components/card-detail-modal.css';
 
 const CardDetailModal = ({
@@ -69,12 +73,10 @@ const CardDetailModal = ({
     updateBoardSettings
   } = useBoardContext();
 
-  // Look up card data from columns
   const columnData = columns?.[columnId];
   const cardData = columnData?.cards?.[cardId];
   const columnTitle = columnData?.title || '';
 
-  // Card operations hook (same as Card.jsx uses)
   const {
     isEditing: _isEditing,
     editedContent: _editedContent,
@@ -113,13 +115,15 @@ const CardDetailModal = ({
     userColor
   });
 
-  // Local editing state for the modal (independent from Card.jsx inline editing)
+  // Local state
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0 });
   const [tagPickerPosition, setTagPickerPosition] = useState({ top: 0, left: 0 });
+  const [description, setDescription] = useState('');
+  const [showActivityDetails, setShowActivityDetails] = useState(false);
   const colorButtonRef = useRef(null);
   const tagButtonRef = useRef(null);
 
@@ -133,7 +137,6 @@ const CardDetailModal = ({
   const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
   const metadataEditingAllowed = isCardMetadataEditingAllowed(workflowPhase, retrospectiveMode);
 
-  // Determine editing disabled state
   const isCreator = isCardAuthor();
   let editingDisabled = false;
   if (workflowPhase && user) {
@@ -146,7 +149,8 @@ const CardDetailModal = ({
       editingDisabled = true;
     }
   }
-  // Pager data
+
+  // Pager data (keyboard navigation)
   const allCardsList = useMemo(() => {
     if (cardList?.length) {
       return cardList.filter(({ cardId: listedCardId, columnId: listedColumnId }) =>
@@ -155,31 +159,25 @@ const CardDetailModal = ({
     }
     if (!columns) return [];
     const list = [];
-    // Sort columns by ID
     const sortedCols = Object.entries(columns).sort((a, b) => a[0].localeCompare(b[0]));
     for (const [colId, colData] of sortedCols) {
       if (!colData.cards) continue;
-      // Get ungrouped cards
       const ungrouped = Object.entries(colData.cards)
         .filter(([_id, data]) => !data.groupId)
         .map(([id, data]) => ({ id, colId, ...data }));
-      // Get groups
       const groups = colData.groups
         ? Object.entries(colData.groups).map(([id, data]) => ({ id, colId, ...data, _isGroup: true }))
         : [];
-      // Combine and sort (same as Column.jsx getSortedItems)
       const items = [];
       if (sortByVotes) {
         items.push(...[...ungrouped.map(c => ({ type: 'card', data: c })), ...groups.map(g => ({ type: 'group', data: g }))].sort((a, b) => (b.data.votes || 0) - (a.data.votes || 0)));
       } else {
         items.push(...[...groups.map(g => ({ type: 'group', data: g })), ...ungrouped.map(c => ({ type: 'card', data: c }))].sort((a, b) => (b.data.created || 0) - (a.data.created || 0)));
       }
-      // Flatten: ungrouped cards directly, group cards in cardIds order
       for (const item of items) {
         if (item.type === 'card') {
           list.push({ cardId: item.data.id, columnId: colId });
         } else {
-          // Group: iterate cardIds to get cards in group order
           const group = item.data;
           if (group.cardIds && colData.cards) {
             for (const cId of group.cardIds) {
@@ -198,6 +196,8 @@ const CardDetailModal = ({
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allCardsList.length - 1;
   const pagerIndex = currentIndex >= 0 ? currentIndex + 1 : 1;
+  const reviewCardListSize = allCardsList.length;
+  const showNavigationHints = reviewCardListSize > 1 && !detailNavigationHintsDismissed;
 
   const handleNavigate = useCallback((direction) => {
     const targetIndex = currentIndex + direction;
@@ -231,15 +231,45 @@ const CardDetailModal = ({
     setEditContent('');
   }, []);
 
+  const handleDescriptionSave = useCallback(() => {
+    const trimmed = description.trim();
+    const original = cardData?.description || '';
+    if (trimmed === original) return;
+    const descRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/description`);
+    if (trimmed) {
+      set(descRef, trimmed);
+    } else {
+      remove(descRef);
+    }
+  }, [description, cardData?.description, boardId, columnId, cardId]);
+
+  const handleArchiveCard = useCallback(() => {
+    if (!cardData) return;
+    if (window.confirm('Archive this card? This action can be undone.')) {
+      const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
+      const savedData = { ...cardData };
+      recordAction(
+        'Archived card',
+        () => set(cardRef, savedData),
+        () => remove(cardRef)
+      );
+      remove(cardRef);
+      onClose();
+    }
+  }, [boardId, columnId, cardId, cardData, recordAction, onClose]);
+
   useEffect(() => {
     setIsEditingContent(false);
     setEditContent('');
     setShowEmojiPicker(false);
     setShowColorPicker(false);
     setShowTagPicker(false);
-  }, [cardId, columnId, setShowEmojiPicker]);
+    setDescription(cardData?.description || '');
+    setShowActivityDetails(false);
+  }, [cardId, columnId, setShowEmojiPicker, cardData?.description]);
 
   const handleKeyDown = useCallback((e) => {
+    const isInInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
     if (e.key === 'Escape') {
       if (isEditingContent) {
         e.stopPropagation();
@@ -252,9 +282,9 @@ const CardDetailModal = ({
         e.stopPropagation();
         handleEditSave();
       }
-    } else if (e.key === 'ArrowLeft' && !isEditingContent) {
+    } else if (e.key === 'ArrowLeft' && !isEditingContent && !isInInput) {
       if (hasPrev) handleNavigate(-1);
-    } else if (e.key === 'ArrowRight' && !isEditingContent) {
+    } else if (e.key === 'ArrowRight' && !isEditingContent && !isInInput) {
       if (hasNext) handleNavigate(1);
     }
   }, [isEditingContent, handleEditCancel, handleEditSave, onClose, hasPrev, hasNext, handleNavigate]);
@@ -270,9 +300,7 @@ const CardDetailModal = ({
   };
 
   const openColorPicker = useCallback((e) => {
-    if (!metadataEditingAllowed || !colorButtonRef.current) {
-      return;
-    }
+    if (!metadataEditingAllowed || !colorButtonRef.current) return;
     e.stopPropagation();
     const rect = colorButtonRef.current.getBoundingClientRect();
     setColorPickerPosition({
@@ -285,9 +313,7 @@ const CardDetailModal = ({
   }, [metadataEditingAllowed, setShowEmojiPicker, showColorPicker]);
 
   const openTagPicker = useCallback((e) => {
-    if (!metadataEditingAllowed || !tagButtonRef.current) {
-      return;
-    }
+    if (!metadataEditingAllowed || !tagButtonRef.current) return;
     e.stopPropagation();
     const rect = tagButtonRef.current.getBoundingClientRect();
     setTagPickerPosition({
@@ -322,14 +348,9 @@ const CardDetailModal = ({
   const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
   const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
-  const reviewCommentCount = Object.keys(displayCardData.comments || {}).length;
-  const reviewCardListSize = allCardsList.length;
-  const showNavigationHints = reviewCardListSize > 1 && !detailNavigationHintsDismissed;
 
   const handleConvertToActionItem = () => {
-    if (!createActionItem || !cardData) {
-      return;
-    }
+    if (!createActionItem || !cardData) return;
     createActionItem({
       description: cardData.content,
       sourceCardId: cardId,
@@ -343,7 +364,6 @@ const CardDetailModal = ({
     }
   };
 
-
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div
@@ -355,64 +375,41 @@ const CardDetailModal = ({
         aria-modal="true"
         aria-labelledby="card-detail-title"
       >
+        {/* Header */}
         <div className="card-detail-header">
           <div className="card-detail-header-meta">
-            <div className="card-detail-column-badge">{columnTitle}</div>
-            {contextLabel && (
-              <div className="card-detail-context-badge">{contextLabel}</div>
-            )}
+            <span className="card-detail-column-badge">{contextLabel || columnTitle}</span>
+            <span className="card-detail-card-id">CARD-{pagerIndex}</span>
           </div>
-          {reviewCardListSize > 1 && (
-            <div className="card-detail-pager">
-              <button
-                className="card-detail-pager-btn"
-                onClick={() => handleNavigate(-1)}
-                disabled={!hasPrev}
-                aria-label="Previous card"
-                title="Previous card (←)"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <span className="card-detail-pager-count">
-                {pagerIndex} / {reviewCardListSize}
-              </span>
-              <button
-                className="card-detail-pager-btn"
-                onClick={() => handleNavigate(1)}
-                disabled={!hasNext}
-                aria-label="Next card"
-                title="Next card (→)"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
-          <button className="close-button" onClick={onClose} aria-label="Close" title="Close (Esc)">
-            <X size={18} />
-          </button>
+          <div className="card-detail-header-actions">
+            <button className="card-detail-more-btn" aria-label="More options" title="More options">
+              <MoreHorizontal size={18} />
+            </button>
+            <button className="close-button" onClick={onClose} aria-label="Close" title="Close (Esc)">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
+        {/* Body — two-column layout */}
         <div className="card-detail-body">
-          <section className="card-detail-section">
-            <h3 id="card-detail-title" className="visually-hidden">Card Details</h3>
+          {/* Left: main content */}
+          <div className="card-detail-main">
             {showNavigationHints && (
-              <div className="card-detail-toolbar">
-                <span className="card-detail-shortcuts">Use ← and → to review cards</span>
+              <div className="card-detail-nav-hints">
+                <span>Use ← and → to review cards</span>
                 <button
-                  className="card-detail-toolbar-dismiss"
                   onClick={dismissNavigationHints}
                   aria-label="Dismiss review tips"
                   title="Dismiss review tips for this board"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
 
-            <div
-              className="card-detail-content"
-              style={{ '--card-color': displayCardData.color || 'var(--accent, #0052cc)' }}
-            >
+            {/* Title */}
+            <div className="card-detail-title-section">
               {isEditingContent ? (
                 <div className="card-detail-edit-container">
                   <textarea
@@ -439,18 +436,24 @@ const CardDetailModal = ({
                   </div>
                 </div>
               ) : (
-                <div
-                  className="card-detail-content-display"
-                  onClick={handleEditStart}
-                  title={editingDisabled ? disabledReason || 'Editing disabled' : 'Click to edit'}
-                  style={{ cursor: editingDisabled ? 'default' : 'pointer' }}
-                >
-                  {showObfuscated ? (
-                    <span className="obfuscated">Content hidden</span>
-                  ) : (
-                    <MarkdownContent content={displayCardData.content} />
-                  )}
-                </div>
+                <>
+                  <h2
+                    id="card-detail-title"
+                    className="card-detail-title"
+                    onClick={handleEditStart}
+                    title={editingDisabled ? disabledReason || 'Editing disabled' : 'Click to edit'}
+                    style={{ cursor: editingDisabled ? 'default' : 'pointer' }}
+                  >
+                    {showObfuscated ? (
+                      <span className="obfuscated">Content hidden</span>
+                    ) : (
+                      <MarkdownContent content={displayCardData.content} />
+                    )}
+                  </h2>
+                  <p className="card-detail-subtitle">
+                    In list <span className="card-detail-column-link">{columnTitle}</span>
+                  </p>
+                </>
               )}
             </div>
 
@@ -461,86 +464,127 @@ const CardDetailModal = ({
                 ))}
               </div>
             )}
-          </section>
 
-          {reviewToolsVisible && (
-            <section className="card-detail-section">
-              <h4 className="card-detail-section-title">Review tools</h4>
-              <div className="card-detail-review-actions">
-                <button
-                  className="card-detail-meta-btn color-action"
-                  onClick={openColorPicker}
-                  ref={colorButtonRef}
-                  disabled={!metadataEditingAllowed}
-                  title={metadataEditingAllowed ? 'Set card color' : 'Labels and colors are unavailable until cards are revealed'}
-                >
-                  <Droplet size={14} />
-                  {displayCardData.color ? 'Change color' : 'Add color'}
-                </button>
-                <button
-                  className="card-detail-meta-btn tag-action"
-                  onClick={openTagPicker}
-                  ref={tagButtonRef}
-                  disabled={!metadataEditingAllowed}
-                  title={metadataEditingAllowed ? 'Manage labels' : 'Labels and colors are unavailable until cards are revealed'}
-                >
-                  <Tag size={14} />
-                  {displayCardData.tags?.length ? `${displayCardData.tags.length} label${displayCardData.tags.length === 1 ? '' : 's'}` : 'Add labels'}
-                </button>
-                {actionItemsEnabled && (
-                  <button
-                    className={`card-detail-meta-btn ${hasActionItem ? 'active' : ''}`}
-                    onClick={hasActionItem ? handleRemoveActionItem : handleConvertToActionItem}
-                    disabled={!metadataEditingAllowed}
-                    title={hasActionItem ? 'Remove action item' : 'Convert to action item'}
-                  >
-                    <CheckSquare size={14} />
-                    {hasActionItem ? 'Action item' : 'Make action item'}
-                  </button>
-                )}
+            {/* Description */}
+            <div className="card-detail-description-section">
+              <div className="card-detail-section-header">
+                <AlignLeft size={18} />
+                <h3>Description</h3>
               </div>
-            </section>
-          )}
+              <textarea
+                className="card-detail-description-input"
+                placeholder="Add a more detailed description..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onBlur={handleDescriptionSave}
+                disabled={editingDisabled}
+              />
+            </div>
 
-          {/* Timer Section */}
-          <section className="card-detail-section">
-            <h4 className="card-detail-section-title"><Clock size={14} /> Timer</h4>
-            <CardTimerControls
-              boardId={boardId}
-              columnId={columnId}
-              cardId={cardId}
-              timerData={cardData.timer}
-              user={user}
-            />
-          </section>
-
-          {/* Voting & Reactions */}
-          <section className="card-detail-section card-detail-interactions">
-            {votingEnabled && interactionsVisible ? (
-              <div className="card-detail-votes">
-                <h4 className="card-detail-section-title">Votes</h4>
-                <VotingControls
-                  votes={displayCardData.votes}
-                  onUpvote={upvoteCard}
-                  onDownvote={downvoteCard}
-                  showDownvoteButton={downvotingEnabled}
-                  disabled={interactionsDisabled}
-                  disabledReason={disabledReason}
-                />
+            {/* Activity */}
+            <div className="card-detail-activity-section">
+              <div className="card-detail-section-header">
+                <MessageSquare size={18} />
+                <h3>Activity</h3>
+                <button
+                  className="card-detail-show-details-btn"
+                  onClick={() => setShowActivityDetails(!showActivityDetails)}
+                >
+                  {showActivityDetails ? 'Hide Details' : 'Show Details'}
+                </button>
               </div>
-            ) : votingEnabled ? (
-              <div className="card-detail-votes">
-                <h4 className="card-detail-section-title">Votes</h4>
-                <div className="card-detail-hidden-notice">
-                  Voting is hidden until the interaction phase.
+
+              <div className="card-detail-comment-area">
+                <div
+                  className="card-detail-user-avatar"
+                  style={{ backgroundColor: userColor || 'var(--accent-alt, #8b5cf6)' }}
+                >
+                  {getInitials(displayName || 'Anonymous')}
+                </div>
+                <div className="card-detail-comment-input-wrapper">
+                  <input
+                    type="text"
+                    className="card-detail-comment-input"
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onClick={e => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newComment.trim()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addComment();
+                      }
+                    }}
+                    disabled={!commentsAllowed}
+                  />
+                  <div className="card-detail-comment-icons">
+                    <Paperclip size={16} />
+                    <AtSign size={16} />
+                  </div>
                 </div>
               </div>
-            ) : null}
 
-            {reactionsVisible ? (
-              <div className="card-detail-reactions-container">
-                <h4 className="card-detail-section-title">Reactions</h4>
-                <div className="card-detail-reactions-row">
+              <button
+                className="card-detail-save-btn"
+                onClick={() => { if (newComment.trim()) addComment(); }}
+                disabled={!newComment.trim() || !commentsAllowed}
+              >
+                Save
+              </button>
+
+              {showActivityDetails && reviewToolsVisible && (
+                <div className="card-detail-comments">
+                  <Comments
+                    comments={displayCardData.comments}
+                    onAddComment={addComment}
+                    newComment=""
+                    onCommentChange={() => {}}
+                    onEditComment={editComment}
+                    onDeleteComment={deleteComment}
+                    isCommentAuthor={isCommentAuthor}
+                    interactionsDisabled={!commentsAllowed}
+                    disabledReason={!commentsAllowed ? 'cards-not-revealed' : null}
+                    presenceData={presenceData}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: sidebar */}
+          <div className="card-detail-sidebar">
+            {actionItemsEnabled && (
+              <button
+                className={`card-detail-convert-btn ${hasActionItem ? 'active' : ''}`}
+                onClick={hasActionItem ? handleRemoveActionItem : handleConvertToActionItem}
+                disabled={!metadataEditingAllowed}
+              >
+                <CheckSquare size={18} />
+                {hasActionItem ? 'Action Item ✓' : 'Convert to Action'}
+              </button>
+            )}
+
+            {/* Timer */}
+            <div className="card-detail-sidebar-section">
+              <h4 className="card-detail-sidebar-label">ACTIVE TIMER</h4>
+              <div className="card-detail-timer-card">
+                <CardTimerControls
+                  boardId={boardId}
+                  columnId={columnId}
+                  cardId={cardId}
+                  timerData={cardData.timer}
+                  user={user}
+                  className="card-detail-timer-sidebar"
+                />
+              </div>
+            </div>
+
+            {/* Reactions */}
+            {reactionsVisible && (
+              <div className="card-detail-sidebar-section">
+                <h4 className="card-detail-sidebar-label">REACTIONS</h4>
+                <div className="card-detail-sidebar-reactions">
                   <CardReactions
                     reactions={displayCardData.reactions}
                     userId={user?.uid}
@@ -548,54 +592,78 @@ const CardDetailModal = ({
                     disabled={reactionsDisabled}
                     disabledReason={reactionDisabledReason}
                   />
-                  {!displayCardData.reactions || Object.keys(displayCardData.reactions).length === 0 ? (
-                    <span className="card-detail-reactions-empty">No reactions yet</span>
-                  ) : null}
                   {!reactionsDisabled && (
                     <button
-                      className="card-detail-add-reaction-btn"
+                      className="card-detail-add-reaction-circle"
                       onClick={toggleEmojiPicker}
                       aria-label="Add reaction"
                       title="Add reaction"
                     >
-                      <Smile size={14} /> Add
+                      <Plus size={14} />
                     </button>
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="card-detail-reactions-container">
-                <h4 className="card-detail-section-title">Reactions</h4>
-                <div className="card-detail-hidden-notice">
-                  Reactions are available once cards are revealed.
+            )}
+
+            {/* Votes */}
+            {votingEnabled && interactionsVisible && (
+              <div className="card-detail-sidebar-votes-row">
+                <span className="card-detail-sidebar-votes-label">Votes</span>
+                <div className="card-detail-sidebar-votes-controls">
+                  <button
+                    className="card-detail-vote-btn"
+                    onClick={interactionsDisabled ? undefined : upvoteCard}
+                    disabled={interactionsDisabled}
+                    aria-label="Upvote"
+                    title={interactionsDisabled ? disabledReason : 'Upvote'}
+                  >
+                    ▲
+                  </button>
+                  <span className="card-detail-sidebar-vote-count">{displayCardData.votes || 0}</span>
+                  {downvotingEnabled && (
+                    <button
+                      className="card-detail-vote-btn"
+                      onClick={interactionsDisabled ? undefined : downvoteCard}
+                      disabled={interactionsDisabled}
+                      aria-label="Downvote"
+                      title={interactionsDisabled ? disabledReason : 'Downvote'}
+                    >
+                      ▼
+                    </button>
+                  )}
                 </div>
               </div>
             )}
-          </section>
 
-          {reviewToolsVisible && (
-            <section className="card-detail-section">
-              <h4 className="card-detail-section-title">Comments ({reviewCommentCount})</h4>
-              <div className="card-detail-comments">
-                <Comments
-                  comments={displayCardData.comments}
-                  onAddComment={addComment}
-                  newComment={newComment}
-                  onCommentChange={setNewComment}
-                  onEditComment={editComment}
-                  onDeleteComment={deleteComment}
-                  isCommentAuthor={isCommentAuthor}
-                  interactionsDisabled={!commentsAllowed}
-                  disabledReason={!commentsAllowed ? 'cards-not-revealed' : null}
-                  presenceData={presenceData}
-                />
-              </div>
-            </section>
-          )}
+            <div className="card-detail-sidebar-divider" />
+
+            <button
+              className="card-detail-sidebar-menu-item"
+              onClick={openTagPicker}
+              ref={tagButtonRef}
+              disabled={!metadataEditingAllowed}
+            >
+              <Tag size={18} /> Labels
+            </button>
+            <button
+              className="card-detail-sidebar-menu-item"
+              onClick={openColorPicker}
+              ref={colorButtonRef}
+              disabled={!metadataEditingAllowed}
+            >
+              <Sliders size={18} /> Card Color
+            </button>
+            <button
+              className="card-detail-sidebar-menu-item"
+              onClick={handleArchiveCard}
+            >
+              <Archive size={18} /> Archive Card
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Emoji Picker Popover */}
       {showEmojiPicker && (
         <EmojiPicker
           position={emojiPickerPosition}
