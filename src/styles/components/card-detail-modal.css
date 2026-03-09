@@ -8,7 +8,6 @@
   max-width: 920px;
   width: 95%;
   max-height: 90vh;
-  max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -16,6 +15,18 @@
   border-radius: 16px;
   box-shadow: var(--modal-shadow);
   animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+}
+
+/* Inline variant (embedded in page, not in modal overlay) */
+.card-detail-inline {
+  max-width: 920px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
   position: relative;
 }
 
