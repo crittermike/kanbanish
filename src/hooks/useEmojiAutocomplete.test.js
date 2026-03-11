@@ -159,7 +159,7 @@ describe('useEmojiAutocomplete', () => {
     expect(result.current.selectedIndex).toBe(0);
   });
 
-  test('close resets the state', () => {
+  test('close resets selectedIndex to 0', () => {
     const value = ':fire';
     const setValue = vi.fn();
     const inputRef = createMockInputRef(value.length);
@@ -169,10 +169,22 @@ describe('useEmojiAutocomplete', () => {
 
     expect(result.current.isOpen).toBe(true);
 
+    // Move selectedIndex away from 0 first
+    act(() => {
+      result.current.onKeyDown({
+        key: 'ArrowDown',
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      });
+    });
+    expect(result.current.selectedIndex).toBe(1);
+
     act(() => {
       result.current.close();
     });
 
+    // selectedIndex is reset; isOpen/suggestions still derive from value+cursor
+    // so they remain until the value changes — close is for keyboard dismissal
     expect(result.current.selectedIndex).toBe(0);
   });
 
