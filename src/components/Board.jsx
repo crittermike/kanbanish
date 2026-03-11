@@ -299,6 +299,7 @@ function Board({ onGoHome }) {
       <CardCreationIndicator 
         usersAddingCards={getAllUsersAddingCards()} 
         currentUserId={user?.uid}
+        showDisplayNames={showDisplayNames}
       />
 
       {/* Workflow Controls - Show when retrospective mode is enabled or during health check phase */}

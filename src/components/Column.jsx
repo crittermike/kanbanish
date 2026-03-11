@@ -12,6 +12,8 @@ import Card from './Card';
 import CardGroup from './CardGroup';
 import ColumnTimer from './ColumnTimer';
 
+const TYPING_INDICATOR_TIMEOUT_MS = 5000;
+
 function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds, onExpandCard }) {
   const { 
     boardId, 
@@ -44,6 +46,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const [draggedCardForGrouping, setDraggedCardForGrouping] = useState(null);
   const columnRef = useRef(null);
   const groupModalRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   // Cancel group creation
   const cancelCreateGroup = () => {
@@ -68,6 +71,15 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       stopCardCreation(); // Also stop tracking when form is hidden due to phase change
     }
   }, [workflowPhase, retrospectiveMode, isAddingCard, stopCardCreation, columnId]);
+
+  // Clean up typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Set up drop target for cards
   const [{ isOver }, drop] = useDrop(() => ({
@@ -140,18 +152,37 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     }
   };
 
+  // Clear any pending typing indicator timeout
+  const clearTypingTimeout = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  };
+
   // Show the inline card form
   const showAddCardForm = () => {
     setIsAddingCard(true);
     setNewCardContent('');
-    startCardCreation(columnId);
   };
 
   // Hide the inline card form
   const hideAddCardForm = () => {
     setIsAddingCard(false);
     setNewCardContent('');
+    clearTypingTimeout();
     stopCardCreation();
+  };
+
+  // Handle typing in the new card textarea — trigger typing indicator
+  const handleNewCardChange = (e) => {
+    setNewCardContent(e.target.value);
+    startCardCreation(columnId);
+    clearTypingTimeout();
+    typingTimeoutRef.current = setTimeout(() => {
+      stopCardCreation();
+      typingTimeoutRef.current = null;
+    }, TYPING_INDICATOR_TIMEOUT_MS);
   };
 
   // Add a new card inline
@@ -487,7 +518,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           <textarea
             placeholder="Enter card content..."
             value={newCardContent}
-            onChange={e => setNewCardContent(e.target.value)}
+            onChange={handleNewCardChange}
             onKeyDown={handleNewCardKeyPress}
             className="inline-card-textarea"
             autoFocus
