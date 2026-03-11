@@ -4,6 +4,7 @@ import { useDrop } from 'react-dnd';
 import { ChevronLeft, ChevronRight, Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
+import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
@@ -11,6 +12,7 @@ import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils
 import Card from './Card';
 import CardGroup from './CardGroup';
 import ColumnTimer from './ColumnTimer';
+import EmojiAutocomplete from './EmojiAutocomplete';
 
 const TYPING_INDICATOR_TIMEOUT_MS = 5000;
 
@@ -47,6 +49,9 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const columnRef = useRef(null);
   const groupModalRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const newCardTextareaRef = useRef(null);
+
+  const emojiAC = useEmojiAutocomplete(newCardContent, setNewCardContent, newCardTextareaRef);
 
   // Cancel group creation
   const cancelCreateGroup = () => {
@@ -177,6 +182,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   // Handle typing in the new card textarea — trigger typing indicator
   const handleNewCardChange = (e) => {
     setNewCardContent(e.target.value);
+    emojiAC.onChange();
     startCardCreation(columnId);
     clearTypingTimeout();
     typingTimeoutRef.current = setTimeout(() => {
@@ -221,6 +227,11 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
 
   // Handle key press for new card
   const handleNewCardKeyPress = e => {
+    // Let emoji autocomplete handle keys first when open
+    if (emojiAC.isOpen) {
+      emojiAC.onKeyDown(e);
+      if (e.defaultPrevented) return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       saveNewCard();
@@ -516,6 +527,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       {isAddingCard ? (
         <div className="inline-card-form">
           <textarea
+            ref={newCardTextareaRef}
             placeholder="Enter card content..."
             value={newCardContent}
             onChange={handleNewCardChange}
@@ -523,6 +535,12 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             className="inline-card-textarea"
             autoFocus
             aria-label="Card content"
+          />
+          <EmojiAutocomplete
+            suggestions={emojiAC.suggestions}
+            selectedIndex={emojiAC.selectedIndex}
+            onSelect={emojiAC.onSelect}
+            inputRef={newCardTextareaRef}
           />
           <div className="inline-card-actions">
             <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>

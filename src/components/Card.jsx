@@ -3,6 +3,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { MessageSquare, CheckSquare, Clock } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
+import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
 import { getInitials } from '../utils/avatarColors';
 import {
   filterVisibleInteractionData,
@@ -26,6 +27,7 @@ import {
 import CardHoverActions from './CardHoverActions';
 import CardReactions from './CardReactions';
 import Comments from './Comments';
+import EmojiAutocomplete from './EmojiAutocomplete';
 import MarkdownContent from './MarkdownContent';
 import VotingControls from './VotingControls';
 
@@ -37,22 +39,47 @@ const CardEditor = ({
   saveCardChanges,
   toggleEditMode,
   deleteCard
-}) => (
-  <div className="card-edit" onClick={e => e.stopPropagation()}>
-    <textarea
-      value={editedContent}
-      onChange={e => setEditedContent(e.target.value)}
-      onKeyDown={handleKeyPress}
-      className="card-edit-textarea"
-      autoFocus
-    />
-    <div className="card-edit-actions">
-      <button className="btn danger-btn" onClick={deleteCard}>Delete</button>
-      <button className="btn secondary-btn" onClick={toggleEditMode}>Cancel</button>
-      <button className="btn success-btn" onClick={saveCardChanges}>Save</button>
+}) => {
+  const textareaRef = useRef(null);
+  const emojiAC = useEmojiAutocomplete(editedContent, setEditedContent, textareaRef);
+
+  const onKeyDown = (e) => {
+    if (emojiAC.isOpen) {
+      emojiAC.onKeyDown(e);
+      if (e.defaultPrevented) return;
+    }
+    handleKeyPress(e);
+  };
+
+  const onChangeHandler = (e) => {
+    setEditedContent(e.target.value);
+    emojiAC.onChange();
+  };
+
+  return (
+    <div className="card-edit" onClick={e => e.stopPropagation()}>
+      <textarea
+        ref={textareaRef}
+        value={editedContent}
+        onChange={onChangeHandler}
+        onKeyDown={onKeyDown}
+        className="card-edit-textarea"
+        autoFocus
+      />
+      <EmojiAutocomplete
+        suggestions={emojiAC.suggestions}
+        selectedIndex={emojiAC.selectedIndex}
+        onSelect={emojiAC.onSelect}
+        inputRef={textareaRef}
+      />
+      <div className="card-edit-actions">
+        <button className="btn danger-btn" onClick={deleteCard}>Delete</button>
+        <button className="btn secondary-btn" onClick={toggleEditMode}>Cancel</button>
+        <button className="btn success-btn" onClick={saveCardChanges}>Save</button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Card Content component for display mode
 const CardContent = ({
