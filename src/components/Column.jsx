@@ -12,6 +12,8 @@ import Card from './Card';
 import CardGroup from './CardGroup';
 import ColumnTimer from './ColumnTimer';
 
+const TYPING_INDICATOR_TIMEOUT_MS = 5000;
+
 function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse, isFiltering, matchingCardIds, matchingGroupIds, onExpandCard }) {
   const { 
     boardId, 
@@ -150,6 +152,14 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     }
   };
 
+  // Clear any pending typing indicator timeout
+  const clearTypingTimeout = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  };
+
   // Show the inline card form
   const showAddCardForm = () => {
     setIsAddingCard(true);
@@ -160,10 +170,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const hideAddCardForm = () => {
     setIsAddingCard(false);
     setNewCardContent('');
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
-    }
+    clearTypingTimeout();
     stopCardCreation();
   };
 
@@ -171,13 +178,11 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const handleNewCardChange = (e) => {
     setNewCardContent(e.target.value);
     startCardCreation(columnId);
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    clearTypingTimeout();
     typingTimeoutRef.current = setTimeout(() => {
       stopCardCreation();
       typingTimeoutRef.current = null;
-    }, 5000);
+    }, TYPING_INDICATOR_TIMEOUT_MS);
   };
 
   // Add a new card inline
