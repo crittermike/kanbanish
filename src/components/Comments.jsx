@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useBoardContext } from '../context/BoardContext';
+import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
 import { getInitials } from '../utils/avatarColors';
 import { shouldHideFeature, getCommentDisabledMessage } from '../utils/retrospectiveModeUtils';
+import EmojiAutocomplete from './EmojiAutocomplete';
 import MarkdownContent from './MarkdownContent';
 
 const CommentEditor = ({
@@ -50,6 +52,11 @@ const Comments = React.memo(({
   const { showDisplayNames } = useBoardContext();
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedContent, setEditedContent] = useState('');
+  const commentInputRef = useRef(null);
+
+  // Wrapper setter so the hook can call onCommentChange
+  const setCommentValue = (val) => onCommentChange(val);
+  const emojiAC = useEmojiAutocomplete(newComment, setCommentValue, commentInputRef);
 
   // Use utility functions for consistent logic
   const shouldShowAlert = !shouldHideFeature(disabledReason);
@@ -172,6 +179,7 @@ const Comments = React.memo(({
       {!hideCommentForm && (
         <div className="comment-form">
           <input
+            ref={commentInputRef}
             type="text"
             placeholder={
               interactionsDisabled && shouldShowAlert
@@ -181,9 +189,16 @@ const Comments = React.memo(({
             className="comment-input"
             aria-label="Add a comment"
             value={newComment}
-            onChange={e => onCommentChange(e.target.value)}
+            onChange={e => {
+              onCommentChange(e.target.value);
+              emojiAC.onChange();
+            }}
             onClick={e => e.stopPropagation()}
-            onKeyPress={e => {
+            onKeyDown={e => {
+              if (emojiAC.isOpen) {
+                emojiAC.onKeyDown(e);
+                if (e.defaultPrevented) return;
+              }
               if (e.key === 'Enter' && newComment.trim()) {
                 e.preventDefault();
                 handleAddComment();
@@ -195,6 +210,12 @@ const Comments = React.memo(({
                 ? commentDisabledMessage
                 : ''
             }
+          />
+          <EmojiAutocomplete
+            suggestions={emojiAC.suggestions}
+            selectedIndex={emojiAC.selectedIndex}
+            onSelect={emojiAC.onSelect}
+            inputRef={commentInputRef}
           />
         </div>
       )}

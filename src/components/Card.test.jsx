@@ -359,7 +359,7 @@ describe('Card Component', () => {
     // Add a comment
     const commentInput = screen.getByPlaceholderText('Add a comment...');
     fireEvent.change(commentInput, { target: { value: 'New test comment' } });
-    fireEvent.keyPress(commentInput, { key: 'Enter', code: 13, charCode: 13 });
+    fireEvent.keyDown(commentInput, { key: 'Enter', code: 13, charCode: 13 });
 
     // Verify comment was added
     await waitFor(() => {

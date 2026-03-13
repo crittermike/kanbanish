@@ -1,0 +1,48 @@
+/**
+ * Kanban App - Emoji Autocomplete Dropdown
+ *
+ * Styles for the inline :shortcode: autocomplete popup that appears
+ * while typing in card and comment text fields.
+ */
+
+.emoji-autocomplete {
+  position: fixed;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-xxs) 0;
+  z-index: 1100;
+  box-shadow: var(--shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.emoji-autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xxs) var(--space-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+  transition: background-color 0.1s ease;
+}
+
+.emoji-autocomplete-item:hover,
+.emoji-autocomplete-item.selected {
+  background-color: var(--accent-subtle, var(--hover-bg));
+}
+
+.emoji-autocomplete-char {
+  font-size: 1.2rem;
+  width: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.emoji-autocomplete-code {
+  color: var(--text-secondary, var(--text-faint));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

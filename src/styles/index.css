@@ -16,6 +16,7 @@
 @import 'components/card-groups.css';
 @import 'components/modals.css';
 @import 'components/emoji-reactions.css';
+@import 'components/emoji-autocomplete.css';
 @import 'components/template-select.css';
 @import 'components/results.css';
 @import 'components/workflow.css';
