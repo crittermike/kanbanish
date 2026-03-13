@@ -1,94 +1,35 @@
 # Kanbanish
 
-A real-time collaborative kanban board built with React and Firebase. No accounts, no setup - just create a board, share the link, and start collaborating. Great for retrospectives, brainstorming, lean coffee, sprint planning, and more.
+A real-time collaborative kanban board. No accounts, no setup - just create a board, share the link, and go.
 
-🔗 **Live at [kanbanish.com](https://www.kanbanish.com)**
+🔗 **Try it at [kanbanish.com](https://www.kanbanish.com)**
 
-## Features
+![Board view](board-ocean-breeze.png)
 
-### Core Board
+## ✨ Features
 
-- **No login required** - fully anonymous via Firebase Anonymous Auth
-- **Real-time collaboration** - all changes sync instantly across connected users
-- **Drag and drop** - move cards between columns with react-dnd
-- **Card grouping** - group related cards with visual stacking and expand/collapse
-- **Card detail modal** - click any card to open a two-column detail view with voting, reactions, comments, color, tags, and a per-card timer
-- **Focus mode** - full-screen card presentation with keyboard navigation, auto-play, and a progress minimap
-- **30+ board templates** - retro, lean coffee, DAKI, SWOT, sailboat, starfish, and many more (or build your own)
-- **Board creation wizard** - pick a template, choose Kanban or Retrospective mode, and toggle features before starting
+- 🔓 **No login required** - anonymous access, just share the URL
+- ⚡ **Real-time sync** - everything updates instantly for all users
+- 🖱️ **Drag and drop** - move and reorder cards across columns
+- 📦 **Card grouping** - stack related cards together with expand/collapse
+- 🗳️ **Voting** - upvotes, downvotes, configurable limits, sort by votes
+- 💬 **Comments & reactions** - threaded comments and emoji reactions on any card
+- ⏱️ **Timers** - global, per-column, and per-card countdown timers
+- 🔍 **Search & filters** - filter by text, tags, color, votes, author, and more
+- 📋 **30+ templates** - retro, lean coffee, DAKI, SWOT, sailboat, starfish, and more
+- 🎨 **Customizable** - dark/light themes, board backgrounds (solids, gradients, patterns, custom images)
+- 📤 **Export** - Markdown, plain text, CSV, or JSON
+- 📊 **Board insights** - engagement scores, sentiment analysis, card distribution, top themes
 
-### Retrospective Workflow
+![Search and filters](filter-desktop-final.png)
 
-When retrospective mode is enabled, the board walks through guided phases:
+### 🔄 Retrospective Mode
 
-1. **Health Check** - team rates areas (morale, tech debt, focus, etc.) on a 1–5 scale
-2. **Health Check Results** - aggregate ratings revealed
-3. **Creation** - participants add cards (content hidden from others)
-4. **Grouping** - cards revealed; drag to group related ideas
-5. **Interactions** - vote, comment, and react on cards (hidden until reveal)
-6. **Interaction Reveal** - all votes, comments, and reactions become visible
-7. **Results** - top-voted items displayed
-8. **Poll** - rate the retrospective's effectiveness (1–5 stars)
-9. **Poll Results** - poll ratings displayed
+Built-in guided workflow for team retros with sequential phases:
 
-### Voting
+**Health Check** → **Creation** (cards hidden) → **Grouping** → **Voting & Reactions** → **Results** → **Effectiveness Poll**
 
-- Upvotes and optional downvotes
-- Configurable vote limits per person (unlimited, 3, 5, 10, or custom)
-- Toggle multiple votes per card
-- Sort cards by votes or chronologically
-- One-click vote reset
-
-### Timers
-
-- **Global board timer** with presets (1m, 3m, 5m, 10m) or custom duration
-- **Per-column timers** - set a default timer for any column; one click to start
-- **Per-card timer** - available inside the card detail modal
-- Audio notification when time expires
-
-### Search & Filters
-
-- Full-text search across card content
-- Filter by tags, author (own cards), vote count, card color, comments, reactions, or grouping status
-- Active filter chips with one-click removal
-
-### Action Items
-
-- Convert cards into trackable action items with assignee, due date, and status
-- Open/done toggle, overdue flagging, inline editing
-- Summary panel with completion stats
-
-### Board Insights
-
-- Overview stats: total cards, votes, comments, reactions, unique authors, groups
-- Engagement score (0–100) based on comment, voting, and reaction activity
-- Sentiment analysis with score and label
-- Card distribution per column
-- Top themes (word frequency), top voted, most discussed, most reacted
-- Action items completion progress
-
-### Customization
-
-- **Themes**: dark and light mode
-- **Board backgrounds**: solid colors, gradients, patterns, or a custom image URL (with tile/cover sizing)
-- **Display names**: optionally show author names and avatars on cards
-
-### Sharing & Export
-
-- One-click share URL
-- Export to **Markdown**, **Plain Text**, **CSV**, or **JSON** with preview and copy-to-clipboard
-- Exports include votes, comments, reactions, tags, colors, and group structure
-
-### Other
-
-- **Emoji reactions** on cards and groups with keyword search
-- **Emoji autocomplete** - type `:shortcode:` (e.g. `:heart:`) in card or comment inputs
-- **Comments** on cards and groups with inline editing and markdown support
-- **Card colors and tags** for visual organization
-- **User presence** - see who's currently on the board
-- **Recent boards** - dashboard shows recent and pinned boards
-- **Responsive design** - works on desktop and mobile
-- **URL configuration** - pre-configure boards via query params (e.g. `?template=lean-coffee&voting=true&votes=5&theme=dark`)
+Plus: action items with assignees and due dates, focus mode for full-screen card presentations, and a board setup wizard to configure everything before you start.
 
 ## 🔧 Technology Stack
 
