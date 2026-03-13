@@ -4,7 +4,7 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 
 🔗 **Try it at [kanbanish.com](https://www.kanbanish.com)**
 
-![Board view](board-ocean-breeze.png)
+![Board view](docs/board-ocean-breeze.png)
 
 ## ✨ Features
 
@@ -21,7 +21,7 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 - 📤 **Export** - Markdown, plain text, CSV, or JSON
 - 📊 **Board insights** - engagement scores, sentiment analysis, card distribution, top themes
 
-![Search and filters](filter-desktop-final.png)
+![Search and filters](docs/filter-desktop-final.png)
 
 ### 🔄 Retrospective Mode
 
