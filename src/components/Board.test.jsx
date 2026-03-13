@@ -280,6 +280,9 @@ describe('Board Component', () => {
       get: param => param === 'board' ? 'existing-board-id' : null
     }));
 
+    // Override retrospectiveMode to false so voting toggle is not disabled
+    useBoardContext.mockReturnValue({ ...mockContextValue, retrospectiveMode: false });
+
     render(
       <DndProvider backend={HTML5Backend}>
         <Board />
