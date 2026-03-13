@@ -140,7 +140,7 @@ const CardDetailModal = ({
 
   const isCreator = isCardAuthor();
   let editingDisabled = false;
-  if (workflowPhase && user) {
+  if (retrospectiveMode && workflowPhase && user) {
     const editingAllowed = isCardEditingAllowed(workflowPhase, retrospectiveMode);
     if (workflowPhase === 'CREATION') {
       editingDisabled = !isCreator;

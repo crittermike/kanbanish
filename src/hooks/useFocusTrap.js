@@ -23,6 +23,12 @@ const FOCUSABLE_SELECTOR = [
 export function useFocusTrap(containerRef, isOpen, options = {}) {
   const { onClose } = options;
   const previouslyFocusedRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  // Keep onClose ref up to date without triggering the effect
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -46,9 +52,9 @@ export function useFocusTrap(containerRef, isOpen, options = {}) {
     }, 0);
 
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && onClose) {
+      if (e.key === 'Escape' && onCloseRef.current) {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -91,5 +97,5 @@ export function useFocusTrap(containerRef, isOpen, options = {}) {
         previouslyFocusedRef.current.focus();
       }
     };
-  }, [isOpen, containerRef, onClose]);
+  }, [isOpen, containerRef]);
 }
