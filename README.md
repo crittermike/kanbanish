@@ -1,45 +1,121 @@
 # Kanbanish
 
-A real-time anonymous Kanban board application built with React and Firebase. Kanbanish allows users to create, share, and collaborate on Kanban boards without requiring accounts or authentication.
+A real-time collaborative kanban board built with React and Firebase. No accounts, no setup — just create a board, share the link, and start collaborating. Great for retrospectives, brainstorming, lean coffee, sprint planning, and more.
+
+🔗 **Live at [kanbanish.com](https://www.kanbanish.com)**
 
 ## Features
 
-- **Anonymous Access**: No login required – just create a board and share the link
-- **Real-time Updates**: Changes appear instantly across all connected users
-- **Drag and Drop Interface**: Easily move cards between columns using intuitive drag and drop
-- **Card Grouping**: Group related cards together with visual stacking and expand/collapse functionality
-- **Emoji Reactions**: Express yourself with emoji reactions on cards
-- **Responsive Design**: Works on desktop and mobile devices
-- **Customizable Boards**: Create and name columns to fit your workflow
+### Core Board
 
-## 🚀 Live Demo
+- **No login required** — fully anonymous via Firebase Anonymous Auth
+- **Real-time collaboration** — all changes sync instantly across connected users
+- **Drag and drop** — move cards between columns with react-dnd
+- **Card grouping** — group related cards with visual stacking and expand/collapse
+- **Card detail modal** — click any card to open a two-column detail view with voting, reactions, comments, color, tags, and a per-card timer
+- **Focus mode** — full-screen card presentation with keyboard navigation, auto-play, and a progress minimap
+- **30+ board templates** — retro, lean coffee, DAKI, SWOT, sailboat, starfish, and many more (or build your own)
+- **Board creation wizard** — pick a template, choose Kanban or Retrospective mode, and toggle features before starting
 
-Try Kanbanish at: [https://crittermike.github.io/kanbanish](https://crittermike.github.io/kanbanish)
+### Retrospective Workflow
+
+When retrospective mode is enabled, the board walks through guided phases:
+
+1. **Health Check** — team rates areas (morale, tech debt, focus, etc.) on a 1–5 scale
+2. **Health Check Results** — aggregate ratings revealed
+3. **Creation** — participants add cards (content hidden from others)
+4. **Grouping** — cards revealed; drag to group related ideas
+5. **Interactions** — vote, comment, and react on cards (hidden until reveal)
+6. **Interaction Reveal** — all votes, comments, and reactions become visible
+7. **Results** — top-voted items displayed
+8. **Poll** — rate the retrospective's effectiveness (1–5 stars)
+9. **Poll Results** — poll ratings displayed
+
+### Voting
+
+- Upvotes and optional downvotes
+- Configurable vote limits per person (unlimited, 3, 5, 10, or custom)
+- Toggle multiple votes per card
+- Sort cards by votes or chronologically
+- One-click vote reset
+
+### Timers
+
+- **Global board timer** with presets (1m, 3m, 5m, 10m) or custom duration
+- **Per-column timers** — set a default timer for any column; one click to start
+- **Per-card timer** — available inside the card detail modal
+- Audio notification when time expires
+
+### Search & Filters
+
+- Full-text search across card content
+- Filter by tags, author (own cards), vote count, card color, comments, reactions, or grouping status
+- Active filter chips with one-click removal
+
+### Action Items
+
+- Convert cards into trackable action items with assignee, due date, and status
+- Open/done toggle, overdue flagging, inline editing
+- Summary panel with completion stats
+
+### Board Insights
+
+- Overview stats: total cards, votes, comments, reactions, unique authors, groups
+- Engagement score (0–100) based on comment, voting, and reaction activity
+- Sentiment analysis with score and label
+- Card distribution per column
+- Top themes (word frequency), top voted, most discussed, most reacted
+- Action items completion progress
+
+### Customization
+
+- **Themes**: dark and light mode
+- **Board backgrounds**: solid colors, gradients, patterns, or a custom image URL (with tile/cover sizing)
+- **Display names**: optionally show author names and avatars on cards
+
+### Sharing & Export
+
+- One-click share URL
+- Export to **Markdown**, **Plain Text**, **CSV**, or **JSON** with preview and copy-to-clipboard
+- Exports include votes, comments, reactions, tags, colors, and group structure
+
+### Other
+
+- **Emoji reactions** on cards and groups with keyword search
+- **Emoji autocomplete** — type `:shortcode:` (e.g. `:heart:`) in card or comment inputs
+- **Comments** on cards and groups with inline editing and markdown support
+- **Card colors and tags** for visual organization
+- **User presence** — see who's currently on the board
+- **Recent boards** — dashboard shows recent and pinned boards
+- **Responsive design** — works on desktop and mobile
+- **URL configuration** — pre-configure boards via query params (e.g. `?template=lean-coffee&voting=true&votes=5&theme=dark`)
 
 ## 🔧 Technology Stack
 
-- **Frontend**: React 19
+- **Frontend**: React 19 (JSX, no TypeScript)
 - **Build Tool**: Vite
 - **State Management**: React Context API
-- **Drag and Drop**: react-dnd
+- **Drag and Drop**: react-dnd (HTML5 backend)
 - **Backend/Database**: Firebase Realtime Database
 - **Authentication**: Firebase Anonymous Auth
-- **Testing**: Vitest and React Testing Library
-- **Code Quality**: ESLint with React, Accessibility, and Import plugins
+- **Styling**: Pure CSS with custom properties (no Tailwind, no CSS-in-JS)
+- **Testing**: Vitest + React Testing Library
+- **Linting**: ESLint with react, react-hooks, import, and jsx-a11y plugins
+- **CI/CD**: GitHub Actions (test on PR, auto-deploy to GitHub Pages on push to main)
 
 ## 🛠️ Development
 
 ### Prerequisites
 
 - Node.js (v18 or higher recommended)
-- npm or yarn
+- npm
 
 ### Getting Started
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/kanbanish.git
+git clone https://github.com/crittermike/kanbanish.git
 cd kanbanish
 ```
 
@@ -63,82 +139,36 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 ### Available Scripts
 
-- **Development Server**: `npm run dev` or `npm start`
-
-  - Starts the Vite development server
-  - Open [http://localhost:3001/kanbanish/](http://localhost:3001/kanbanish/) in your browser
-
-- **Build for Production**: `npm run build`
-
-  - Builds the app for production to the `build` folder
-  - Optimized and ready for deployment
-
-- **Preview Production Build**: `npm run preview`
-
-  - Locally preview the production build
-
-- **Run Tests**: `npm test`
-  - Executes the test suite with Vitest
-
-- **Code Linting**: `npm run lint`
-  - Checks code for style and quality issues using ESLint
-  - Use `npm run lint:fix` to automatically fix fixable issues
-  - Use `npm run lint:check` to enforce zero warnings (useful for CI)
-
-## 📱 Using Kanbanish
-
-1. **Creating a Board**:
-
-   - Visit the application and click "Create New Board"
-   - Give your board a name and customize columns as needed
-   - Share the generated URL with collaborators
-
-2. **Adding Cards**:
-
-   - Click "+" in any column to add a new card
-   - Enter a title and description for your card
-   - Save to add it to the board
-
-3. **Moving Cards**:
-
-   - Drag and drop cards between columns to update their status
-
-4. **Adding Reactions**:
-
-   - Click the reaction button on any card to add emoji reactions
-
-5. **Grouping Cards**:
-   - Select multiple cards by clicking on them
-   - Click the group button (📦) in the column header
-   - Enter a name for your group and confirm
-   - Expand/collapse groups by clicking the group header
-   - Ungroup cards using the scissors (✂️) button
+| Script | Command | Purpose |
+|---|---|---|
+| `npm run dev` | `vite --port 3000` | Development server at [localhost:3000](http://localhost:3000) |
+| `npm run build` | `vite build` | Production build to `build/` |
+| `npm run preview` | `vite preview` | Preview production build |
+| `npm test` | `vitest run` | Run tests once |
+| `npm run test:watch` | `vitest` | Tests in watch mode |
+| `npm run lint` | `eslint .` | Check for lint errors |
+| `npm run lint:fix` | `eslint . --fix` | Auto-fix lint errors |
 
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
-### Development Guidelines
-
-1. **Code Quality**: Run `npm run lint` before committing to ensure code follows the project's style guidelines
-2. **Testing**: Run `npm test` to ensure all tests pass
-3. **Type Safety**: Follow TypeScript-like patterns even in JavaScript (proper prop types, clear function signatures)
-4. **Accessibility**: Ensure new components follow accessibility best practices
-
-### Contributing Process
-
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and ensure they follow the style guide (`npm run lint:fix`)
-4. Add or update tests as needed
-5. Commit your changes (`git commit -m 'Add some amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+3. Run `npm run lint:fix && npm test && npm run build` before committing
+4. Open a Pull Request
+
+### Development Guidelines
+
+- **Code Quality**: Run `npm run lint` to ensure code follows the project's style guidelines
+- **Testing**: Add tests as `ComponentName.test.jsx` alongside components; run `npm test` to verify
+- **Accessibility**: Follow jsx-a11y best practices for new components
+- **Always run `npm run build`** in addition to tests — Vite's production build catches import errors that Vitest does not
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the LICENSE file for details.
 
 ## 📬 Contact
 
-Project Link: [https://github.com/yourusername/kanbanish](https://github.com/yourusername/kanbanish)
+Project Link: [github.com/crittermike/kanbanish](https://github.com/crittermike/kanbanish)
