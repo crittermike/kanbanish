@@ -16,3 +16,13 @@ vi.mock('./utils/firebase', () => {
     default: null
   };
 });
+
+// Global mock for firebase SDK — hooks import ref/set/remove directly from here
+vi.mock('firebase/database', () => ({
+  ref: vi.fn(() => 'mock-ref'),
+  set: vi.fn(() => Promise.resolve()),
+  remove: vi.fn(() => Promise.resolve()),
+  get: vi.fn(() => Promise.resolve({ val: () => null, exists: () => false })),
+  onValue: vi.fn(() => () => {}),
+  off: vi.fn()
+}));
