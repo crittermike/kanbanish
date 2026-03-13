@@ -1,6 +1,6 @@
 # Kanbanish
 
-A real-time collaborative kanban board built with React and Firebase. No accounts, no setup — just create a board, share the link, and start collaborating. Great for retrospectives, brainstorming, lean coffee, sprint planning, and more.
+A real-time collaborative kanban board built with React and Firebase. No accounts, no setup - just create a board, share the link, and start collaborating. Great for retrospectives, brainstorming, lean coffee, sprint planning, and more.
 
 🔗 **Live at [kanbanish.com](https://www.kanbanish.com)**
 
@@ -8,28 +8,28 @@ A real-time collaborative kanban board built with React and Firebase. No account
 
 ### Core Board
 
-- **No login required** — fully anonymous via Firebase Anonymous Auth
-- **Real-time collaboration** — all changes sync instantly across connected users
-- **Drag and drop** — move cards between columns with react-dnd
-- **Card grouping** — group related cards with visual stacking and expand/collapse
-- **Card detail modal** — click any card to open a two-column detail view with voting, reactions, comments, color, tags, and a per-card timer
-- **Focus mode** — full-screen card presentation with keyboard navigation, auto-play, and a progress minimap
-- **30+ board templates** — retro, lean coffee, DAKI, SWOT, sailboat, starfish, and many more (or build your own)
-- **Board creation wizard** — pick a template, choose Kanban or Retrospective mode, and toggle features before starting
+- **No login required** - fully anonymous via Firebase Anonymous Auth
+- **Real-time collaboration** - all changes sync instantly across connected users
+- **Drag and drop** - move cards between columns with react-dnd
+- **Card grouping** - group related cards with visual stacking and expand/collapse
+- **Card detail modal** - click any card to open a two-column detail view with voting, reactions, comments, color, tags, and a per-card timer
+- **Focus mode** - full-screen card presentation with keyboard navigation, auto-play, and a progress minimap
+- **30+ board templates** - retro, lean coffee, DAKI, SWOT, sailboat, starfish, and many more (or build your own)
+- **Board creation wizard** - pick a template, choose Kanban or Retrospective mode, and toggle features before starting
 
 ### Retrospective Workflow
 
 When retrospective mode is enabled, the board walks through guided phases:
 
-1. **Health Check** — team rates areas (morale, tech debt, focus, etc.) on a 1–5 scale
-2. **Health Check Results** — aggregate ratings revealed
-3. **Creation** — participants add cards (content hidden from others)
-4. **Grouping** — cards revealed; drag to group related ideas
-5. **Interactions** — vote, comment, and react on cards (hidden until reveal)
-6. **Interaction Reveal** — all votes, comments, and reactions become visible
-7. **Results** — top-voted items displayed
-8. **Poll** — rate the retrospective's effectiveness (1–5 stars)
-9. **Poll Results** — poll ratings displayed
+1. **Health Check** - team rates areas (morale, tech debt, focus, etc.) on a 1–5 scale
+2. **Health Check Results** - aggregate ratings revealed
+3. **Creation** - participants add cards (content hidden from others)
+4. **Grouping** - cards revealed; drag to group related ideas
+5. **Interactions** - vote, comment, and react on cards (hidden until reveal)
+6. **Interaction Reveal** - all votes, comments, and reactions become visible
+7. **Results** - top-voted items displayed
+8. **Poll** - rate the retrospective's effectiveness (1–5 stars)
+9. **Poll Results** - poll ratings displayed
 
 ### Voting
 
@@ -42,8 +42,8 @@ When retrospective mode is enabled, the board walks through guided phases:
 ### Timers
 
 - **Global board timer** with presets (1m, 3m, 5m, 10m) or custom duration
-- **Per-column timers** — set a default timer for any column; one click to start
-- **Per-card timer** — available inside the card detail modal
+- **Per-column timers** - set a default timer for any column; one click to start
+- **Per-card timer** - available inside the card detail modal
 - Audio notification when time expires
 
 ### Search & Filters
@@ -82,13 +82,13 @@ When retrospective mode is enabled, the board walks through guided phases:
 ### Other
 
 - **Emoji reactions** on cards and groups with keyword search
-- **Emoji autocomplete** — type `:shortcode:` (e.g. `:heart:`) in card or comment inputs
+- **Emoji autocomplete** - type `:shortcode:` (e.g. `:heart:`) in card or comment inputs
 - **Comments** on cards and groups with inline editing and markdown support
 - **Card colors and tags** for visual organization
-- **User presence** — see who's currently on the board
-- **Recent boards** — dashboard shows recent and pinned boards
-- **Responsive design** — works on desktop and mobile
-- **URL configuration** — pre-configure boards via query params (e.g. `?template=lean-coffee&voting=true&votes=5&theme=dark`)
+- **User presence** - see who's currently on the board
+- **Recent boards** - dashboard shows recent and pinned boards
+- **Responsive design** - works on desktop and mobile
+- **URL configuration** - pre-configure boards via query params (e.g. `?template=lean-coffee&voting=true&votes=5&theme=dark`)
 
 ## 🔧 Technology Stack
 
@@ -163,11 +163,11 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 - **Code Quality**: Run `npm run lint` to ensure code follows the project's style guidelines
 - **Testing**: Add tests as `ComponentName.test.jsx` alongside components; run `npm test` to verify
 - **Accessibility**: Follow jsx-a11y best practices for new components
-- **Always run `npm run build`** in addition to tests — Vite's production build catches import errors that Vitest does not
+- **Always run `npm run build`** in addition to tests - Vite's production build catches import errors that Vitest does not
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 📬 Contact
 
