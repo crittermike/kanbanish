@@ -11,12 +11,15 @@ const requiredEnvVars = [
   'VITE_FIREBASE_DATABASE_URL'
 ];
 
-const missing = requiredEnvVars.filter(key => !import.meta.env[key]);
-if (missing.length > 0) {
-  throw new Error(
-    `Missing required Firebase environment variables: ${missing.join(', ')}. ` +
-    'Copy .env.example to .env and fill in your Firebase project values.'
-  );
+const isTest = import.meta.env.MODE === 'test' || typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+if (!isTest) {
+  const missing = requiredEnvVars.filter(key => !import.meta.env[key]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required Firebase environment variables: ${missing.join(', ')}. ` +
+      'Copy .env.example to .env and fill in your Firebase project values.'
+    );
+  }
 }
 
 const firebaseConfig = {
