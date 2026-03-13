@@ -240,15 +240,19 @@ const SettingsPanel = ({
                   <div className="settings-toggle-row">
                     <span className="settings-toggle-label">Allow voting</span>
                     <button
-                      className="settings-toggle-switch"
+                      className={`settings-toggle-switch${retrospectiveMode ? ' settings-toggle-disabled' : ''}`}
                       role="switch"
                       aria-checked={votingEnabled}
-                      onClick={() => updateVotingEnabled(!votingEnabled)}
+                      onClick={() => { if (!retrospectiveMode) updateVotingEnabled(!votingEnabled); }}
                       aria-label="Allow voting"
+                      aria-disabled={retrospectiveMode}
                     >
                       <span className="settings-toggle-knob"></span>
                     </button>
                   </div>
+                  {retrospectiveMode && (
+                    <p className="settings-hint">Voting is always enabled in retrospective mode</p>
+                  )}
                 </div>
 
                 {votingEnabled && (

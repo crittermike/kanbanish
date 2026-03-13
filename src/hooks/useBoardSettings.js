@@ -158,9 +158,10 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
 
   const updateRetrospectiveMode = useCallback((enabled) => {
     if (enabled) {
-      // When enabling retrospective mode, start with health check phase
+      // When enabling retrospective mode, force voting on and start with health check phase
       updateBoardSettings({
         retrospectiveMode: enabled,
+        votingEnabled: true,
         workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
       });
     } else {

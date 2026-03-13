@@ -335,6 +335,41 @@ describe('SettingsPanel - Tab Navigation', () => {
     });
   });
 
+  describe('Voting forced on in retrospective mode', () => {
+    test('voting toggle is disabled when retrospective mode is on', () => {
+      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
+      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
+      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
+      expect(votingSwitch).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    test('voting toggle is not disabled when retrospective mode is off', () => {
+      render(<SettingsPanel {...defaultProps} retrospectiveMode={false} />);
+      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
+      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
+      expect(votingSwitch).not.toHaveAttribute('aria-disabled', 'true');
+    });
+
+    test('clicking voting toggle in retro mode does not call updateVotingEnabled', () => {
+      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
+      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
+      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
+      fireEvent.click(votingSwitch);
+
+      expect(defaultProps.updateVotingEnabled).not.toHaveBeenCalled();
+    });
+
+    test('shows forced-on hint when retrospective mode is active', () => {
+      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
+      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+
+      expect(screen.getByText('Voting is always enabled in retrospective mode')).toBeVisible();
+    });
+  });
+
   describe('Dialog interactions', () => {
     test('does not render tab content when dialog is closed', () => {
       render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);

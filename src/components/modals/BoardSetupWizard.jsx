@@ -99,16 +99,21 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
               <div className="settings-toggle-row">
                 <span className="settings-toggle-label" id="label-voting">Allow Voting</span>
                 <button 
-                  className="settings-toggle-switch" 
+                  className={`settings-toggle-switch${retrospectiveMode ? ' settings-toggle-disabled' : ''}`}
                   role="switch" 
                   aria-checked={votingEnabled} 
-                  onClick={() => setVotingEnabled(!votingEnabled)} 
+                  onClick={() => { if (!retrospectiveMode) setVotingEnabled(!votingEnabled); }}
                   aria-labelledby="label-voting"
+                  aria-disabled={retrospectiveMode}
                 >
                   <span className="settings-toggle-knob"></span>
                 </button>
               </div>
-              <p className="settings-hint">Let participants upvote and downvote cards</p>
+              <p className="settings-hint">
+                {retrospectiveMode
+                  ? 'Voting is always enabled in retrospective mode'
+                  : 'Let participants upvote and downvote cards'}
+              </p>
             </div>
 
             <div className="wizard-setting-group">

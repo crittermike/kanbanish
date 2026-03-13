@@ -273,6 +273,86 @@ describe('BoardSetupWizard', () => {
       expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
+    it('voting toggle is disabled when retrospective mode is selected', () => {
+      render(
+        <BoardSetupWizard
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          templateName="Test"
+        />
+      );
+
+      // Select Retrospective Mode
+      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
+      fireEvent.click(retroButton);
+
+      const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
+      expect(votingSwitch).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('voting toggle cannot be turned off in retrospective mode', () => {
+      render(
+        <BoardSetupWizard
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          templateName="Test"
+        />
+      );
+
+      // Select Retrospective Mode
+      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
+      fireEvent.click(retroButton);
+
+      // Try to click the voting switch — it should remain checked
+      const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
+      fireEvent.click(votingSwitch);
+
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
+    });
+
+    it('shows forced-on hint when retrospective mode is active', () => {
+      render(
+        <BoardSetupWizard
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          templateName="Test"
+        />
+      );
+
+      // Select Retrospective Mode
+      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
+      fireEvent.click(retroButton);
+
+      expect(screen.getByText('Voting is always enabled in retrospective mode')).toBeInTheDocument();
+    });
+
+    it('voting toggle is re-enabled when switching back to kanban mode', () => {
+      render(
+        <BoardSetupWizard
+          isOpen={true}
+          onClose={mockOnClose}
+          onConfirm={mockOnConfirm}
+          templateName="Test"
+        />
+      );
+
+      // Select Retrospective Mode
+      const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
+      fireEvent.click(retroButton);
+
+      const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
+      expect(votingSwitch).toHaveAttribute('aria-disabled', 'true');
+
+      // Switch back to Kanban Mode
+      const kanbanButton = screen.getByRole('radio', { name: /Kanban Mode/i });
+      fireEvent.click(kanbanButton);
+
+      expect(votingSwitch).not.toHaveAttribute('aria-disabled', 'true');
+    });
+
     it('clicking health check toggle turns it on (no mode switch needed)', () => {
       render(
         <BoardSetupWizard

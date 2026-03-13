@@ -412,6 +412,11 @@ h1 {
     transform: translateX(18px);
 }
 
+.settings-toggle-switch.settings-toggle-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 html.light-mode .settings-toggle-switch {
     background-color: #afb8c1;
 }
