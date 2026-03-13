@@ -4,8 +4,6 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 
 🔗 **Try it at [kanbanish.com](https://www.kanbanish.com)**
 
-![Board view](docs/board-ocean-breeze.png)
-
 ## ✨ Features
 
 - 🔓 **No login required** - anonymous access, just share the URL
@@ -20,8 +18,6 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 - 🎨 **Customizable** - dark/light themes, board backgrounds (solids, gradients, patterns, custom images)
 - 📤 **Export** - Markdown, plain text, CSV, or JSON
 - 📊 **Board insights** - engagement scores, sentiment analysis, card distribution, top themes
-
-![Search and filters](docs/filter-desktop-final.png)
 
 ### 🔄 Retrospective Mode
 
