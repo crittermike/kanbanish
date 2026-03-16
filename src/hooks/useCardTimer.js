@@ -1,6 +1,7 @@
 import { ref, set, remove } from 'firebase/database';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { database } from '../utils/firebase';
+import { playDing } from '../utils/sound';
 
 /**
  * Hook for per-card timer functionality (countdown timer synced via Firebase).
@@ -24,12 +25,22 @@ import { database } from '../utils/firebase';
  */
 export const useCardTimer = ({ boardId, columnId, cardId, timerData, user }) => {
   const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const hasNotifiedRef = useRef(false);
+  const lastStartedAtRef = useRef(null);
 
   // Derive the Firebase ref path for this card's timer
   const getTimerRef = useCallback(() => {
     if (!boardId || !columnId || !cardId) return null;
     return ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/timer`);
   }, [boardId, columnId, cardId]);
+
+  // Reset notification guard when a new timer starts
+  useEffect(() => {
+    if (timerData?.startedAt !== lastStartedAtRef.current) {
+      hasNotifiedRef.current = false;
+      lastStartedAtRef.current = timerData?.startedAt;
+    }
+  }, [timerData?.startedAt]);
 
   // Live countdown tick
   useEffect(() => {
@@ -53,6 +64,11 @@ export const useCardTimer = ({ boardId, columnId, cardId, timerData, user }) => 
       const elapsed = (Date.now() - timerData.startedAt) / 1000;
       const remaining = Math.max(0, timerData.duration - elapsed);
       setRemainingSeconds(Math.round(remaining));
+
+      if (remaining <= 0 && !hasNotifiedRef.current) {
+        hasNotifiedRef.current = true;
+        playDing();
+      }
     };
 
     tick(); // immediate
