@@ -1,5 +1,6 @@
 import { Home, Maximize2, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
+import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 /**
  * Board header with title input, user/vote counters, and share/export buttons.
@@ -53,6 +54,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     )}
     <div className="action-buttons">
       <UserCounter />
+      <TotalVoteCounter />
     </div>
 
   </div>
