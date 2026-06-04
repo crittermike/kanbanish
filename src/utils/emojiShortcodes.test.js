@@ -23,6 +23,12 @@ describe('searchEmojiShortcodes', () => {
     expect(emojis).toContain('🔥');
   });
 
+  test('returns poop emoji when searching for "poop"', () => {
+    const results = searchEmojiShortcodes('poop');
+    const emojis = results.map(r => r.emoji);
+    expect(emojis).toContain('💩');
+  });
+
   test('returns results when searching for "smile"', () => {
     const results = searchEmojiShortcodes('smile');
     expect(results.length).toBeGreaterThan(0);

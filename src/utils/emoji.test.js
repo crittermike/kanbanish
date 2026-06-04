@@ -73,6 +73,13 @@ describe('getEmojiKeywords', () => {
     expect(keywords).toContain('celebration');
   });
 
+  test('returns keywords for poop emoji', () => {
+    const keywords = getEmojiKeywords('💩');
+    expect(keywords).toContain('poop');
+    expect(keywords).toContain('poo');
+    expect(keywords).toContain('pile');
+  });
+
   test('returns fallback keywords for an unknown emoji', () => {
     // An emoji not in the keywords map
     const keywords = getEmojiKeywords('🪐');

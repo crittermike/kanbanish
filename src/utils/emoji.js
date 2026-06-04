@@ -184,7 +184,8 @@ export function getEmojiKeywords(emoji) {
     '😷': ['face', 'medical', 'mask', 'sick'],
     '🤒': ['face', 'thermometer', 'sick'],
     '🤕': ['face', 'head', 'bandage', 'hurt'],
-    
+    '💩': ['poop', 'poo', 'pile', 'shit', 'crap', 'turd'],
+
     // Hearts and love
     '❤️': ['red', 'heart', 'love'],
     '🧡': ['orange', 'heart', 'love'],
