@@ -1,5 +1,6 @@
 import { Home, Maximize2, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
+import BoardSeriesPager from './BoardSeriesPager';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
 /**
@@ -10,7 +11,7 @@ import UserCounter from './UserCounter';
  * @param {Function} props.handleBoardTitleChange - Called on title input change
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, onFocusModeEnter }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, onFocusModeEnter, previousBoardId, nextBoardId, onNavigateToBoard }) => (
   <div className="board-title-container">
     {onGoHome && (
       <button
@@ -21,6 +22,13 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       >
         <Home size={16} />
       </button>
+    )}
+    {onNavigateToBoard && (
+      <BoardSeriesPager
+        previousBoardId={previousBoardId}
+        nextBoardId={nextBoardId}
+        onNavigate={onNavigateToBoard}
+      />
     )}
     <input
       type="text"

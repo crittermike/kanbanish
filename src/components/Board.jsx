@@ -16,6 +16,7 @@ import FocusMode from './FocusMode';
 import HealthCheckVoting from './HealthCheckVoting';
 import CardDetailModal from './modals/CardDetailModal';
 import ExportBoardModal from './modals/ExportBoardModal';
+import LinkPreviousBoardModal from './modals/LinkPreviousBoardModal';
 import PollResults from './PollResults';
 import PollVoting from './PollVoting';
 import ProfileButton from './ProfileButton';
@@ -28,11 +29,12 @@ import WorkflowControls from './WorkflowControls';
  * Main Board component responsible for rendering and managing the kanban board.
  * Orchestrates board initialization, URL settings, and layout of header, columns, and modals.
  */
-function Board({ onGoHome }) {
+function Board({ onGoHome, onNavigateToBoard }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isActionItemsPanelOpen, setIsActionItemsPanelOpen] = useState(false);
+  const [isLinkPreviousModalOpen, setIsLinkPreviousModalOpen] = useState(false);
 
   // State for card detail modal
   const [expandedCard, setExpandedCard] = useState(null);
@@ -81,7 +83,12 @@ function Board({ onGoHome }) {
     setBoardBackground,
     setCustomBackground,
     customBackgroundSize,
-    setCustomBackgroundSize
+    setCustomBackgroundSize,
+    previousBoardId,
+    nextBoardId,
+    startNextBoard,
+    linkToPreviousBoard,
+    unlinkFromSeries
   } = useBoardContext();
 
   // Search state
@@ -174,6 +181,37 @@ function Board({ onGoHome }) {
     showNotification('Preparing board export...');
   };
 
+  // Create the next board in the series and navigate to it
+  const handleStartNextBoard = useCallback(async () => {
+    if (nextBoardId) {
+      const proceed = window.confirm(
+        'This board already links to a next board. Starting a new one will replace that link. Continue?'
+      );
+      if (!proceed) return;
+    }
+    try {
+      const newBoardId = await startNextBoard();
+      if (newBoardId && onNavigateToBoard) {
+        showNotification('Started next board in series');
+        onNavigateToBoard(newBoardId);
+      }
+    } catch {
+      showNotification('Could not start the next board');
+    }
+  }, [nextBoardId, startNextBoard, onNavigateToBoard, showNotification]);
+
+  // Detach this board from its series
+  const handleUnlinkSeries = useCallback(async () => {
+    const proceed = window.confirm('Remove this board from its series? Its neighbouring boards will stay linked to each other.');
+    if (!proceed) return;
+    try {
+      await unlinkFromSeries();
+      showNotification('Removed from series');
+    } catch {
+      showNotification('Could not update the series');
+    }
+  }, [unlinkFromSeries, showNotification]);
+
   // Handle card expand for card detail modal
   const handleExpandCard = useCallback((cardId, columnId, options = {}) => {
     setExpandedCard({ cardId, columnId, ...options });
@@ -219,6 +257,9 @@ function Board({ onGoHome }) {
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
             onFocusModeEnter={focusMode.enter}
+            previousBoardId={previousBoardId}
+            nextBoardId={nextBoardId}
+            onNavigateToBoard={onNavigateToBoard}
           />
           <SettingsPanel
             handleStartHealthCheck={() => {
@@ -261,6 +302,20 @@ function Board({ onGoHome }) {
             setCustomBackground={setCustomBackground}
             customBackgroundSize={customBackgroundSize}
             setCustomBackgroundSize={setCustomBackgroundSize}
+            previousBoardId={previousBoardId}
+            nextBoardId={nextBoardId}
+            onStartNextBoard={() => {
+              setSettingsDropdownOpen(false);
+              handleStartNextBoard();
+            }}
+            onOpenLinkPrevious={() => {
+              setSettingsDropdownOpen(false);
+              setIsLinkPreviousModalOpen(true);
+            }}
+            onUnlinkSeries={() => {
+              setSettingsDropdownOpen(false);
+              handleUnlinkSeries();
+            }}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
@@ -341,6 +396,13 @@ function Board({ onGoHome }) {
       <ActionItemsPanel
         isOpen={isActionItemsPanelOpen}
         onClose={() => setIsActionItemsPanelOpen(false)}
+      />
+
+      <LinkPreviousBoardModal
+        isOpen={isLinkPreviousModalOpen}
+        onClose={() => setIsLinkPreviousModalOpen(false)}
+        currentBoardId={boardId}
+        onLink={linkToPreviousBoard}
       />
 
       {/* Card Detail Modal */}

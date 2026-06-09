@@ -197,6 +197,8 @@ boards/{boardId}/
   title: string
   created: timestamp
   owner: string (uid)
+  previousBoardId?: string (board series: link to the predecessor board)
+  nextBoardId?: string     (board series: link to the successor board)
   columns/{columnId}/
     title: string
     cards/{cardId}/
@@ -264,6 +266,17 @@ HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 
 The `INTERACTION_REVEAL` phase uses reveal logic in `retrospectiveModeUtils.js` to progressively show votes/reactions.
+
+## Board Series
+
+Boards can be linked into an ordered chain so users can page back to earlier boards (e.g. to review a previous retro's commitments). Works in both kanban and retrospective formats — it links *boards*, independent of workflow phases.
+
+- Pointers live on the board node in Firebase (shared, not localStorage): `boards/{boardId}/previousBoardId` and `nextBoardId`. Linking A→B sets `B.previousBoardId = A` and `A.nextBoardId = B` (doubly-linked, adjacent paging only).
+- Operations live in `src/hooks/useBoardSeries.js`: `startNextBoard` (clones the current board's column structure + settings with empty cards, links pointers, returns the new ID), `linkToPreviousBoard`, `unlinkFromSeries`. Wired through `BoardContext`.
+- **Chain integrity**: replacing an existing link detaches the displaced neighbour's reciprocal pointer (no dangling back-references); `linkToPreviousBoard` walks the target's predecessor chain (bounded) and refuses links that would create a cycle; `unlinkFromSeries` splices the two neighbours together when removing a middle board.
+- `BoardSeriesPager` (in the header via `BoardHeader`) renders `← Previous / Next →`, shown only when a pointer exists. Navigation reuses App's `?board=` mechanism (`handleOpenBoard`).
+- **Gotcha**: `BoardGate` in `App.jsx` is keyed on `key={activeBoardId}` so navigating board→board remounts `BoardProvider` and re-subscribes (the provider does not resync `initialBoardId` on its own).
+- Entry points: "Start next board" and "Link to previous board" in the Settings panel's Share & Export tab; the latter opens `LinkPreviousBoardModal` (recent-boards picker or paste a URL/ID, parsed by `utils/boardLink.js`).
 
 ## Styling
 
@@ -361,7 +374,7 @@ npm run lint:check # Same as lint (alias)
 
 ## Known Issues & Technical Debt
 
-1. **Firebase config is hardcoded** in `src/utils/firebase.js` — not using environment variables. The project is "big-orca" on Firebase.
+1. **Firebase config comes from env vars** in `src/utils/firebase.js` (`VITE_FIREBASE_*`) and **throws if any are missing** — local `npm run dev`/`test:e2e` need a `.env` (copy `.env.example`); CI/deploy inject them as secrets. The project is "big-orca" on Firebase. (The web config values are public client config, shipped in the deployed bundle.)
 2. **No TypeScript** — all files are `.jsx`. No type checking beyond ESLint.
 3. **No routing library** — board ID is managed via query params manually.
 

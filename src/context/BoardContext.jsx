@@ -2,6 +2,7 @@ import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useRef, useState, useEffect, useMemo } from 'react';
 import { useActionItems } from '../hooks/useActionItems';
 import { useBoardBackground } from '../hooks/useBoardBackground';
+import { useBoardSeries } from '../hooks/useBoardSeries';
 import { useBoardSettings } from '../hooks/useBoardSettings';
 import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
@@ -76,6 +77,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Action items state
   const [actionItems, setActionItems] = useState({});
   const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
+
+  // Board series: pointers linking this board to its neighbours in a chain
+  const [previousBoardId, setPreviousBoardId] = useState(null);
+  const [nextBoardId, setNextBoardId] = useState(null);
+
   const initialWorkflowPhaseRef = useRef(null); // Captures the workflowPhase on first board load
   const [initialWorkflowPhase, setInitialWorkflowPhase] = useState(null);
 
@@ -248,6 +254,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
           // Load action items
           setActionItems(boardData.actionItems || {});
+
+          // Load board series pointers
+          setPreviousBoardId(boardData.previousBoardId || null);
+          setNextBoardId(boardData.nextBoardId || null);
         }
       });
 
@@ -419,6 +429,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     createActionItem, updateActionItemStatus, updateActionItemAssignee,
     updateActionItemDueDate, updateActionItemDescription, deleteActionItem
   } = useActionItems({ boardId, user, columns });
+
+  // Board series operations (link boards into an ordered chain)
+  const {
+    startNextBoard, linkToPreviousBoard, unlinkFromSeries
+  } = useBoardSeries({ boardId, user });
 
   // Compute board-wide tags
   const boardTags = useMemo(() => {
@@ -644,6 +659,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       actionItems, actionItemsEnabled, updateActionItemsEnabled,
       createActionItem, updateActionItemStatus, updateActionItemAssignee,
       updateActionItemDueDate, updateActionItemDescription, deleteActionItem,
+      // Board series
+      previousBoardId, nextBoardId, startNextBoard, linkToPreviousBoard, unlinkFromSeries,
       // Board background
       backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState,
       setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
@@ -680,6 +697,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
     updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
     updateActionItemDescription, deleteActionItem,
+    previousBoardId, nextBoardId, startNextBoard, linkToPreviousBoard, unlinkFromSeries,
     backgroundId, customBackgroundCss, customBackgroundSizeState, setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   ]);
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

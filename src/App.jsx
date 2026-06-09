@@ -137,7 +137,7 @@ function AppContent() {
         </a>
       )}
       {activeBoardId ? (
-        <BoardGate boardId={activeBoardId} onGoHome={handleGoHome} />
+        <BoardGate key={activeBoardId} boardId={activeBoardId} onGoHome={handleGoHome} onOpenBoard={handleOpenBoard} />
       ) : (
         <DashboardGate onOpenBoard={handleOpenBoard} />
       )}
@@ -162,11 +162,11 @@ function AppContent() {
  * Wraps the Board in a BoardProvider and passes the boardId + goHome handler.
  * BoardProvider handles Firebase subscription; Board handles rendering.
  */
-function BoardGate({ boardId, onGoHome }) {
+function BoardGate({ boardId, onGoHome, onOpenBoard }) {
   return (
     <DndProvider backend={HTML5Backend}>
       <BoardProvider initialBoardId={boardId}>
-        <BoardWithTracking onGoHome={onGoHome} />
+        <BoardWithTracking onGoHome={onGoHome} onOpenBoard={onOpenBoard} />
       </BoardProvider>
     </DndProvider>
   );
@@ -175,7 +175,7 @@ function BoardGate({ boardId, onGoHome }) {
 /**
  * Wrapper that tracks board visits in localStorage once board data loads.
  */
-function BoardWithTracking({ onGoHome }) {
+function BoardWithTracking({ onGoHome, onOpenBoard }) {
   const { boardId, boardTitle, columns } = useBoardContext();
   const { addBoard } = useRecentBoards();
 
@@ -190,7 +190,7 @@ function BoardWithTracking({ onGoHome }) {
     }
   }, [boardId, boardTitle, columns, addBoard]);
 
-  return <Board onGoHome={onGoHome} />;
+  return <Board onGoHome={onGoHome} onNavigateToBoard={onOpenBoard} />;
 }
 
 /**

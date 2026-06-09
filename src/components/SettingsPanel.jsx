@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Link, Monitor, Moon, RotateCcw, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
+import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Layers, Link, Link2, Monitor, Moon, RotateCcw, Scissors, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import { useNotification } from '../context/NotificationContext';
 import BackgroundPicker from './BackgroundPicker';
 import InsightsContent from './InsightsContent';
@@ -51,7 +51,12 @@ const SettingsPanel = ({
   customBackgroundCss,
   setCustomBackground,
   customBackgroundSize,
-  setCustomBackgroundSize
+  setCustomBackgroundSize,
+  previousBoardId,
+  nextBoardId,
+  onStartNextBoard,
+  onOpenLinkPrevious,
+  onUnlinkSeries
 }) => {
   const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState('appearance');
@@ -518,6 +523,61 @@ const SettingsPanel = ({
                             {actionItemCount > 0 && <span className="action-items-count-badge">{actionItemCount}</span>}
                           </span>
                           <span className="settings-share-action-desc">View and manage action items</span>
+                        </div>
+                        <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="settings-divider" />
+
+                <div className="settings-section">
+                  <h4 className="settings-section-title">Board series</h4>
+                  <div className="settings-share-actions">
+                    <button
+                      className="settings-share-action-btn"
+                      onClick={() => {
+                        if (onStartNextBoard) onStartNextBoard();
+                      }}
+                    >
+                      <div className="settings-share-action-icon">
+                        <Layers size={20} aria-hidden="true" />
+                      </div>
+                      <div className="settings-share-action-text">
+                        <span className="settings-share-action-title">Start next board</span>
+                        <span className="settings-share-action-desc">Create the next board in this series and jump to it</span>
+                      </div>
+                      <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
+                    </button>
+                    <button
+                      className="settings-share-action-btn"
+                      onClick={() => {
+                        if (onOpenLinkPrevious) onOpenLinkPrevious();
+                      }}
+                    >
+                      <div className="settings-share-action-icon">
+                        <Link2 size={20} aria-hidden="true" />
+                      </div>
+                      <div className="settings-share-action-text">
+                        <span className="settings-share-action-title">Link to previous board</span>
+                        <span className="settings-share-action-desc">Connect an earlier board so you can page back to it</span>
+                      </div>
+                      <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
+                    </button>
+                    {(previousBoardId || nextBoardId) && (
+                      <button
+                        className="settings-share-action-btn"
+                        onClick={() => {
+                          if (onUnlinkSeries) onUnlinkSeries();
+                        }}
+                      >
+                        <div className="settings-share-action-icon">
+                          <Scissors size={20} aria-hidden="true" />
+                        </div>
+                        <div className="settings-share-action-text">
+                          <span className="settings-share-action-title">Remove from series</span>
+                          <span className="settings-share-action-desc">Detach this board from its series</span>
                         </div>
                         <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
                       </button>

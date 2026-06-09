@@ -1,0 +1,140 @@
+/*
+ * Board Series Styles
+ * Pager controls in the header + the "link to previous board" modal.
+ */
+
+/* --- Header pager --- */
+.board-series-pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.board-series-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 0 var(--space-sm);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.board-series-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.board-series-btn-label {
+  line-height: 1;
+}
+
+/* Collapse the text labels on narrow screens — keep the chevrons */
+@media (max-width: 640px) {
+  .board-series-btn-label {
+    display: none;
+  }
+
+  .board-series-btn {
+    padding: 0 var(--space-xs);
+  }
+}
+
+/* --- Link to previous board modal --- */
+.link-previous-modal {
+  max-width: 480px;
+  width: 100%;
+}
+
+.link-previous-help {
+  margin: 0 0 var(--space-md);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.link-previous-label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.link-previous-input {
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-color);
+  font-size: 0.875rem;
+}
+
+.link-previous-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.link-previous-divider {
+  margin: var(--space-md) 0 var(--space-sm);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.link-previous-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.link-previous-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-color);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+.link-previous-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.link-previous-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.link-previous-item-title {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-previous-item-meta {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}

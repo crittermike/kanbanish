@@ -36,6 +36,7 @@
 @import 'components/board-background.css';
 @import 'components/focus-mode.css';
 @import 'components/card-detail-modal.css';
+@import 'components/board-series.css';
 
 /* Utility classes and notifications */
 .notification {
