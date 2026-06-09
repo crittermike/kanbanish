@@ -61,7 +61,7 @@ const LinkPreviousBoardModal = ({ isOpen, onClose, currentBoardId, onLink }) => 
         showNotification('Linked to previous board');
         onClose();
       } else {
-        showNotification("Couldn't find that board");
+        showNotification("Couldn't link that board — it may not exist, or linking it would create a loop in the series");
       }
     } catch {
       showNotification('Something went wrong linking the board');

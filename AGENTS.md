@@ -273,6 +273,7 @@ Boards can be linked into an ordered chain so users can page back to earlier boa
 
 - Pointers live on the board node in Firebase (shared, not localStorage): `boards/{boardId}/previousBoardId` and `nextBoardId`. Linking A→B sets `B.previousBoardId = A` and `A.nextBoardId = B` (doubly-linked, adjacent paging only).
 - Operations live in `src/hooks/useBoardSeries.js`: `startNextBoard` (clones the current board's column structure + settings with empty cards, links pointers, returns the new ID), `linkToPreviousBoard`, `unlinkFromSeries`. Wired through `BoardContext`.
+- **Chain integrity**: replacing an existing link detaches the displaced neighbour's reciprocal pointer (no dangling back-references); `linkToPreviousBoard` walks the target's predecessor chain (bounded) and refuses links that would create a cycle; `unlinkFromSeries` splices the two neighbours together when removing a middle board.
 - `BoardSeriesPager` (in the header via `BoardHeader`) renders `← Previous / Next →`, shown only when a pointer exists. Navigation reuses App's `?board=` mechanism (`handleOpenBoard`).
 - **Gotcha**: `BoardGate` in `App.jsx` is keyed on `key={activeBoardId}` so navigating board→board remounts `BoardProvider` and re-subscribes (the provider does not resync `initialBoardId` on its own).
 - Entry points: "Start next board" and "Link to previous board" in the Settings panel's Share & Export tab; the latter opens `LinkPreviousBoardModal` (recent-boards picker or paste a URL/ID, parsed by `utils/boardLink.js`).

@@ -202,7 +202,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
 
   // Detach this board from its series
   const handleUnlinkSeries = useCallback(async () => {
-    const proceed = window.confirm('Remove this board from its series?');
+    const proceed = window.confirm('Remove this board from its series? Its neighbouring boards will stay linked to each other.');
     if (!proceed) return;
     try {
       await unlinkFromSeries();

@@ -29,6 +29,13 @@ const snapshot = (value) => ({
   exists: () => value !== null && value !== undefined
 });
 
+// Mock get() with a map of path → value, since the ref mock returns the path.
+const mockGetByPath = (map) => {
+  get.mockImplementation((path) => Promise.resolve(snapshot(
+    Object.prototype.hasOwnProperty.call(map, path) ? map[path] : null
+  )));
+};
+
 const createProps = (overrides = {}) => ({
   boardId: 'board-current',
   user: { uid: 'user-1' },
@@ -109,6 +116,26 @@ describe('useBoardSeries', () => {
       const [currentNextPath, nextValue] = set.mock.calls[1];
       expect(currentNextPath).toBe('boards/board-current/nextBoardId');
       expect(nextValue).toBe(newId);
+
+      // The replaced successor's back-pointer is detached so it no longer
+      // claims the current board as its predecessor.
+      expect(remove).toHaveBeenCalledWith('boards/should-be-overwritten/previousBoardId');
+    });
+
+    it('does not detach anything when the current board has no successor', async () => {
+      get.mockResolvedValueOnce(
+        snapshot({
+          title: 'Standalone',
+          columns: { a_one: { title: 'Start', cards: {} } }
+        })
+      );
+
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      await act(async () => {
+        await result.current.startNextBoard();
+      });
+
+      expect(remove).not.toHaveBeenCalled();
     });
   });
 
@@ -145,7 +172,7 @@ describe('useBoardSeries', () => {
     });
 
     it('sets both reciprocal pointers when the target exists', async () => {
-      get.mockResolvedValueOnce(snapshot({ title: 'Older board' }));
+      mockGetByPath({ 'boards/board-older': { title: 'Older board' } });
       const { result } = renderHook(() => useBoardSeries(createProps()));
       let ok;
       await act(async () => {
@@ -154,32 +181,129 @@ describe('useBoardSeries', () => {
       expect(ok).toBe(true);
       expect(set).toHaveBeenCalledWith('boards/board-current/previousBoardId', 'board-older');
       expect(set).toHaveBeenCalledWith('boards/board-older/nextBoardId', 'board-current');
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it("detaches the current board's replaced predecessor", async () => {
+      mockGetByPath({
+        'boards/board-older': { title: 'Older board' },
+        'boards/board-current/previousBoardId': 'board-old-prev'
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      let ok;
+      await act(async () => {
+        ok = await result.current.linkToPreviousBoard('board-older');
+      });
+      expect(ok).toBe(true);
+      expect(remove).toHaveBeenCalledWith('boards/board-old-prev/nextBoardId');
+      expect(set).toHaveBeenCalledWith('boards/board-current/previousBoardId', 'board-older');
+    });
+
+    it("detaches the target's replaced successor", async () => {
+      mockGetByPath({
+        'boards/board-older': { title: 'Older board', nextBoardId: 'board-target-next' }
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      let ok;
+      await act(async () => {
+        ok = await result.current.linkToPreviousBoard('board-older');
+      });
+      expect(ok).toBe(true);
+      expect(remove).toHaveBeenCalledWith('boards/board-target-next/previousBoardId');
+      expect(set).toHaveBeenCalledWith('boards/board-older/nextBoardId', 'board-current');
+    });
+
+    it('re-linking the same pair detaches nothing', async () => {
+      mockGetByPath({
+        'boards/board-older': { title: 'Older board', nextBoardId: 'board-current' },
+        'boards/board-current/previousBoardId': 'board-older'
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      let ok;
+      await act(async () => {
+        ok = await result.current.linkToPreviousBoard('board-older');
+      });
+      expect(ok).toBe(true);
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('refuses a link that would create a direct cycle', async () => {
+      // board-b already lists the current board as its predecessor.
+      mockGetByPath({
+        'boards/board-b': { title: 'B', previousBoardId: 'board-current' }
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      let ok;
+      await act(async () => {
+        ok = await result.current.linkToPreviousBoard('board-b');
+      });
+      expect(ok).toBe(false);
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('refuses a link that would create a deeper cycle', async () => {
+      // Chain: board-current → … → board-b → board-c; linking board-c as
+      // current's predecessor would loop.
+      mockGetByPath({
+        'boards/board-c': { title: 'C', previousBoardId: 'board-b' },
+        'boards/board-b/previousBoardId': 'board-current'
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      let ok;
+      await act(async () => {
+        ok = await result.current.linkToPreviousBoard('board-c');
+      });
+      expect(ok).toBe(false);
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
     });
   });
 
   describe('unlinkFromSeries', () => {
-    it('removes reciprocal neighbour pointers and own pointers', async () => {
-      get.mockResolvedValueOnce(
-        snapshot({ previousBoardId: 'board-prev', nextBoardId: 'board-next' })
-      );
+    it('splices the neighbours together when unlinking a middle board', async () => {
+      mockGetByPath({
+        'boards/board-current': { previousBoardId: 'board-prev', nextBoardId: 'board-next' }
+      });
       const { result } = renderHook(() => useBoardSeries(createProps()));
       await act(async () => {
         await result.current.unlinkFromSeries();
       });
-      expect(remove).toHaveBeenCalledWith('boards/board-prev/nextBoardId');
-      expect(remove).toHaveBeenCalledWith('boards/board-next/previousBoardId');
+      // Neighbours now point at each other, keeping the rest of the series intact.
+      expect(set).toHaveBeenCalledWith('boards/board-prev/nextBoardId', 'board-next');
+      expect(set).toHaveBeenCalledWith('boards/board-next/previousBoardId', 'board-prev');
+      // Own pointers are removed.
       expect(remove).toHaveBeenCalledWith('boards/board-current/previousBoardId');
       expect(remove).toHaveBeenCalledWith('boards/board-current/nextBoardId');
+      // Neighbour pointers are spliced, not removed.
+      expect(remove).not.toHaveBeenCalledWith('boards/board-prev/nextBoardId');
+      expect(remove).not.toHaveBeenCalledWith('boards/board-next/previousBoardId');
     });
 
-    it('only removes existing links', async () => {
-      get.mockResolvedValueOnce(snapshot({ previousBoardId: 'board-prev' }));
+    it('removes the lone neighbour pointer when unlinking the last board', async () => {
+      mockGetByPath({
+        'boards/board-current': { previousBoardId: 'board-prev' }
+      });
       const { result } = renderHook(() => useBoardSeries(createProps()));
       await act(async () => {
         await result.current.unlinkFromSeries();
       });
       expect(remove).toHaveBeenCalledWith('boards/board-prev/nextBoardId');
-      expect(remove).not.toHaveBeenCalledWith('boards/undefined/previousBoardId');
+      expect(remove).toHaveBeenCalledWith('boards/board-current/previousBoardId');
+      expect(set).not.toHaveBeenCalled();
+    });
+
+    it('removes the lone neighbour pointer when unlinking the first board', async () => {
+      mockGetByPath({
+        'boards/board-current': { nextBoardId: 'board-next' }
+      });
+      const { result } = renderHook(() => useBoardSeries(createProps()));
+      await act(async () => {
+        await result.current.unlinkFromSeries();
+      });
+      expect(remove).toHaveBeenCalledWith('boards/board-next/previousBoardId');
+      expect(remove).toHaveBeenCalledWith('boards/board-current/nextBoardId');
+      expect(set).not.toHaveBeenCalled();
     });
   });
 });
