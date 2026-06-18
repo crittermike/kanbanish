@@ -244,7 +244,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
   }
 
   return (
-    <div className={hasBackground ? 'board-layout board-has-background' : 'board-layout'}>
+    <div className={hasBackground ? 'board-has-background' : ''}>
       {hasBackground && <div className="board-background-layer" style={backgroundStyle} />}
 
       <header>
