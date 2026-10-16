@@ -141,7 +141,7 @@ describe('Board Component', () => {
     expect(boardTitleInput).toBeInTheDocument();
 
     // Check if settings button exists
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     expect(settingsButton).toBeInTheDocument();
 
     // Check if columns are rendered
@@ -202,15 +202,8 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open settings dropdown first
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Navigate to Share & Export tab
-    fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
-
-    const copyButton = screen.getByText('Share Board');
-    fireEvent.click(copyButton);
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy board link' }));
 
     const expectedUrl = 'https://example.com/?board=test-board-123';
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedUrl);
@@ -225,7 +218,7 @@ describe('Board Component', () => {
   });
 
 
-  test('opens sort dropdown when dropdown button is clicked', () => {
+  test('shows sort options in the board actions menu', () => {
     // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
@@ -238,14 +231,21 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Find and click the settings dropdown button
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
+  });
 
-    // Check that dropdown options are shown
-    expect(screen.getByText('Sort Cards')).toBeInTheDocument();
-    expect(screen.getByText('Chronological')).toBeInTheDocument();
-    expect(screen.getByText('By Votes')).toBeInTheDocument();
+  test('hides sort options when voting is off', () => {
+    useBoardContext.mockReturnValue({ ...mockContextValue, votingEnabled: false, retrospectiveMode: false, sortByVotes: false });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board />
+      </DndProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
   });
 
   test('selects sort by votes when that option is clicked', () => {
@@ -261,13 +261,8 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Click the "By Votes" option
-    const byVotesOption = screen.getByText('By Votes');
-    fireEvent.click(byVotesOption);
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
     // Check that setSortByVotes was called with true
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
@@ -290,13 +285,10 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
-
-    // Find the toggle switch for "Allow voting" and click it
+    // Find the toggle switch for "Allow voting" (Board tab) and click it
     const votingToggle = screen.getByRole('switch', { name: 'Allow voting' });
     fireEvent.click(votingToggle);
 
@@ -318,11 +310,8 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Find the toggle switch for "Allow multiple votes" and click it
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
@@ -355,11 +344,8 @@ describe('Board Component', () => {
     );
 
     // Open the settings dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Click the toggle switch for multiple votes
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
@@ -437,11 +423,8 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Find the toggle switch for "Allow downvoting" and click it
     const downvotingToggle = screen.getByRole('switch', { name: 'Allow downvoting' });
@@ -455,7 +438,8 @@ describe('Board Component', () => {
     // Override the mock for this specific test - voting is disabled
     useBoardContext.mockReturnValue({
       ...mockContextValue,
-      votingEnabled: false
+      votingEnabled: false,
+      retrospectiveMode: false
     });
 
     // Simulate having a board ID in the URL
@@ -470,11 +454,8 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
     // Verify the downvoting option is not visible when voting is disabled
     expect(screen.queryByText('Allow downvoting')).not.toBeInTheDocument();
@@ -506,23 +487,15 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
 
     // Find and click the reset votes button
-    const resetVotesButton = screen.getByText('Reset all votes');
+    const resetVotesButton = screen.getByRole('menuitem', { name: 'Reset all votes' });
     expect(resetVotesButton).toBeInTheDocument();
     fireEvent.click(resetVotesButton);
 
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
-
-    // Verify dropdown remains open
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 
   test('does not reset votes if user cancels confirmation', async () => {
@@ -548,29 +521,22 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
 
     // Find and click the reset votes button
-    const resetVotesButton = screen.getByText('Reset all votes');
+    const resetVotesButton = screen.getByRole('menuitem', { name: 'Reset all votes' });
     fireEvent.click(resetVotesButton);
 
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
-
-    // Dropdown should still be open
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 
   test('hides multi-vote setting and reset votes button when voting is disabled', () => {
     // Override the mock for this specific test - voting is disabled
     useBoardContext.mockReturnValue({
       ...mockContextValue,
-      votingEnabled: false
+      votingEnabled: false,
+      retrospectiveMode: false
     });
 
     // Simulate having a board ID in the URL
@@ -585,18 +551,13 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
-
-    // Verify vote settings are displayed correctly
-    expect(screen.getByText('Allow voting')).toBeInTheDocument();
 
     // The multi-vote setting and reset votes button should be hidden when voting is disabled
     expect(screen.queryByText('Multiple votes per card')).not.toBeInTheDocument();
-    expect(screen.queryByText('Reset all votes')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.queryByRole('menuitem', { name: 'Reset all votes' })).not.toBeInTheDocument();
   });
 
   test('shows multi-vote setting and reset votes button when voting is enabled', () => {
@@ -618,16 +579,13 @@ describe('Board Component', () => {
     );
 
     // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
+    const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Voting tab
-    fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
-
     // Verify all vote settings are displayed
-    expect(screen.getByText('Allow voting')).toBeInTheDocument();
     expect(screen.getByText('Multiple votes per card')).toBeInTheDocument();
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitem', { name: 'Reset all votes' })).toBeInTheDocument();
   });
 
   test('sorts cards and groups by votes when sort by votes is enabled', () => {

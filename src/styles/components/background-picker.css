@@ -98,12 +98,21 @@
   box-shadow: 0 0 0 1px var(--accent);
 }
 
-/* "None" swatch X icon */
-.bg-picker-swatch-none {
-  color: var(--text-faint);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Swatch label */
+.bg-picker-swatch-name {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bg-picker-swatch:hover .bg-picker-swatch-name,
+.bg-picker-swatch-selected .bg-picker-swatch-name {
+  color: var(--text-color);
 }
 
 /* Selected checkmark */
@@ -224,12 +233,6 @@
   cursor: not-allowed;
 }
 
-.bg-picker-custom-hint {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
 .bg-picker-custom-preview-area {
   display: flex;
   flex-direction: column;
@@ -261,17 +264,3 @@
   font-size: var(--font-size-sm);
 }
 
-.bg-picker-custom-clear {
-  padding: var(--space-xs) var(--space-sm);
-  background: transparent;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-speed) var(--transition-ease);
-}
-
-.bg-picker-custom-clear:hover {
-  background: var(--hover-bg);
-}

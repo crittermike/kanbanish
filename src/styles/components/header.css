@@ -134,7 +134,7 @@ h1 {
 
 /* Settings modal styles */
 .settings-modal {
-    max-width: 500px;
+    max-width: 460px;
 }
 
 .settings-modal .modal-body {
@@ -175,41 +175,6 @@ h1 {
 .settings-quick-action-btn:hover {
     background: var(--hover-bg);
     border-color: var(--text-muted);
-}
-
-/* Health Check prominent button */
-.settings-health-check-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-color);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(13, 150, 104, 0.15);
-}
-
-.settings-health-check-btn:hover {
-    background: var(--hover-bg);
-    border-color: var(--text-muted);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
-}
-
-.settings-health-check-btn:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-.health-check-btn-icon {
-    font-size: 1.2em;
-    line-height: 1;
 }
 
 /* Settings toggle button */
@@ -277,31 +242,6 @@ h1 {
 .settings-full-width-btn {
     width: 100%;
     margin: var(--space-xs) 0;
-}
-
-.settings-reset-votes-btn {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    gap: 4px;
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    padding: var(--space-xs) var(--space-sm);
-    background-color: var(--danger-transparent-lighter);
-    border: 1px solid var(--danger-transparent-border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    margin-top: var(--space-sm);
-    transition: all 0.2s ease;
-}
-
-.settings-reset-votes-btn:hover {
-    background-color: var(--danger);
-    color: white;
-    border-color: var(--danger);
 }
 
 .settings-section-title {
@@ -460,6 +400,131 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     box-shadow: 0 0 0 1px var(--primary-color);
 }
 
+/* Header dropdown menu (board actions) */
+.header-menu {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+}
+
+.header-menu-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    min-width: 200px;
+    padding: var(--space-xxs);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 200;
+}
+
+.header-menu-popover-end {
+    right: 0;
+}
+
+.header-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.header-menu-item svg {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.header-menu-item:hover,
+.header-menu-item:focus-visible {
+    background-color: var(--hover-bg);
+    outline: none;
+}
+
+.header-menu-item[aria-checked="true"] {
+    color: var(--accent);
+}
+
+.header-menu-check {
+    margin-left: auto;
+}
+
+.header-menu-item .header-menu-check {
+    color: var(--accent);
+}
+
+.header-menu-item-danger,
+.header-menu-item-danger svg {
+    color: var(--danger);
+}
+
+.header-menu-separator {
+    height: 1px;
+    margin: var(--space-xxs) 0;
+    background-color: var(--border-color);
+}
+
+.header-menu-label {
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.header-menu-icon-spacer {
+    flex-shrink: 0;
+    width: 15px;
+}
+
+/* Mini switch on toggle items (e.g. Dark mode) */
+.header-menu-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 26px;
+    height: 15px;
+    margin-left: auto;
+    border-radius: 999px;
+    background-color: var(--border-color);
+    transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.header-menu-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background-color: #fff;
+    transition: transform var(--transition-speed) var(--transition-ease);
+}
+
+.header-menu-item-switch[aria-checked="true"] {
+    color: var(--text-color);
+}
+
+.header-menu-item-switch[aria-checked="true"] .header-menu-switch {
+    background-color: var(--accent);
+}
+
+.header-menu-item-switch[aria-checked="true"] .header-menu-switch::after {
+    transform: translateX(11px);
+}
+
+.board-actions-btn[aria-expanded="true"] {
+    background-color: var(--hover-bg);
+}
+
 /* Fallback for browsers that don't support :has() */
 .settings-toggle-btn[aria-expanded="true"] {
     background-color: var(--hover-bg);
@@ -489,7 +554,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 }
 
 /*
- * Narrow screens: keep the header to one row (home, title, more, settings).
+ * Narrow screens: keep the header to one row (home, title, more, board actions, settings).
  * The header's wrapper divs are flattened with display: contents so every icon
  * becomes a flex item of .header-content; secondary icons are hidden until the
  * "more" toggle is expanded, then shown on a second row.
@@ -518,6 +583,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 
     .header-content .settings-toggle-btn,
+    .header-content .board-actions-menu,
     .header-content .timer-active {
         order: 1;
     }
@@ -531,12 +597,12 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 
     .header-content .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content .action-buttons > :not(.settings-toggle-btn, .timer-active, .modal-overlay) {
+    .header-content .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay) {
         order: 3;
     }
 
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .timer-active, .modal-overlay),
+    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay),
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .timer-active .timer-controls {
         display: none;
     }

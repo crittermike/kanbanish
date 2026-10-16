@@ -87,13 +87,9 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    // Open the settings dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Click the "By Votes" option
-    const byVotesOption = screen.getByText('By Votes');
-    fireEvent.click(byVotesOption);
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
     // Verify that setSortByVotes was called with true (this persists to Firebase)
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
@@ -102,7 +98,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledTimes(1);
   });
 
-  it('calls setSortByVotes when switching back to chronological', () => {
+  it('calls setSortByVotes when switching back to newest first', () => {
     // Start with sort by votes enabled
     const contextWithSortByVotes = {
       ...mockContextValue,
@@ -117,13 +113,9 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    // Open the settings dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
-
-    // Click the "Chronological" option
-    const chronologicalOption = screen.getByText('Chronological');
-    fireEvent.click(chronologicalOption);
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Most votes' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Newest' }));
 
     // Verify that setSortByVotes was called with false (this persists to Firebase)
     expect(contextWithSortByVotes.setSortByVotes).toHaveBeenCalledWith(false);

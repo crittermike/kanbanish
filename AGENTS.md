@@ -275,7 +275,7 @@ Boards can be linked into an ordered chain so users can page back to earlier boa
 - **Chain integrity**: replacing an existing link detaches the displaced neighbour's reciprocal pointer (no dangling back-references); `linkToPreviousBoard` walks the target's predecessor chain (bounded) and refuses links that would create a cycle; `unlinkFromSeries` splices the two neighbours together when removing a middle board.
 - `BoardSeriesPager` (in the header via `BoardHeader`) renders `← Previous / Next →`, shown only when a pointer exists. Navigation reuses App's `?board=` mechanism (`handleOpenBoard`).
 - **Gotcha**: `BoardGate` in `App.jsx` is keyed on `key={activeBoardId}` so navigating board→board remounts `BoardProvider` and re-subscribes (the provider does not resync `initialBoardId` on its own).
-- Entry points: "Start next board" and "Link to previous board" in the Settings panel's Share & Export tab; the latter opens `LinkPreviousBoardModal` (recent-boards picker or paste a URL/ID, parsed by `utils/boardLink.js`).
+- Entry points: "Start next board" and "Link to previous board" in the header's Board actions menu (`BoardActionsMenu`); the latter opens `LinkPreviousBoardModal` (recent-boards picker or paste a URL/ID, parsed by `utils/boardLink.js`).
 
 ## Styling
 

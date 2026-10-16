@@ -244,8 +244,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             handleStartHealthCheck={startHealthCheckPhase}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
-            sortByVotes={sortByVotes}
-            setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
             updateVotingEnabled={updateVotingEnabled}
             downvotingEnabled={downvotingEnabled}
@@ -256,6 +254,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
             updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
+            showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
+            sortByVotes={sortByVotes}
+            setSortByVotes={setSortByVotes}
             resetAllVotes={resetAllVotes}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
@@ -271,18 +272,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
             setCustomBackgroundSize={setCustomBackgroundSize}
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
-            onStartNextBoard={() => {
-              setSettingsDropdownOpen(false);
-              handleStartNextBoard();
-            }}
-            onOpenLinkPrevious={() => {
-              setSettingsDropdownOpen(false);
-              setIsLinkPreviousModalOpen(true);
-            }}
-            onUnlinkSeries={() => {
-              setSettingsDropdownOpen(false);
-              handleUnlinkSeries();
-            }}
+            onStartNextBoard={handleStartNextBoard}
+            onOpenLinkPrevious={() => setIsLinkPreviousModalOpen(true)}
+            onUnlinkSeries={handleUnlinkSeries}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
