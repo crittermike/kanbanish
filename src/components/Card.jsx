@@ -1,6 +1,6 @@
 import { memo, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { MessageSquare, CheckSquare, Clock } from 'react-feather';
+import { MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useCardOperations } from '../hooks/useCardOperations';
 import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
@@ -174,11 +174,8 @@ function Card({
     getUserVoteCount, 
     retrospectiveMode, 
     workflowPhase = 'CREATION',
-    hideCardAuthorship,
     recordAction,
     undo,
-    actionItems,
-    actionItemsEnabled,
     presenceData,
     displayName,
     userColor,
@@ -273,11 +270,6 @@ function Card({
   // Create filtered card data for display
   const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
 
-  const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
-    ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
-  );
-  const hasActionItem = !!actionItemEntry;
-
   const commentCount = Object.keys(displayCardData.comments || {}).length;
   const reviewToolsVisible = !groupId && areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = !groupId && areCommentsAllowed(workflowPhase, retrospectiveMode);
@@ -355,8 +347,8 @@ function Card({
     if (canDropOnCard) {
       classes.push('groupable');
     }
-    // Only show author indicator during creation phase to maintain anonymity in later phases
-    if (isCardAuthor() && workflowPhase === WORKFLOW_PHASES.CREATION && !hideCardAuthorship) {
+    // Only show author indicator during creation phase, and never on anonymous boards
+    if (isCardAuthor() && workflowPhase === WORKFLOW_PHASES.CREATION && showDisplayNames) {
       classes.push('author-editable');
     }
 
@@ -460,24 +452,11 @@ function Card({
             </div>
           )}
 
-          {/* Inline badges for action items, timer, and comments */}
-          {(hasActionItem || cardData.timer?.isRunning || (!isEditing && showCommentBadge)) && (
+          {!isEditing && showCommentBadge && (
             <div className="card-inline-badges">
-              {cardData.timer?.isRunning && (
-                <span className="card-inline-badge timer-badge" title="Timer running">
-                  <Clock size={11} /> Timer
-                </span>
-              )}
-              {hasActionItem && (
-                <span className="card-inline-badge action-item-badge" title="Converted to action item">
-                  <CheckSquare size={11} /> Action item
-                </span>
-              )}
-              {!isEditing && showCommentBadge && (
-                <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
-                  <MessageSquare size={11} /> {commentCount}
-                </span>
-              )}
+              <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
+                <MessageSquare size={11} /> {commentCount}
+              </span>
             </div>
           )}
 

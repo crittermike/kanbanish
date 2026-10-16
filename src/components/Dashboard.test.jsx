@@ -304,7 +304,6 @@ describe('Dashboard Component', () => {
       defaultSettings: {
         retrospectiveMode: false,
         showDisplayNames: false,
-        actionItemsEnabled: false,
         workflowPhase: 'HEALTH_CHECK'
       }
     };
@@ -325,7 +324,6 @@ describe('Dashboard Component', () => {
           settingsOverrides: {
             retrospectiveMode: false,
             showDisplayNames: false,
-            actionItemsEnabled: false,
             workflowPhase: 'HEALTH_CHECK'
           }
         })

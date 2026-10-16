@@ -102,7 +102,7 @@ export const areCommentsAllowed = (workflowPhase, retrospectiveMode = false) => 
 };
 
 /**
- * Determines if review metadata (labels, colors, action item conversion) can be edited.
+ * Determines if review metadata (labels, colors) can be edited.
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
  * @returns {boolean}

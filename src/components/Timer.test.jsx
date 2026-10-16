@@ -131,15 +131,13 @@ describe('Timer Component', () => {
       expect(mockStartTimer).not.toHaveBeenCalled();
     });
 
-    test('closes setup when cancel button is clicked', () => {
+    test('closes setup when Escape is pressed', () => {
       render(<Timer />);
       fireEvent.click(screen.getByTitle('Set timer'));
 
-      // Verify setup is shown
       expect(screen.getByText('1m')).toBeInTheDocument();
 
-      // Click the cancel button
-      fireEvent.click(screen.getByTitle('Cancel'));
+      fireEvent.keyDown(document, { key: 'Escape' });
 
       // Setup should be hidden, back to Set Timer button
       expect(screen.getByTitle('Set timer')).toBeInTheDocument();

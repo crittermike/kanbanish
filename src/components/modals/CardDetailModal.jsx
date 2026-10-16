@@ -1,7 +1,7 @@
 import { ref, remove, set } from 'firebase/database';
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  X, CheckSquare, Tag,
+  X, Tag,
   AlignLeft, MessageSquare,
   Plus, Sliders
 } from 'react-feather';
@@ -29,7 +29,6 @@ import {
 import CardColorPicker from '../CardColorPicker';
 import CardReactions from '../CardReactions';
 import CardTagPicker from '../CardTagPicker';
-import CardTimerControls from '../CardTimerControls';
 import Comments from '../Comments';
 import EmojiPicker from '../EmojiPicker';
 import MarkdownContent from '../MarkdownContent';
@@ -61,10 +60,6 @@ const CardDetailModal = ({
     recordAction,
     undo,
     boardTags,
-    actionItems,
-    actionItemsEnabled,
-    createActionItem,
-    deleteActionItem,
     presenceData,
     displayName,
     userColor,
@@ -321,32 +316,10 @@ const CardDetailModal = ({
 
   if (!isOpen || !cardData) return null;
 
-  // Action items
-  const actionItemEntry = actionItemsEnabled && actionItems && Object.entries(actionItems).find(
-    ([_id, item]) => item.sourceCardId === cardId && item.sourceColumnId === columnId
-  );
-  const hasActionItem = !!actionItemEntry;
-  const actionItemId = actionItemEntry ? actionItemEntry[0] : null;
-
   // Obfuscation check
   const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
   const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
-
-  const handleConvertToActionItem = () => {
-    if (!createActionItem || !cardData) return;
-    createActionItem({
-      description: cardData.content,
-      sourceCardId: cardId,
-      sourceColumnId: columnId
-    });
-  };
-
-  const handleRemoveActionItem = () => {
-    if (actionItemId && deleteActionItem) {
-      deleteActionItem(actionItemId);
-    }
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
@@ -520,32 +493,6 @@ const CardDetailModal = ({
 
           {/* Right: sidebar */}
           <div className="card-detail-sidebar">
-            {actionItemsEnabled && (
-              <button
-                className={`card-detail-convert-btn ${hasActionItem ? 'active' : ''}`}
-                onClick={hasActionItem ? handleRemoveActionItem : handleConvertToActionItem}
-                disabled={!metadataEditingAllowed}
-              >
-                <CheckSquare size={18} />
-                {hasActionItem ? 'Action Item ✓' : 'Convert to Action'}
-              </button>
-            )}
-
-            {/* Timer */}
-            <div className="card-detail-sidebar-section">
-              <h4 className="card-detail-sidebar-label">ACTIVE TIMER</h4>
-              <div className="card-detail-timer-card">
-                <CardTimerControls
-                  boardId={boardId}
-                  columnId={columnId}
-                  cardId={cardId}
-                  timerData={cardData.timer}
-                  user={user}
-                  className="card-detail-timer-sidebar"
-                />
-              </div>
-            </div>
-
             {/* Reactions */}
             {reactionsVisible && (
               <div className="card-detail-sidebar-section">

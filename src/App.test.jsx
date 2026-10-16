@@ -105,7 +105,6 @@ vi.mock('./data/boardTemplates', () => ({
       defaultSettings: {
         retrospectiveMode: false,
         showDisplayNames: false,
-        actionItemsEnabled: false,
         workflowPhase: 'HEALTH_CHECK'
       }
     }
@@ -248,7 +247,6 @@ describe('App Component', () => {
           settingsOverrides: {
             retrospectiveMode: false,
             showDisplayNames: false,
-            actionItemsEnabled: false,
             workflowPhase: 'HEALTH_CHECK'
           }
         })

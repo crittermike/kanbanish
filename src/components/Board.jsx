@@ -2,17 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBackgroundById } from '../data/boardBackgrounds';
-import useFocusMode from '../hooks/useFocusMode';
 import { useSearchFilter } from '../hooks/useSearchFilter';
 import { addColumn } from '../utils/boardUtils';
 import { parseUrlSettings } from '../utils/urlSettings';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
-import ActionItemsPanel from './ActionItemsPanel';
 import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import DisplayNamePrompt from './DisplayNamePrompt';
-import FocusMode from './FocusMode';
 import HealthCheckVoting from './HealthCheckVoting';
 import CardDetailModal from './modals/CardDetailModal';
 import ExportBoardModal from './modals/ExportBoardModal';
@@ -33,7 +30,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [isActionItemsPanelOpen, setIsActionItemsPanelOpen] = useState(false);
   const [isLinkPreviousModalOpen, setIsLinkPreviousModalOpen] = useState(false);
 
   // State for card detail modal
@@ -61,8 +57,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     user,
     darkMode,
     updateDarkMode,
-    hideCardAuthorship,
-    updateHideCardAuthorship,
     showDisplayNames,
     updateShowDisplayNames,
     workflowPhase,
@@ -70,9 +64,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
-    actionItems,
-    actionItemsEnabled,
-    updateActionItemsEnabled,
     displayName,
     userColor,
     updateDisplayName,
@@ -93,9 +84,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
 
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
-
-  // Focus mode state
-  const focusMode = useFocusMode({ columns, sortByVotes });
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -211,9 +199,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     setExpandedCard({ cardId, columnId, ...options });
   }, []);
 
-
-  const actionItemCount = Object.values(actionItems || {}).filter(i => i.status === 'open').length;
-
   // Resolve background CSS
   const bgDef = getBackgroundById(backgroundId);
   const backgroundCss = backgroundId === 'custom' ? customBackgroundCss : bgDef?.css || '';
@@ -250,7 +235,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             onGoHome={onGoHome}
             onSearchOpen={searchFilter.openSearch}
             isSearchOpen={searchFilter.isOpen}
-            onFocusModeEnter={focusMode.enter}
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
@@ -274,19 +258,10 @@ function Board({ onGoHome, onNavigateToBoard }) {
             resetAllVotes={resetAllVotes}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
-            hideCardAuthorship={hideCardAuthorship}
-            updateHideCardAuthorship={updateHideCardAuthorship}
             showDisplayNames={showDisplayNames}
             updateShowDisplayNames={updateShowDisplayNames}
             votesPerUser={votesPerUser}
             updateVotesPerUser={updateVotesPerUser}
-            onOpenActionItems={() => {
-              setIsActionItemsPanelOpen(true);
-              setSettingsDropdownOpen(false);
-            }}
-            actionItemCount={actionItemCount}
-            actionItemsEnabled={actionItemsEnabled}
-            updateActionItemsEnabled={updateActionItemsEnabled}
             backgroundId={backgroundId}
             setBoardBackground={setBoardBackground}
             customBackgroundCss={customBackgroundCss}
@@ -384,11 +359,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
         }}
       />
 
-      <ActionItemsPanel
-        isOpen={isActionItemsPanelOpen}
-        onClose={() => setIsActionItemsPanelOpen(false)}
-      />
-
       <LinkPreviousBoardModal
         isOpen={isLinkPreviousModalOpen}
         onClose={() => setIsLinkPreviousModalOpen(false)}
@@ -414,9 +384,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
       )}
 
       <DisplayNamePrompt />
-
-      {/* Focus Mode overlay */}
-      <FocusMode {...focusMode} />
 
     </div>
   );

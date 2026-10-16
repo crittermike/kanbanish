@@ -15,14 +15,8 @@ vi.mock('./CardGroup', () => ({
   default: ({ groupData }) => <div>{groupData.name}</div>
 }));
 
-vi.mock('./CardTimerControls', () => ({
-  default: ({ cardId }) => <div data-testid="result-timer-controls">Timer for {cardId}</div>
-}));
-
 describe('ResultsView', () => {
   const baseContext = {
-    boardId: 'board-1',
-    user: { uid: 'user-1' },
     workflowPhase: 'RESULTS',
     resultsViewIndex: 0,
     navigateResults: vi.fn(),
@@ -118,23 +112,40 @@ describe('ResultsView', () => {
     });
   });
 
-  it('shows a regular timer button and removes the old helper copy', () => {
+  it('does not show a per-card timer', () => {
     useBoardContext.mockReturnValue(baseContext);
 
     render(<ResultsView onExpandCard={vi.fn()} />);
 
-    expect(screen.getByRole('button', { name: 'Timer' })).toBeInTheDocument();
-    expect(screen.queryByText(/use the detail view timer while you walk through each item/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /timer/i })).not.toBeInTheDocument();
   });
 
-  it('toggles inline timer controls for the current result card', () => {
-    useBoardContext.mockReturnValue(baseContext);
+  it('navigates results with the arrow keys', () => {
+    const navigateResults = vi.fn();
+    useBoardContext.mockReturnValue({ ...baseContext, navigateResults });
 
     render(<ResultsView onExpandCard={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Timer' }));
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
 
-    expect(screen.getByTestId('result-timer-controls')).toHaveTextContent('Timer for card-1');
-    expect(screen.getByRole('button', { name: 'Hide timer' })).toBeInTheDocument();
+    expect(navigateResults).toHaveBeenNthCalledWith(1, 'next');
+    expect(navigateResults).toHaveBeenNthCalledWith(2, 'prev');
+  });
+
+  it('ignores arrow keys while typing in an input', () => {
+    const navigateResults = vi.fn();
+    useBoardContext.mockReturnValue({ ...baseContext, navigateResults });
+
+    render(
+      <>
+        <input aria-label="typing" />
+        <ResultsView onExpandCard={vi.fn()} />
+      </>
+    );
+
+    fireEvent.keyDown(screen.getByLabelText('typing'), { key: 'ArrowRight' });
+
+    expect(navigateResults).not.toHaveBeenCalled();
   });
 });

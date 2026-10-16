@@ -95,7 +95,6 @@ describe('BOARD_TEMPLATES', () => {
     expect(bigOrcaTemplate.defaultSettings).toBeDefined();
     expect(bigOrcaTemplate.defaultSettings.retrospectiveMode).toBe(false);
     expect(bigOrcaTemplate.defaultSettings.showDisplayNames).toBe(false);
-    expect(bigOrcaTemplate.defaultSettings.actionItemsEnabled).toBe(false);
     expect(bigOrcaTemplate.defaultSettings.workflowPhase).toBe('HEALTH_CHECK');
   });
 

@@ -1,6 +1,6 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Play, Pause, RotateCcw, Square, X } from 'react-feather';
+import { Clock, Play, Pause, RotateCcw, Square } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
@@ -55,6 +55,15 @@ const Timer = () => {
   }, []);
 
   useOnClickOutside(setupRef, handleClickOutside);
+
+  useEffect(() => {
+    if (!showSetup) return undefined;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setShowSetup(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showSetup]);
 
   // Compute remaining time from timer data
   const updateRemaining = useCallback(() => {
@@ -193,13 +202,6 @@ const Timer = () => {
                 <Play size={14} />
               </button>
             </div>
-            <button
-              className="btn icon-btn timer-setup-close"
-              onClick={() => setShowSetup(false)}
-              title="Cancel"
-            >
-              <X size={14} />
-            </button>
           </div>
         )}
       </div>

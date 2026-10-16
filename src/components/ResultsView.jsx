@@ -1,15 +1,20 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Clock, Maximize2 } from 'react-feather';
+import { useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Maximize2 } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
-import CardTimerControls from './CardTimerControls';
+
+const isTypingTarget = target => {
+  if (!target) {
+    return false;
+  }
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable;
+};
 
 const ResultsView = ({ onExpandCard = null }) => {
   const {
-    boardId,
-    user,
     workflowPhase,
     resultsViewIndex,
     navigateResults,
@@ -17,7 +22,31 @@ const ResultsView = ({ onExpandCard = null }) => {
     columns,
     getTotalVotes
   } = useBoardContext();
-  const [showTimer, setShowTimer] = useState(false);
+
+  useEffect(() => {
+    if (workflowPhase !== WORKFLOW_PHASES.RESULTS) {
+      return undefined;
+    }
+
+    const handleKeyDown = e => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || isTypingTarget(e.target)) {
+        return;
+      }
+      if (document.querySelector('[aria-modal="true"]')) {
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateResults('next');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateResults('prev');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [workflowPhase, navigateResults]);
 
   if (workflowPhase !== WORKFLOW_PHASES.RESULTS) {
     return null;
@@ -82,17 +111,11 @@ const ResultsView = ({ onExpandCard = null }) => {
   const primaryResultCardId = currentItem.type === 'group'
     ? currentItem.data.cardIds?.find(cardId => columns[currentItem.columnId]?.cards?.[cardId])
     : currentItem.id;
-  const primaryResultCard = primaryResultCardId
-    ? columns[currentItem.columnId]?.cards?.[primaryResultCardId]
-    : null;
 
   return (
     <div className="results-view">
       <div className="results-header">
         <h2>Results</h2>
-        <p className="results-subtitle">
-          Review the board one item at a time with quick timer access, then open detail view whenever you want labels or discussion.
-        </p>
       </div>
 
       <div className="results-navigation">
@@ -100,7 +123,7 @@ const ResultsView = ({ onExpandCard = null }) => {
           className="btn navigation-btn"
           onClick={() => navigateResults('prev')}
           disabled={resultsViewIndex === 0}
-          title="Previous result"
+          title="Previous result (←)"
         >
           <ChevronLeft size={20} />
           Previous
@@ -116,7 +139,7 @@ const ResultsView = ({ onExpandCard = null }) => {
           className="btn navigation-btn"
           onClick={() => navigateResults('next')}
           disabled={resultsViewIndex === totalItems - 1}
-          title="Next result"
+          title="Next result (→)"
         >
           Next
           <ChevronRight size={20} />
@@ -137,38 +160,15 @@ const ResultsView = ({ onExpandCard = null }) => {
             </div>
           </div>
 
-          {primaryResultCardId && (
+          {primaryResultCardId && onExpandCard && (
             <div className="result-review-actions">
-              {onExpandCard && (
-                <button
-                  className="btn secondary-btn result-detail-btn"
-                  onClick={() => handleExpandResultCard(primaryResultCardId, currentItem.columnId)}
-                >
-                  <Maximize2 size={16} />
-                  {currentItem.type === 'group' ? 'Review cards in detail' : 'Open detail view'}
-                </button>
-              )}
               <button
-                className="btn secondary-btn result-timer-btn"
-                onClick={() => setShowTimer(isOpen => !isOpen)}
-                aria-expanded={showTimer}
+                className="btn secondary-btn result-detail-btn"
+                onClick={() => handleExpandResultCard(primaryResultCardId, currentItem.columnId)}
               >
-                <Clock size={16} />
-                {showTimer ? 'Hide timer' : 'Timer'}
+                <Maximize2 size={16} />
+                {currentItem.type === 'group' ? 'Review cards in detail' : 'Open detail view'}
               </button>
-            </div>
-          )}
-
-          {showTimer && primaryResultCard && (
-            <div className="result-inline-timer">
-              <CardTimerControls
-                boardId={boardId}
-                columnId={currentItem.columnId}
-                cardId={primaryResultCardId}
-                timerData={primaryResultCard.timer}
-                user={user}
-                className="result-card-timer"
-              />
             </div>
           )}
 

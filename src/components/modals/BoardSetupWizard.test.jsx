@@ -71,7 +71,7 @@ describe('BoardSetupWizard', () => {
       expect(screen.getByText('Set Up Your Board')).toBeInTheDocument();
     });
 
-    it('shows default settings: Kanban Mode selected, voting OFF, display names OFF, action items OFF', () => {
+    it('shows default settings: Kanban Mode selected, voting OFF, anonymous ON', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -93,13 +93,9 @@ describe('BoardSetupWizard', () => {
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
       expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
 
-      // Check display names is disabled
-      const namesSwitch = screen.getByRole('switch', { name: /Show Display Names/i });
-      expect(namesSwitch).toHaveAttribute('aria-checked', 'false');
-
-      // Check action items is disabled
-      const actionItemsSwitch = screen.getByRole('switch', { name: /Enable Action Items/i });
-      expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'false');
+      // Check anonymous is enabled
+      const anonymousSwitch = screen.getByRole('switch', { name: /Anonymous/i });
+      expect(anonymousSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
     it('health check toggle is always visible regardless of board mode', () => {
@@ -235,7 +231,7 @@ describe('BoardSetupWizard', () => {
       expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
-    it('toggle switches work: clicking Show Display Names toggle turns it on', () => {
+    it('toggle switches work: clicking Anonymous toggle turns it off', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -245,30 +241,12 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      const namesSwitch = screen.getByRole('switch', { name: /Show Display Names/i });
-      expect(namesSwitch).toHaveAttribute('aria-checked', 'false');
+      const anonymousSwitch = screen.getByRole('switch', { name: /Anonymous/i });
+      expect(anonymousSwitch).toHaveAttribute('aria-checked', 'true');
 
-      fireEvent.click(namesSwitch);
+      fireEvent.click(anonymousSwitch);
 
-      expect(namesSwitch).toHaveAttribute('aria-checked', 'true');
-    });
-
-    it('toggle switches work: clicking Enable Action Items toggle turns it on', () => {
-      render(
-        <BoardSetupWizard
-          isOpen={true}
-          onClose={mockOnClose}
-          onConfirm={mockOnConfirm}
-          templateName="Test"
-        />
-      );
-
-      const actionItemsSwitch = screen.getByRole('switch', { name: /Enable Action Items/i });
-      expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'false');
-
-      fireEvent.click(actionItemsSwitch);
-
-      expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(anonymousSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
     it('voting toggle is disabled when retrospective mode is selected', () => {
@@ -388,7 +366,6 @@ describe('BoardSetupWizard', () => {
         retrospectiveMode: false,
         votingEnabled: false,
         showDisplayNames: false,
-        actionItemsEnabled: false,
         startHealthCheck: false
       });
     });
@@ -407,13 +384,9 @@ describe('BoardSetupWizard', () => {
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
       fireEvent.click(votingSwitch);
 
-      // Change display names to on
-      const namesSwitch = screen.getByRole('switch', { name: /Show Display Names/i });
-      fireEvent.click(namesSwitch);
-
-      // Change action items to on
-      const actionItemsSwitch = screen.getByRole('switch', { name: /Enable Action Items/i });
-      fireEvent.click(actionItemsSwitch);
+      // Turn anonymous off (show display names)
+      const anonymousSwitch = screen.getByRole('switch', { name: /Anonymous/i });
+      fireEvent.click(anonymousSwitch);
 
       const createButton = screen.getByText('Create Board');
       fireEvent.click(createButton);
@@ -422,7 +395,6 @@ describe('BoardSetupWizard', () => {
         retrospectiveMode: false,
         votingEnabled: true,
         showDisplayNames: true,
-        actionItemsEnabled: true,
         startHealthCheck: false
       });
     });
@@ -484,7 +456,6 @@ describe('BoardSetupWizard', () => {
         retrospectiveMode: false,
         votingEnabled: false,
         showDisplayNames: false,
-        actionItemsEnabled: false,
         startHealthCheck: true
       });
     });
@@ -534,11 +505,8 @@ describe('BoardSetupWizard', () => {
       const kanbanButton = screen.getByRole('radio', { name: /Kanban Mode/i });
       expect(kanbanButton).toHaveAttribute('aria-checked', 'true');
 
-      const namesSwitch = screen.getByRole('switch', { name: /Show Display Names/i });
-      expect(namesSwitch).toHaveAttribute('aria-checked', 'false');
-
-      const actionItemsSwitch = screen.getByRole('switch', { name: /Enable Action Items/i });
-      expect(actionItemsSwitch).toHaveAttribute('aria-checked', 'false');
+      const anonymousSwitch = screen.getByRole('switch', { name: /Anonymous/i });
+      expect(anonymousSwitch).toHaveAttribute('aria-checked', 'true');
     });
   });
 });

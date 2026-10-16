@@ -260,7 +260,6 @@ const BOARD_TEMPLATES = [
     defaultSettings: {
       retrospectiveMode: false,
       showDisplayNames: false,
-      actionItemsEnabled: false,
       workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
     }
   },

@@ -158,7 +158,6 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         retrospectiveMode: wizardSettings.retrospectiveMode,
         votingEnabled: wizardSettings.votingEnabled,
         showDisplayNames: wizardSettings.showDisplayNames,
-        actionItemsEnabled: wizardSettings.actionItemsEnabled,
         ...(wizardSettings.startHealthCheck && { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK }),
       }
     })

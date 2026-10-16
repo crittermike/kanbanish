@@ -182,7 +182,7 @@ const WorkflowControls = () => {
           <div className="workflow-phase">
             <div className="phase-info">
               <h3>Results Phase</h3>
-              <p>Viewing the top-voted cards and groups. Use detail view to walk through each item with timers, labels, and comments.</p>
+              <p>Viewing the top-voted cards and groups. Use detail view to walk through each item with labels and comments.</p>
             </div>
             <div className="phase-controls">
               <button
