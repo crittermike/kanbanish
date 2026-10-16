@@ -242,6 +242,24 @@
   margin-bottom: 1rem;
 }
 
+.star-slot {
+  position: relative;
+  display: inline-flex;
+}
+
+.star-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+  display: inline-flex;
+}
+
+.star-fill svg {
+  flex-shrink: 0;
+}
+
 .effectiveness-label {
   font-size: 1.2rem;
   font-weight: 600;

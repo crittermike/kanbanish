@@ -136,7 +136,6 @@ describe('areReactionsVisible', () => {
   it('returns true throughout revealed retro review phases', () => {
     expect(areReactionsVisible(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(areReactionsVisible(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areReactionsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areReactionsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
@@ -157,8 +156,11 @@ describe('areReviewToolsVisible', () => {
   it('returns true during revealed board phases in retro mode', () => {
     expect(areReviewToolsVisible(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(areReviewToolsVisible(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areReviewToolsVisible(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areReviewToolsVisible(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
+  });
+
+  it('returns false for an unset phase in retro mode', () => {
+    expect(areReviewToolsVisible(undefined, true)).toBe(false);
   });
 
   it('returns false during unrevealed or non-board retro phases', () => {
@@ -187,7 +189,6 @@ describe('areReactionsAllowed', () => {
   it('allows reactions throughout revealed retro review phases', () => {
     expect(areReactionsAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(areReactionsAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areReactionsAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areReactionsAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
@@ -208,7 +209,6 @@ describe('areCommentsAllowed', () => {
   it('allows comments throughout revealed retro review phases', () => {
     expect(areCommentsAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(areCommentsAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(areCommentsAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(areCommentsAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 
@@ -353,7 +353,6 @@ describe('isCardMetadataEditingAllowed', () => {
   it('returns true for revealed retro phases', () => {
     expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.GROUPING, true)).toBe(true);
     expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.INTERACTIONS, true)).toBe(true);
-    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.INTERACTION_REVEAL, true)).toBe(true);
     expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.RESULTS, true)).toBe(true);
   });
 

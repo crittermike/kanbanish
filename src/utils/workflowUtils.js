@@ -87,7 +87,6 @@ export const areReviewToolsVisible = (workflowPhase, retrospectiveMode = false) 
   }
   return workflowPhase === WORKFLOW_PHASES.GROUPING ||
          workflowPhase === WORKFLOW_PHASES.INTERACTIONS ||
-         workflowPhase === WORKFLOW_PHASES.INTERACTION_REVEAL ||
          workflowPhase === WORKFLOW_PHASES.RESULTS;
 };
 

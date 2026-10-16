@@ -92,9 +92,11 @@ function AppContent() {
     if (!template) return;
 
     templateProcessed.current = true;
+    let authResolved = false;
 
     // Ensure user is authenticated before creating board
     const unsubscribe = auth.onAuthStateChanged(authedUser => {
+      authResolved = true;
       const doCreate = (user) => {
         createBoardFromTemplate({
           columns: template.columns,
@@ -125,7 +127,13 @@ function AppContent() {
       unsubscribe();
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      // StrictMode runs cleanup before auth resolves; allow the re-run to subscribe again
+      if (!authResolved) {
+        templateProcessed.current = false;
+      }
+    };
   }, [activeBoardId, handleOpenBoard]);
 
 
