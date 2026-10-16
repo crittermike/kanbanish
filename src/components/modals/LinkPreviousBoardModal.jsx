@@ -58,7 +58,6 @@ const LinkPreviousBoardModal = ({ isOpen, onClose, currentBoardId, onLink }) => 
     try {
       const ok = await onLink(targetId);
       if (ok) {
-        showNotification('Linked to previous board');
         onClose();
       } else {
         showNotification("Couldn't link that board — it may not exist, or linking it would create a loop in the series");

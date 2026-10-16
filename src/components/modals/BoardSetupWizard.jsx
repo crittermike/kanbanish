@@ -4,7 +4,7 @@ import '../../styles/components/wizard.css';
 
 export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateName, templateTags = [] }) {
   const [retrospectiveMode, setRetrospectiveMode] = useState(false);
-  const [votingEnabled, setVotingEnabled] = useState(true);
+  const [votingEnabled, setVotingEnabled] = useState(false);
   const [showDisplayNames, setShowDisplayNames] = useState(false);
   const [actionItemsEnabled, setActionItemsEnabled] = useState(false);
   const [startHealthCheck, setStartHealthCheck] = useState(false);
@@ -20,7 +20,7 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
         ['retrospective', 'reflection', 'agile', 'feedback', 'emotions'].includes(tag)
       );
       setRetrospectiveMode(isRetroTemplate);
-      setVotingEnabled(true);
+      setVotingEnabled(isRetroTemplate);
       setShowDisplayNames(false);
       setActionItemsEnabled(false);
       setStartHealthCheck(false);

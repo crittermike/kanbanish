@@ -2,7 +2,6 @@ import { memo, useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { useNotification } from '../context/NotificationContext';
 import { useGroupOperations } from '../hooks/useGroupOperations';
 import {
   filterVisibleInteractionData,
@@ -41,7 +40,6 @@ function CardGroup({
   matchingCardIds = null,
   onExpandCard = null
 }) {
-  const { showNotification } = useNotification();
   const {
     boardId,
     user,
@@ -99,14 +97,13 @@ function CardGroup({
       // Allow dropping cards from any column, as long as the card is not already in this group
       if (!groupData.cardIds?.includes(item.cardId) && item.groupId !== groupId) {
         moveCard(item.cardId, item.columnId, columnId, groupId);
-        showNotification('Card added to group');
         return { handled: true }; // Signal that this drop was handled
       }
     },
     collect: monitor => ({
       isOver: !!monitor.isOver()
     })
-  }), [columnId, groupId, groupData.cardIds, moveCard, showNotification]);
+  }), [columnId, groupId, groupData.cardIds, moveCard]);
 
   // Apply the drop ref to group element
   drop(groupRef);
@@ -168,7 +165,6 @@ function CardGroup({
   const handleUngroup = () => {
     if (window.confirm('Are you sure you want to ungroup these cards?')) {
       ungroupCards(columnId, groupId);
-      showNotification('Cards ungrouped');
     }
   };
 

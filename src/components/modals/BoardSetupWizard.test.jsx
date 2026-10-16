@@ -71,7 +71,7 @@ describe('BoardSetupWizard', () => {
       expect(screen.getByText('Set Up Your Board')).toBeInTheDocument();
     });
 
-    it('shows default settings: Kanban Mode selected, voting ON, display names OFF, action items OFF', () => {
+    it('shows default settings: Kanban Mode selected, voting OFF, display names OFF, action items OFF', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -89,9 +89,9 @@ describe('BoardSetupWizard', () => {
       const retroButton = screen.getByRole('radio', { name: /Retrospective Mode/i });
       expect(retroButton).toHaveAttribute('aria-checked', 'false');
 
-      // Check voting is enabled
+      // Check voting is disabled
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
-      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
 
       // Check display names is disabled
       const namesSwitch = screen.getByRole('switch', { name: /Show Display Names/i });
@@ -207,9 +207,7 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      // First disable voting
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
-      fireEvent.click(votingSwitch);
       expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
 
       // Select Retrospective Mode — should auto-enable voting
@@ -219,7 +217,7 @@ describe('BoardSetupWizard', () => {
       expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
-    it('toggle switches work: clicking Allow Voting toggle turns it off', () => {
+    it('toggle switches work: clicking Allow Voting toggle turns it on', () => {
       render(
         <BoardSetupWizard
           isOpen={true}
@@ -230,11 +228,11 @@ describe('BoardSetupWizard', () => {
       );
 
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
-      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
 
       fireEvent.click(votingSwitch);
 
-      expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
     });
 
     it('toggle switches work: clicking Show Display Names toggle turns it on', () => {
@@ -388,7 +386,7 @@ describe('BoardSetupWizard', () => {
 
       expect(mockOnConfirm).toHaveBeenCalledWith({
         retrospectiveMode: false,
-        votingEnabled: true,
+        votingEnabled: false,
         showDisplayNames: false,
         actionItemsEnabled: false,
         startHealthCheck: false
@@ -405,7 +403,7 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      // Change voting to off
+      // Change voting to on
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
       fireEvent.click(votingSwitch);
 
@@ -422,7 +420,7 @@ describe('BoardSetupWizard', () => {
 
       expect(mockOnConfirm).toHaveBeenCalledWith({
         retrospectiveMode: false,
-        votingEnabled: false,
+        votingEnabled: true,
         showDisplayNames: true,
         actionItemsEnabled: true,
         startHealthCheck: false
@@ -484,7 +482,7 @@ describe('BoardSetupWizard', () => {
       // Health check should be true
       expect(mockOnConfirm).toHaveBeenCalledWith({
         retrospectiveMode: false,
-        votingEnabled: true,
+        votingEnabled: false,
         showDisplayNames: false,
         actionItemsEnabled: false,
         startHealthCheck: true
@@ -503,10 +501,10 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      // Change voting to off
+      // Change voting to on
       const votingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
       fireEvent.click(votingSwitch);
-      expect(votingSwitch).toHaveAttribute('aria-checked', 'false');
+      expect(votingSwitch).toHaveAttribute('aria-checked', 'true');
 
       // Close the modal
       rerender(
@@ -528,9 +526,9 @@ describe('BoardSetupWizard', () => {
         />
       );
 
-      // Check that voting is back to on (default)
+      // Check that voting is back to off (default)
       const newVotingSwitch = screen.getByRole('switch', { name: /Allow Voting/i });
-      expect(newVotingSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(newVotingSwitch).toHaveAttribute('aria-checked', 'false');
 
       // Verify all other settings are also reset to defaults
       const kanbanButton = screen.getByRole('radio', { name: /Kanban Mode/i });

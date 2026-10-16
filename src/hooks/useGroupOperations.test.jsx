@@ -115,7 +115,7 @@ describe('useGroupOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('removes an existing reaction', async () => {
@@ -126,7 +126,7 @@ describe('useGroupOperations', () => {
       });
 
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 

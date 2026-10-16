@@ -98,17 +98,15 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       if (item.columnId !== columnId) {
         // Moving card between different columns
         moveCard(item.cardId, item.columnId, columnId);
-        showNotification('Card moved successfully');
       } else if (item.groupId) {
         // Moving card from group to column (ungrouping)
         moveCard(item.cardId, item.columnId, columnId, null);
-        showNotification('Card removed from group');
       }
     },
     collect: monitor => ({
       isOver: !!monitor.isOver()
     })
-  }), [columnId, moveCard, showNotification]);
+  }), [columnId, moveCard]);
 
   // Apply the drop ref to column content
   drop(columnRef);
@@ -148,9 +146,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     if (boardId && window.confirm('Are you sure you want to delete this column and all its cards?')) {
       const columnRef = ref(database, `boards/${boardId}/columns/${columnId}`);
       remove(columnRef)
-        .then(() => {
-          showNotification('Column deleted');
-        })
         .catch(() => {
           // Error deleting column - silent fallback
         });
@@ -196,7 +191,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     if (boardId && newCardContent.trim()) {
       addCard(boardId, columnId, newCardContent, user, displayName, userColor)
         .then((cardId) => {
-          showNotification('Card added');
           hideAddCardForm();
           
           setTimeout(() => {
@@ -343,14 +337,12 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       if (draggedCardColumn === targetCardColumn) {
         // Same column - create group directly
         createCardGroup(columnId, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
-        showNotification(`Group "${newGroupName.trim()}" created`);
       } else {
         // Cross-column - move the dragged card first, then create group
         moveCard(draggedCardId, draggedCardColumn, targetCardColumn, null)
           .then(() => {
             // Now that the card has been moved, create the group
             createCardGroup(targetCardColumn, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
-            showNotification(`Card moved and group "${newGroupName.trim()}" created`);
           })
           .catch(() => {
             // Error moving card for group creation
@@ -401,7 +393,10 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   }
 
   return (
-    <div className={`column${isColumnTimerExpired ? ' column-timer-expired' : ''}`}>
+    <div
+      ref={columnRef}
+      className={`column${isColumnTimerExpired ? ' column-timer-expired' : ''}${isOver ? ' drag-over' : ''}`}
+    >
       <div className="column-header">
         {isEditing ? (
           <input
@@ -434,27 +429,17 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             onClick={() => onToggleCollapse(columnId)}
             aria-label="Collapse column"
           >
-            <ChevronLeft aria-hidden="true" />
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
           <ColumnTimer columnId={columnId} timerData={columnData.timer} defaultTimerSeconds={columnData.defaultTimerSeconds} />
           {isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
             <button className="icon-button" title="Delete Column" onClick={deleteColumn} aria-label="Delete column">
-              <Trash2 aria-hidden="true" />
+              <Trash2 size={16} aria-hidden="true" />
             </button>
           )}
         </div>
       </div>
-      <div
-        ref={columnRef}
-        className={`column-content ${isOver ? 'drag-over' : ''}`}
-      >
-        {sortedGroups().length === 0 && sortedCards().length === 0 && (
-          <div className="empty-column-placeholder">
-            <span>No cards yet</span>
-            <span>Add a card to get started</span>
-          </div>
-        )}
-
+      <div className="column-content">
         {/* Render card groups and individual cards in sorted order */}
         {getSortedItems().map(item => {
           if (item.type === 'group') {
@@ -550,7 +535,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       ) : (
         isCardCreationAllowed(workflowPhase, retrospectiveMode) && (
           <button className="add-card" onClick={showAddCardForm}>
-            <Plus />
+            <Plus size={16} />
             Add Card
           </button>
         )

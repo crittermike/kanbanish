@@ -77,12 +77,10 @@ export function useGroupOperations({
         await remove(userRef);
         const newCount = Math.max(0, getReactionCount(emoji) - 1);
         await set(countRef, newCount);
-        showNotification('Your reaction removed');
       } else {
         await set(userRef, true);
         const newCount = getReactionCount(emoji) + 1;
         await set(countRef, newCount);
-        showNotification('Reaction added');
       }
     } catch (error) {
       console.error('Error managing reaction:', error);
@@ -115,7 +113,6 @@ export function useGroupOperations({
     try {
       await set(commentRef, commentData);
       setNewComment('');
-      showNotification('Comment added');
     } catch (error) {
       console.error('Error adding comment:', error);
       showNotification('Error adding comment');
@@ -137,7 +134,6 @@ export function useGroupOperations({
     
     try {
       await set(commentRef, newContent.trim());
-      showNotification('Comment updated');
     } catch (error) {
       console.error('Error updating comment:', error);
       showNotification('Error updating comment');
@@ -159,7 +155,6 @@ export function useGroupOperations({
     
     try {
       await remove(commentRef);
-      showNotification('Comment deleted');
     } catch (error) {
       console.error('Error deleting comment:', error);
       showNotification('Error deleting comment');

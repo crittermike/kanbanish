@@ -130,7 +130,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -181,7 +181,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -244,7 +244,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('votes'));
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Vote removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -327,7 +327,7 @@ describe('Card Component', () => {
     // Verify reaction was added and wait for it to appear in the DOM
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
       const addedReaction = screen.getByTestId('emoji-reaction');
       expect(addedReaction).toHaveTextContent(emojiText);
     });
@@ -345,7 +345,7 @@ describe('Card Component', () => {
     // Verify reaction was removed
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -364,7 +364,7 @@ describe('Card Component', () => {
     // Verify comment was added
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -391,7 +391,7 @@ describe('Card Component', () => {
     // Verify changes were saved
     await waitFor(() => {
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     // Wait for the updated content to appear and verify it's in the document
@@ -479,7 +479,7 @@ describe('Card Component', () => {
     // Verify reaction was removed
     await waitFor(() => {
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -551,7 +551,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalledWith(expect.anything(), expect.stringContaining('comments/comment1'));
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -623,7 +623,7 @@ describe('Card Component', () => {
     await waitFor(() => {
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -712,7 +712,7 @@ describe('Card Component', () => {
 
     // Wait for first vote to be processed
     await waitFor(() => {
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(set).toHaveBeenCalled();
     });
 
     // Reset the mocks after first vote
@@ -724,8 +724,9 @@ describe('Card Component', () => {
 
     // Verify second vote was processed
     await waitFor(() => {
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(set).toHaveBeenCalled();
     });
+    expect(mockShowNotification).not.toHaveBeenCalled();
   });
 
   test('does not enforce vote limit when votesPerUser is 0 (unlimited)', async () => {
@@ -749,8 +750,9 @@ describe('Card Component', () => {
 
     // Verify vote was allowed (not blocked by limit)
     await waitFor(() => {
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(set).toHaveBeenCalled();
     });
+    expect(mockShowNotification).not.toHaveBeenCalled();
 
     // Verify the vote was actually recorded (set was called)
     expect(set).toHaveBeenCalled();

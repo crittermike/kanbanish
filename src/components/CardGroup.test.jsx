@@ -377,8 +377,7 @@ describe('CardGroup Component', () => {
       );
     });
 
-    // Verify success notification
-    expect(mockShowNotification).toHaveBeenCalledWith('Card added to group');
+    expect(mockShowNotification).not.toHaveBeenCalled();
   });
 
   test('handles moving card from different column to group', async () => {
@@ -415,8 +414,7 @@ describe('CardGroup Component', () => {
       );
     });
 
-    // Verify success notification
-    expect(mockShowNotification).toHaveBeenCalledWith('Card added to group');
+    expect(mockShowNotification).not.toHaveBeenCalled();
   });
 
   test('displays comment toggle button with correct count', () => {

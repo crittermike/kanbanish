@@ -142,7 +142,6 @@ export function useCardOperations({
         displayName: displayName || cardData.displayName || '',
         userColor: userColor || cardData.userColor || ''
       });
-      showNotification('Card saved');
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving card:', error);
@@ -194,7 +193,7 @@ export function useCardOperations({
   }, [saveCardChanges, cardData.content]);
 
   // Voting operations
-  const updateVotes = useCallback(async (delta, e, message) => {
+  const updateVotes = useCallback(async (delta, e) => {
     e.stopPropagation();
 
     if (!boardId || !user) {
@@ -287,23 +286,17 @@ export function useCardOperations({
         await set(voterRef, newUserVote);
       }
 
-      // Show an appropriate message based on what happened
-      if (!multipleVotesAllowed && userCurrentVote !== 0 && delta === -userCurrentVote) {
-        showNotification('Vote removed');
-      } else {
-        showNotification(message);
-      }
     } catch (error) {
       console.error('Error updating votes:', error);
     }
   }, [boardId, columnId, cardId, cardData.votes, cardData.voters, showNotification, multipleVotesAllowed, user, isInteractionDisabled, workflowPhase, retrospectiveMode, votesPerUser, getUserVoteCount]);
 
   const upvoteCard = useCallback(e => {
-    updateVotes(1, e, 'Upvoted card');
+    updateVotes(1, e);
   }, [updateVotes]);
 
   const downvoteCard = useCallback(e => {
-    updateVotes(-1, e, 'Downvoted card');
+    updateVotes(-1, e);
   }, [updateVotes]);
 
 
@@ -349,12 +342,10 @@ export function useCardOperations({
         await remove(userRef);
         const newCount = Math.max(0, getReactionCount(emoji) - 1);
         await set(countRef, newCount);
-        showNotification('Your reaction removed');
       } else {
         await set(userRef, true);
         const newCount = getReactionCount(emoji) + 1;
         await set(countRef, newCount);
-        showNotification('Reaction added');
       }
     } catch (error) {
       console.error('Error managing reaction:', error);
@@ -384,7 +375,6 @@ export function useCardOperations({
       };
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       await set(commentRef, commentData);
-      showNotification('Comment added');
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -429,8 +419,6 @@ export function useCardOperations({
 
       const commentRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}/comments/${commentId}`);
       await set(commentRef, updatedComment);
-
-      showNotification('Comment updated');
     } catch (error) {
       console.error('Error updating comment:', error);
     }
