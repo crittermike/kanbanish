@@ -356,8 +356,8 @@ npm run lint:check # Same as lint (alias)
 ### Deploy Workflow (`.github/workflows/deploy-to-github-pages.yml`)
 
 - Triggers on: push to main
-- Builds with Vite and deploys to GitHub Pages
-- Base path handled by `vite.config.js` (uses `/kanbanish/` for GH Pages, `/` otherwise)
+- Builds with Vite and pushes the build to the `gh-pages` branch, which GitHub Pages serves at www.kanbanish.com
+- This is the only deploy workflow; base path is always `/` (custom domain)
 
 ## npm Scripts
 
