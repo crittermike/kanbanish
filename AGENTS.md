@@ -260,12 +260,12 @@ users/{userId}/preferences/
 When `retrospectiveMode` is enabled, the board operates as a guided retrospective with phases:
 
 ```
-HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → INTERACTION_REVEAL → RESULTS → POLL → POLL_RESULTS
+HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
 ```
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 
-The `INTERACTION_REVEAL` phase uses reveal logic in `retrospectiveModeUtils.js` to progressively show votes/reactions.
+`retrospectiveModeUtils.js` derives the reveal state (`hidden` → `interactive` → `frozen`) from the current phase.
 
 ## Board Series
 

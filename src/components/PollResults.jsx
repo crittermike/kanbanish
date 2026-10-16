@@ -35,14 +35,19 @@ const PollResults = () => {
                 <span className="score-max">5.0</span>
               </div>
               <div className="stars-display">
-                {[1, 2, 3, 4, 5].map(rating => (
-                  <Star
-                    key={rating}
-                    size={20}
-                    fill={stats.average >= rating ? '#ffd700' : 'none'}
-                    color={stats.average >= rating ? '#ffd700' : '#ccc'}
-                  />
-                ))}
+                {[1, 2, 3, 4, 5].map(rating => {
+                  const fill = Math.min(1, Math.max(0, Math.round((stats.average - rating + 1) * 2) / 2));
+                  return (
+                    <span key={rating} className="star-slot" data-fill={fill}>
+                      <Star size={20} fill="none" color={fill > 0 ? '#ffd700' : '#ccc'} />
+                      {fill > 0 && (
+                        <span className="star-fill" style={{ width: `${fill * 100}%` }}>
+                          <Star size={20} fill="#ffd700" color="#ffd700" />
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
               </div>
             </div>
             <div

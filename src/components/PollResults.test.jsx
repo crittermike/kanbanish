@@ -47,6 +47,20 @@ describe('PollResults Component', () => {
     expect(screen.getByText('Very Effective')).toBeInTheDocument();
   });
 
+  test('renders a half star for a 4.5 average', () => {
+    mockGetPollStats.mockReturnValue({
+      average: 4.5,
+      distribution: [0, 0, 0, 1, 1],
+      totalVotes: 2
+    });
+
+    const { container } = render(<PollResults />);
+
+    const fills = [...container.querySelectorAll('.stars-display .star-slot')]
+      .map(slot => slot.getAttribute('data-fill'));
+    expect(fills).toEqual(['1', '1', '1', '1', '0.5']);
+  });
+
   test('shows vote distribution chart', () => {
     mockGetPollStats.mockReturnValue({
       average: 3.5,

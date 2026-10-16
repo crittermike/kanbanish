@@ -189,6 +189,38 @@ describe('App Component', () => {
     pushStateSpy.mockRestore();
   });
 
+  test('creates board from template under React.StrictMode', async () => {
+    delete window.location;
+    window.location = { ...originalLocation, search: '?template=lean-coffee', href: 'http://localhost/?template=lean-coffee' };
+    const pushStateSpy = vi.spyOn(window.history, 'pushState').mockImplementation(() => {});
+
+    const { auth } = await import('./utils/firebase');
+    const { createBoardFromTemplate } = await import('./utils/boardUtils');
+    const createBoardMock = vi.mocked(createBoardFromTemplate);
+    createBoardMock.mockClear();
+
+    // Real Firebase listeners stop firing once unsubscribed
+    const originalImpl = auth.onAuthStateChanged.getMockImplementation();
+    auth.onAuthStateChanged.mockImplementation((cb) => {
+      let active = true;
+      Promise.resolve().then(() => active && cb({ uid: 'test-user' }));
+      return () => { active = false; };
+    });
+
+    const { StrictMode } = await import('react');
+    render(<StrictMode><App /></StrictMode>);
+
+    await waitFor(() => {
+      expect(createBoardMock).toHaveBeenCalledTimes(1);
+    }, { timeout: 2000 });
+    await waitFor(() => {
+      expect(screen.getByTestId('board')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    auth.onAuthStateChanged.mockImplementation(originalImpl);
+    pushStateSpy.mockRestore();
+  });
+
   test('does not crash when ?template=nonexistent-template is in URL', () => {
     // Set URL with nonexistent template param
     delete window.location;
