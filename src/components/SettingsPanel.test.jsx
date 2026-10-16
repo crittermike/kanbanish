@@ -45,7 +45,7 @@ describe('SettingsPanel', () => {
     onUnlinkSeries: vi.fn(),
   };
 
-  const openAdvanced = () => fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
+  const openActions = () => fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,98 +69,39 @@ describe('SettingsPanel', () => {
     });
   });
 
-  describe('Tabs', () => {
-    test('renders Board and Advanced tabs, Board selected by default', () => {
+  describe('Settings dialog', () => {
+    test('groups preferences under Voting and Board with no tabs', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      const tabs = within(tablist).getAllByRole('tab');
-      expect(tabs.map(t => t.textContent)).toEqual(['Board', 'Advanced']);
-      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
-      expect(tabs[0]).toHaveAttribute('tabindex', '0');
-      expect(tabs[1]).toHaveAttribute('tabindex', '-1');
+      expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+      const voting = screen.getByRole('region', { name: 'Voting' });
+      const board = screen.getByRole('region', { name: 'Board' });
+
+      expect(within(voting).getByRole('switch', { name: 'Allow voting' })).toBeVisible();
+      expect(within(voting).getByText('Votes per person')).toBeVisible();
+      expect(within(voting).getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
+      expect(within(voting).getByRole('switch', { name: 'Allow users to vote multiple times on the same card' })).toBeVisible();
+
+      expect(within(board).getByRole('switch', { name: 'Anonymous' })).toBeVisible();
+      expect(within(board).getByRole('switch', { name: 'Retrospective mode' })).toBeVisible();
+      expect(within(board).getByRole('switch', { name: 'Custom background' })).toBeVisible();
     });
 
-    test('each tab controls its matching tabpanel', () => {
+    test('holds preferences only, no one-off actions', () => {
       render(<SettingsPanel {...defaultProps} />);
+      const dialog = screen.getByRole('dialog');
 
-      ['board', 'advanced'].forEach(id => {
-        const tab = document.getElementById(`settings-tab-${id}`);
-        expect(tab).toHaveAttribute('aria-controls', `settings-tabpanel-${id}`);
-        const panel = document.getElementById(`settings-tabpanel-${id}`);
-        expect(panel).toHaveAttribute('role', 'tabpanel');
-        expect(panel).toHaveAttribute('aria-labelledby', `settings-tab-${id}`);
-      });
-      expect(document.getElementById('settings-tabpanel-board')).not.toHaveAttribute('hidden');
-      expect(document.getElementById('settings-tabpanel-advanced')).toHaveAttribute('hidden');
+      for (const name of ['Start health check', 'Export board', 'Start next board', 'Link to previous board', 'Reset all votes']) {
+        expect(within(dialog).queryByRole('button', { name })).not.toBeInTheDocument();
+      }
+      expect(within(dialog).queryByText('Theme')).not.toBeInTheDocument();
+      expect(within(dialog).queryByText(/sort/i)).not.toBeInTheDocument();
     });
 
-    test('clicking a tab switches panels', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      openAdvanced();
-
-      expect(screen.getByRole('tab', { name: /Advanced/i })).toHaveAttribute('aria-selected', 'true');
-      expect(document.getElementById('settings-tabpanel-advanced')).not.toHaveAttribute('hidden');
-      expect(document.getElementById('settings-tabpanel-board')).toHaveAttribute('hidden');
-    });
-
-    test('resets to Board tab when dialog reopens', () => {
-      const { rerender } = render(<SettingsPanel {...defaultProps} />);
-      openAdvanced();
-
-      rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
-      rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={true} />);
-
-      expect(screen.getByRole('tab', { name: /Board/i })).toHaveAttribute('aria-selected', 'true');
-    });
-
-    test('arrow keys, Home and End move between tabs', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      const board = screen.getByRole('tab', { name: /Board/i });
-      const advanced = screen.getByRole('tab', { name: /Advanced/i });
-
-      fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-      expect(advanced).toHaveAttribute('aria-selected', 'true');
-      fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-      expect(board).toHaveAttribute('aria-selected', 'true');
-      fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-      expect(advanced).toHaveAttribute('aria-selected', 'true');
-      fireEvent.keyDown(tablist, { key: 'Home' });
-      expect(board).toHaveAttribute('aria-selected', 'true');
-      fireEvent.keyDown(tablist, { key: 'End' });
-      expect(advanced).toHaveAttribute('aria-selected', 'true');
-    });
-  });
-
-  describe('Board tab', () => {
-    test('shows voting, votes per person, and author visibility options', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      expect(screen.getByRole('switch', { name: 'Allow voting' })).toBeVisible();
-      expect(screen.getByText('Votes per person')).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Anonymous' })).toBeVisible();
-    });
-
-    test('does not include theme, sort, share, or insights', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      expect(screen.queryByText('Theme')).not.toBeInTheDocument();
-      expect(screen.queryByText('Sort Cards')).not.toBeInTheDocument();
-      expect(screen.queryByText('Share Board')).not.toBeInTheDocument();
-      expect(screen.queryByRole('tab', { name: /Insights/i })).not.toBeInTheDocument();
-    });
-
-    test('Start Health Check starts the health check and closes settings', () => {
-      render(<SettingsPanel {...defaultProps} retrospectiveMode={false} />);
-      fireEvent.click(screen.getByRole('button', { name: 'Start Health Check' }));
-      expect(defaultProps.handleStartHealthCheck).toHaveBeenCalled();
-      expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
-    });
-
-    test('hides votes per person when voting is off', () => {
+    test('hides vote rules when voting is off', () => {
       render(<SettingsPanel {...defaultProps} votingEnabled={false} />);
       expect(screen.queryByText('Votes per person')).not.toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'Allow downvoting' })).not.toBeInTheDocument();
     });
 
     test('toggling voting calls updateVotingEnabled', () => {
@@ -168,22 +109,27 @@ describe('SettingsPanel', () => {
       fireEvent.click(screen.getByRole('switch', { name: 'Allow voting' }));
       expect(defaultProps.updateVotingEnabled).toHaveBeenCalledWith(false);
     });
+
+    test('Anonymous is the inverse of display names', () => {
+      render(<SettingsPanel {...defaultProps} showDisplayNames={true} />);
+      const anonymous = screen.getByRole('switch', { name: 'Anonymous' });
+      expect(anonymous).toHaveAttribute('aria-checked', 'false');
+      fireEvent.click(anonymous);
+      expect(defaultProps.updateShowDisplayNames).toHaveBeenCalledWith(false);
+    });
   });
 
   describe('Retrospective mode', () => {
-    test('hides Allow voting but keeps vote settings', () => {
+    test('hides Allow voting but keeps vote rules', () => {
       render(<SettingsPanel {...defaultProps} votingEnabled={false} retrospectiveMode={true} />);
 
       expect(screen.queryByRole('switch', { name: 'Allow voting' })).not.toBeInTheDocument();
       expect(screen.getByText('Votes per person')).toBeVisible();
-
-      openAdvanced();
       expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
     });
 
-    test('toggle lives in Advanced with an accurate hint', () => {
+    test('toggle has an accurate hint', () => {
       render(<SettingsPanel {...defaultProps} />);
-      openAdvanced();
 
       fireEvent.click(screen.getByRole('switch', { name: 'Retrospective mode' }));
       expect(defaultProps.updateRetrospectiveMode).toHaveBeenCalledWith(true);
@@ -192,52 +138,137 @@ describe('SettingsPanel', () => {
     });
   });
 
-  describe('Advanced tab', () => {
-    test('shows voting rules, background, and board actions', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      openAdvanced();
+  describe('Custom background', () => {
+    test('is off with no picker when the board uses the default background', () => {
+      render(<SettingsPanel {...defaultProps} backgroundId="none" />);
 
-      expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Allow users to vote multiple times on the same card' })).toBeVisible();
-      expect(screen.getByText('Board Background')).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Export board' })).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Start next board' })).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Link to previous board' })).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Reset all votes' })).toBeVisible();
-      expect(screen.queryByRole('button', { name: 'Remove from series' })).not.toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Custom background' })).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByRole('tablist', { name: 'Background categories' })).not.toBeInTheDocument();
     });
 
-    test('hides voting rules and reset when voting is off', () => {
-      render(<SettingsPanel {...defaultProps} votingEnabled={false} />);
-      openAdvanced();
+    test('turning it on reveals the picker without changing the background', () => {
+      render(<SettingsPanel {...defaultProps} backgroundId="none" />);
 
-      expect(screen.queryByRole('switch', { name: 'Allow downvoting' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Reset all votes' })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('switch', { name: 'Custom background' }));
+      expect(screen.getByRole('tablist', { name: 'Background categories' })).toBeVisible();
+      expect(screen.queryByRole('button', { name: /^Default/ })).not.toBeInTheDocument();
+      expect(defaultProps.setBoardBackground).not.toHaveBeenCalled();
     });
 
-    test('shows Remove from series when board is linked', () => {
-      render(<SettingsPanel {...defaultProps} previousBoardId="prev" />);
-      openAdvanced();
+    test('is on with the picker shown when the board has a background', () => {
+      render(<SettingsPanel {...defaultProps} backgroundId="slate" />);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove from series' }));
-      expect(defaultProps.onUnlinkSeries).toHaveBeenCalled();
+      expect(screen.getByRole('switch', { name: 'Custom background' })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('button', { name: 'Slate (selected)' })).toBeVisible();
     });
 
-    test('Export board closes the dialog and opens export', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      openAdvanced();
+    test('turning it off restores the default background', () => {
+      render(<SettingsPanel {...defaultProps} backgroundId="slate" />);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Export board' }));
-      expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
-      expect(defaultProps.handleExportBoard).toHaveBeenCalled();
+      fireEvent.click(screen.getByRole('switch', { name: 'Custom background' }));
+      expect(defaultProps.setBoardBackground).toHaveBeenCalledWith('none');
+      expect(screen.queryByRole('tablist', { name: 'Background categories' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Board actions menu', () => {
+    test('is closed until the button is clicked', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      const button = screen.getByRole('button', { name: 'Board actions' });
+
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+
+      openActions();
+      expect(button).toHaveAttribute('aria-expanded', 'true');
+      const menu = screen.getByRole('menu', { name: 'Board actions' });
+      expect(within(menu).getAllByRole('menuitem').map(i => i.textContent)).toEqual([
+        'Start health check',
+        'Export board',
+        'Start next board',
+        'Link to previous board',
+        'Reset all votes',
+      ]);
+    });
+
+    test('Start health check works outside retrospective mode', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} retrospectiveMode={false} />);
+      openActions();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Start health check' }));
+
+      expect(defaultProps.handleStartHealthCheck).toHaveBeenCalled();
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
+
+    test('Start health check is available in retrospective mode', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} retrospectiveMode={true} />);
+      openActions();
+      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toBeVisible();
+    });
+
+    test('runs export, series, and reset actions', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} previousBoardId="prev" />);
+
+      const actions = [
+        ['Export board', defaultProps.handleExportBoard],
+        ['Start next board', defaultProps.onStartNextBoard],
+        ['Link to previous board', defaultProps.onOpenLinkPrevious],
+        ['Remove from series', defaultProps.onUnlinkSeries],
+        ['Reset all votes', defaultProps.resetAllVotes],
+      ];
+      for (const [name, handler] of actions) {
+        openActions();
+        fireEvent.click(screen.getByRole('menuitem', { name }));
+        expect(handler).toHaveBeenCalled();
+      }
+    });
+
+    test('hides Remove from series when the board is not linked', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      openActions();
+      expect(screen.queryByRole('menuitem', { name: 'Remove from series' })).not.toBeInTheDocument();
+    });
+
+    test('hides Reset all votes when voting is off', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} votingEnabled={false} />);
+      openActions();
+      expect(screen.queryByRole('menuitem', { name: 'Reset all votes' })).not.toBeInTheDocument();
+    });
+
+    test('Escape closes the menu and returns focus to the button', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      openActions();
+      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toHaveFocus();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Board actions' })).toHaveFocus();
+    });
+
+    test('arrow keys move between items', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      openActions();
+      const menu = screen.getByRole('menu');
+
+      fireEvent.keyDown(menu, { key: 'ArrowDown' });
+      expect(screen.getByRole('menuitem', { name: 'Export board' })).toHaveFocus();
+      fireEvent.keyDown(menu, { key: 'End' });
+      expect(screen.getByRole('menuitem', { name: 'Reset all votes' })).toHaveFocus();
+      fireEvent.keyDown(menu, { key: 'ArrowDown' });
+      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toHaveFocus();
+    });
+
+    test('clicking outside closes the menu', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      openActions();
+      fireEvent.mouseDown(document.body);
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     });
   });
 
   describe('Dialog interactions', () => {
-    test('does not render tab content when dialog is closed', () => {
+    test('does not render the dialog when closed', () => {
       render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
-
-      expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 

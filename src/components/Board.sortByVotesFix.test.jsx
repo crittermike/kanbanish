@@ -87,12 +87,9 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    // Open the search bar, which holds the sort toggle
-    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
-
-    const sortToggle = screen.getByRole('button', { name: 'Sort cards by votes' });
-    expect(sortToggle).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(sortToggle);
+    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Newest' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
     // Verify that setSortByVotes was called with true (this persists to Firebase)
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
@@ -116,11 +113,9 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
-
-    const sortToggle = screen.getByRole('button', { name: 'Sort cards by votes' });
-    expect(sortToggle).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(sortToggle);
+    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Most votes' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Most votes' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Newest' }));
 
     // Verify that setSortByVotes was called with false (this persists to Firebase)
     expect(contextWithSortByVotes.setSortByVotes).toHaveBeenCalledWith(false);

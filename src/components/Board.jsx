@@ -239,6 +239,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
+            showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
+            sortByVotes={sortByVotes}
+            setSortByVotes={setSortByVotes}
           />
           <SettingsPanel
             handleStartHealthCheck={startHealthCheckPhase}
@@ -269,18 +272,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
             setCustomBackgroundSize={setCustomBackgroundSize}
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
-            onStartNextBoard={() => {
-              setSettingsDropdownOpen(false);
-              handleStartNextBoard();
-            }}
-            onOpenLinkPrevious={() => {
-              setSettingsDropdownOpen(false);
-              setIsLinkPreviousModalOpen(true);
-            }}
-            onUnlinkSeries={() => {
-              setSettingsDropdownOpen(false);
-              handleUnlinkSeries();
-            }}
+            onStartNextBoard={handleStartNextBoard}
+            onOpenLinkPrevious={() => setIsLinkPreviousModalOpen(true)}
+            onUnlinkSeries={handleUnlinkSeries}
           >
             <ProfileButton
               showDisplayNames={showDisplayNames}
@@ -312,9 +306,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
           setFilterValue={searchFilter.setFilterValue}
           clearFilters={searchFilter.clearFilters}
           boardTags={boardTags}
-          sortByVotes={sortByVotes}
-          setSortByVotes={setSortByVotes}
-          showSortToggle={votingEnabled || retrospectiveMode || sortByVotes}
         />
       )}
 

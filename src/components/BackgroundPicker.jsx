@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Check, X, Image as ImageIcon } from 'react-feather';
+import { Check, Image as ImageIcon } from 'react-feather';
 import BOARD_BACKGROUNDS, { BACKGROUND_CATEGORIES } from '../data/boardBackgrounds';
 
 /**
- * Background picker component for the Settings panel Advanced tab.
+ * Background picker shown in Settings when "Custom background" is on.
  * Shows a grid of background thumbnails organized by category tabs.
  *
  * @param {Object} props
@@ -21,12 +21,11 @@ const BackgroundPicker = ({
   const [activeCategory, setActiveCategory] = useState('solid');
   const [customUrl, setCustomUrl] = useState('');
 
-  const backgrounds = BOARD_BACKGROUNDS.filter(bg => bg.category === activeCategory);
+  // The "Custom background" toggle in Settings replaces the Default swatch
+  const backgrounds = BOARD_BACKGROUNDS.filter(bg => bg.category === activeCategory && bg.id !== 'none');
 
   return (
     <div className="background-picker">
-      <h4 className="settings-section-title">Board Background</h4>
-
       {/* Category tabs */}
       <div className="bg-picker-categories" role="tablist" aria-label="Background categories">
         {BACKGROUND_CATEGORIES.map(cat => (
@@ -66,7 +65,6 @@ const BackgroundPicker = ({
               Apply
             </button>
           </div>
-          <p className="settings-hint bg-picker-custom-hint">Paste any public image URL</p>
 
           {currentBackgroundId === 'custom' && customBackgroundCss && (
             <div className="bg-picker-size-section">
@@ -99,23 +97,15 @@ const BackgroundPicker = ({
 
           <div className="bg-picker-custom-preview-area">
             {currentBackgroundId === 'custom' && customBackgroundCss ? (
-              <>
-                <div 
-                  className="bg-picker-custom-preview-image" 
-                  style={{ 
-                    background: customBackgroundCss, 
-                    backgroundSize: customBackgroundSize === 'tile' ? 'auto' : customBackgroundSize === 'stretch' ? '100% 100%' : 'cover',
-                    backgroundRepeat: customBackgroundSize === 'tile' ? 'repeat' : 'no-repeat',
-                    backgroundPosition: customBackgroundSize === 'tile' ? 'top left' : 'center'
-                  }}
-                />
-                <button
-                  className="bg-picker-custom-clear btn"
-                  onClick={() => onSelectBackground('none')}
-                >
-                  Clear Custom Background
-                </button>
-              </>
+              <div
+                className="bg-picker-custom-preview-image"
+                style={{
+                  background: customBackgroundCss,
+                  backgroundSize: customBackgroundSize === 'tile' ? 'auto' : customBackgroundSize === 'stretch' ? '100% 100%' : 'cover',
+                  backgroundRepeat: customBackgroundSize === 'tile' ? 'repeat' : 'no-repeat',
+                  backgroundPosition: customBackgroundSize === 'tile' ? 'top left' : 'center'
+                }}
+              />
             ) : (
               <div className="bg-picker-custom-preview-empty">
                 <ImageIcon size={24} aria-hidden="true" />
@@ -132,7 +122,6 @@ const BackgroundPicker = ({
         >
           {backgrounds.map(bg => {
             const isSelected = currentBackgroundId === bg.id;
-            const isNone = bg.id === 'none';
 
             return (
               <button
@@ -145,14 +134,8 @@ const BackgroundPicker = ({
               >
                 <span
                   className="bg-picker-swatch-preview"
-                  style={isNone ? {} : { background: bg.css }}
-                >
-                  {isNone && (
-                    <span className="bg-picker-swatch-none">
-                      <X size={14} aria-hidden="true" />
-                    </span>
-                  )}
-                </span>
+                  style={{ background: bg.css }}
+                />
 
                 {/* Selected check */}
                 {isSelected && (

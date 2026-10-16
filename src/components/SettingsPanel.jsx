@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, FileText, Layers, Layout, Link2, Moon, RotateCcw, Scissors, Settings, Share2, Sliders, Sun } from 'react-feather';
+import { Moon, Settings, Share2, Sun } from 'react-feather';
 import BackgroundPicker from './BackgroundPicker';
+import BoardActionsMenu from './BoardActionsMenu';
 import Timer from './Timer';
-
-const TABS = [
-  { id: 'board', label: 'Board', icon: Layout },
-  { id: 'advanced', label: 'Advanced', icon: Sliders },
-];
 
 const VOTE_PRESETS = [3, 5, 10];
 
 const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
-  <div className="settings-section">
+  <div className="settings-row">
     <div className="settings-toggle-row">
       <span className="settings-toggle-label">{label}</span>
       <button
@@ -28,16 +24,9 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
   </div>
 );
 
-const ActionButton = ({ icon: Icon, label, onClick }) => (
-  <button className="settings-action-btn" onClick={onClick}>
-    <Icon size={16} aria-hidden="true" />
-    <span>{label}</span>
-  </button>
-);
-
 /**
- * Header actions (timer, share, theme) and the Board Settings modal
- * with two tabs: Board and Advanced.
+ * Header actions (timer, share, theme, board actions) and the Board Settings modal.
+ * Settings holds board preferences only; one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
   handleStartHealthCheck,
@@ -73,18 +62,26 @@ const SettingsPanel = ({
   onOpenLinkPrevious,
   onUnlinkSeries
 }) => {
-  const [activeTab, setActiveTab] = useState('board');
-
   // Voting is always on in retrospective mode
   const votingActive = votingEnabled || retrospectiveMode;
   const isCustomVoteLimit = votesPerUser > 0 && !VOTE_PRESETS.includes(votesPerUser);
+  const hasBackground = !!backgroundId && backgroundId !== 'none';
+  const [backgroundOpen, setBackgroundOpen] = useState(hasBackground);
 
-  // Reset to first tab whenever the modal opens
+  // Sync the background toggle with the board each time the modal opens
   useEffect(() => {
     if (sortDropdownOpen) {
-      setActiveTab('board');
+      setBackgroundOpen(hasBackground);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortDropdownOpen]);
+
+  const handleBackgroundToggle = (on) => {
+    setBackgroundOpen(on);
+    if (!on && hasBackground) {
+      setBoardBackground('none');
+    }
+  };
 
   const handleOverlayClick = useCallback((e) => {
     if (e.target.classList.contains('modal-overlay')) {
@@ -103,37 +100,8 @@ const SettingsPanel = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sortDropdownOpen, setSortDropdownOpen]);
 
-  const handleTabKeyDown = (e) => {
-    const tabIds = TABS.map(t => t.id);
-    const currentIndex = tabIds.indexOf(activeTab);
-    let newIndex = currentIndex;
-
-    if (e.key === 'ArrowRight') {
-      newIndex = (currentIndex + 1) % tabIds.length;
-    } else if (e.key === 'ArrowLeft') {
-      newIndex = (currentIndex - 1 + tabIds.length) % tabIds.length;
-    } else if (e.key === 'Home') {
-      newIndex = 0;
-    } else if (e.key === 'End') {
-      newIndex = tabIds.length - 1;
-    } else {
-      return;
-    }
-
-    e.preventDefault();
-    setActiveTab(tabIds[newIndex]);
-    const tabButton = document.getElementById(`settings-tab-${tabIds[newIndex]}`);
-    if (tabButton) tabButton.focus();
-  };
-
-  const closeAnd = (fn) => () => {
-    setSortDropdownOpen(false);
-    if (fn) fn();
-  };
-
   return (
     <div className="action-buttons">
-
       <Timer />
       {children}
       <button
@@ -152,6 +120,15 @@ const SettingsPanel = ({
       >
         {darkMode ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
       </button>
+      <BoardActionsMenu
+        onStartHealthCheck={handleStartHealthCheck}
+        onExportBoard={handleExportBoard}
+        onStartNextBoard={onStartNextBoard}
+        onOpenLinkPrevious={onOpenLinkPrevious}
+        onUnlinkSeries={onUnlinkSeries}
+        inSeries={!!(previousBoardId || nextBoardId)}
+        onResetVotes={votingActive ? resetAllVotes : null}
+      />
       <button
         id="settings-dropdown-button"
         className="btn icon-btn settings-toggle-btn"
@@ -172,37 +149,10 @@ const SettingsPanel = ({
               <button className="close-button" onClick={() => setSortDropdownOpen(false)} aria-label="Close">&times;</button>
             </div>
 
-            <div className="settings-tabs" role="tablist" aria-label="Settings categories" onKeyDown={handleTabKeyDown}>
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    id={`settings-tab-${tab.id}`}
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls={`settings-tabpanel-${tab.id}`}
-                    tabIndex={isActive ? 0 : -1}
-                    className={`settings-tab${isActive ? ' settings-tab-active' : ''}`}
-                    onClick={() => setActiveTab(tab.id)}
-                  >
-                    <Icon size={14} aria-hidden="true" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <div className="modal-body settings-content">
+              <section className="settings-group" aria-labelledby="settings-group-voting">
+                <h3 id="settings-group-voting" className="settings-group-title">Voting</h3>
 
-            <div className="modal-body">
-              {/* Board Tab */}
-              <div
-                id="settings-tabpanel-board"
-                role="tabpanel"
-                aria-labelledby="settings-tab-board"
-                className="settings-tabpanel"
-                hidden={activeTab !== 'board'}
-              >
                 {!retrospectiveMode && (
                   <ToggleRow
                     label="Allow voting"
@@ -212,74 +162,53 @@ const SettingsPanel = ({
                 )}
 
                 {votingActive && (
-                  <div className="settings-section settings-vote-limit">
-                    <h4 className="settings-section-title">Votes per person</h4>
-                    <div className="vote-limit-preset-buttons">
-                      <button
-                        className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
-                        onClick={() => updateVotesPerUser(0)}
-                      >
-                        Unlimited
-                      </button>
-                      {VOTE_PRESETS.map(val => (
+                  <>
+                    <div className="settings-row settings-vote-limit">
+                      <span className="settings-toggle-label" id="votes-per-person-label">Votes per person</span>
+                      <div className="vote-limit-preset-buttons" role="group" aria-labelledby="votes-per-person-label">
                         <button
-                          key={val}
-                          className={`vote-limit-preset ${votesPerUser === val ? 'active' : ''}`}
-                          onClick={() => updateVotesPerUser(val)}
+                          className={`vote-limit-preset ${votesPerUser === 0 ? 'active' : ''}`}
+                          aria-pressed={votesPerUser === 0}
+                          onClick={() => updateVotesPerUser(0)}
                         >
-                          {val}
+                          Unlimited
                         </button>
-                      ))}
-                      <div className={`vote-limit-custom-inline ${isCustomVoteLimit ? 'active' : ''}`}>
-                        <input
-                          type="number"
-                          className="vote-limit-input"
-                          min="1"
-                          max="99"
-                          aria-label="Custom votes per person"
-                          value={isCustomVoteLimit ? votesPerUser : ''}
-                          onChange={e => {
-                            const val = parseInt(e.target.value, 10);
-                            if (!isNaN(val) && val > 0) {
-                              updateVotesPerUser(val);
-                            }
-                          }}
-                          onBlur={e => {
-                            const val = parseInt(e.target.value, 10);
-                            if ((isNaN(val) || val <= 0) && isCustomVoteLimit) {
-                              updateVotesPerUser(0);
-                            }
-                          }}
-                          placeholder="#"
-                        />
+                        {VOTE_PRESETS.map(val => (
+                          <button
+                            key={val}
+                            className={`vote-limit-preset ${votesPerUser === val ? 'active' : ''}`}
+                            aria-pressed={votesPerUser === val}
+                            onClick={() => updateVotesPerUser(val)}
+                          >
+                            {val}
+                          </button>
+                        ))}
+                        <div className={`vote-limit-custom-inline ${isCustomVoteLimit ? 'active' : ''}`}>
+                          <input
+                            type="number"
+                            className="vote-limit-input"
+                            min="1"
+                            max="99"
+                            aria-label="Custom votes per person"
+                            value={isCustomVoteLimit ? votesPerUser : ''}
+                            onChange={e => {
+                              const val = parseInt(e.target.value, 10);
+                              if (!isNaN(val) && val > 0) {
+                                updateVotesPerUser(val);
+                              }
+                            }}
+                            onBlur={e => {
+                              const val = parseInt(e.target.value, 10);
+                              if ((isNaN(val) || val <= 0) && isCustomVoteLimit) {
+                                updateVotesPerUser(0);
+                              }
+                            }}
+                            placeholder="#"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                <ToggleRow
-                  label="Anonymous"
-                  checked={!showDisplayNames}
-                  onChange={(anonymous) => updateShowDisplayNames(!anonymous)}
-                />
-
-                <div className="settings-section">
-                  <div className="settings-action-list">
-                    <ActionButton icon={Activity} label="Start Health Check" onClick={closeAnd(handleStartHealthCheck)} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced Tab */}
-              <div
-                id="settings-tabpanel-advanced"
-                role="tabpanel"
-                aria-labelledby="settings-tab-advanced"
-                className="settings-tabpanel"
-                hidden={activeTab !== 'advanced'}
-              >
-                {votingActive && (
-                  <>
                     <ToggleRow
                       label="Allow downvoting"
                       checked={downvotingEnabled}
@@ -293,6 +222,16 @@ const SettingsPanel = ({
                     />
                   </>
                 )}
+              </section>
+
+              <section className="settings-group" aria-labelledby="settings-group-board">
+                <h3 id="settings-group-board" className="settings-group-title">Board</h3>
+
+                <ToggleRow
+                  label="Anonymous"
+                  checked={!showDisplayNames}
+                  onChange={(anonymous) => updateShowDisplayNames(!anonymous)}
+                />
 
                 <ToggleRow
                   label="Retrospective mode"
@@ -301,37 +240,25 @@ const SettingsPanel = ({
                   hint="Guided steps: add cards, group, vote, discuss"
                 />
 
-                <div className="settings-section">
-                  <BackgroundPicker
-                    currentBackgroundId={backgroundId}
-                    onSelectBackground={setBoardBackground}
-                    customBackgroundCss={customBackgroundCss}
-                    onSetCustomBackground={setCustomBackground}
-                    customBackgroundSize={customBackgroundSize}
-                    onSetCustomBackgroundSize={setCustomBackgroundSize}
-                  />
-                </div>
+                <ToggleRow
+                  label="Custom background"
+                  checked={backgroundOpen}
+                  onChange={handleBackgroundToggle}
+                />
 
-                <div className="settings-section">
-                  <div className="settings-action-list">
-                    <ActionButton icon={FileText} label="Export board" onClick={closeAnd(handleExportBoard)} />
-                    <ActionButton icon={Layers} label="Start next board" onClick={() => onStartNextBoard && onStartNextBoard()} />
-                    <ActionButton icon={Link2} label="Link to previous board" onClick={() => onOpenLinkPrevious && onOpenLinkPrevious()} />
-                    {(previousBoardId || nextBoardId) && (
-                      <ActionButton icon={Scissors} label="Remove from series" onClick={() => onUnlinkSeries && onUnlinkSeries()} />
-                    )}
-                    {votingActive && (
-                      <button
-                        className="settings-action-btn settings-action-btn-danger"
-                        onClick={resetAllVotes}
-                      >
-                        <RotateCcw size={16} aria-hidden="true" />
-                        <span>Reset all votes</span>
-                      </button>
-                    )}
+                {backgroundOpen && (
+                  <div className="settings-row settings-background">
+                    <BackgroundPicker
+                      currentBackgroundId={backgroundId}
+                      onSelectBackground={setBoardBackground}
+                      customBackgroundCss={customBackgroundCss}
+                      onSetCustomBackground={setCustomBackground}
+                      customBackgroundSize={customBackgroundSize}
+                      onSetCustomBackgroundSize={setCustomBackgroundSize}
+                    />
                   </div>
-                </div>
-              </div>
+                )}
+              </section>
             </div>
           </div>
         </div>

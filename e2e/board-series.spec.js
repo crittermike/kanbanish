@@ -65,12 +65,10 @@ test.describe('Board series', () => {
     const firstBoardId = boardIdFromUrl(page.url());
     expect(firstBoardId).toBeTruthy();
 
-    // Open settings → Advanced tab → Start next board.
-    await page.getByRole('button', { name: /board settings/i }).click();
-    await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
-    await page.getByRole('tab', { name: /advanced/i }).click();
+    // Board actions menu → Start next board.
+    await page.getByRole('button', { name: /board actions/i }).click();
 
-    const startNextBtn = page.getByRole('button', { name: /start next board/i });
+    const startNextBtn = page.getByRole('menuitem', { name: /start next board/i });
     await expect(startNextBtn).toBeVisible();
     await startNextBtn.click();
 
@@ -110,11 +108,9 @@ test.describe('Board series', () => {
     const currentBoardId = boardIdFromUrl(page.url());
     expect(currentBoardId).not.toBe(previousBoardId);
 
-    // Open settings → Advanced tab → Link to previous board.
-    await page.getByRole('button', { name: /board settings/i }).click();
-    await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
-    await page.getByRole('tab', { name: /advanced/i }).click();
-    await page.getByRole('button', { name: /link to previous board/i }).click();
+    // Board actions menu → Link to previous board.
+    await page.getByRole('button', { name: /board actions/i }).click();
+    await page.getByRole('menuitem', { name: /link to previous board/i }).click();
 
     // The link modal appears — paste the previous board id and link.
     await expect(page.getByRole('heading', { name: /link to previous board/i })).toBeVisible();

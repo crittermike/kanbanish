@@ -217,7 +217,7 @@ describe('Board Component', () => {
   });
 
 
-  test('shows sort toggle in the search bar', () => {
+  test('shows the sort menu in the header without opening search', () => {
     // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
@@ -230,9 +230,19 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
+    expect(screen.getByRole('button', { name: 'Sort cards: Newest' })).toBeVisible();
+  });
 
-    expect(screen.getByRole('button', { name: 'Sort cards by votes' })).toHaveTextContent('Newest');
+  test('hides the sort menu when voting is off', () => {
+    useBoardContext.mockReturnValue({ ...mockContextValue, votingEnabled: false, retrospectiveMode: false, sortByVotes: false });
+
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Board />
+      </DndProvider>
+    );
+
+    expect(screen.queryByRole('button', { name: /^Sort cards/ })).not.toBeInTheDocument();
   });
 
   test('selects sort by votes when that option is clicked', () => {
@@ -248,8 +258,8 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Sort cards by votes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Newest' }));
+    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
     // Check that setSortByVotes was called with true
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
@@ -300,9 +310,6 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
-
     // Find the toggle switch for "Allow multiple votes" and click it
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
     fireEvent.click(multiVoteToggle);
@@ -336,9 +343,6 @@ describe('Board Component', () => {
     // Open the settings dropdown
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
-
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
 
     // Click the toggle switch for multiple votes
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
@@ -419,9 +423,6 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
-
     // Find the toggle switch for "Allow downvoting" and click it
     const downvotingToggle = screen.getByRole('switch', { name: 'Allow downvoting' });
     fireEvent.click(downvotingToggle);
@@ -453,9 +454,6 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
-
     // Verify the downvoting option is not visible when voting is disabled
     expect(screen.queryByText('Allow downvoting')).not.toBeInTheDocument();
   });
@@ -486,23 +484,15 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings');
-    fireEvent.click(settingsButton);
-
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
 
     // Find and click the reset votes button
-    const resetVotesButton = screen.getByText('Reset all votes');
+    const resetVotesButton = screen.getByRole('menuitem', { name: 'Reset all votes' });
     expect(resetVotesButton).toBeInTheDocument();
     fireEvent.click(resetVotesButton);
 
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
-
-    // Verify dropdown remains open
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 
   test('does not reset votes if user cancels confirmation', async () => {
@@ -528,22 +518,14 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    // Open the dropdown
-    const settingsButton = screen.getByTitle('Board settings');
-    fireEvent.click(settingsButton);
-
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
 
     // Find and click the reset votes button
-    const resetVotesButton = screen.getByText('Reset all votes');
+    const resetVotesButton = screen.getByRole('menuitem', { name: 'Reset all votes' });
     fireEvent.click(resetVotesButton);
 
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
-
-    // Dropdown should still be open
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
 
   test('hides multi-vote setting and reset votes button when voting is disabled', () => {
@@ -569,12 +551,10 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
-
     // The multi-vote setting and reset votes button should be hidden when voting is disabled
     expect(screen.queryByText('Multiple votes per card')).not.toBeInTheDocument();
-    expect(screen.queryByText('Reset all votes')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.queryByRole('menuitem', { name: 'Reset all votes' })).not.toBeInTheDocument();
   });
 
   test('shows multi-vote setting and reset votes button when voting is enabled', () => {
@@ -599,12 +579,10 @@ describe('Board Component', () => {
     const settingsButton = screen.getByTitle('Board settings');
     fireEvent.click(settingsButton);
 
-    // Navigate to Advanced tab
-    fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
-
     // Verify all vote settings are displayed
     expect(screen.getByText('Multiple votes per card')).toBeInTheDocument();
-    expect(screen.getByText('Reset all votes')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitem', { name: 'Reset all votes' })).toBeInTheDocument();
   });
 
   test('sorts cards and groups by votes when sort by votes is enabled', () => {

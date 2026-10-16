@@ -115,14 +115,6 @@
   color: var(--text-color);
 }
 
-/* "None" swatch X icon */
-.bg-picker-swatch-none {
-  color: var(--text-faint);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Selected checkmark */
 .bg-picker-swatch-check {
   position: absolute;
@@ -241,12 +233,6 @@
   cursor: not-allowed;
 }
 
-.bg-picker-custom-hint {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
 .bg-picker-custom-preview-area {
   display: flex;
   flex-direction: column;
@@ -278,17 +264,3 @@
   font-size: var(--font-size-sm);
 }
 
-.bg-picker-custom-clear {
-  padding: var(--space-xs) var(--space-sm);
-  background: transparent;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-speed) var(--transition-ease);
-}
-
-.bg-picker-custom-clear:hover {
-  background: var(--hover-bg);
-}

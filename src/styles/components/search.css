@@ -188,33 +188,6 @@
     border-color: var(--accent);
 }
 
-/* Sort toggle (newest / votes) */
-.sort-toggle-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    padding: var(--space-xs) var(--space-sm);
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-muted);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all var(--transition-speed) var(--transition-ease);
-}
-
-.sort-toggle-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: var(--hover-bg);
-}
-
-.sort-toggle-btn.active {
-    color: var(--accent);
-    border-color: var(--accent);
-}
-
 /* Filter count badge */
 .filter-badge {
     position: absolute;

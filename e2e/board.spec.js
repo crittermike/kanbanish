@@ -102,8 +102,8 @@ test.describe('Board', () => {
     // Settings modal should appear
     await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
 
-    // Should show Board tab
-    await expect(page.getByRole('tab', { name: /^board$/i })).toBeVisible();
+    // Should show the voting preferences
+    await expect(page.getByRole('region', { name: /^voting$/i })).toBeVisible();
 
     // Close via the close button
     await page.getByRole('button', { name: /close/i }).click();

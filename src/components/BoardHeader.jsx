@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Home, MoreHorizontal, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import BoardSeriesPager from './BoardSeriesPager';
+import SortMenu from './SortMenu';
 import UserCounter from './UserCounter';
 import VoteCounter from './VoteCounter';
 
@@ -22,14 +23,15 @@ const HeaderMoreToggle = () => {
 };
 
 /**
- * Board header with title input, user/vote counters, and share/export buttons.
+ * Board header with title input, search, sort, and user/vote counters.
  *
  * @param {Object} props
  * @param {string} props.boardTitle - Current board title
  * @param {Function} props.handleBoardTitleChange - Called on title input change
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
+ * @param {boolean} props.showSort - Show the sort menu (when voting is on or cards are sorted by votes)
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, previousBoardId, nextBoardId, onNavigateToBoard }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, previousBoardId, nextBoardId, onNavigateToBoard, showSort, sortByVotes, setSortByVotes }) => (
   <div className="board-title-container">
     {onGoHome && (
       <button
@@ -59,6 +61,9 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       className="header-input"
     />
     <HeaderMoreToggle />
+    {showSort && setSortByVotes && (
+      <SortMenu sortByVotes={sortByVotes} setSortByVotes={setSortByVotes} />
+    )}
     {!isSearchOpen && (
       <button
         className="search-trigger-btn"
