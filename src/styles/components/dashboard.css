@@ -289,22 +289,48 @@
 
 .dashboard-template-tile-all .dashboard-template-preview {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  place-items: center;
-  gap: 0;
-  padding: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  padding: 14px;
   background: color-mix(in srgb, var(--hover-bg) 70%, var(--card-bg));
 }
 
-.dashboard-template-browse-icon {
-  font-size: 20px;
-  line-height: 1;
-  opacity: 0.85;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* Neutral mini boards that pick up the accent on hover */
+.dashboard-template-mini {
+  position: relative;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  transition:
+    border-color var(--transition-speed) var(--transition-ease),
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dashboard-template-tile-all:hover .dashboard-template-browse-icon {
-  transform: scale(1.12);
+.dashboard-template-mini::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 40%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-color);
+  transition: background var(--transition-speed) var(--transition-ease);
+}
+
+.dashboard-template-tile-all:hover .dashboard-template-mini,
+.dashboard-template-tile-all:focus-visible .dashboard-template-mini {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+}
+
+.dashboard-template-tile-all:hover .dashboard-template-mini::before,
+.dashboard-template-tile-all:focus-visible .dashboard-template-mini::before {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.dashboard-template-tile-all:hover .dashboard-template-mini:nth-child(2n) {
+  transform: translateY(-2px);
 }
 
 .dashboard-template-tile-all .dashboard-template-name {
@@ -478,25 +504,14 @@
 
   .dashboard-template-tile-all {
     grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: stretch;
   }
 
   .dashboard-template-tile-all .dashboard-template-preview {
-    aspect-ratio: auto;
-    flex: 1;
-    grid-template-columns: repeat(8, 1fr);
-    padding: 10px 12px;
-  }
-
-  .dashboard-template-tile-all .dashboard-template-browse-icon {
-    font-size: 16px;
+    display: none;
   }
 
   .dashboard-template-tile-all .dashboard-template-footer {
-    height: auto;
     border-top: none;
-    border-left: 1px solid var(--border-subtle);
   }
 
   .dashboard-board-card {

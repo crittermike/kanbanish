@@ -105,10 +105,6 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const quickTemplates = useMemo(() => getQuickTemplates(getLastTemplateId()), []);
-  const browseIcons = useMemo(() => {
-    const quickIds = new Set(quickTemplates.map(t => t.id));
-    return [...new Set(BOARD_TEMPLATES.filter(t => !quickIds.has(t.id)).map(t => t.icon))].slice(0, 8);
-  }, [quickTemplates]);
   const [joinBoardId, setJoinBoardId] = useState('');
   const [loadingMeta, setLoadingMeta] = useState(new Set());
   const [user, setUser] = useState(null);
@@ -279,8 +275,8 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
               onClick={() => setIsTemplateModalOpen(true)}
             >
               <span className="dashboard-template-preview" aria-hidden="true">
-                {browseIcons.map(icon => (
-                  <span key={icon} className="dashboard-template-browse-icon">{icon}</span>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <span key={i} className="dashboard-template-mini" />
                 ))}
               </span>
               <span className="dashboard-template-footer">
