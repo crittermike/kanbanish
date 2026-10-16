@@ -171,19 +171,23 @@ describe('createBoardFromTemplate', () => {
     );
   });
 
-  it('board title uses templateName when provided', async () => {
+  it('board title is templateName plus the current date', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2025, 5, 12, 12));
     const user = { uid: 'user-1' };
     await createBoardFromTemplate({
       columns: ['A', 'B'],
-      templateName: 'Custom',
+      templateName: 'Retro',
       user
     });
+    vi.useRealTimers();
 
+    const date = new Date(2025, 5, 12).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     const boardData = set.mock.calls[0][1];
-    expect(boardData.title).toBe('Custom Board');
+    expect(boardData.title).toBe(`Retro – ${date}`);
   });
 
-  it('board title defaults to "Untitled Board" when templateName is null', async () => {
+  it('board title falls back to "Board" when templateName is null', async () => {
     const user = { uid: 'user-1' };
     await createBoardFromTemplate({
       columns: ['A'],
@@ -192,7 +196,7 @@ describe('createBoardFromTemplate', () => {
     });
 
     const boardData = set.mock.calls[0][1];
-    expect(boardData.title).toBe('Untitled Board');
+    expect(boardData.title).toMatch(/^Board – /);
   });
 
   it('columns are created with alphabetical prefixes', async () => {

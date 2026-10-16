@@ -101,7 +101,6 @@ vi.mock('./data/boardTemplates', () => ({
       columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
       icon: '🐋',
       tags: ['retrospective', 'team', 'commitments', 'feelings'],
-      skipWizard: true,
       defaultSettings: {
         retrospectiveMode: false,
         showDisplayNames: false,

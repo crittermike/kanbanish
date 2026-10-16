@@ -40,7 +40,7 @@ src/
 │
 ├── components/
 │   ├── Board.jsx                # Main board layout: header, settings panel, columns (600+ lines)
-│   ├── Dashboard.jsx            # Landing page: create board, pick template, recent boards
+│   ├── Dashboard.jsx            # Landing page: one-click template tiles, join, recent boards
 │   ├── Column.jsx               # Single column with cards
 │   ├── Card.jsx                 # Individual card (content, votes, reactions, comments)
 │   ├── CardGroup.jsx            # Grouped cards container
@@ -60,7 +60,7 @@ src/
 │   ├── HealthCheckResults.jsx   # Health check results display
 │   └── modals/
 │       ├── ExportBoardModal.jsx
-│       └── NewBoardTemplateModal.jsx
+│       └── NewBoardTemplateModal.jsx  # "All templates" picker (one click creates)
 │
 ├── hooks/
 │   ├── usePoll.js                   # Poll voting operations (submitPollVote, getPollStats)
@@ -185,7 +185,7 @@ Board settings can be pre-configured via URL parameters:
 
 Parsed in `urlSettings.js` (re-exported via `helpers.js`) → `parseUrlSettings()`. Applied on board creation.
 
-Additionally, `?template=<id>` creates a board from a predefined template and redirects to it (bypasses the template selection dialog). Template IDs match the `id` field in `src/data/boardTemplates.js` (e.g., `?template=lean-coffee`, `?template=retro`, `?template=big-orca`). This is handled in `App.jsx`, not `urlSettings.js`.
+Additionally, `?template=<id>` creates a board from a predefined template and redirects to it. The dashboard's template tiles and the "All templates" picker are `<a href="?template=<id>">` links, so they can be bookmarked or opened in a new tab; a plain click creates the board in place. Template IDs match the `id` field in `src/data/boardTemplates.js` (e.g., `?template=lean-coffee`, `?template=retro`, `?template=big-orca`). This is handled in `App.jsx`, not `urlSettings.js`.
 
 ## Firebase Data Model
 
@@ -390,9 +390,9 @@ npm run lint:check # Same as lint (alias)
 
 ### Adding a New Board Template
 
-Templates are defined in `src/data/boardTemplates.js` as a `BOARD_TEMPLATES` array (default export). Each template has `{ id, name, description, columns, icon, tags }`. To add a template:
+Templates are defined in `src/data/boardTemplates.js` as a `BOARD_TEMPLATES` array (default export). Each template has `{ id, name, description, columns, icon, tags }`, plus optional `shortName` (board title prefix) and `defaultSettings`. Without `defaultSettings`, the board mode is inferred from tags (`src/utils/templateUtils.js`). New boards are titled `<shortName or name> – <date>`. To add a template:
 1. Add a new entry to the `BOARD_TEMPLATES` array in `src/data/boardTemplates.js`
-2. The template is automatically available in the template selection modal and via `?template=<id>` URL param
+2. The template is automatically available in the "All templates" picker and via `?template=<id>` URL param
 3. The `id` field is the slug used in URLs (e.g., `lean-coffee` → `?template=lean-coffee`)
 
 ### Modifying the Firebase Schema

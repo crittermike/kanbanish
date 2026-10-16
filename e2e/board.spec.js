@@ -1,57 +1,25 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Helper: create a board via the template modal + setup wizard UI flow.
- * Waits for auth, clicks New Board, selects default template, clicks through
- * the setup wizard, then waits for the board view to appear.
+ * Helper: create a board by clicking the "Default" template tile on the
+ * dashboard, then wait for the board view to appear. Retries because board
+ * creation silently fails until Firebase anonymous auth is ready.
  */
-async function createBoardViaModal(page) {
+async function createBoard(page) {
   await page.goto('/');
 
-  // Wait for the dashboard to be fully loaded
-  await expect(page.getByRole('button', { name: /new board/i })).toBeVisible();
+  const defaultChip = page.getByRole('link', { name: 'Default' });
+  await expect(defaultChip).toBeVisible();
 
-  // Wait for Firebase auth — the app needs an authenticated user before board creation works.
-  // We poll by checking if clicking "New Board" and "Create Board" results in navigation.
-  // Strategy: click through the modal flow, and if the board doesn't appear,
-  // the auth wasn't ready. Use a retry loop.
   let boardLoaded = false;
   for (let attempt = 0; attempt < 5; attempt++) {
-    // Click "New Board" to open the template modal
-    await page.getByRole('button', { name: /new board/i }).click();
+    await defaultChip.click();
 
-    // Wait for the modal to appear
-    const modalHeading = page.getByRole('heading', { name: /choose a board template/i });
-    await expect(modalHeading).toBeVisible({ timeout: 3000 });
-
-    // The default template should already be selected — click "Create Board" to open the wizard
-    await page.getByRole('button', { name: /create board/i }).click();
-
-    // Wait for the setup wizard to appear
-    const wizardHeading = page.getByRole('heading', { name: /set up your board/i });
-    await expect(wizardHeading).toBeVisible({ timeout: 3000 });
-
-    // Click "Create Board" in the wizard to actually create the board
-    await page.locator('.wizard-modal').getByRole('button', { name: /create board/i }).click();
-
-    // Wait to see if we navigate to the board view
     try {
       await expect(page.getByLabel('Board title')).toBeVisible({ timeout: 8000 });
       boardLoaded = true;
       break;
     } catch {
-      // Auth wasn't ready yet — the board creation silently failed.
-      // Wait a bit for auth to complete and try again.
-      // Close the wizard if it's still open
-      const wizardCloseBtn = page.locator('.wizard-modal').getByRole('button', { name: /close setup wizard/i });
-      if (await wizardCloseBtn.isVisible().catch(() => false)) {
-        await wizardCloseBtn.click();
-      }
-      // Close the template modal if it's still open
-      const cancelBtn = page.getByRole('button', { name: /cancel/i });
-      if (await cancelBtn.isVisible().catch(() => false)) {
-        await cancelBtn.click();
-      }
       await page.waitForTimeout(3000);
     }
   }
@@ -62,8 +30,8 @@ async function createBoardViaModal(page) {
 }
 
 test.describe('Board', () => {
-  test('can create a board via template modal and see columns', async ({ page }) => {
-    await createBoardViaModal(page);
+  test('can create a board from a template tile and see columns', async ({ page }) => {
+    await createBoard(page);
 
     // URL should now contain ?board= parameter
     await expect(page).toHaveURL(/[?&]board=/);
@@ -73,7 +41,7 @@ test.describe('Board', () => {
   });
 
   test('can add a card to a column', async ({ page }) => {
-    await createBoardViaModal(page);
+    await createBoard(page);
 
     // Click "Add Card" on the first column
     const firstColumn = page.locator('.column').first();
@@ -94,7 +62,7 @@ test.describe('Board', () => {
   });
 
   test('can open and close board settings', async ({ page }) => {
-    await createBoardViaModal(page);
+    await createBoard(page);
 
     // Open settings
     await page.getByRole('button', { name: /board settings/i }).click();
@@ -113,7 +81,7 @@ test.describe('Board', () => {
   });
 
   test('can rename the board title', async ({ page }) => {
-    await createBoardViaModal(page);
+    await createBoard(page);
 
     const titleInput = page.getByLabel('Board title');
     await expect(titleInput).toBeVisible();

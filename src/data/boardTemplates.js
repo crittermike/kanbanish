@@ -7,12 +7,12 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  * @typedef {Object} BoardTemplate
  * @property {string} id - Unique template identifier
  * @property {string} name - Display name
+ * @property {string} [shortName] - Prefix for new board titles (defaults to name)
  * @property {string} description - Short description of the template's purpose
  * @property {(string|{title: string, defaultTimerSeconds?: number})[]} columns - Column definitions (strings or objects with optional timer defaults)
  * @property {string} icon - Emoji icon for display
  * @property {string[]} tags - Searchable tags
- * @property {boolean} [skipWizard] - If true, skip the setup wizard and use defaultSettings
- * @property {Object} [defaultSettings] - Settings to apply when skipWizard is true
+ * @property {Object} [defaultSettings] - Settings to apply on creation (otherwise board mode is inferred from tags)
  */
 
 /** @type {BoardTemplate[]} */
@@ -20,6 +20,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'default',
     name: 'Default',
+    shortName: 'Board',
     description: 'Simple task tracking for any project',
     columns: ['To Do', 'In Progress', 'Done'],
     icon: '📋',
@@ -44,6 +45,7 @@ const BOARD_TEMPLATES = [
   {
     id: 'retro',
     name: 'Retrospective',
+    shortName: 'Retro',
     description: 'Reflect on past work and plan improvements',
     columns: ['Went Well', 'Could Improve', 'Action Items'],
     icon: '🔄',
@@ -256,7 +258,6 @@ const BOARD_TEMPLATES = [
     columns: [{ title: 'Good stuff', defaultTimerSeconds: 600 }, { title: 'Bad stuff', defaultTimerSeconds: 600 }, { title: 'Feelings', defaultTimerSeconds: 600 }, { title: 'Improvements', defaultTimerSeconds: 600 }, 'Past commitments', 'New commitments'],
     icon: '🐋',
     tags: ['retrospective', 'team', 'commitments', 'feelings'],
-    skipWizard: true,
     defaultSettings: {
       retrospectiveMode: false,
       showDisplayNames: false,
@@ -270,7 +271,6 @@ const BOARD_TEMPLATES = [
     columns: ['Went Well', 'Could Improve', 'Curious About', 'How Are You Feeling?'],
     icon: '🚀',
     tags: ['agile', 'reflection', 'team'],
-    skipWizard: true,
     defaultSettings: {
       retrospectiveMode: true,
       multipleVotesAllowed: true,
