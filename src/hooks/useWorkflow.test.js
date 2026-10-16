@@ -61,32 +61,6 @@ describe('useWorkflow', () => {
       });
     });
 
-    it('should call updateBoardSettings with POLL for startPollPhase', () => {
-      mockProps = createMockProps();
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.startPollPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.POLL
-      });
-    });
-
-    it('should call updateBoardSettings with POLL_RESULTS for startPollResultsPhase', () => {
-      mockProps = createMockProps();
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.startPollResultsPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
-      });
-    });
-
     it('should call updateBoardSettings with CREATION, retrospectiveMode false, and resultsViewIndex 0 for goToCreationPhase', () => {
       mockProps = createMockProps();
       const { result } = renderHook(() => useWorkflow(mockProps));
@@ -237,36 +211,6 @@ describe('useWorkflow', () => {
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
         workflowPhase: WORKFLOW_PHASES.INTERACTIONS
-      });
-    });
-
-    it('should go from POLL to RESULTS', () => {
-      mockProps = createMockProps({
-        workflowPhase: WORKFLOW_PHASES.POLL
-      });
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.goToPreviousPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.RESULTS
-      });
-    });
-
-    it('should go from POLL_RESULTS to POLL', () => {
-      mockProps = createMockProps({
-        workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
-      });
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.goToPreviousPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.POLL
       });
     });
   });

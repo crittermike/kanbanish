@@ -8,7 +8,7 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  * @property {string} id - Unique template identifier
  * @property {string} name - Display name
  * @property {string} description - Short description of the template's purpose
- * @property {(string|{title: string, defaultTimerSeconds?: number})[]} columns - Column definitions (strings or objects with optional timer defaults)
+ * @property {(string|{title: string})[]} columns - Column definitions (strings or objects with a title)
  * @property {string} icon - Emoji icon for display
  * @property {string[]} tags - Searchable tags
  * @property {boolean} [skipWizard] - If true, skip the setup wizard and use defaultSettings
@@ -253,14 +253,13 @@ const BOARD_TEMPLATES = [
     id: 'big-orca',
     name: 'Big Orca',
     description: 'Comprehensive retro covering feelings, commitments, and improvements',
-    columns: [{ title: 'Good stuff', defaultTimerSeconds: 600 }, { title: 'Bad stuff', defaultTimerSeconds: 600 }, { title: 'Feelings', defaultTimerSeconds: 600 }, { title: 'Improvements', defaultTimerSeconds: 600 }, 'Past commitments', 'New commitments'],
+    columns: ['Good stuff', 'Bad stuff', 'Feelings', 'Improvements', 'Past commitments', 'New commitments'],
     icon: '🐋',
     tags: ['retrospective', 'team', 'commitments', 'feelings'],
     skipWizard: true,
     defaultSettings: {
       retrospectiveMode: false,
       showDisplayNames: false,
-      actionItemsEnabled: false,
       workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
     }
   },

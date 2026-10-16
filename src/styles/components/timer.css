@@ -53,12 +53,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  border-left: 1px solid var(--border-color);
-  padding-left: var(--space-md);
 }
 
 .timer-custom-input {
-  width: 80px;
+  flex: 1;
+  min-width: 0;
   padding: var(--space-sm);
   font-size: var(--font-size-sm);
   border: 1px solid var(--border-color);
@@ -87,11 +86,6 @@
 .timer-custom-start:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-}
-
-.timer-setup-close {
-  padding: 4px;
-  margin-left: 2px;
 }
 
 /* ===== Active Timer ===== */
@@ -282,13 +276,5 @@
 
   .timer-presets {
     flex-wrap: wrap;
-  }
-
-  .timer-custom {
-    border-left: none;
-    padding-left: 0;
-    border-top: 1px solid var(--border-color);
-    padding-top: 6px;
-    width: 100%;
   }
 }

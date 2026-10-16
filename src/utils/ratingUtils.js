@@ -26,17 +26,3 @@ export function getScoreLabel(average) {
   if (average >= 1.5) return 'Poor';
   return 'Terrible';
 }
-
-/**
- * Maps a numeric average to a poll effectiveness label.
- *
- * @param {number} average - The average score (1.0 to 5.0)
- * @returns {string} The effectiveness label
- */
-export function getEffectivenessLabel(average) {
-  if (average >= 4.5) return 'Extremely Effective';
-  if (average >= 3.5) return 'Very Effective';
-  if (average >= 2.5) return 'Moderately Effective';
-  if (average >= 1.5) return 'Slightly Effective';
-  return 'Not Effective';
-}

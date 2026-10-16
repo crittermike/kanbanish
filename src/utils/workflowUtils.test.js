@@ -16,8 +16,6 @@ import {
   isCardMetadataEditingAllowed,
   isCardCreationAllowed,
   isCardDraggingAllowed,
-  isPollAllowed,
-  arePollResultsVisible,
   getWorkflowDisabledReason,
   getPhaseDescription
 } from './workflowUtils';
@@ -28,14 +26,12 @@ const ALL_PHASES = [
   WORKFLOW_PHASES.CREATION,
   WORKFLOW_PHASES.GROUPING,
   WORKFLOW_PHASES.INTERACTIONS,
-  WORKFLOW_PHASES.RESULTS,
-  WORKFLOW_PHASES.POLL,
-  WORKFLOW_PHASES.POLL_RESULTS
+  WORKFLOW_PHASES.RESULTS
 ];
 
 describe('WORKFLOW_PHASES', () => {
-  it('has all 8 phases', () => {
-    expect(Object.keys(WORKFLOW_PHASES)).toHaveLength(8);
+  it('has all 6 phases', () => {
+    expect(Object.keys(WORKFLOW_PHASES)).toHaveLength(6);
   });
 
   it('contains the expected phase keys', () => {
@@ -45,9 +41,7 @@ describe('WORKFLOW_PHASES', () => {
       CREATION: 'CREATION',
       GROUPING: 'GROUPING',
       INTERACTIONS: 'INTERACTIONS',
-      RESULTS: 'RESULTS',
-      POLL: 'POLL',
-      POLL_RESULTS: 'POLL_RESULTS'
+      RESULTS: 'RESULTS'
     });
   });
 });
@@ -165,9 +159,7 @@ describe('areReviewToolsVisible', () => {
     const hiddenPhases = [
       WORKFLOW_PHASES.HEALTH_CHECK,
       WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
-      WORKFLOW_PHASES.CREATION,
-      WORKFLOW_PHASES.POLL,
-      WORKFLOW_PHASES.POLL_RESULTS
+      WORKFLOW_PHASES.CREATION
     ];
 
     hiddenPhases.forEach(phase => {
@@ -359,7 +351,7 @@ describe('isCardMetadataEditingAllowed', () => {
 
   it('returns false before cards are revealed in retro mode', () => {
     expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.CREATION, true)).toBe(false);
-    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.POLL, true)).toBe(false);
+    expect(isCardMetadataEditingAllowed(WORKFLOW_PHASES.HEALTH_CHECK, true)).toBe(false);
   });
 });
 
@@ -401,48 +393,6 @@ describe('isCardDraggingAllowed', () => {
       .filter(p => p !== WORKFLOW_PHASES.GROUPING)
       .forEach(phase => {
         expect(isCardDraggingAllowed(phase, true)).toBe(false);
-      });
-  });
-});
-
-describe('isPollAllowed', () => {
-  it('returns false when retrospective mode is off', () => {
-    ALL_PHASES.forEach(phase => {
-      expect(isPollAllowed(phase)).toBe(false);
-      expect(isPollAllowed(phase, false)).toBe(false);
-    });
-  });
-
-  it('returns true only during POLL phase in retro mode', () => {
-    expect(isPollAllowed(WORKFLOW_PHASES.POLL, true)).toBe(true);
-  });
-
-  it('returns false for all other phases in retro mode', () => {
-    ALL_PHASES
-      .filter(p => p !== WORKFLOW_PHASES.POLL)
-      .forEach(phase => {
-        expect(isPollAllowed(phase, true)).toBe(false);
-      });
-  });
-});
-
-describe('arePollResultsVisible', () => {
-  it('returns false when retrospective mode is off', () => {
-    ALL_PHASES.forEach(phase => {
-      expect(arePollResultsVisible(phase)).toBe(false);
-      expect(arePollResultsVisible(phase, false)).toBe(false);
-    });
-  });
-
-  it('returns true only during POLL_RESULTS phase in retro mode', () => {
-    expect(arePollResultsVisible(WORKFLOW_PHASES.POLL_RESULTS, true)).toBe(true);
-  });
-
-  it('returns false for all other phases in retro mode', () => {
-    ALL_PHASES
-      .filter(p => p !== WORKFLOW_PHASES.POLL_RESULTS)
-      .forEach(phase => {
-        expect(arePollResultsVisible(phase, true)).toBe(false);
       });
   });
 });
@@ -509,10 +459,6 @@ describe('getPhaseDescription', () => {
       .toBe('Add comments, votes, and reactions');
     expect(getPhaseDescription(WORKFLOW_PHASES.RESULTS))
       .toBe('View top-voted items');
-    expect(getPhaseDescription(WORKFLOW_PHASES.POLL))
-      .toBe('Rate the effectiveness of this retrospective');
-    expect(getPhaseDescription(WORKFLOW_PHASES.POLL_RESULTS))
-      .toBe('View retrospective effectiveness ratings');
   });
 
   it('returns "Unknown phase" for an unknown phase', () => {

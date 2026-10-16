@@ -70,7 +70,7 @@ export function addCard(boardId, columnId, content, user = null, displayName = '
  * Creates a new board from a template definition.
  *
  * @param {Object} params
- * @param {(string|{title: string, defaultTimerSeconds?: number})[]} params.columns - Column definitions (strings or objects with optional timer defaults)
+ * @param {(string|{title: string})[]} params.columns - Column definitions (strings or objects with a title)
  * @param {string} [params.templateName] - Template name (used for board title)
  * @param {Object} params.user - Firebase user object with uid
  * @param {string} [params.queryString] - URL query string for settings overrides
@@ -100,14 +100,11 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
       title: isObject ? columnDef.title : columnDef,
       cards: {}
     };
-    if (isObject && columnDef.defaultTimerSeconds) {
-      columnData.defaultTimerSeconds = columnDef.defaultTimerSeconds;
-    }
     columnsObj[`${prefix}_${generateId()}`] = columnData;
   });
 
   // Only allow a safe subset of settings to be overridden on creation
-  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'actionItemsEnabled', 'workflowPhase'];
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'workflowPhase'];
   const sanitizedOverrides = {};
   if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
     allowedOverrideKeys.forEach(k => {

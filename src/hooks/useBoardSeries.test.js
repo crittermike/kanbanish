@@ -80,7 +80,7 @@ describe('useBoardSeries', () => {
             resultsViewIndex: 3
           },
           columns: {
-            b_two: { title: 'Stop', cards: { c1: {} }, defaultTimerSeconds: 60 },
+            b_two: { title: 'Stop', cards: { c1: {} } },
             a_one: { title: 'Start', cards: { c2: {} } }
           },
           nextBoardId: 'should-be-overwritten'

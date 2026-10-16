@@ -6,7 +6,6 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
   const [retrospectiveMode, setRetrospectiveMode] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(false);
   const [showDisplayNames, setShowDisplayNames] = useState(false);
-  const [actionItemsEnabled, setActionItemsEnabled] = useState(false);
   const [startHealthCheck, setStartHealthCheck] = useState(false);
   // Track latest tags in a ref so the effect only fires when isOpen changes
   const templateTagsRef = useRef(templateTags);
@@ -22,7 +21,6 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
       setRetrospectiveMode(isRetroTemplate);
       setVotingEnabled(isRetroTemplate);
       setShowDisplayNames(false);
-      setActionItemsEnabled(false);
       setStartHealthCheck(false);
     }
   }, [isOpen]);
@@ -38,7 +36,6 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
       retrospectiveMode,
       votingEnabled,
       showDisplayNames,
-      actionItemsEnabled,
       startHealthCheck,
     });
   };
@@ -118,36 +115,20 @@ export default function BoardSetupWizard({ isOpen, onClose, onConfirm, templateN
 
             <div className="wizard-setting-group">
               <div className="settings-toggle-row">
-                <span className="settings-toggle-label" id="label-names">Show Display Names</span>
+                <span className="settings-toggle-label" id="label-names">Anonymous</span>
                 <button 
                   className="settings-toggle-switch" 
                   role="switch" 
-                  aria-checked={showDisplayNames} 
+                  aria-checked={!showDisplayNames} 
                   onClick={() => setShowDisplayNames(!showDisplayNames)} 
                   aria-labelledby="label-names"
                 >
                   <span className="settings-toggle-knob"></span>
                 </button>
               </div>
-              <p className="settings-hint">Show author names and avatars on cards and comments</p>
+              <p className="settings-hint">Hide who wrote each card and comment</p>
             </div>
 
-            <div className="wizard-setting-group">
-              <div className="settings-toggle-row">
-                <span className="settings-toggle-label" id="label-action-items">Enable Action Items</span>
-                <button 
-                  className="settings-toggle-switch" 
-                  role="switch" 
-                  aria-checked={actionItemsEnabled} 
-                  onClick={() => setActionItemsEnabled(!actionItemsEnabled)} 
-                  aria-labelledby="label-action-items"
-                >
-                  <span className="settings-toggle-knob"></span>
-                </button>
-              </div>
-              <p className="settings-hint">Track action items with assignees and due dates</p>
-            </div>
-            
             <div className="wizard-setting-group">
               <div className="settings-toggle-row">
                 <span className="settings-toggle-label" id="label-health-check">Start with Health Check</span>

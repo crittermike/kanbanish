@@ -56,8 +56,6 @@ src/
 │   ├── VotingControls.jsx       # Vote up/down buttons
 │   ├── WorkflowControls.jsx     # Retrospective phase stepper
 │   ├── ResultsView.jsx          # Results phase display
-│   ├── PollVoting.jsx           # 1-5 star poll input
-│   ├── PollResults.jsx          # Poll results display
 │   ├── HealthCheckVoting.jsx    # Health check voting input
 │   ├── HealthCheckResults.jsx   # Health check results display
 │   └── modals/
@@ -66,7 +64,6 @@ src/
 │       └── VoteLimitModal.jsx
 │
 ├── hooks/
-│   ├── usePoll.js                   # Poll voting operations (submitPollVote, getPollStats)
 │   ├── useHealthCheck.js            # Health check voting (submitHealthCheckVote, getHealthCheckStats)
 │   ├── useBoardSettings.js          # Board settings CRUD (updateVotingEnabled, etc.)
 │   ├── usePresence.js               # User presence tracking, card creation activity indicators
@@ -104,7 +101,6 @@ src/
         ├── template-select.css
         ├── results.css
         ├── workflow.css
-        ├── poll.css
         ├── health-check.css
         └── state-utilities.css
 ```
@@ -117,7 +113,7 @@ All application state is managed through `BoardContext.jsx` (~450 lines), which 
 
 1. Initializes Firebase connection and anonymous auth
 2. Subscribes to Firebase Realtime Database via `onValue` listeners
-3. Delegates domain operations to 7 extracted hooks (see Hook Architecture below)
+3. Delegates domain operations to 6 extracted hooks (see Hook Architecture below)
 4. Exposes all board state and operations to the component tree via context
 5. Manages board creation, joining, URL settings parsing
 
@@ -136,15 +132,13 @@ Domain logic is extracted from BoardContext into focused hooks. Each hook:
 const { activeUsers, ... } = usePresence({ boardId, user });
 // 2. useBoardSettings — no hook dependencies
 const { updateBoardSettings, ... } = useBoardSettings({ boardId, user, ... });
-// 3. usePoll — no hook dependencies
-const { submitPollVote, getPollStats } = usePoll({ boardId, user, ... });
-// 4. useHealthCheck — no hook dependencies
+// 3. useHealthCheck — no hook dependencies
 const { submitHealthCheckVote, ... } = useHealthCheck({ boardId, user, ... });
-// 5. useVoting — depends on activeUsers from usePresence
+// 4. useVoting — depends on activeUsers from usePresence
 const { resetAllVotes, ... } = useVoting({ boardId, user, columns, activeUsers, ... });
-// 6. useGroups — no hook dependencies
+// 5. useGroups — no hook dependencies
 const { moveCard, ..., removeAllGrouping } = useGroups({ boardId, user, columns });
-// 7. useWorkflow — depends on updateBoardSettings AND removeAllGrouping
+// 6. useWorkflow — depends on updateBoardSettings AND removeAllGrouping
 const { startGroupingPhase, ... } = useWorkflow({ updateBoardSettings, columns, ..., removeAllGrouping });
 ```
 
@@ -152,7 +146,6 @@ const { startGroupingPhase, ... } = useWorkflow({ updateBoardSettings, columns, 
 |------|---------------|-------------|
 | `usePresence` | User presence tracking, card creation indicators | `activeUsers`, `usersAddingCards`, `startCardCreation`, `stopCardCreation` |
 | `useBoardSettings` | Board settings CRUD | `updateBoardSettings` + 6 setting-specific wrappers |
-| `usePoll` | Poll voting | `submitPollVote`, `getPollStats` |
 | `useHealthCheck` | Health check voting | `submitHealthCheckVote`, `getHealthCheckStats` |
 | `useVoting` | Vote operations and counting | `resetAllVotes`, `getTotalVotes`, `getUserVoteCount`, `upvoteGroup`, `downvoteGroup` |
 | `useGroups` | Card grouping | `moveCard`, `createCardGroup`, `ungroupCards`, `removeAllGrouping` |
@@ -176,7 +169,7 @@ All Firebase writes use `set()` and `remove()` — never `update()`. This is an 
 - `App.jsx` uses `window.history.pushState` for URL management (no React Router)
 - `Board.jsx` is the main layout: header bar, settings panel, and columns grid
 - Components consume context via `useBoardContext()` hook
-- Domain operations are extracted into hooks: 7 in `hooks/` called by BoardContext, plus `useCardOperations` and `useGroupOperations` used directly by components
+- Domain operations are extracted into hooks: 6 in `hooks/` called by BoardContext, plus `useCardOperations` and `useGroupOperations` used directly by components
 
 ### URL Settings
 
@@ -240,7 +233,6 @@ boards/{boardId}/
     columnId: string
     lastUpdated: timestamp
     uid: string
-  poll/votes/{userId}: number (1-5)
   healthCheck/votes/{questionId}/{userId}: number (1-5)
 
 users/{userId}/preferences/
@@ -260,7 +252,7 @@ users/{userId}/preferences/
 When `retrospectiveMode` is enabled, the board operates as a guided retrospective with phases:
 
 ```
-HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → INTERACTION_REVEAL → RESULTS → POLL → POLL_RESULTS
+HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → INTERACTION_REVEAL → RESULTS
 ```
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.

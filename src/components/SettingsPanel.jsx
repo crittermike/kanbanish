@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Layers, Link, Link2, Monitor, Moon, RotateCcw, Scissors, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
+import { ArrowDown, ChevronRight, EyeOff, FileText, Layers, Link, Link2, Moon, RotateCcw, Scissors, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
 import BackgroundPicker from './BackgroundPicker';
-import InsightsContent from './InsightsContent';
 import Timer from './Timer';
 
 const TABS = [
@@ -9,11 +8,10 @@ const TABS = [
   { id: 'voting', label: 'Voting', icon: ThumbsUp },
   { id: 'features', label: 'Features', icon: Zap },
   { id: 'share', label: 'Share & Export', icon: Share2 },
-  { id: 'insights', label: 'Insights', icon: BarChart2 },
 ];
 
 /**
- * Settings modal organized with tabs: Appearance, Voting, Features, Share & Export, Insights.
+ * Settings modal organized with tabs: Appearance, Voting, Features, Share & Export.
  */
 const SettingsPanel = ({
   handleStartHealthCheck,
@@ -34,16 +32,10 @@ const SettingsPanel = ({
   resetAllVotes,
   darkMode,
   updateDarkMode,
-  hideCardAuthorship,
-  updateHideCardAuthorship,
   showDisplayNames,
   updateShowDisplayNames,
   votesPerUser,
   updateVotesPerUser,
-  onOpenActionItems,
-  actionItemCount,
-  actionItemsEnabled,
-  updateActionItemsEnabled,
   children,
   backgroundId,
   setBoardBackground,
@@ -110,17 +102,6 @@ const SettingsPanel = ({
   return (
     <div className="action-buttons">
 
-      {actionItemsEnabled && (
-        <button
-          className="btn icon-btn action-items-header-btn"
-          onClick={onOpenActionItems}
-          title={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
-          aria-label={`Action Items${actionItemCount > 0 ? ` (${actionItemCount} open)` : ''}`}
-        >
-          <CheckSquare size={16} aria-hidden="true" />
-          {actionItemCount > 0 && <span className="action-items-badge">{actionItemCount}</span>}
-        </button>
-      )}
       <Timer />
       {children}
       <button
@@ -382,63 +363,21 @@ const SettingsPanel = ({
                 <div className="settings-section">
                   <div className="settings-toggle-row">
                     <span className="settings-toggle-label">
-                      <Monitor size={14} aria-hidden="true" className="settings-toggle-icon" />
-                      Screen sharing mode
-                    </span>
-                    <button
-                      className="settings-toggle-switch"
-                      role="switch"
-                      aria-checked={hideCardAuthorship}
-                      onClick={() => updateHideCardAuthorship(!hideCardAuthorship)}
-                      aria-label="Screen sharing mode"
-                    >
-                      <span className="settings-toggle-knob"></span>
-                    </button>
-                  </div>
-                  <p className="settings-hint">
-                    Hides the colored marker on cards you created
-                  </p>
-                </div>
-
-                <div className="settings-section">
-                  <div className="settings-toggle-row">
-                    <span className="settings-toggle-label">
                       <Users size={14} aria-hidden="true" className="settings-toggle-icon" />
-                      Display names
+                      Anonymous
                     </span>
                     <button
                       className="settings-toggle-switch"
                       role="switch"
-                      aria-checked={showDisplayNames}
+                      aria-checked={!showDisplayNames}
                       onClick={() => updateShowDisplayNames(!showDisplayNames)}
-                      aria-label="Show display names on board"
+                      aria-label="Anonymous"
                     >
                       <span className="settings-toggle-knob"></span>
                     </button>
                   </div>
                   <p className="settings-hint">
-                    Show author names and avatars on cards and comments
-                  </p>
-                </div>
-
-                <div className="settings-section">
-                  <div className="settings-toggle-row">
-                    <span className="settings-toggle-label">
-                      <CheckSquare size={14} aria-hidden="true" className="settings-toggle-icon" />
-                      Action items
-                    </span>
-                    <button
-                      className="settings-toggle-switch"
-                      role="switch"
-                      aria-checked={actionItemsEnabled}
-                      onClick={() => updateActionItemsEnabled(!actionItemsEnabled)}
-                      aria-label="Enable action items"
-                    >
-                      <span className="settings-toggle-knob"></span>
-                    </button>
-                  </div>
-                  <p className="settings-hint">
-                    Convert cards into trackable action items with assignees and due dates
+                    Hide who wrote each card and comment
                   </p>
                 </div>
 
@@ -501,26 +440,6 @@ const SettingsPanel = ({
                       </div>
                       <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
                     </button>
-                    {actionItemsEnabled && (
-                      <button
-                        className="settings-share-action-btn"
-                        onClick={() => {
-                          if (onOpenActionItems) onOpenActionItems();
-                        }}
-                      >
-                        <div className="settings-share-action-icon">
-                          <CheckSquare size={20} aria-hidden="true" />
-                        </div>
-                        <div className="settings-share-action-text">
-                          <span className="settings-share-action-title">
-                            Action Items
-                            {actionItemCount > 0 && <span className="action-items-count-badge">{actionItemCount}</span>}
-                          </span>
-                          <span className="settings-share-action-desc">View and manage action items</span>
-                        </div>
-                        <ChevronRight size={16} className="settings-share-action-chevron" aria-hidden="true" />
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -578,17 +497,6 @@ const SettingsPanel = ({
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Insights Tab */}
-              <div
-                id="settings-tabpanel-insights"
-                role="tabpanel"
-                aria-labelledby="settings-tab-insights"
-                className="settings-tabpanel"
-                hidden={activeTab !== 'insights'}
-              >
-                <InsightsContent />
               </div>
             </div>
           </div>

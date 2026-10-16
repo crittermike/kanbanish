@@ -11,34 +11,6 @@ vi.mock('../context/NotificationContext', () => ({
   })
 }));
 
-// Mock BoardContext (used by InsightsContent)
-vi.mock('../context/BoardContext', () => ({
-  useBoardContext: () => ({
-    columns: {},
-    actionItems: {},
-    activeUsers: []
-  })
-}));
-
-// Mock useBoardInsights (used by InsightsContent)
-vi.mock('../hooks/useBoardInsights', () => ({
-  useBoardInsights: () => ({
-    stats: {},
-    columnDistribution: [],
-    themes: [],
-    sentiment: {},
-    topVotedCards: [],
-    topVotedGroups: [],
-    mostDiscussed: [],
-    mostReacted: [],
-    actionItemsSummary: { total: 0 },
-    engagementScore: 0,
-    engagementFactors: {},
-    summary: '',
-    isEmpty: true
-  })
-}));
-
 // Mock Timer component
 vi.mock('./Timer', () => ({
   default: () => <div data-testid="timer" />
@@ -64,16 +36,10 @@ describe('SettingsPanel - Tab Navigation', () => {
     resetAllVotes: vi.fn(),
     darkMode: true,
     updateDarkMode: vi.fn(),
-    hideCardAuthorship: false,
-    updateHideCardAuthorship: vi.fn(),
     showDisplayNames: false,
     updateShowDisplayNames: vi.fn(),
     votesPerUser: 0,
     updateVotesPerUser: vi.fn(),
-    onOpenActionItems: vi.fn(),
-    actionItemCount: 0,
-    actionItemsEnabled: false,
-    updateActionItemsEnabled: vi.fn(),
     backgroundId: 'none',
     setBoardBackground: vi.fn(),
   };
@@ -90,7 +56,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       expect(tablist).toBeInTheDocument();
 
       const tabs = within(tablist).getAllByRole('tab');
-      expect(tabs).toHaveLength(5);
+      expect(tabs).toHaveLength(4);
     });
 
     test('defaults to Appearance tab on open', () => {
@@ -120,7 +86,7 @@ describe('SettingsPanel - Tab Navigation', () => {
     test('each tab has matching aria-controls and tabpanel id', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tabIds = ['appearance', 'voting', 'features', 'share', 'insights'];
+      const tabIds = ['appearance', 'voting', 'features', 'share'];
       tabIds.forEach(id => {
         const tab = document.getElementById(`settings-tab-${id}`);
         expect(tab).toBeInTheDocument();
@@ -136,7 +102,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       const panels = screen.getAllByRole('tabpanel', { hidden: true }).filter(p => p.id.startsWith('settings-tabpanel-'));
-      expect(panels).toHaveLength(5);
+      expect(panels).toHaveLength(4);
     });
 
     test('only the active tabpanel is visible', () => {
@@ -145,7 +111,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       const activePanel = document.getElementById('settings-tabpanel-appearance');
       expect(activePanel).not.toHaveAttribute('hidden');
 
-      const hiddenPanels = ['voting', 'features', 'share', 'insights'];
+      const hiddenPanels = ['voting', 'features', 'share'];
       hiddenPanels.forEach(id => {
         const panel = document.getElementById(`settings-tabpanel-${id}`);
         expect(panel).toHaveAttribute('hidden');
@@ -224,7 +190,7 @@ describe('SettingsPanel - Tab Navigation', () => {
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
 
-      expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
     });
 
     test('ArrowRight wraps from last to first tab', () => {
@@ -232,7 +198,7 @@ describe('SettingsPanel - Tab Navigation', () => {
 
       // Navigate to last tab first
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      fireEvent.click(screen.getByRole('tab', { name: /Insights/i }));
+      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
 
       // Press ArrowRight — should wrap to first
       fireEvent.keyDown(tablist, { key: 'ArrowRight' });
@@ -257,14 +223,14 @@ describe('SettingsPanel - Tab Navigation', () => {
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       fireEvent.keyDown(tablist, { key: 'End' });
 
-      expect(screen.getByRole('tab', { name: /Insights/i })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
     });
 
     test('sequential ArrowRight navigates through all tabs', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Insights/i, /Appearance/i];
+      const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Appearance/i];
 
       expectedOrder.forEach(name => {
         fireEvent.keyDown(tablist, { key: 'ArrowRight' });
@@ -300,9 +266,8 @@ describe('SettingsPanel - Tab Navigation', () => {
       fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
 
       expect(screen.getByRole('switch', { name: 'Retrospective Mode' })).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Screen sharing mode' })).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Show display names on board' })).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Enable action items' })).toBeVisible();
+      expect(screen.getByRole('switch', { name: 'Anonymous' })).toBeVisible();
+      expect(screen.queryByRole('switch', { name: 'Screen sharing mode' })).not.toBeInTheDocument();
       expect(screen.getByText('Start Health Check')).toBeVisible();
     });
 
@@ -314,24 +279,15 @@ describe('SettingsPanel - Tab Navigation', () => {
       expect(screen.getByText('Export Board')).toBeVisible();
     });
 
-    test('Share tab shows action items link when enabled', () => {
-      render(<SettingsPanel {...defaultProps} actionItemsEnabled={true} actionItemCount={3} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
+    test('Anonymous toggle is the inverse of display names', () => {
+      const updateShowDisplayNames = vi.fn();
+      render(<SettingsPanel {...defaultProps} showDisplayNames={false} updateShowDisplayNames={updateShowDisplayNames} />);
+      fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
 
-      const sharePanel = document.getElementById('settings-tabpanel-share');
-      const actionTitles = sharePanel.querySelectorAll('.settings-share-action-title');
-      const actionItemTitle = Array.from(actionTitles).find(el => el.textContent.includes('Action Items'));
-      expect(actionItemTitle).toBeTruthy();
-      expect(sharePanel.querySelector('.action-items-count-badge')).toHaveTextContent('3');
-    });
-
-    test('Share tab hides action items link when disabled', () => {
-      render(<SettingsPanel {...defaultProps} actionItemsEnabled={false} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
-
-      // "Action Items" text might exist in the header button area, but not in the share tab
-      const sharePanel = document.getElementById('settings-tabpanel-share');
-      expect(sharePanel.querySelector('.settings-share-action-title')).not.toHaveTextContent('Action Items');
+      const toggle = screen.getByRole('switch', { name: 'Anonymous' });
+      expect(toggle).toHaveAttribute('aria-checked', 'true');
+      fireEvent.click(toggle);
+      expect(updateShowDisplayNames).toHaveBeenCalledWith(true);
     });
   });
 

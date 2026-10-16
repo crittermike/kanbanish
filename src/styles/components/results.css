@@ -21,12 +21,6 @@
   font-size: 1.8rem;
 }
 
-.results-subtitle {
-  margin: 8px 0 0;
-  color: var(--text-secondary);
-  max-width: 46rem;
-}
-
 .results-controls {
   display: flex;
   gap: 10px;
@@ -113,24 +107,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-
-.result-timer-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.result-inline-timer {
-  margin-bottom: 20px;
-  padding: 14px 16px;
-  background: var(--bg-secondary, var(--card-background));
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-}
-
-.result-inline-timer .card-detail-timer {
-  padding: 0;
 }
 
 .result-type {

@@ -1,13 +1,10 @@
 import { ref, onValue, off, set } from 'firebase/database';
 import { createContext, useCallback, useContext, useRef, useState, useEffect, useMemo } from 'react';
-import { useActionItems } from '../hooks/useActionItems';
 import { useBoardBackground } from '../hooks/useBoardBackground';
 import { useBoardSeries } from '../hooks/useBoardSeries';
 import { useBoardSettings } from '../hooks/useBoardSettings';
-import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
-import { usePoll } from '../hooks/usePoll';
 import { usePresence } from '../hooks/usePresence';
 import { useTimer } from '../hooks/useTimer';
 import { useUndoRedo } from '../hooks/useUndoRedo';
@@ -52,17 +49,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
   const [resultsViewIndex, setResultsViewIndex] = useState(0); // For navigating results
 
-  // Poll state for retrospective effectiveness rating
-  const [pollVotes, setPollVotes] = useState({}); // { userId: rating }
-  const [userPollVote, setUserPollVote] = useState(null); // Current user's vote
-
   // Health check state
   const [healthCheckVotes, setHealthCheckVotes] = useState({}); // { questionId: { userId: rating } }
   const [userHealthCheckVotes, setUserHealthCheckVotes] = useState({}); // { questionId: rating }
 
   const [boardRef, setBoardRef] = useState(null);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
-  const [hideCardAuthorship, setHideCardAuthorship] = useState(false);
 
   // Display name and color for user presence
   const [displayName, setDisplayName] = useState('');
@@ -73,10 +65,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Global timer state
   const [timerData, setTimerData] = useState(null);
-
-  // Action items state
-  const [actionItems, setActionItems] = useState({});
-  const [actionItemsEnabled, setActionItemsEnabled] = useState(false); // Default to disabled
 
   // Board series: pointers linking this board to its neighbours in a chain
   const [previousBoardId, setPreviousBoardId] = useState(null);
@@ -102,9 +90,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             const prefs = snapshot.val();
             if (prefs.darkMode !== undefined) {
               setDarkMode(prefs.darkMode);
-            }
-            if (prefs.hideCardAuthorship !== undefined) {
-              setHideCardAuthorship(prefs.hideCardAuthorship);
             }
             if (prefs.displayName) {
               setDisplayName(prefs.displayName);
@@ -182,11 +167,15 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
               setRetrospectiveMode(boardData.settings.retrospectiveMode);
             }
             if (boardData.settings.workflowPhase !== undefined) {
-              setWorkflowPhase(boardData.settings.workflowPhase);
+              // The effectiveness poll phases were removed; boards left in them land on Results
+              const phase = ['POLL', 'POLL_RESULTS'].includes(boardData.settings.workflowPhase)
+                ? WORKFLOW_PHASES.RESULTS
+                : boardData.settings.workflowPhase;
+              setWorkflowPhase(phase);
               // Capture initial workflow phase on first load
               if (initialWorkflowPhaseRef.current === null) {
-                initialWorkflowPhaseRef.current = boardData.settings.workflowPhase;
-                setInitialWorkflowPhase(boardData.settings.workflowPhase);
+                initialWorkflowPhaseRef.current = phase;
+                setInitialWorkflowPhase(phase);
               }
             }
             if (boardData.settings.resultsViewIndex !== undefined) {
@@ -196,9 +185,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
               setShowDisplayNames(boardData.settings.showDisplayNames);
             }
             setDetailNavigationHintsDismissed(!!boardData.settings.detailNavigationHintsDismissed);
-            if (boardData.settings.actionItemsEnabled !== undefined) {
-              setActionItemsEnabled(boardData.settings.actionItemsEnabled);
-            }
             if (boardData.settings.backgroundId !== undefined) {
               setBackgroundId(boardData.settings.backgroundId);
             }
@@ -220,19 +206,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           }
 
 
-          // Load poll data
-          if (boardData.poll) {
-            setPollVotes(boardData.poll.votes || {});
-            if (user && boardData.poll.votes && boardData.poll.votes[user.uid]) {
-              setUserPollVote(boardData.poll.votes[user.uid]);
-            } else {
-              setUserPollVote(null);
-            }
-          } else {
-            setPollVotes({});
-            setUserPollVote(null);
-          }
-
           // Load health check data
           if (boardData.healthCheck) {
             setHealthCheckVotes(boardData.healthCheck.votes || {});
@@ -251,9 +224,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             setHealthCheckVotes({});
             setUserHealthCheckVotes({});
           }
-
-          // Load action items
-          setActionItems(boardData.actionItems || {});
 
           // Load board series pointers
           setPreviousBoardId(boardData.previousBoardId || null);
@@ -349,21 +319,20 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateVotesPerUser,
     setSortByVotes,
     updateRetrospectiveMode,
-    updateShowDisplayNames,
-    updateActionItemsEnabled
+    updateShowDisplayNames
   } = useBoardSettings({
     boardId,
     user,
     settingsState: {
       votingEnabled, downvotingEnabled, multipleVotesAllowed,
       votesPerUser, sortByVotes, retrospectiveMode,
-      workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed, actionItemsEnabled,
+      workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
       backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
-      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed, setActionItemsEnabled,
+      setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
       setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState
     }
   });
@@ -375,11 +344,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateBoardSettings
   });
 
-  // Poll and health check hooks
-  const { submitPollVote, getPollStats } = usePoll({
-    boardId, user, pollVotes, setUserPollVote
-  });
-
+  // Health check hook
   const { submitHealthCheckVote, getHealthCheckStats, resetHealthCheck } = useHealthCheck({
     boardId, user, healthCheckVotes, setUserHealthCheckVotes
   });
@@ -402,7 +367,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Workflow phase transitions and results navigation
   const {
     startGroupingPhase, startInteractionsPhase,
-    startResultsPhase, startPollPhase, startPollResultsPhase,
+    startResultsPhase,
     goToCreationPhase, goToPreviousPhase,
     startHealthCheckPhase, startHealthCheckResultsPhase,
     navigateResults, getSortedItemsForResults
@@ -411,25 +376,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     resultsViewIndex, removeAllGrouping
   });
 
-  // Per-column timer functions
-  const {
-    startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer, setColumnDefaultTimer
-  } = useColumnTimer({
-    boardId, user, workflowPhase, columns
-  });
-
   // Global timer functions
   const {
     startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer
   } = useTimer({
-    boardId, user, timerData, setTimerData, workflowPhase, columns
+    boardId, user, timerData, setTimerData, workflowPhase
   });
-  // Action items operations
-  const {
-    createActionItem, updateActionItemStatus, updateActionItemAssignee,
-    updateActionItemDueDate, updateActionItemDescription, deleteActionItem
-  } = useActionItems({ boardId, user, columns });
-
   // Board series operations (link boards into an ordered chain)
   const {
     startNextBoard, linkToPreviousBoard, unlinkFromSeries
@@ -563,27 +515,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       }
     };
 
-    // Update hide card authorship preference
-    const updateHideCardAuthorship = enabled => {
-      if (user) {
-        const userPrefsRef = ref(database, `users/${user.uid}/preferences`);
-        get(userPrefsRef).then(snapshot => {
-          const currentPrefs = snapshot.exists() ? snapshot.val() : {};
-          set(userPrefsRef, { ...currentPrefs, hideCardAuthorship: enabled })
-            .then(() => {
-              setHideCardAuthorship(enabled);
-            })
-            .catch(error => {
-              console.error('Error updating hide card authorship preference:', error);
-            });
-        }).catch(error => {
-          console.error('Error reading preferences:', error);
-        });
-      } else {
-        setHideCardAuthorship(enabled);
-      }
-    };
-
     return {
     user, boardId, setBoardId, boardTitle, setBoardTitle, columns,
     updateBoardTitle, sortByVotes, setSortByVotes, votingEnabled,
@@ -598,9 +529,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       updateDarkMode,
       // Tags
       boardTags,
-      // Screen sharing mode
-      hideCardAuthorship,
-      updateHideCardAuthorship,
       // Display name and presence
       displayName,
       userColor,
@@ -615,10 +543,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
-    startPollPhase, startPollResultsPhase, goToCreationPhase,
+    goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
-      // Poll system
-    pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
     getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
@@ -632,13 +558,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
       getAllUsersAddingCards,
-      // Per-column timer system
-      startColumnTimer,
-      pauseColumnTimer,
-      resumeColumnTimer,
-      resetColumnTimer,
-      restartColumnTimer,
-      setColumnDefaultTimer,
       // Global timer system
       timerData,
       startTimer,
@@ -656,10 +575,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     canUndo, canRedo, pastCount, futureCount,
       // Health check
       initialWorkflowPhase,
-      // Action items
-      actionItems, actionItemsEnabled, updateActionItemsEnabled,
-      createActionItem, updateActionItemStatus, updateActionItemAssignee,
-      updateActionItemDueDate, updateActionItemDescription, deleteActionItem,
       // Board series
       previousBoardId, nextBoardId, startNextBoard, linkToPreviousBoard, unlinkFromSeries,
       // Board background
@@ -677,27 +592,21 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     showDisplayNames, updateShowDisplayNames, detailNavigationHintsDismissed,
     boardRef, moveCard, resetAllVotes,
     getTotalVotes, getUserVoteCount, getTotalVotesRemaining, darkMode, boardTags,
-    hideCardAuthorship,
     displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
     prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
-    startPollPhase, startPollResultsPhase, goToCreationPhase,
+    goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
-    pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
     getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
-    getAllUsersAddingCards, startColumnTimer, pauseColumnTimer, resumeColumnTimer,
-    resetColumnTimer, restartColumnTimer, setColumnDefaultTimer, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
+    getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
     canUndo, canRedo, pastCount, futureCount,
     initialWorkflowPhase,
-    actionItems, actionItemsEnabled, updateActionItemsEnabled, createActionItem,
-    updateActionItemStatus, updateActionItemAssignee, updateActionItemDueDate,
-    updateActionItemDescription, deleteActionItem,
     previousBoardId, nextBoardId, startNextBoard, linkToPreviousBoard, unlinkFromSeries,
     backgroundId, customBackgroundCss, customBackgroundSizeState, setBoardBackground, setCustomBackground, setCustomBackgroundSize, clearBackground
   ]);

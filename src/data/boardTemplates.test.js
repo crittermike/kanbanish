@@ -69,10 +69,10 @@ describe('BOARD_TEMPLATES', () => {
   it('big-orca template should have exactly the correct columns', () => {
     const bigOrcaTemplate = BOARD_TEMPLATES.find((t) => t.id === 'big-orca');
     const expectedColumns = [
-      { title: 'Good stuff', defaultTimerSeconds: 600 },
-      { title: 'Bad stuff', defaultTimerSeconds: 600 },
-      { title: 'Feelings', defaultTimerSeconds: 600 },
-      { title: 'Improvements', defaultTimerSeconds: 600 },
+      'Good stuff',
+      'Bad stuff',
+      'Feelings',
+      'Improvements',
       'Past commitments',
       'New commitments'
     ];
@@ -95,7 +95,6 @@ describe('BOARD_TEMPLATES', () => {
     expect(bigOrcaTemplate.defaultSettings).toBeDefined();
     expect(bigOrcaTemplate.defaultSettings.retrospectiveMode).toBe(false);
     expect(bigOrcaTemplate.defaultSettings.showDisplayNames).toBe(false);
-    expect(bigOrcaTemplate.defaultSettings.actionItemsEnabled).toBe(false);
     expect(bigOrcaTemplate.defaultSettings.workflowPhase).toBe('HEALTH_CHECK');
   });
 

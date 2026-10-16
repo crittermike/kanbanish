@@ -1,7 +1,7 @@
 /**
  * Play a bell/ding tone using the Web Audio API.
  *
- * Used by the global timer, column timers, and per-card timers to notify
+ * Used by the global timer to notify
  * users when a countdown reaches zero.
  */
 export const playDing = () => {

@@ -29,8 +29,7 @@ vi.mock('../utils/workflowUtils', () => ({
     CREATION: 'CREATION',
     GROUPING: 'GROUPING',
     INTERACTIONS: 'INTERACTIONS',
-    RESULTS: 'RESULTS',
-    POLL: 'POLL'
+    RESULTS: 'RESULTS'
   }
 }));
 

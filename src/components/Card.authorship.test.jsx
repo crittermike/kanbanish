@@ -57,6 +57,7 @@ describe('Card Authorship Tests', () => {
     multipleVotesAllowed: false,
     retrospectiveMode: false,
     workflowPhase: 'CREATION',
+    showDisplayNames: true,
     updateCard: mockUpdateCard,
     deleteCard: mockDeleteCard,
     addComment: mockAddComment,
@@ -238,5 +239,14 @@ describe('Card Authorship Tests', () => {
     // Card should have author-editable class in creation phase
     const card = screen.getByTestId('card-content').closest('.card');
     expect(card).toHaveClass('author-editable');
+  });
+
+  it('hides author indicator on anonymous boards', () => {
+    useBoardContext.mockReturnValue({ ...defaultMockContext, showDisplayNames: false });
+
+    render(<Card {...baseProps} />);
+
+    const card = screen.getByTestId('card-content').closest('.card');
+    expect(card).not.toHaveClass('author-editable');
   });
 });
