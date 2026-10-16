@@ -1,8 +1,26 @@
-import { Home, Maximize2, Search } from 'react-feather';
+import { useState } from 'react';
+import { Home, Maximize2, MoreHorizontal, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import BoardSeriesPager from './BoardSeriesPager';
 import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
+
+// On narrow screens, header.css hides secondary header icons until this is expanded.
+const HeaderMoreToggle = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <button
+      className="header-more-btn"
+      onClick={() => setIsOpen(open => !open)}
+      aria-expanded={isOpen}
+      title="More"
+      aria-label="More options"
+    >
+      <MoreHorizontal size={16} />
+    </button>
+  );
+};
+
 /**
  * Board header with title input, user/vote counters, and share/export buttons.
  *
@@ -40,6 +58,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       onBlur={handleBoardTitleBlur}
       className="header-input"
     />
+    <HeaderMoreToggle />
     {!isSearchOpen && (
       <button
         className="search-trigger-btn"

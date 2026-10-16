@@ -114,7 +114,6 @@
     
     /* Layout */
     --column-width: 340px;
-    --column-width-mobile: 280px;
     --header-height: 3rem;
     --max-comments-height: 200px;
     --column-collapsed-width: 44px;
