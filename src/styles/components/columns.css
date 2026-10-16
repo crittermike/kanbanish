@@ -214,6 +214,7 @@ main {
   border-radius: var(--radius-sm);
   border: 1px solid var(--accent);
   width: 100%;
+  min-width: 0;
   background-color: var(--accent-subtle);
   color: var(--text-color);
   outline: none;
@@ -248,6 +249,7 @@ main {
 /* Column Actions */
 .column-actions {
   display: flex;
+  flex-shrink: 0;
   gap: var(--space-xs);
   opacity: 0;
   transition: opacity var(--transition-speed) var(--transition-ease);
