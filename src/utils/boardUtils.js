@@ -71,10 +71,10 @@ export function addCard(boardId, columnId, content, user = null, displayName = '
  *
  * @param {Object} params
  * @param {(string|{title: string, defaultTimerSeconds?: number})[]} params.columns - Column definitions (strings or objects with optional timer defaults)
- * @param {string} [params.templateName] - Template name (used for board title)
+ * @param {string} [params.templateName] - Template name (board title becomes "<name> – <date>")
  * @param {Object} params.user - Firebase user object with uid
  * @param {string} [params.queryString] - URL query string for settings overrides
- * @param {Object} [params.settingsOverrides] - Direct settings overrides (e.g. from wizard)
+ * @param {Object} [params.settingsOverrides] - Direct settings overrides (e.g. template defaults)
  * @returns {Promise<string>} Resolves with the new board ID
  */
 export function createBoardFromTemplate({ columns, templateName = null, user, queryString = '', settingsOverrides = {} }) {
@@ -82,7 +82,8 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
     return Promise.reject(new Error('User is required'));
   }
 
-  const boardTitle = templateName ? `${templateName} Board` : 'Untitled Board';
+  const date = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const boardTitle = `${templateName || 'Board'} – ${date}`;
   const parsed = parseUrlSettings(queryString);
 
   const newBoardId = generateId();
@@ -117,7 +118,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
     });
   }
 
-  // Apply direct overrides (e.g. from the board setup wizard)
+  // Apply direct overrides (e.g. template defaults)
   if (settingsOverrides && typeof settingsOverrides === 'object') {
     allowedOverrideKeys.forEach(k => {
       if (settingsOverrides[k] !== undefined) {

@@ -11,6 +11,7 @@ import BOARD_TEMPLATES from './data/boardTemplates';
 import { useRecentBoards } from './hooks/useRecentBoards';
 import { createBoardFromTemplate } from './utils/boardUtils';
 import { auth, signInAnonymously } from './utils/firebase';
+import { getTemplateBoardOptions } from './utils/templateUtils';
 
 /**
  * Reads the ?board= parameter from the current URL.
@@ -99,11 +100,9 @@ function AppContent() {
       authResolved = true;
       const doCreate = (user) => {
         createBoardFromTemplate({
-          columns: template.columns,
-          templateName: template.name,
+          ...getTemplateBoardOptions(template),
           user,
-          queryString: window.location.search,
-          ...(template.defaultSettings && { settingsOverrides: template.defaultSettings })
+          queryString: window.location.search
         })
           .then(newBoardId => {
             handleOpenBoard(newBoardId);

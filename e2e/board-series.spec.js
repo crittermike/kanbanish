@@ -1,44 +1,27 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Helper: create a board via the template modal + setup wizard UI flow.
- * Waits for auth, clicks New Board, selects default template, clicks through
- * the setup wizard, then waits for the board view to appear.
+ * Helper: create a board by clicking the "Default" template tile on the
+ * dashboard, then wait for the board view to appear. Retries because board
+ * creation silently fails until Firebase anonymous auth is ready.
  *
  * (Mirrors the helper in board.spec.js — e2e specs are self-contained.)
  */
-async function createBoardViaModal(page) {
+async function createBoard(page) {
   await page.goto('/');
 
-  await expect(page.getByRole('button', { name: /new board/i })).toBeVisible();
+  const defaultChip = page.getByRole('link', { name: 'Default' });
+  await expect(defaultChip).toBeVisible();
 
   let boardLoaded = false;
   for (let attempt = 0; attempt < 5; attempt++) {
-    await page.getByRole('button', { name: /new board/i }).click();
-
-    const modalHeading = page.getByRole('heading', { name: /choose a board template/i });
-    await expect(modalHeading).toBeVisible({ timeout: 3000 });
-
-    await page.getByRole('button', { name: /create board/i }).click();
-
-    const wizardHeading = page.getByRole('heading', { name: /set up your board/i });
-    await expect(wizardHeading).toBeVisible({ timeout: 3000 });
-
-    await page.locator('.wizard-modal').getByRole('button', { name: /create board/i }).click();
+    await defaultChip.click();
 
     try {
       await expect(page.getByLabel('Board title')).toBeVisible({ timeout: 8000 });
       boardLoaded = true;
       break;
     } catch {
-      const wizardCloseBtn = page.locator('.wizard-modal').getByRole('button', { name: /close setup wizard/i });
-      if (await wizardCloseBtn.isVisible().catch(() => false)) {
-        await wizardCloseBtn.click();
-      }
-      const cancelBtn = page.getByRole('button', { name: /cancel/i });
-      if (await cancelBtn.isVisible().catch(() => false)) {
-        await cancelBtn.click();
-      }
       await page.waitForTimeout(3000);
     }
   }
@@ -59,7 +42,7 @@ test.describe('Board series', () => {
     // Auto-accept the confirm() that appears only if a board already has a next link.
     page.on('dialog', dialog => dialog.accept());
 
-    await createBoardViaModal(page);
+    await createBoard(page);
     await expect(page).toHaveURL(/[?&]board=/);
 
     const firstBoardId = boardIdFromUrl(page.url());
@@ -97,13 +80,13 @@ test.describe('Board series', () => {
     page.on('dialog', dialog => dialog.accept());
 
     // Create a first board to be the "previous" board, remember its id, then leave it.
-    await createBoardViaModal(page);
+    await createBoard(page);
     await expect(page).toHaveURL(/[?&]board=/);
     const previousBoardId = boardIdFromUrl(page.url());
     expect(previousBoardId).toBeTruthy();
 
     // Create a second, independent board.
-    await createBoardViaModal(page);
+    await createBoard(page);
     await expect(page).toHaveURL(/[?&]board=/);
     const currentBoardId = boardIdFromUrl(page.url());
     expect(currentBoardId).not.toBe(previousBoardId);

@@ -1,11 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Clock, Layout, Plus, Star, Trash2, Sun, Moon, Users, Zap, Globe } from 'react-feather';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { ArrowRight, Star, Trash2, Sun, Moon } from 'react-feather';
+import BOARD_TEMPLATES from '../data/boardTemplates';
 import { useRecentBoards } from '../hooks/useRecentBoards';
 import { createBoardFromTemplate } from '../utils/boardUtils';
 import { database, auth, signInAnonymously, get, ref } from '../utils/firebase';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
-import BoardSetupWizard from './modals/BoardSetupWizard';
+import { getLastTemplateId, getTemplateBoardOptions, setLastTemplateId } from '../utils/templateUtils';
 import NewBoardTemplateModal from './modals/NewBoardTemplateModal';
+import TemplateLink from './TemplateLink';
+
+const FEATURED_TEMPLATE_IDS = ['default', 'retro', 'lean-coffee', 'start-stop-continue'];
+const QUICK_TEMPLATE_COUNT = 4;
+
+/**
+ * Templates shown as quick-create tiles: last-used first, then the featured ones.
+ * @param {string|null} lastTemplateId
+ * @returns {Array} Template objects
+ */
+function getQuickTemplates(lastTemplateId) {
+  const ids = [...new Set([lastTemplateId, ...FEATURED_TEMPLATE_IDS].filter(Boolean))];
+  return ids
+    .map(id => BOARD_TEMPLATES.find(t => t.id === id))
+    .filter(Boolean)
+    .slice(0, QUICK_TEMPLATE_COUNT);
+}
+
+const TILE_COLORS = ['var(--accent)', 'var(--success-color)', 'var(--warning-color)', 'var(--accent-alt)'];
+
+/**
+ * Stable per-template tile color. A non-featured last-used template displaces the last
+ * featured tile, so it takes that tile's color and the row stays distinct.
+ * @param {Object} template
+ * @returns {string} CSS color
+ */
+function getTileColor(template) {
+  const featuredIndex = FEATURED_TEMPLATE_IDS.indexOf(template.id);
+  return TILE_COLORS[featuredIndex === -1 ? TILE_COLORS.length - 1 : featuredIndex];
+}
+
+/**
+ * Miniature board showing a template's column layout, so each tile previews what it creates.
+ * Card stubs vary per template so tiles with the same column count still differ.
+ */
+function TemplatePreview({ template }) {
+  const seed = [...template.id].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  return (
+    <span className="dashboard-template-preview" aria-hidden="true">
+      {template.columns.slice(0, 4).map((_, i) => (
+        <span key={i} className="dashboard-template-preview-col">
+          <span className="dashboard-template-preview-title" />
+          {Array.from({ length: ((seed + i * 5) % 3) + 1 }, (_, j) => (
+            <span key={j} className="dashboard-template-preview-card" />
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /**
  * Format a timestamp into a human-readable relative time string.
@@ -43,7 +93,7 @@ function countCards(columns) {
 
 /**
  * Dashboard component — landing page shown when no board is active.
- * Displays recent/pinned boards, allows creating new boards and joining by ID.
+ * Displays recent/pinned boards, one-click board creation from templates, and joining by ID.
  *
  * @param {Object} props
  * @param {Function} props.onOpenBoard - Called with boardId to navigate to a board
@@ -53,8 +103,8 @@ function countCards(columns) {
 function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
   const { recentBoards, removeBoard, togglePin, updateBoardMeta, clearAll } = useRecentBoards();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [pendingTemplate, setPendingTemplate] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const quickTemplates = useMemo(() => getQuickTemplates(getLastTemplateId()), []);
   const [joinBoardId, setJoinBoardId] = useState('');
   const [loadingMeta, setLoadingMeta] = useState(new Set());
   const [user, setUser] = useState(null);
@@ -104,72 +154,31 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
     });
   }, [recentBoards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When a template is selected, store it and open the setup wizard
-  // If the template has skipWizard, bypass the wizard and create the board directly
-  const handleTemplateSelected = useCallback((templateColumns, templateName = null, templateTags = [], templateObj = null) => {
-    const template = { columns: templateColumns, name: templateName, tags: templateTags };
+  // Create a board from a template in one step and open it
+  const handleCreateFromTemplate = useCallback(template => {
+    if (isCreating) return;
+    setIsCreating(true);
 
-    if (templateObj?.skipWizard && templateObj?.defaultSettings) {
-      // Skip wizard — create board directly with template's default settings
-      const createDirectly = (currentUser) => {
-        createBoardFromTemplate({
-          columns: template.columns,
-          templateName: template.name,
-          user: currentUser,
-          queryString: window.location.search,
-          settingsOverrides: templateObj.defaultSettings
-        })
-          .then(newBoardId => {
-            setIsTemplateModalOpen(false);
-            onOpenBoard(newBoardId);
-          })
-          .catch(error => {
-            console.error('Error creating board:', error);
-          });
-      };
+    const userPromise = user
+      ? Promise.resolve(user)
+      : signInAnonymously(auth).then(result => result.user);
 
-      if (user) {
-        createDirectly(user);
-      } else {
-        signInAnonymously(auth)
-          .then(result => createDirectly(result.user))
-          .catch(error => {
-            console.error('Error signing in for template creation:', error);
-          });
-      }
-      return;
-    }
-
-    setPendingTemplate(template);
-    setIsTemplateModalOpen(false);
-    setIsWizardOpen(true);
-  }, [user, onOpenBoard]);
-
-  // When wizard is confirmed, create the board with the chosen settings
-  const handleWizardConfirm = useCallback((wizardSettings) => {
-    if (!user || !pendingTemplate) return;
-
-    createBoardFromTemplate({
-      columns: pendingTemplate.columns,
-      templateName: pendingTemplate.name,
-      user,
-      queryString: window.location.search,
-      settingsOverrides: {
-        retrospectiveMode: wizardSettings.retrospectiveMode,
-        votingEnabled: wizardSettings.votingEnabled,
-        showDisplayNames: wizardSettings.showDisplayNames,
-        ...(wizardSettings.startHealthCheck && { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK }),
-      }
-    })
+    userPromise
+      .then(currentUser => createBoardFromTemplate({
+        ...getTemplateBoardOptions(template),
+        user: currentUser,
+        queryString: window.location.search
+      }))
       .then(newBoardId => {
-        setIsWizardOpen(false);
-        setPendingTemplate(null);
+        setLastTemplateId(template.id);
+        setIsTemplateModalOpen(false);
         onOpenBoard(newBoardId);
       })
       .catch(error => {
         console.error('Error creating board:', error);
+        setIsCreating(false);
       });
-  }, [user, pendingTemplate, onOpenBoard]);
+  }, [isCreating, user, onOpenBoard]);
 
   // Navigate to a board
   const handleOpenBoard = (boardId) => {
@@ -199,23 +208,34 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
     }
   };
 
-  // Handle Enter key in join input
-  const handleJoinKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleJoinBoard();
-    }
-  };
-
   const pinnedBoards = recentBoards.filter(b => b.pinned);
   const unpinnedBoards = recentBoards.filter(b => !b.pinned);
 
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <div className="dashboard-header-left">
-          <h1>Kanbanish</h1>
-        </div>
+        <h1>Kanbanish</h1>
         <div className="dashboard-header-right">
+          <form
+            className="dashboard-join-section"
+            onSubmit={e => { e.preventDefault(); handleJoinBoard(); }}
+          >
+            <input
+              type="text"
+              className="dashboard-join-input"
+              placeholder="Board link or ID"
+              value={joinBoardId}
+              onChange={e => setJoinBoardId(e.target.value)}
+              aria-label="Board ID or URL"
+            />
+            <button
+              type="submit"
+              className="dashboard-join-btn"
+              disabled={!joinBoardId.trim()}
+            >
+              Join
+            </button>
+          </form>
           <button
             className="dashboard-theme-toggle"
             onClick={onToggleDarkMode}
@@ -228,67 +248,56 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
       </div>
 
       <div className="dashboard-body">
-        {/* Hero: Create + Join in a card container */}
-        <div className="dashboard-hero">
-          <div className="dashboard-tagline">
-            <h2>Collaborative boards for teams</h2>
-            <p>Run retros, brainstorm, or organize work — no sign-up needed.</p>
+        <section className="dashboard-section dashboard-new">
+          <div className="dashboard-section-header">
+            <h2>New board</h2>
           </div>
-          <div className="dashboard-hero-actions">
+          <div className="dashboard-template-tiles">
+            {quickTemplates.map(template => (
+              <TemplateLink
+                key={template.id}
+                template={template}
+                onSelect={handleCreateFromTemplate}
+                disabled={isCreating}
+                className="dashboard-template-tile"
+                style={{ '--tile-color': getTileColor(template) }}
+                title={template.description}
+              >
+                <TemplatePreview template={template} />
+                <span className="dashboard-template-footer">
+                  <span className="dashboard-template-name">{template.name}</span>
+                </span>
+              </TemplateLink>
+            ))}
             <button
-              className="dashboard-new-board-btn"
+              type="button"
+              className="dashboard-template-tile dashboard-template-tile-all"
               onClick={() => setIsTemplateModalOpen(true)}
             >
-              <Plus size={20} />
-              New Board
+              <span className="dashboard-template-preview" aria-hidden="true">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <span key={i} className="dashboard-template-mini" />
+                ))}
+              </span>
+              <span className="dashboard-template-footer">
+                <span className="dashboard-template-name">All templates</span>
+                <ArrowRight size={14} className="dashboard-template-arrow" aria-hidden="true" />
+              </span>
             </button>
-            <div className="dashboard-hero-divider">or</div>
-            <div className="dashboard-join-section">
-              <input
-                type="text"
-                className="dashboard-join-input"
-                placeholder="Paste a board URL or ID to join..."
-                value={joinBoardId}
-                onChange={e => setJoinBoardId(e.target.value)}
-                onKeyDown={handleJoinKeyDown}
-                aria-label="Board ID or URL"
-              />
-              <button
-                className="dashboard-join-btn"
-                onClick={handleJoinBoard}
-                disabled={!joinBoardId.trim()}
-              >
-                Join
-              </button>
-            </div>
           </div>
-          <div className="dashboard-features">
-            <div className="dashboard-feature">
-              <Zap size={16} />
-              <span>Instant setup</span>
-            </div>
-            <div className="dashboard-feature">
-              <Users size={16} />
-              <span>Real-time collaboration</span>
-            </div>
-            <div className="dashboard-feature">
-              <Globe size={16} />
-              <span>No account needed</span>
-            </div>
-          </div>
-        </div>
+        </section>
 
         {/* Pinned Boards */}
         {pinnedBoards.length > 0 && (
           <div className="dashboard-section">
             <div className="dashboard-section-header">
-              <h2><Star size={14} /> Pinned</h2>
+              <h2>Pinned</h2>
             </div>
             <div className="dashboard-board-list">
               {pinnedBoards.map(board => (
                 <div
                   key={board.id}
-                  className="dashboard-board-card pinned"
+                  className="dashboard-board-card"
                   onClick={() => handleOpenBoard(board.id)}
                   role="button"
                   tabIndex={0}
@@ -333,22 +342,14 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
         )}
 
         {/* Recent Boards */}
-        <div className="dashboard-section">
-          <div className="dashboard-section-header">
-            <h2><Clock size={14} /> Recent</h2>
-            {recentBoards.length > 0 && (
-              <button className="dashboard-clear-all" onClick={() => { if (window.confirm('Clear all recent boards from your list?')) clearAll(); }}>
+        {unpinnedBoards.length > 0 && (
+          <div className="dashboard-section">
+            <div className="dashboard-section-header">
+              <h2>Recent</h2>
+              <button className="dashboard-section-action dashboard-clear-all" onClick={() => { if (window.confirm('Clear all recent boards from your list?')) clearAll(); }}>
                 Clear all
               </button>
-            )}
-          </div>
-          {unpinnedBoards.length === 0 && pinnedBoards.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <Layout size={32} />
-              <h3>No recent boards</h3>
-              <p>Create a new board or join an existing one above.</p>
             </div>
-          ) : (
             <div className="dashboard-board-list">
               {unpinnedBoards.map(board => (
                 <div
@@ -393,27 +394,15 @@ function Dashboard({ onOpenBoard, darkMode, onToggleDarkMode }) {
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Template Selection Modal */}
       <NewBoardTemplateModal
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
-        onSelectTemplate={handleTemplateSelected}
-      />
-
-      {/* Board Setup Wizard (Step 2) */}
-      <BoardSetupWizard
-        isOpen={isWizardOpen}
-        onClose={() => {
-          setIsWizardOpen(false);
-          setIsTemplateModalOpen(true);
-        }}
-        onConfirm={handleWizardConfirm}
-        templateName={pendingTemplate?.name}
-        templateTags={pendingTemplate?.tags}
+        onSelectTemplate={handleCreateFromTemplate}
+        disabled={isCreating}
       />
     </div>
   );

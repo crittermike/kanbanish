@@ -35,6 +35,8 @@ vi.mock('./modals/NewBoardTemplateModal', () => ({
   }
 }));
 
+const LAST_TEMPLATE_KEY = 'kanbanish_last_template';
+
 // Mock boardUtils
 vi.mock('../utils/boardUtils', () => ({
   createBoardFromTemplate: vi.fn(() => Promise.resolve('new-board-123'))
@@ -49,6 +51,7 @@ describe('Dashboard Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     useRecentBoards.mockReturnValue({
       recentBoards: [],
       removeBoard: mockRemoveBoard,
@@ -68,18 +71,105 @@ describe('Dashboard Component', () => {
       />
     );
 
-  test('renders empty state when no recent boards', () => {
+  test('hides the Recent section when there are no recent boards', () => {
     renderDashboard();
 
     expect(screen.getByText('Kanbanish')).toBeInTheDocument();
-    expect(screen.getByText('No recent boards')).toBeInTheDocument();
-    expect(screen.getByText('Create a new board or join an existing one above.')).toBeInTheDocument();
+    expect(screen.queryByText('Recent')).not.toBeInTheDocument();
+    expect(screen.queryByText('Clear all')).not.toBeInTheDocument();
   });
 
-  test('renders New Board button', () => {
+  const tileHrefs = () => screen.getAllByRole('link').map(link => link.getAttribute('href'));
+
+  test('renders template tiles linking to ?template= URLs', () => {
     renderDashboard();
 
-    expect(screen.getByText('New Board')).toBeInTheDocument();
+    expect(tileHrefs()).toEqual([
+      '?template=default',
+      '?template=retro',
+      '?template=lean-coffee',
+      '?template=start-stop-continue'
+    ]);
+    expect(screen.getByRole('link', { name: 'Default' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Big Orca/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All templates' })).toBeInTheDocument();
+  });
+
+  test('puts the last-used template first without duplicating it', () => {
+    localStorage.setItem(LAST_TEMPLATE_KEY, 'retro');
+    renderDashboard();
+
+    expect(tileHrefs()).toEqual([
+      '?template=retro',
+      '?template=default',
+      '?template=lean-coffee',
+      '?template=start-stop-continue'
+    ]);
+  });
+
+  test('adds a non-featured last-used template as the first tile', () => {
+    localStorage.setItem(LAST_TEMPLATE_KEY, 'sailboat');
+    renderDashboard();
+
+    expect(tileHrefs()).toEqual([
+      '?template=sailboat',
+      '?template=default',
+      '?template=retro',
+      '?template=lean-coffee'
+    ]);
+  });
+
+  test('clicking a tile creates the board with the template settings and opens it', async () => {
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('link', { name: /Retrospective/ }));
+
+    await waitFor(() => {
+      expect(createBoardFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['Went Well', 'Could Improve', 'Action Items'],
+          templateName: 'Retro',
+          settingsOverrides: { retrospectiveMode: true },
+          user: { uid: 'test-user' }
+        })
+      );
+    });
+    await waitFor(() => {
+      expect(mockOnOpenBoard).toHaveBeenCalledWith('new-board-123');
+    });
+    expect(localStorage.getItem(LAST_TEMPLATE_KEY)).toBe('retro');
+  });
+
+  test('uses template defaultSettings when present', async () => {
+    localStorage.setItem(LAST_TEMPLATE_KEY, 'big-orca');
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('link', { name: /Big Orca/ }));
+
+    await waitFor(() => {
+      expect(createBoardFromTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateName: 'Big Orca',
+          settingsOverrides: {
+            retrospectiveMode: false,
+            showDisplayNames: false,
+            workflowPhase: 'HEALTH_CHECK'
+          }
+        })
+      );
+    });
+  });
+
+  test('modifier-clicking a tile leaves navigation to the browser', () => {
+    renderDashboard();
+    // jsdom can't navigate; stop the default action after React has seen the event
+    const blockNavigation = e => e.preventDefault();
+    document.addEventListener('click', blockNavigation);
+
+    fireEvent.click(screen.getByRole('link', { name: /Default/ }), { metaKey: true });
+
+    document.removeEventListener('click', blockNavigation);
+    expect(createBoardFromTemplate).not.toHaveBeenCalled();
   });
 
   test('renders join board input', () => {
@@ -180,12 +270,12 @@ describe('Dashboard Component', () => {
     expect(mockTogglePin).toHaveBeenCalledWith('board-1');
   });
 
-  test('opens template modal when New Board is clicked', () => {
+  test('opens template modal when All templates is clicked', () => {
     renderDashboard();
 
     expect(screen.queryByTestId('template-modal')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('New Board'));
+    fireEvent.click(screen.getByText('All templates'));
 
     expect(screen.getByTestId('template-modal')).toBeInTheDocument();
   });
@@ -210,12 +300,12 @@ describe('Dashboard Component', () => {
     expect(mockOnOpenBoard).toHaveBeenCalledWith('extracted-id');
   });
 
-  test('handles Enter key in join input', () => {
+  test('submits the join form', () => {
     renderDashboard();
 
     const input = screen.getByLabelText('Board ID or URL');
     fireEvent.change(input, { target: { value: 'enter-board' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.submit(input.closest('form'));
 
     expect(mockOnOpenBoard).toHaveBeenCalledWith('enter-board');
   });
@@ -287,71 +377,28 @@ describe('Dashboard Component', () => {
     expect(mockClearAll).not.toHaveBeenCalled();
   });
 
-  test('skips wizard and creates board directly when template has skipWizard', async () => {
+  test('creates a board when a template is picked from the modal', async () => {
     renderDashboard();
 
-    // Open template modal to capture onSelectTemplate
-    fireEvent.click(screen.getByText('New Board'));
-    expect(capturedOnSelectTemplate).toBeDefined();
+    fireEvent.click(screen.getByText('All templates'));
+    capturedOnSelectTemplate({
+      id: 'lean-coffee',
+      name: 'Lean Coffee',
+      columns: ['Topics', 'Discussing', 'Done'],
+      tags: ['discussion']
+    });
 
-    // Simulate selecting a template with skipWizard and defaultSettings
-    const skipWizardTemplate = {
-      id: 'big-orca',
-      name: 'Big Orca',
-      columns: ['Good stuff', 'Bad stuff'],
-      tags: ['retrospective'],
-      skipWizard: true,
-      defaultSettings: {
-        retrospectiveMode: false,
-        showDisplayNames: false,
-        workflowPhase: 'HEALTH_CHECK'
-      }
-    };
-
-    capturedOnSelectTemplate(
-      skipWizardTemplate.columns,
-      skipWizardTemplate.name,
-      skipWizardTemplate.tags,
-      skipWizardTemplate
-    );
-
-    // createBoardFromTemplate should be called directly with defaultSettings
     await waitFor(() => {
       expect(createBoardFromTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
-          columns: ['Good stuff', 'Bad stuff'],
-          templateName: 'Big Orca',
-          settingsOverrides: {
-            retrospectiveMode: false,
-            showDisplayNames: false,
-            workflowPhase: 'HEALTH_CHECK'
-          }
+          columns: ['Topics', 'Discussing', 'Done'],
+          templateName: 'Lean Coffee',
+          settingsOverrides: { retrospectiveMode: false }
         })
       );
     });
-
-    // Board should be opened after creation
     await waitFor(() => {
       expect(mockOnOpenBoard).toHaveBeenCalledWith('new-board-123');
     });
-  });
-
-  test('opens wizard normally when template does not have skipWizard', () => {
-    renderDashboard();
-
-    // Open template modal to capture onSelectTemplate
-    fireEvent.click(screen.getByText('New Board'));
-    expect(capturedOnSelectTemplate).toBeDefined();
-
-    // Simulate selecting a regular template (no skipWizard)
-    capturedOnSelectTemplate(
-      ['Topics', 'Discussing', 'Done'],
-      'Lean Coffee',
-      ['discussion'],
-      { id: 'lean-coffee', name: 'Lean Coffee', columns: ['Topics', 'Discussing', 'Done'], tags: ['discussion'] }
-    );
-
-    // createBoardFromTemplate should NOT be called (wizard should open instead)
-    expect(createBoardFromTemplate).not.toHaveBeenCalled();
   });
 });

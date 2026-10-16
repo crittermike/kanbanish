@@ -24,7 +24,7 @@ Built-in guided workflow for team retros with sequential phases:
 
 **Health Check** → **Creation** (cards hidden) → **Grouping** → **Voting & Reactions** → **Results** → **Effectiveness Poll**
 
-Plus: a board setup wizard to configure everything before you start.
+Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
 
 ## 🔧 Technology Stack
 

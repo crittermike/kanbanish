@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BOARD_TEMPLATES from '../../data/boardTemplates';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import TemplateLink from '../TemplateLink';
 import '../../styles/components/modals.css';
 import '../../styles/components/template-select.css';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+
+const getColumnTitle = column => (typeof column === 'string' ? column : column.title);
 
 /**
  * Safely highlights matching text by splitting into segments and wrapping
@@ -18,7 +21,6 @@ const highlightMatch = (text, query) => {
   }
 
   try {
-    // Escape special regex characters in the query
     const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escaped})`, 'gi');
     const parts = text.split(regex);
@@ -37,95 +39,50 @@ const highlightMatch = (text, query) => {
   }
 };
 
-const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState('default');
+/**
+ * Full template picker behind the dashboard's "More…" chip.
+ * Clicking a template creates the board immediately.
+ */
+const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate, disabled = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredTemplates, setFilteredTemplates] = useState(BOARD_TEMPLATES);
   const modalRef = useRef(null);
+  const searchInputRef = useRef(null);
 
-  useFocusTrap(modalRef, isOpen, { onClose });
-  // Filter templates based on search query
+  const handleClose = () => {
+    setSearchQuery('');
+    onClose();
+  };
+
+  useFocusTrap(modalRef, isOpen, { onClose: handleClose });
+
+  // Runs after useFocusTrap's initial focus so the search box wins
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredTemplates(BOARD_TEMPLATES);
-      return;
-    }
+    if (!isOpen) return;
+    const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
 
+  const filteredTemplates = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    const filtered = BOARD_TEMPLATES.filter(template =>
+    if (!query) {
+      return BOARD_TEMPLATES;
+    }
+    return BOARD_TEMPLATES.filter(template =>
       template.name.toLowerCase().includes(query) ||
       template.description.toLowerCase().includes(query) ||
       template.tags.some(tag => tag.toLowerCase().includes(query)) ||
-      template.columns.some(column => (typeof column === 'string' ? column : column.title).toLowerCase().includes(query))
+      template.columns.some(column => getColumnTitle(column).toLowerCase().includes(query))
     );
-
-    setFilteredTemplates(filtered);
   }, [searchQuery]);
 
-  const handleTemplateSelect = templateId => {
-    setSelectedTemplate(templateId);
-  };
-
-  const handleConfirm = () => {
-    const template = BOARD_TEMPLATES.find(t => t.id === selectedTemplate);
-    if (template) {
-      onSelectTemplate(template.columns, template.name, template.tags, template);
-    }
-  };
-
-  const handleSearchChange = e => {
-    setSearchQuery(e.target.value);
-  };
-
-  const searchInputRef = React.useRef(null);
-  const createButtonRef = React.useRef(null);
-
-  // Enhanced keyboard navigation
-  const handleKeyDown = e => {
-    if (e.key === 'Enter' && e.target.classList.contains('template-search-input')) {
-      if (filteredTemplates.length > 0) {
-        setSelectedTemplate(filteredTemplates[0].id);
-        e.preventDefault();
-      }
-    } else if (e.key === 'Enter' && !e.target.classList.contains('template-search-input')) {
-      handleConfirm();
+  const handleSearchKeyDown = e => {
+    if (e.key === 'Enter' && filteredTemplates.length > 0) {
       e.preventDefault();
-    } else if (e.key === 'Escape') {
-      if (searchQuery) {
-        setSearchQuery('');
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
-        e.preventDefault();
-      } else {
-        onClose();
-      }
-    } else if (e.key === '/' && !e.target.classList.contains('template-search-input')) {
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-        e.preventDefault();
+      if (!disabled) {
+        onSelectTemplate(filteredTemplates[0]);
       }
     }
   };
-
-  // Focus the search input when the modal opens
-  React.useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current.focus();
-      }, 100);
-    }
-  }, [isOpen]);
-
-  // Add key event listener when modal is open
-  React.useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [isOpen, selectedTemplate, searchQuery, filteredTemplates]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen) {
     return null;
@@ -135,102 +92,47 @@ const NewBoardTemplateModal = ({ isOpen, onClose, onSelectTemplate }) => {
     <div className="modal-overlay" role="presentation">
       <div ref={modalRef} className="modal-container template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
         <div className="modal-header">
-          <h2 id="template-modal-title">Choose a Board Template</h2>
-          <button className="close-button" onClick={onClose} aria-label="Close">&times;</button>
+          <h2 id="template-modal-title">Templates</h2>
+          <button className="close-button" onClick={handleClose} aria-label="Close">&times;</button>
         </div>
 
         <div className="modal-body template-selector">
-          <div className="template-search">
-            <div className="search-input-container">
-              <input
-                type="text"
-                placeholder="Search templates by name, description, or columns... (Press / to focus)"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="template-search-input"
-                autoFocus
-                aria-label="Search templates"
-                ref={searchInputRef}
-              />
-              {searchQuery && (
-                <button
-                  className="clear-search"
-                  onClick={() => setSearchQuery('')}
-                  title="Clear search"
-                >
-                  ×
-                </button>
-              )}
+          <input
+            type="search"
+            placeholder="Search templates"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            className="template-search-input"
+            aria-label="Search templates"
+            ref={searchInputRef}
+          />
+
+          {filteredTemplates.length === 0 ? (
+            <div className="no-results">No matches</div>
+          ) : (
+            <div className="template-grid">
+              {filteredTemplates.map(template => {
+                const columns = template.columns.map(getColumnTitle).join(' · ');
+                return (
+                  <TemplateLink
+                    key={template.id}
+                    template={template}
+                    onSelect={onSelectTemplate}
+                    disabled={disabled}
+                    className="template-card"
+                    title={template.description}
+                  >
+                    <span className="template-icon" aria-hidden="true">{template.icon}</span>
+                    <span className="template-info">
+                      <span className="template-name">{highlightMatch(template.name, searchQuery)}</span>
+                      <span className="template-columns">{highlightMatch(columns, searchQuery)}</span>
+                    </span>
+                  </TemplateLink>
+                );
+              })}
             </div>
-
-            <div className="search-results-count">
-              {searchQuery ? (
-                filteredTemplates.length === 0 ? (
-                  <div className="no-results">
-                    No templates match your search
-                  </div>
-                ) : (
-                  <div className="results-count">
-                    Found {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''}
-                  </div>
-                )
-              ) : null}
-            </div>
-          </div>
-
-          <div className="template-grid">
-            {filteredTemplates.map(template => (
-              <div
-                key={template.id}
-                className={`template-card ${selectedTemplate === template.id ? 'selected' : ''} ${searchQuery ? 'search-active' : ''}`}
-                onClick={() => handleTemplateSelect(template.id)}
-              >
-                <div className="template-icon">{template.icon}</div>
-                <div className="template-info">
-                  <h3>{highlightMatch(template.name, searchQuery)}</h3>
-                  <p>{highlightMatch(template.description, searchQuery)}</p>
-                </div>
-                <div className="template-details">
-                  <div className="template-columns">
-                    {template.columns.map((col, idx) => {
-                      const colTitle = typeof col === 'string' ? col : col.title;
-                      return (
-                        <span key={idx} className="template-column-pill">
-                          {highlightMatch(colTitle, searchQuery)}
-                        </span>
-                      );
-                    })}
-                  </div>
-                  <div className="template-tags">
-                    {template.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className={`template-tag ${searchQuery && tag.toLowerCase().includes(searchQuery.toLowerCase()) ? 'highlight' : ''}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="modal-footer">
-          <button
-            className="primary-button"
-            onClick={handleConfirm}
-            ref={createButtonRef}
-          >
-            Create Board
-          </button>
-          <button
-            className="secondary-button"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
+          )}
         </div>
       </div>
     </div>
