@@ -226,42 +226,7 @@
   color: var(--accent);
 }
 
-/* Vote Limit Modal */
-.vote-limit-modal {
-  max-width: 450px;
-}
-
-.vote-limit-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.vote-limit-description {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.5;
-}
-
-.vote-limit-input-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.vote-limit-input-section label {
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: var(--font-size-sm);
-}
-
-.vote-limit-input-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
+/* Vote limit controls */
 .vote-limit-input {
   width: 80px;
   padding: var(--space-sm);
@@ -277,24 +242,6 @@
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px var(--primary-color-alpha);
-}
-
-.vote-limit-input-suffix {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.vote-limit-examples {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.vote-limit-examples-title {
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: var(--font-size-sm);
-  margin: 0;
 }
 
 .vote-limit-preset-buttons {
@@ -325,20 +272,6 @@
   border-color: var(--primary-color);
   background: var(--primary-color);
   color: var(--primary-color-text);
-}
-
-.vote-limit-info {
-  padding: var(--space-md);
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  border-radius: var(--radius-sm);
-}
-
-.vote-limit-info p {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: 1.4;
 }
 
 /* Mobile responsive adjustments */

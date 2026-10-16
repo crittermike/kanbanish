@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Home, MoreHorizontal, Search } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import BoardSeriesPager from './BoardSeriesPager';
-import TotalVoteCounter from './TotalVoteCounter';
 import UserCounter from './UserCounter';
+import VoteCounter from './VoteCounter';
 
 // On narrow screens, header.css hides secondary header icons until this is expanded.
 const HeaderMoreToggle = () => {
@@ -71,7 +71,7 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
     )}
     <div className="action-buttons">
       <UserCounter />
-      <TotalVoteCounter />
+      <VoteCounter />
     </div>
 
   </div>

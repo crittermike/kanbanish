@@ -1,38 +1,17 @@
 import { useBoardContext } from '../context/BoardContext';
-import { areInteractionsVisible } from '../utils/workflowUtils';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 /**
- * Custom hook to determine if vote counters should be visible
- * Centralizes the common visibility logic for both VoteCounter and TotalVoteCounter
+ * Determines whether the current user's "votes left" counter should show.
+ * It only appears during the retro Vote step.
  */
 export const useVoteCounterVisibility = () => {
-  const { 
-    votingEnabled, 
-    retrospectiveMode, 
-    workflowPhase, 
-    user, 
-    activeUsers 
-  } = useBoardContext();
+  const { votingEnabled, retrospectiveMode, workflowPhase, user } = useBoardContext();
 
-  // Base visibility conditions that apply to all vote counters
-  const isBaseVisible = votingEnabled && 
-                       retrospectiveMode && 
-                       areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const isUserVoteCounterVisible = !!votingEnabled &&
+    !!retrospectiveMode &&
+    workflowPhase === WORKFLOW_PHASES.INTERACTIONS &&
+    !!user;
 
-  // Individual user vote counter visibility (requires logged in user)
-  const isUserVoteCounterVisible = isBaseVisible && !!user;
-
-  // Total vote counter visibility (requires active users)
-  const isTotalVoteCounterVisible = isBaseVisible && !!activeUsers;
-
-  return {
-    isUserVoteCounterVisible,
-    isTotalVoteCounterVisible,
-    isBaseVisible,
-    votingEnabled,
-    retrospectiveMode,
-    workflowPhase,
-    user,
-    activeUsers
-  };
+  return { isUserVoteCounterVisible };
 };

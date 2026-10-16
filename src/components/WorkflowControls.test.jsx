@@ -1,160 +1,127 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
 import WorkflowControls from './WorkflowControls';
 
-// Mock BoardContext
 vi.mock('../context/BoardContext');
-
-// Mock NotificationContext
-const { mockShowNotification } = vi.hoisted(() => ({
-  mockShowNotification: vi.fn()
-}));
-vi.mock('../context/NotificationContext', () => ({
-  useNotification: () => ({
-    showNotification: mockShowNotification,
-    notification: { message: '', show: false }
-  })
-}));
-
-// Mock react-feather
-vi.mock('react-feather', () => ({
-  Eye: () => <span>eye-icon</span>,
-  MessageCircle: () => <span>message-icon</span>,
-  Award: () => <span>award-icon</span>,
-  ArrowLeft: () => <span>arrow-left-icon</span>,
-  BarChart: () => <span>bar-chart-icon</span>,
-  Heart: () => <span>heart-icon</span>
-}));
-
-// Mock VoteLimitModal
-vi.mock('./modals/VoteLimitModal', () => ({
-  default: ({ isOpen, onConfirm, onClose, currentLimit }) => {
-    if (!isOpen) return null;
-    return (
-      <div data-testid="vote-limit-modal">
-        <span data-testid="current-limit">{currentLimit}</span>
-        <button onClick={() => onConfirm(5)}>Confirm with 5</button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
-    );
-  }
-}));
 
 describe('WorkflowControls', () => {
   const defaultContext = {
     workflowPhase: 'CREATION',
     initialWorkflowPhase: 'CREATION',
+    retrospectiveMode: true,
+    healthCheckVotes: {},
     votesPerUser: 3,
-    startGroupingPhase: vi.fn(),
-    startResultsPhase: vi.fn(),
-    startPollPhase: vi.fn(),
-    startPollResultsPhase: vi.fn(),
-    goToPreviousPhase: vi.fn(),
-    updateBoardSettings: vi.fn()
+    updateVotesPerUser: vi.fn(),
+    goToNextPhase: vi.fn(),
+    goToPreviousPhase: vi.fn()
   };
+
+  const renderWith = (overrides = {}) => {
+    useBoardContext.mockReturnValue({ ...defaultContext, ...overrides });
+    return render(<WorkflowControls />);
+  };
+
+  const stepLabels = () =>
+    within(screen.getByRole('list')).getAllByRole('listitem').map(li => li.textContent);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    useBoardContext.mockReturnValue(defaultContext);
   });
 
-  test('renders creation phase controls', () => {
-    render(<WorkflowControls />);
-    expect(screen.getByText('Card Creation Phase')).toBeInTheDocument();
-    expect(screen.getByText('Reveal Cards & Start Grouping')).toBeInTheDocument();
+  test('shows the retro steps without Health when there is no health check', () => {
+    renderWith();
+    expect(stepLabels()).toEqual(['Add', 'Group', 'Vote', 'Discuss', 'Poll']);
   });
 
-  test('hides Back to Health Check button when initialWorkflowPhase is CREATION', () => {
-    render(<WorkflowControls />);
-    expect(screen.queryByText('Back to Health Check')).not.toBeInTheDocument();
+  test('includes the Health step when the board started with a health check', () => {
+    renderWith({ initialWorkflowPhase: 'HEALTH_CHECK' });
+    expect(stepLabels()).toEqual(['Health', 'Add', 'Group', 'Vote', 'Discuss', 'Poll']);
   });
 
-  test('shows Back to Health Check button when initialWorkflowPhase is HEALTH_CHECK', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      initialWorkflowPhase: 'HEALTH_CHECK'
-    });
-    render(<WorkflowControls />);
-    expect(screen.getByText('Back to Health Check')).toBeInTheDocument();
+  test('includes the Health step when health check votes exist', () => {
+    renderWith({ healthCheckVotes: { teamwork: { u1: 4 } } });
+    expect(stepLabels()[0]).toBe('Health');
   });
 
-  test('opens vote limit modal when starting voting from grouping phase', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'GROUPING'
-    });
-    render(<WorkflowControls />);
-
-    fireEvent.click(screen.getByText('Start Voting'));
-    expect(screen.getByTestId('vote-limit-modal')).toBeInTheDocument();
+  test('shows only the Health step for a standalone health check', () => {
+    renderWith({ retrospectiveMode: false, workflowPhase: 'HEALTH_CHECK', initialWorkflowPhase: 'HEALTH_CHECK' });
+    expect(stepLabels()).toEqual(['Health']);
   });
 
-  test('vote limit modal receives current votesPerUser as currentLimit', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'GROUPING',
-      votesPerUser: 7
-    });
-    render(<WorkflowControls />);
-
-    fireEvent.click(screen.getByText('Start Voting'));
-    expect(screen.getByTestId('current-limit')).toHaveTextContent('7');
+  test.each([
+    ['HEALTH_CHECK', 'Health'],
+    ['HEALTH_CHECK_RESULTS', 'Health'],
+    ['CREATION', 'Add'],
+    ['GROUPING', 'Group'],
+    ['INTERACTIONS', 'Vote'],
+    ['RESULTS', 'Discuss'],
+    ['POLL', 'Poll'],
+    ['POLL_RESULTS', 'Poll']
+  ])('marks the current step for %s', (phase, label) => {
+    renderWith({ workflowPhase: phase, initialWorkflowPhase: 'HEALTH_CHECK' });
+    const current = screen.getByRole('listitem', { current: 'step' });
+    expect(current).toHaveTextContent(label);
+    expect(current).toHaveClass('workflow-step-current');
   });
 
-  test('vote limit confirm sets votesPerUser and workflowPhase in a single updateBoardSettings call', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'GROUPING'
-    });
-    render(<WorkflowControls />);
-
-    // Open the modal
-    fireEvent.click(screen.getByText('Start Voting'));
-    // Confirm with 5 votes
-    fireEvent.click(screen.getByText('Confirm with 5'));
-
-    // Should make a single combined call, NOT two separate calls
-    expect(defaultContext.updateBoardSettings).toHaveBeenCalledTimes(1);
-    expect(defaultContext.updateBoardSettings).toHaveBeenCalledWith({
-      votesPerUser: 5,
-      workflowPhase: 'INTERACTIONS'
-    });
+  test('marks earlier steps done', () => {
+    renderWith({ workflowPhase: 'INTERACTIONS' });
+    expect(screen.getByText('Add').closest('li')).toHaveClass('workflow-step-done');
+    expect(screen.getByText('Discuss').closest('li')).toHaveClass('workflow-step-upcoming');
   });
 
-  test('vote limit confirm shows notification with vote count', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'GROUPING'
-    });
-    render(<WorkflowControls />);
-
-    fireEvent.click(screen.getByText('Start Voting'));
-    fireEvent.click(screen.getByText('Confirm with 5'));
-
-    expect(mockShowNotification).toHaveBeenCalledWith(
-      'Voting phase started - each user can cast 5 votes'
-    );
+  test('Next calls goToNextPhase', () => {
+    renderWith();
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(defaultContext.goToNextPhase).toHaveBeenCalled();
   });
 
-  test('interactions phase shows View Results button', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'INTERACTIONS'
-    });
-    render(<WorkflowControls />);
-    expect(screen.getByText('View Results')).toBeInTheDocument();
+  test('hides Next on the final step', () => {
+    renderWith({ workflowPhase: 'POLL_RESULTS' });
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
   });
 
-  test('clicking View Results calls startResultsPhase', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultContext,
-      workflowPhase: 'INTERACTIONS'
-    });
-    render(<WorkflowControls />);
+  test('hides back on the first step', () => {
+    renderWith();
+    expect(screen.queryByRole('button', { name: 'Previous step' })).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByText('View Results'));
-    expect(defaultContext.startResultsPhase).toHaveBeenCalled();
+  test('hides back on the first health step', () => {
+    renderWith({ workflowPhase: 'HEALTH_CHECK', initialWorkflowPhase: 'HEALTH_CHECK' });
+    expect(screen.queryByRole('button', { name: 'Previous step' })).not.toBeInTheDocument();
+  });
+
+  test('back is an icon button that calls goToPreviousPhase', () => {
+    renderWith({ workflowPhase: 'GROUPING' });
+    const back = screen.getByRole('button', { name: 'Previous step' });
+    expect(back).toHaveTextContent('');
+    fireEvent.click(back);
+    expect(defaultContext.goToPreviousPhase).toHaveBeenCalled();
+  });
+
+  test('shows the votes per person select only during Vote', () => {
+    renderWith({ workflowPhase: 'GROUPING' });
+    expect(screen.queryByLabelText('Votes per person')).not.toBeInTheDocument();
+  });
+
+  test('changing votes per person updates the setting', () => {
+    renderWith({ workflowPhase: 'INTERACTIONS' });
+    const select = screen.getByLabelText('Votes per person');
+    expect(select).toHaveValue('3');
+    fireEvent.change(select, { target: { value: '5' } });
+    expect(defaultContext.updateVotesPerUser).toHaveBeenCalledWith(5);
+    fireEvent.change(select, { target: { value: '0' } });
+    expect(defaultContext.updateVotesPerUser).toHaveBeenCalledWith(0);
+  });
+
+  test('keeps a custom votes per person value selectable', () => {
+    renderWith({ workflowPhase: 'INTERACTIONS', votesPerUser: 25 });
+    expect(screen.getByLabelText('Votes per person')).toHaveValue('25');
+  });
+
+  test('renders nothing for phases outside the stepper', () => {
+    const { container } = renderWith({ workflowPhase: 'INTERACTION_REVEAL' });
+    expect(container).toBeEmptyDOMElement();
   });
 });

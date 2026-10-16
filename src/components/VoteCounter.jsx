@@ -1,26 +1,24 @@
 import { useBoardContext } from '../context/BoardContext';
 import { useVoteCounterVisibility } from '../hooks/useVoteCounterVisibility';
-import BaseVoteCounter from './BaseVoteCounter';
 
 const VoteCounter = () => {
   const { isUserVoteCounterVisible } = useVoteCounterVisibility();
   const { user, votesPerUser, getUserVoteCount } = useBoardContext();
 
-  if (!isUserVoteCounterVisible || votesPerUser === 0) {
+  if (!isUserVoteCounterVisible || !votesPerUser) {
     return null;
   }
 
-  const usedVotes = getUserVoteCount(user.uid);
-  const remainingVotes = Math.max(0, votesPerUser - usedVotes);
+  const remainingVotes = Math.max(0, votesPerUser - getUserVoteCount(user.uid));
+  const depletedClass = remainingVotes === 0 ? ' vote-counter-depleted' : '';
 
   return (
-    <BaseVoteCounter
-      className="vote-counter"
-      label="Your votes remaining:"
-      value={remainingVotes}
-      total={votesPerUser}
-      isDepleted={remainingVotes === 0}
-    />
+    <div className="vote-counter" data-testid="vote-counter">
+      <div className="vote-counter-content">
+        <span className={`vote-counter-value${depletedClass}`}>{remainingVotes}</span>{' '}
+        <span className="vote-counter-label">{remainingVotes === 1 ? 'vote' : 'votes'} left</span>
+      </div>
+    </div>
   );
 };
 
