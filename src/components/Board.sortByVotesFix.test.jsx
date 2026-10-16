@@ -87,13 +87,12 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    // Open the settings dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
+    // Open the search bar, which holds the sort toggle
+    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
 
-    // Click the "By Votes" option
-    const byVotesOption = screen.getByText('By Votes');
-    fireEvent.click(byVotesOption);
+    const sortToggle = screen.getByRole('button', { name: 'Sort cards by votes' });
+    expect(sortToggle).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(sortToggle);
 
     // Verify that setSortByVotes was called with true (this persists to Firebase)
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
@@ -102,7 +101,7 @@ describe('Board Component - Sort By Votes Fix', () => {
     expect(mockContextValue.setSortByVotes).toHaveBeenCalledTimes(1);
   });
 
-  it('calls setSortByVotes when switching back to chronological', () => {
+  it('calls setSortByVotes when switching back to newest first', () => {
     // Start with sort by votes enabled
     const contextWithSortByVotes = {
       ...mockContextValue,
@@ -117,13 +116,11 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    // Open the settings dropdown
-    const settingsButton = screen.getByTitle('Board settings and preferences');
-    fireEvent.click(settingsButton);
+    fireEvent.click(screen.getByRole('button', { name: 'Search cards' }));
 
-    // Click the "Chronological" option
-    const chronologicalOption = screen.getByText('Chronological');
-    fireEvent.click(chronologicalOption);
+    const sortToggle = screen.getByRole('button', { name: 'Sort cards by votes' });
+    expect(sortToggle).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(sortToggle);
 
     // Verify that setSortByVotes was called with false (this persists to Firebase)
     expect(contextWithSortByVotes.setSortByVotes).toHaveBeenCalledWith(false);

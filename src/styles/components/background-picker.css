@@ -98,6 +98,23 @@
   box-shadow: 0 0 0 1px var(--accent);
 }
 
+/* Swatch label */
+.bg-picker-swatch-name {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bg-picker-swatch:hover .bg-picker-swatch-name,
+.bg-picker-swatch-selected .bg-picker-swatch-name {
+  color: var(--text-color);
+}
+
 /* "None" swatch X icon */
 .bg-picker-swatch-none {
   color: var(--text-faint);

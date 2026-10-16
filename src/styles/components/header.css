@@ -135,9 +135,12 @@ h1 {
 /* Settings modal styles */
 .settings-modal {
     max-width: 500px;
+    height: min(560px, 90vh);
 }
 
 .settings-modal .modal-body {
+    flex: 1;
+    min-height: 0;
     padding: var(--space-md) var(--space-lg);
     gap: 0;
 }
@@ -175,41 +178,6 @@ h1 {
 .settings-quick-action-btn:hover {
     background: var(--hover-bg);
     border-color: var(--text-muted);
-}
-
-/* Health Check prominent button */
-.settings-health-check-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-color);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(13, 150, 104, 0.15);
-}
-
-.settings-health-check-btn:hover {
-    background: var(--hover-bg);
-    border-color: var(--text-muted);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
-}
-
-.settings-health-check-btn:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-.health-check-btn-icon {
-    font-size: 1.2em;
-    line-height: 1;
 }
 
 /* Settings toggle button */
@@ -277,31 +245,6 @@ h1 {
 .settings-full-width-btn {
     width: 100%;
     margin: var(--space-xs) 0;
-}
-
-.settings-reset-votes-btn {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    gap: 4px;
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    padding: var(--space-xs) var(--space-sm);
-    background-color: var(--danger-transparent-lighter);
-    border: 1px solid var(--danger-transparent-border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    margin-top: var(--space-sm);
-    transition: all 0.2s ease;
-}
-
-.settings-reset-votes-btn:hover {
-    background-color: var(--danger);
-    color: white;
-    border-color: var(--danger);
 }
 
 .settings-section-title {

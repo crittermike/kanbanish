@@ -1,4 +1,4 @@
-import { Search, X, Sliders, Tag, User, ThumbsUp, Droplet, MessageCircle, Smile, Layers } from 'react-feather';
+import { ArrowDown, Search, X, Sliders, Tag, User, ThumbsUp, Droplet, MessageCircle, Smile, Layers } from 'react-feather';
 
 /**
  * Card color palette — matches CardColorPicker.jsx CARD_COLORS.
@@ -106,7 +106,10 @@ function SearchFilterBar({
   toggleFilterValue,
   setFilterValue,
   clearFilters,
-  boardTags
+  boardTags,
+  sortByVotes,
+  setSortByVotes,
+  showSortToggle
 }) {
   const activeChips = getActiveFilterChips(filters);
 
@@ -157,6 +160,19 @@ function SearchFilterBar({
             <span className="filter-badge" aria-hidden="true">{activeFilterCount}</span>
           )}
         </button>
+
+        {showSortToggle && setSortByVotes && (
+          <button
+            className={`sort-toggle-btn ${sortByVotes ? 'active' : ''}`}
+            onClick={() => setSortByVotes(!sortByVotes)}
+            aria-pressed={!!sortByVotes}
+            aria-label="Sort cards by votes"
+            title={sortByVotes ? 'Sorted by votes' : 'Sorted by time added'}
+          >
+            {sortByVotes ? <ThumbsUp size={16} /> : <ArrowDown size={16} />}
+            <span>{sortByVotes ? 'Votes' : 'Newest'}</span>
+          </button>
+        )}
 
         <div className="search-actions">
           {isFiltering && (

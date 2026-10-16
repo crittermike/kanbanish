@@ -145,7 +145,7 @@ html.light-mode .settings-tabpanel .settings-section:not(:last-child) {
     display: none; /* Hide dividers since sections have borders */
 }
 
-/* ── Boolean option buttons (Theme, Sort) ── */
+/* ── Boolean option buttons ── */
 
 .settings-tabpanel .settings-boolean-option {
     display: flex;
@@ -209,8 +209,6 @@ html.light-mode .settings-tabpanel .settings-section:not(:last-child) {
     margin-top: 2px;
     padding: 0 0 var(--space-xxs);
     line-height: 1.4;
-    /* 14px icon width + 5px margin-right from .settings-toggle-icon */
-    margin-left: 19px;
 }
 
 /* ── Vote limit in tabs ── */
@@ -231,136 +229,51 @@ html.light-mode .settings-tabpanel .settings-section:not(:last-child) {
     font-weight: 600;
 }
 
-/* ── Reset votes button polish ── */
+/* ── Action list (Advanced tab) ── */
 
-.settings-tabpanel .settings-reset-votes-btn {
-    font-size: var(--font-size-xs);
-    padding: var(--space-xs) var(--space-sm);
-    margin-top: var(--space-md);
-    opacity: 0.8;
-    border: 1px solid var(--danger-transparent-border);
-    border-radius: var(--radius-md);
-}
-
-.settings-tabpanel .settings-reset-votes-btn svg {
-    width: 13px;
-    height: 13px;
-}
-
-.settings-tabpanel .settings-reset-votes-btn:hover {
-    opacity: 1;
-}
-
-/* ── Share & Export action cards ── */
-
-.settings-share-actions {
+.settings-action-list {
     display: flex;
     flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.settings-action-btn {
+    display: flex;
+    align-items: center;
     gap: var(--space-sm);
-}
-
-.settings-share-action-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
     width: 100%;
-    padding: var(--space-md) var(--space-lg);
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    color: var(--text-color);
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s ease;
-}
-
-.settings-share-action-btn:hover {
-    border-color: var(--accent);
-    background: var(--hover-bg);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-}
-
-.settings-share-action-btn:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-/* Chevron icon on share action cards */
-.settings-share-action-chevron {
-    margin-left: auto;
-    color: var(--text-color);
-    flex-shrink: 0;
-    opacity: 0.5;
-    stroke-width: 2.5;
-    transition: transform var(--transition-speed) ease, color var(--transition-speed) ease, opacity var(--transition-speed) ease;
-}
-
-.settings-share-action-btn:hover .settings-share-action-chevron {
-    transform: translateX(3px);
-    color: var(--accent);
-    opacity: 1;
-}
-
-.settings-share-action-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
+    padding: var(--space-sm);
+    background: none;
+    border: none;
     border-radius: var(--radius-md);
-    background: var(--accent-transparent-lighter);
-    color: var(--accent);
-    flex-shrink: 0;
-}
-
-.settings-share-action-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-    flex: 1;
-}
-
-.settings-share-action-title {
-    font-weight: 600;
+    color: var(--text-color);
     font-size: var(--font-size-sm);
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.settings-share-action-desc {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-}
-
-/* ── Settings toggle icon inline with label ── */
-
-.settings-toggle-icon {
-    width: 14px;
-    height: 14px;
-    vertical-align: middle;
-    margin-right: 6px;
-    opacity: 0.75;
-    flex-shrink: 0;
-    position: relative;
-    top: -0.5px;
-}
-
-/* ── Health check button polish ── */
-
-.settings-tabpanel .settings-health-check-btn {
-    border-radius: var(--radius-md);
-    padding: var(--space-sm) var(--space-lg);
-    width: 100%;
-    justify-content: center;
     font-weight: 500;
-    margin-top: var(--space-xxs);
-    border: 1.5px solid var(--border-color);
-    background: var(--hover-bg);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) var(--transition-ease),
+                color var(--transition-speed) var(--transition-ease);
+}
+
+.settings-action-btn svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.settings-action-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--accent);
+}
+
+.settings-action-btn:hover svg {
+    color: var(--accent);
+}
+
+.settings-action-btn-danger,
+.settings-action-btn-danger svg,
+.settings-action-btn-danger:hover,
+.settings-action-btn-danger:hover svg {
+    color: var(--danger);
 }
 
 /* ── Mobile responsive ── */
@@ -392,25 +305,6 @@ html.light-mode .settings-tabpanel .settings-section:not(:last-child) {
 
     .settings-tabpanel .boolean-option {
         padding: var(--space-sm) var(--space-sm);
-    }
-
-    .settings-share-action-btn {
-        padding: var(--space-sm) var(--space-md);
-    }
-
-    .settings-share-action-icon {
-        width: 32px;
-        height: 32px;
-    }
-
-    .settings-share-action-icon svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    .settings-share-action-chevron {
-        width: 14px;
-        height: 14px;
     }
 
     .settings-tabpanel .vote-limit-preset-buttons {

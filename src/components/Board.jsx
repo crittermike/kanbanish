@@ -244,8 +244,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             handleStartHealthCheck={startHealthCheckPhase}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
-            sortByVotes={sortByVotes}
-            setSortByVotes={setSortByVotes}
             votingEnabled={votingEnabled}
             updateVotingEnabled={updateVotingEnabled}
             downvotingEnabled={downvotingEnabled}
@@ -314,6 +312,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
           setFilterValue={searchFilter.setFilterValue}
           clearFilters={searchFilter.clearFilters}
           boardTags={boardTags}
+          sortByVotes={sortByVotes}
+          setSortByVotes={setSortByVotes}
+          showSortToggle={votingEnabled || retrospectiveMode || sortByVotes}
         />
       )}
 

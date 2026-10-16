@@ -65,10 +65,10 @@ test.describe('Board series', () => {
     const firstBoardId = boardIdFromUrl(page.url());
     expect(firstBoardId).toBeTruthy();
 
-    // Open settings → Share & Export tab → Start next board.
+    // Open settings → Advanced tab → Start next board.
     await page.getByRole('button', { name: /board settings/i }).click();
     await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
-    await page.getByRole('tab', { name: /share & export/i }).click();
+    await page.getByRole('tab', { name: /advanced/i }).click();
 
     const startNextBtn = page.getByRole('button', { name: /start next board/i });
     await expect(startNextBtn).toBeVisible();
@@ -110,10 +110,10 @@ test.describe('Board series', () => {
     const currentBoardId = boardIdFromUrl(page.url());
     expect(currentBoardId).not.toBe(previousBoardId);
 
-    // Open settings → Share & Export → Link to previous board.
+    // Open settings → Advanced tab → Link to previous board.
     await page.getByRole('button', { name: /board settings/i }).click();
     await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
-    await page.getByRole('tab', { name: /share & export/i }).click();
+    await page.getByRole('tab', { name: /advanced/i }).click();
     await page.getByRole('button', { name: /link to previous board/i }).click();
 
     // The link modal appears — paste the previous board id and link.

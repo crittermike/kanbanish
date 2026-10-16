@@ -3,7 +3,7 @@ import { Check, X, Image as ImageIcon } from 'react-feather';
 import BOARD_BACKGROUNDS, { BACKGROUND_CATEGORIES } from '../data/boardBackgrounds';
 
 /**
- * Background picker component for the Settings panel Appearance tab.
+ * Background picker component for the Settings panel Advanced tab.
  * Shows a grid of background thumbnails organized by category tabs.
  *
  * @param {Object} props

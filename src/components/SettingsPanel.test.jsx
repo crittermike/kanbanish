@@ -16,13 +16,11 @@ vi.mock('./Timer', () => ({
   default: () => <div data-testid="timer" />
 }));
 
-describe('SettingsPanel - Tab Navigation', () => {
+describe('SettingsPanel', () => {
   const defaultProps = {
     handleStartHealthCheck: vi.fn(),
     copyShareUrl: vi.fn(),
     handleExportBoard: vi.fn(),
-    sortByVotes: false,
-    setSortByVotes: vi.fn(),
     votingEnabled: true,
     updateVotingEnabled: vi.fn(),
     downvotingEnabled: true,
@@ -42,287 +40,196 @@ describe('SettingsPanel - Tab Navigation', () => {
     updateVotesPerUser: vi.fn(),
     backgroundId: 'none',
     setBoardBackground: vi.fn(),
+    onStartNextBoard: vi.fn(),
+    onOpenLinkPrevious: vi.fn(),
+    onUnlinkSeries: vi.fn(),
   };
+
+  const openAdvanced = () => fireEvent.click(screen.getByRole('tab', { name: /Advanced/i }));
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('Default state and ARIA attributes', () => {
-    test('renders tablist with 4 tabs', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      expect(tablist).toBeInTheDocument();
-
-      const tabs = within(tablist).getAllByRole('tab');
-      expect(tabs).toHaveLength(4);
+  describe('Header buttons', () => {
+    test('share button copies the board link', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Share board' }));
+      expect(defaultProps.copyShareUrl).toHaveBeenCalled();
     });
 
-    test('defaults to Appearance tab on open', () => {
-      render(<SettingsPanel {...defaultProps} />);
+    test('theme button toggles dark mode', () => {
+      const { rerender } = render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
+      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(false);
 
-      const appearanceTab = screen.getByRole('tab', { name: /Appearance/i });
-      expect(appearanceTab).toHaveAttribute('aria-selected', 'true');
-
-      const votingTab = screen.getByRole('tab', { name: /Voting/i });
-      expect(votingTab).toHaveAttribute('aria-selected', 'false');
+      rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={false} darkMode={false} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(true);
     });
+  });
 
-    test('active tab has tabIndex 0, inactive tabs have tabIndex -1', () => {
+  describe('Tabs', () => {
+    test('renders Board and Advanced tabs, Board selected by default', () => {
       render(<SettingsPanel {...defaultProps} />);
 
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
       const tabs = within(tablist).getAllByRole('tab');
-      const activeTab = tabs.find(tab => tab.getAttribute('aria-selected') === 'true');
-      const inactiveTabs = tabs.filter(tab => tab.getAttribute('aria-selected') === 'false');
-
-      expect(activeTab).toHaveAttribute('tabindex', '0');
-      inactiveTabs.forEach(tab => {
-        expect(tab).toHaveAttribute('tabindex', '-1');
-      });
+      expect(tabs.map(t => t.textContent)).toEqual(['Board', 'Advanced']);
+      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+      expect(tabs[0]).toHaveAttribute('tabindex', '0');
+      expect(tabs[1]).toHaveAttribute('tabindex', '-1');
     });
 
-    test('each tab has matching aria-controls and tabpanel id', () => {
+    test('each tab controls its matching tabpanel', () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      const tabIds = ['appearance', 'voting', 'features', 'share'];
-      tabIds.forEach(id => {
+      ['board', 'advanced'].forEach(id => {
         const tab = document.getElementById(`settings-tab-${id}`);
-        expect(tab).toBeInTheDocument();
         expect(tab).toHaveAttribute('aria-controls', `settings-tabpanel-${id}`);
-
         const panel = document.getElementById(`settings-tabpanel-${id}`);
-        expect(panel).toBeInTheDocument();
+        expect(panel).toHaveAttribute('role', 'tabpanel');
         expect(panel).toHaveAttribute('aria-labelledby', `settings-tab-${id}`);
       });
+      expect(document.getElementById('settings-tabpanel-board')).not.toHaveAttribute('hidden');
+      expect(document.getElementById('settings-tabpanel-advanced')).toHaveAttribute('hidden');
     });
 
-    test('each tabpanel has role="tabpanel"', () => {
+    test('clicking a tab switches panels', () => {
       render(<SettingsPanel {...defaultProps} />);
+      openAdvanced();
 
-      const panels = screen.getAllByRole('tabpanel', { hidden: true }).filter(p => p.id.startsWith('settings-tabpanel-'));
-      expect(panels).toHaveLength(4);
+      expect(screen.getByRole('tab', { name: /Advanced/i })).toHaveAttribute('aria-selected', 'true');
+      expect(document.getElementById('settings-tabpanel-advanced')).not.toHaveAttribute('hidden');
+      expect(document.getElementById('settings-tabpanel-board')).toHaveAttribute('hidden');
     });
 
-    test('only the active tabpanel is visible', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      const activePanel = document.getElementById('settings-tabpanel-appearance');
-      expect(activePanel).not.toHaveAttribute('hidden');
-
-      const hiddenPanels = ['voting', 'features', 'share'];
-      hiddenPanels.forEach(id => {
-        const panel = document.getElementById(`settings-tabpanel-${id}`);
-        expect(panel).toHaveAttribute('hidden');
-      });
-    });
-  });
-
-  describe('Tab switching', () => {
-    test('clicking a tab switches the active tab', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      // Click Voting tab
-      const votingTab = screen.getByRole('tab', { name: /Voting/i });
-      fireEvent.click(votingTab);
-
-      expect(votingTab).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'false');
-
-      // Voting panel should be visible
-      expect(document.getElementById('settings-tabpanel-voting')).not.toHaveAttribute('hidden');
-      expect(document.getElementById('settings-tabpanel-appearance')).toHaveAttribute('hidden');
-    });
-
-    test('clicking each tab shows the correct panel content', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      // Appearance tab (default) - check for Theme section
-      expect(screen.getByText('Theme')).toBeVisible();
-
-      // Voting tab
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
-      expect(screen.getByText('Allow voting')).toBeVisible();
-
-      // Features tab
-      fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
-      expect(screen.getByText('Retrospective mode')).toBeVisible();
-
-      // Share & Export tab
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
-      expect(screen.getByText('Share Board')).toBeVisible();
-    });
-
-    test('resets to Appearance tab when dialog reopens', () => {
+    test('resets to Board tab when dialog reopens', () => {
       const { rerender } = render(<SettingsPanel {...defaultProps} />);
+      openAdvanced();
 
-      // Switch to Voting tab
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
-      expect(screen.getByRole('tab', { name: /Voting/i })).toHaveAttribute('aria-selected', 'true');
-
-      // Close dialog
       rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
-
-      // Reopen dialog
       rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={true} />);
 
-      // Should be back on Appearance tab
-      expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: /Board/i })).toHaveAttribute('aria-selected', 'true');
     });
-  });
 
-  describe('Keyboard navigation', () => {
-    test('ArrowRight moves to next tab', () => {
+    test('arrow keys, Home and End move between tabs', () => {
       render(<SettingsPanel {...defaultProps} />);
-
       const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
+      const board = screen.getByRole('tab', { name: /Board/i });
+      const advanced = screen.getByRole('tab', { name: /Advanced/i });
+
       fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-
-      expect(screen.getByRole('tab', { name: /Voting/i })).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'false');
-    });
-
-    test('ArrowLeft wraps from first to last tab', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      // Start on Appearance (first tab), press ArrowLeft
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
+      expect(advanced).toHaveAttribute('aria-selected', 'true');
+      fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+      expect(board).toHaveAttribute('aria-selected', 'true');
       fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-
-      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
-    });
-
-    test('ArrowRight wraps from last to first tab', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      // Navigate to last tab first
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
-
-      // Press ArrowRight — should wrap to first
-      fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-      expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'true');
-    });
-
-    test('Home key moves to first tab', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      // Navigate to Features tab
-      fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
-
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
+      expect(advanced).toHaveAttribute('aria-selected', 'true');
       fireEvent.keyDown(tablist, { key: 'Home' });
-
-      expect(screen.getByRole('tab', { name: /Appearance/i })).toHaveAttribute('aria-selected', 'true');
-    });
-
-    test('End key moves to last tab', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
+      expect(board).toHaveAttribute('aria-selected', 'true');
       fireEvent.keyDown(tablist, { key: 'End' });
-
-      expect(screen.getByRole('tab', { name: /Share/i })).toHaveAttribute('aria-selected', 'true');
-    });
-
-    test('sequential ArrowRight navigates through all tabs', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      const tablist = screen.getByRole('tablist', { name: 'Settings categories' });
-      const expectedOrder = [/Voting/i, /Features/i, /Share/i, /Appearance/i];
-
-      expectedOrder.forEach(name => {
-        fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-        expect(screen.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true');
-      });
+      expect(advanced).toHaveAttribute('aria-selected', 'true');
     });
   });
 
-  describe('Tab content isolation', () => {
-    test('Appearance tab shows theme and sort options', () => {
+  describe('Board tab', () => {
+    test('shows voting, votes per person, and author visibility options', () => {
       render(<SettingsPanel {...defaultProps} />);
-
-      expect(screen.getByText('Theme')).toBeVisible();
-      expect(screen.getByText('Sort Cards')).toBeVisible();
-      expect(screen.getByText('Light')).toBeVisible();
-      expect(screen.getByText('Dark')).toBeVisible();
-      expect(screen.getByText('Chronological')).toBeVisible();
-      expect(screen.getByText('By Votes')).toBeVisible();
-    });
-
-    test('Voting tab shows voting toggles and vote limit', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
 
       expect(screen.getByRole('switch', { name: 'Allow voting' })).toBeVisible();
-      expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
       expect(screen.getByText('Votes per person')).toBeVisible();
-      expect(screen.getByText('Unlimited')).toBeVisible();
-    });
-
-    test('Features tab shows feature toggles and health check', () => {
-      render(<SettingsPanel {...defaultProps} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
-
-      expect(screen.getByRole('switch', { name: 'Retrospective Mode' })).toBeVisible();
       expect(screen.getByRole('switch', { name: 'Anonymous' })).toBeVisible();
-      expect(screen.queryByRole('switch', { name: 'Screen sharing mode' })).not.toBeInTheDocument();
-      expect(screen.getByText('Start Health Check')).toBeVisible();
     });
 
-    test('Share tab shows share and export actions', () => {
+    test('does not include theme, sort, share, or insights', () => {
       render(<SettingsPanel {...defaultProps} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Share/i }));
 
-      expect(screen.getByText('Share Board')).toBeVisible();
-      expect(screen.getByText('Export Board')).toBeVisible();
+      expect(screen.queryByText('Theme')).not.toBeInTheDocument();
+      expect(screen.queryByText('Sort Cards')).not.toBeInTheDocument();
+      expect(screen.queryByText('Share Board')).not.toBeInTheDocument();
+      expect(screen.queryByRole('tab', { name: /Insights/i })).not.toBeInTheDocument();
     });
 
-    test('Anonymous toggle is the inverse of display names', () => {
-      const updateShowDisplayNames = vi.fn();
-      render(<SettingsPanel {...defaultProps} showDisplayNames={false} updateShowDisplayNames={updateShowDisplayNames} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Features/i }));
+    test('Start Health Check starts the health check and closes settings', () => {
+      render(<SettingsPanel {...defaultProps} retrospectiveMode={false} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Start Health Check' }));
+      expect(defaultProps.handleStartHealthCheck).toHaveBeenCalled();
+      expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
+    });
 
-      const toggle = screen.getByRole('switch', { name: 'Anonymous' });
-      expect(toggle).toHaveAttribute('aria-checked', 'true');
-      fireEvent.click(toggle);
-      expect(updateShowDisplayNames).toHaveBeenCalledWith(true);
+    test('hides votes per person when voting is off', () => {
+      render(<SettingsPanel {...defaultProps} votingEnabled={false} />);
+      expect(screen.queryByText('Votes per person')).not.toBeInTheDocument();
+    });
+
+    test('toggling voting calls updateVotingEnabled', () => {
+      render(<SettingsPanel {...defaultProps} />);
+      fireEvent.click(screen.getByRole('switch', { name: 'Allow voting' }));
+      expect(defaultProps.updateVotingEnabled).toHaveBeenCalledWith(false);
     });
   });
 
-  describe('Voting forced on in retrospective mode', () => {
-    test('voting toggle is disabled when retrospective mode is on', () => {
-      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+  describe('Retrospective mode', () => {
+    test('hides Allow voting but keeps vote settings', () => {
+      render(<SettingsPanel {...defaultProps} votingEnabled={false} retrospectiveMode={true} />);
 
-      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
-      expect(votingSwitch).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.queryByRole('switch', { name: 'Allow voting' })).not.toBeInTheDocument();
+      expect(screen.getByText('Votes per person')).toBeVisible();
+
+      openAdvanced();
+      expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
     });
 
-    test('voting toggle is not disabled when retrospective mode is off', () => {
-      render(<SettingsPanel {...defaultProps} retrospectiveMode={false} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+    test('toggle lives in Advanced with an accurate hint', () => {
+      render(<SettingsPanel {...defaultProps} />);
+      openAdvanced();
 
-      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
-      expect(votingSwitch).not.toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(screen.getByRole('switch', { name: 'Retrospective mode' }));
+      expect(defaultProps.updateRetrospectiveMode).toHaveBeenCalledWith(true);
+      expect(screen.getByText('Guided steps: add cards, group, vote, discuss')).toBeVisible();
+      expect(screen.queryByText(/hidden text until revealed/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced tab', () => {
+    test('shows voting rules, background, and board actions', () => {
+      render(<SettingsPanel {...defaultProps} />);
+      openAdvanced();
+
+      expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
+      expect(screen.getByRole('switch', { name: 'Allow users to vote multiple times on the same card' })).toBeVisible();
+      expect(screen.getByText('Board Background')).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Export board' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Start next board' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Link to previous board' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Reset all votes' })).toBeVisible();
+      expect(screen.queryByRole('button', { name: 'Remove from series' })).not.toBeInTheDocument();
     });
 
-    test('clicking voting toggle in retro mode does not call updateVotingEnabled', () => {
-      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+    test('hides voting rules and reset when voting is off', () => {
+      render(<SettingsPanel {...defaultProps} votingEnabled={false} />);
+      openAdvanced();
 
-      const votingSwitch = screen.getByRole('switch', { name: 'Allow voting' });
-      fireEvent.click(votingSwitch);
-
-      expect(defaultProps.updateVotingEnabled).not.toHaveBeenCalled();
+      expect(screen.queryByRole('switch', { name: 'Allow downvoting' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Reset all votes' })).not.toBeInTheDocument();
     });
 
-    test('shows forced-on hint when retrospective mode is active', () => {
-      render(<SettingsPanel {...defaultProps} retrospectiveMode={true} />);
-      fireEvent.click(screen.getByRole('tab', { name: /Voting/i }));
+    test('shows Remove from series when board is linked', () => {
+      render(<SettingsPanel {...defaultProps} previousBoardId="prev" />);
+      openAdvanced();
 
-      expect(screen.getByText('Voting is always enabled in retrospective mode')).toBeVisible();
+      fireEvent.click(screen.getByRole('button', { name: 'Remove from series' }));
+      expect(defaultProps.onUnlinkSeries).toHaveBeenCalled();
+    });
+
+    test('Export board closes the dialog and opens export', () => {
+      render(<SettingsPanel {...defaultProps} />);
+      openAdvanced();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Export board' }));
+      expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
+      expect(defaultProps.handleExportBoard).toHaveBeenCalled();
     });
   });
 
@@ -336,27 +243,19 @@ describe('SettingsPanel - Tab Navigation', () => {
 
     test('Escape key closes the dialog', () => {
       render(<SettingsPanel {...defaultProps} />);
-
       fireEvent.keyDown(window, { key: 'Escape' });
-
       expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
     });
 
     test('clicking overlay closes the dialog', () => {
       render(<SettingsPanel {...defaultProps} />);
-
-      const overlay = document.querySelector('.modal-overlay');
-      fireEvent.click(overlay);
-
+      fireEvent.click(document.querySelector('.modal-overlay'));
       expect(defaultProps.setSortDropdownOpen).toHaveBeenCalledWith(false);
     });
 
     test('clicking inside the modal does not close it', () => {
       render(<SettingsPanel {...defaultProps} />);
-
-      const modal = document.querySelector('.modal-container');
-      fireEvent.click(modal);
-
+      fireEvent.click(document.querySelector('.modal-container'));
       expect(defaultProps.setSortDropdownOpen).not.toHaveBeenCalled();
     });
   });

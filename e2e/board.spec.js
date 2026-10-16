@@ -102,8 +102,8 @@ test.describe('Board', () => {
     // Settings modal should appear
     await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
 
-    // Should show Appearance section
-    await expect(page.getByText('Appearance')).toBeVisible();
+    // Should show Board tab
+    await expect(page.getByRole('tab', { name: /^board$/i })).toBeVisible();
 
     // Close via the close button
     await page.getByRole('button', { name: /close/i }).click();
