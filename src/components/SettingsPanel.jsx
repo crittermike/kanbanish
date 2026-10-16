@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Moon, Settings, Share2, Sun } from 'react-feather';
+import { Settings } from 'react-feather';
 import BackgroundPicker from './BackgroundPicker';
 import BoardActionsMenu from './BoardActionsMenu';
 import Timer from './Timer';
@@ -25,8 +25,8 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
 );
 
 /**
- * Header actions (timer, share, theme, board actions) and the Board Settings modal.
- * Settings holds board preferences only; one-off actions live in the board actions menu.
+ * Header actions (timer, board actions menu) and the Board Settings modal.
+ * Settings holds board preferences only; sort, theme and one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
   handleStartHealthCheck,
@@ -42,6 +42,9 @@ const SettingsPanel = ({
   updateRetrospectiveMode,
   sortDropdownOpen,
   setSortDropdownOpen,
+  showSort,
+  sortByVotes,
+  setSortByVotes,
   resetAllVotes,
   darkMode,
   updateDarkMode,
@@ -104,23 +107,13 @@ const SettingsPanel = ({
     <div className="action-buttons">
       <Timer />
       {children}
-      <button
-        className="btn icon-btn share-board-btn"
-        onClick={copyShareUrl}
-        title="Copy board link"
-        aria-label="Share board"
-      >
-        <Share2 size={16} aria-hidden="true" />
-      </button>
-      <button
-        className="btn icon-btn theme-toggle-btn"
-        onClick={() => updateDarkMode(!darkMode)}
-        title={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
-        aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
-      >
-        {darkMode ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
-      </button>
       <BoardActionsMenu
+        showSort={showSort}
+        sortByVotes={sortByVotes}
+        onSortChange={setSortByVotes}
+        onShare={copyShareUrl}
+        darkMode={darkMode}
+        onToggleDarkMode={updateDarkMode}
         onStartHealthCheck={handleStartHealthCheck}
         onExportBoard={handleExportBoard}
         onStartNextBoard={onStartNextBoard}

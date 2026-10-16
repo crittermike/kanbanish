@@ -202,7 +202,8 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Share board' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy board link' }));
 
     const expectedUrl = 'https://example.com/?board=test-board-123';
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedUrl);
@@ -217,7 +218,7 @@ describe('Board Component', () => {
   });
 
 
-  test('shows the sort menu in the header without opening search', () => {
+  test('shows sort options in the board actions menu', () => {
     // For this test, let's simulate having a board ID in the URL
     // so the template modal doesn't open automatically
     mockURLSearchParams.mockImplementation(() => ({
@@ -230,10 +231,11 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    expect(screen.getByRole('button', { name: 'Sort cards: Newest' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('hides the sort menu when voting is off', () => {
+  test('hides sort options when voting is off', () => {
     useBoardContext.mockReturnValue({ ...mockContextValue, votingEnabled: false, retrospectiveMode: false, sortByVotes: false });
 
     render(
@@ -242,7 +244,8 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    expect(screen.queryByRole('button', { name: /^Sort cards/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
   });
 
   test('selects sort by votes when that option is clicked', () => {
@@ -258,7 +261,7 @@ describe('Board Component', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Newest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
     // Check that setSortByVotes was called with true

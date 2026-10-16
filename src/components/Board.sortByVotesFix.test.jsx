@@ -87,7 +87,7 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Newest' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
     expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
 
@@ -113,7 +113,7 @@ describe('Board Component - Sort By Votes Fix', () => {
       </DndProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sort cards: Most votes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
     expect(screen.getByRole('menuitemradio', { name: 'Most votes' })).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Newest' }));
 

@@ -400,7 +400,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     box-shadow: 0 0 0 1px var(--primary-color);
 }
 
-/* Header dropdown menus (sort, board actions) */
+/* Header dropdown menu (board actions) */
 .header-menu {
     position: relative;
     display: flex;
@@ -421,11 +421,6 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 
 .header-menu-popover-end {
     right: 0;
-}
-
-.header-menu-popover-start {
-    left: 0;
-    min-width: 160px;
 }
 
 .header-menu-item {
@@ -479,31 +474,51 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     background-color: var(--border-color);
 }
 
-.sort-menu-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    height: 32px;
-    padding: 0 var(--space-xs);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
+.header-menu-label {
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all var(--transition-speed) var(--transition-ease);
 }
 
-.sort-menu-btn:hover,
-.sort-menu-btn[aria-expanded="true"] {
-    color: var(--text-color);
-    background: var(--hover-bg);
+.header-menu-icon-spacer {
+    flex-shrink: 0;
+    width: 15px;
 }
 
-.sort-menu-btn span:not(.sort-menu-prefix) {
+/* Mini switch on toggle items (e.g. Dark mode) */
+.header-menu-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 26px;
+    height: 15px;
+    margin-left: auto;
+    border-radius: 999px;
+    background-color: var(--border-color);
+    transition: background-color var(--transition-speed) var(--transition-ease);
+}
+
+.header-menu-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background-color: #fff;
+    transition: transform var(--transition-speed) var(--transition-ease);
+}
+
+.header-menu-item-switch[aria-checked="true"] {
     color: var(--text-color);
-    font-weight: 500;
+}
+
+.header-menu-item-switch[aria-checked="true"] .header-menu-switch {
+    background-color: var(--accent);
+}
+
+.header-menu-item-switch[aria-checked="true"] .header-menu-switch::after {
+    transform: translateX(11px);
 }
 
 .board-actions-btn[aria-expanded="true"] {
@@ -539,7 +554,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 }
 
 /*
- * Narrow screens: keep the header to one row (home, title, more, settings).
+ * Narrow screens: keep the header to one row (home, title, more, board actions, settings).
  * The header's wrapper divs are flattened with display: contents so every icon
  * becomes a flex item of .header-content; secondary icons are hidden until the
  * "more" toggle is expanded, then shown on a second row.
@@ -557,10 +572,6 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
         display: contents;
     }
 
-    .sort-menu-prefix {
-        display: none;
-    }
-
     .header-content #board-title {
         flex: 1 1 0;
         width: auto;
@@ -572,6 +583,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 
     .header-content .settings-toggle-btn,
+    .header-content .board-actions-menu,
     .header-content .timer-active {
         order: 1;
     }
@@ -585,12 +597,12 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 
     .header-content .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content .action-buttons > :not(.settings-toggle-btn, .timer-active, .modal-overlay) {
+    .header-content .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay) {
         order: 3;
     }
 
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .timer-active, .modal-overlay),
+    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay),
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .timer-active .timer-controls {
         display: none;
     }

@@ -43,6 +43,9 @@ describe('SettingsPanel', () => {
     onStartNextBoard: vi.fn(),
     onOpenLinkPrevious: vi.fn(),
     onUnlinkSeries: vi.fn(),
+    showSort: true,
+    sortByVotes: false,
+    setSortByVotes: vi.fn(),
   };
 
   const openActions = () => fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
@@ -52,20 +55,13 @@ describe('SettingsPanel', () => {
   });
 
   describe('Header buttons', () => {
-    test('share button copies the board link', () => {
+    test('keeps only timer, board actions and settings in the header', () => {
       render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
-      fireEvent.click(screen.getByRole('button', { name: 'Share board' }));
-      expect(defaultProps.copyShareUrl).toHaveBeenCalled();
-    });
-
-    test('theme button toggles dark mode', () => {
-      const { rerender } = render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
-      fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
-      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(false);
-
-      rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={false} darkMode={false} />);
-      fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
-      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(true);
+      expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /theme/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^sort/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Board actions' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Board settings' })).toBeInTheDocument();
     });
   });
 
@@ -183,12 +179,61 @@ describe('SettingsPanel', () => {
       expect(button).toHaveAttribute('aria-expanded', 'true');
       const menu = screen.getByRole('menu', { name: 'Board actions' });
       expect(within(menu).getAllByRole('menuitem').map(i => i.textContent)).toEqual([
-        'Start health check',
+        'Copy board link',
         'Export board',
+        'Start health check',
         'Start next board',
         'Link to previous board',
         'Reset all votes',
       ]);
+    });
+
+    test('sort options show the current choice and change it', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} sortByVotes={false} />);
+      openActions();
+      const group = screen.getByRole('group', { name: 'Sort by' });
+      expect(within(group).getByRole('menuitemradio', { name: 'Newest' })).toHaveAttribute('aria-checked', 'true');
+      expect(within(group).getByRole('menuitemradio', { name: 'Most votes' })).toHaveAttribute('aria-checked', 'false');
+
+      fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
+      expect(defaultProps.setSortByVotes).toHaveBeenCalledWith(true);
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
+
+    test('selecting the current sort does not write', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} sortByVotes={true} />);
+      openActions();
+      fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
+      expect(defaultProps.setSortByVotes).not.toHaveBeenCalled();
+    });
+
+    test('hides sort options when sorting is unavailable', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} showSort={false} />);
+      openActions();
+      expect(screen.queryByRole('group', { name: 'Sort by' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
+    });
+
+    test('Copy board link copies the share URL', () => {
+      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
+      openActions();
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Copy board link' }));
+      expect(defaultProps.copyShareUrl).toHaveBeenCalled();
+    });
+
+    test('Dark mode switch shows the current theme and toggles it without closing', () => {
+      const { rerender } = render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} darkMode={true} />);
+      openActions();
+      const item = screen.getByRole('menuitemcheckbox', { name: 'Dark mode' });
+      expect(item).toHaveAttribute('aria-checked', 'true');
+      fireEvent.click(item);
+      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(false);
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+
+      rerender(<SettingsPanel {...defaultProps} sortDropdownOpen={false} darkMode={false} />);
+      expect(screen.getByRole('menuitemcheckbox', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'false');
+      fireEvent.click(screen.getByRole('menuitemcheckbox', { name: 'Dark mode' }));
+      expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(true);
     });
 
     test('Start health check works outside retrospective mode', () => {
@@ -238,7 +283,7 @@ describe('SettingsPanel', () => {
     test('Escape closes the menu and returns focus to the button', () => {
       render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} />);
       openActions();
-      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toHaveFocus();
+      expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveFocus();
 
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -251,11 +296,15 @@ describe('SettingsPanel', () => {
       const menu = screen.getByRole('menu');
 
       fireEvent.keyDown(menu, { key: 'ArrowDown' });
-      expect(screen.getByRole('menuitem', { name: 'Export board' })).toHaveFocus();
+      expect(screen.getByRole('menuitemradio', { name: 'Most votes' })).toHaveFocus();
+      fireEvent.keyDown(menu, { key: 'ArrowDown' });
+      expect(screen.getByRole('menuitem', { name: 'Copy board link' })).toHaveFocus();
       fireEvent.keyDown(menu, { key: 'End' });
       expect(screen.getByRole('menuitem', { name: 'Reset all votes' })).toHaveFocus();
-      fireEvent.keyDown(menu, { key: 'ArrowDown' });
-      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toHaveFocus();
+      fireEvent.keyDown(menu, { key: 'ArrowUp' });
+      expect(screen.getByRole('menuitemcheckbox', { name: 'Dark mode' })).toHaveFocus();
+      fireEvent.keyDown(menu, { key: 'Home' });
+      expect(screen.getByRole('menuitemradio', { name: 'Newest' })).toHaveFocus();
     });
 
     test('clicking outside closes the menu', () => {

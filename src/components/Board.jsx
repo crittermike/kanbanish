@@ -239,9 +239,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
-            showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
-            sortByVotes={sortByVotes}
-            setSortByVotes={setSortByVotes}
           />
           <SettingsPanel
             handleStartHealthCheck={startHealthCheckPhase}
@@ -257,6 +254,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
             updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
+            showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
+            sortByVotes={sortByVotes}
+            setSortByVotes={setSortByVotes}
             resetAllVotes={resetAllVotes}
             darkMode={darkMode}
             updateDarkMode={updateDarkMode}
