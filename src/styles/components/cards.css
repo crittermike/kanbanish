@@ -582,9 +582,8 @@
 /* Mobile responsive adjustments for cards */
 @media (max-width: 768px) {
 
-    /* Enhance touch targets for card actions */
     .card {
-        padding: var(--space-md);
+        padding: var(--space-xs) var(--space-sm);
     }
 
     /* Card edit actions stay horizontal on mobile, just increase touch targets */
@@ -644,15 +643,14 @@
         margin-bottom: var(--space-sm);
     }
 
-    /* Increase touch area for voting buttons */
+    /* Wider touch area for voting buttons without making cards taller */
     .vote-button {
-        height: 30px;
-        width: 30px;
-        padding: 6px;
+        height: 20px;
+        width: 32px;
     }
 
     .votes {
-        min-width: 40px;
+        min-width: 32px;
     }
 
     /* Make comments button easier to tap */

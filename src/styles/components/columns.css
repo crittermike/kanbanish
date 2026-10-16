@@ -308,11 +308,23 @@ html.light-mode .column {
     box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments: one full-width column per screen, snapping horizontally */
 @media (max-width: 768px) {
+  /* Wait for columns to render; otherwise the add-column button is the only
+     snap target and the board stays scrolled to the end once columns load. */
+  main:has(.column) {
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-md);
+  }
+
   .column {
-    min-width: var(--column-width-mobile);
-    max-width: var(--column-width-mobile);
+    min-width: calc(100vw - 2 * var(--space-md));
+    max-width: calc(100vw - 2 * var(--space-md));
+    scroll-snap-align: start;
+  }
+
+  .add-column-container {
+    scroll-snap-align: end;
   }
 
   .column.collapsed {
