@@ -33,7 +33,7 @@ describe('PollResults Component', () => {
     expect(screen.getByText('7 participants')).toBeInTheDocument();
   });
 
-  test('displays overall score and effectiveness level', () => {
+  test('displays overall score without an effectiveness label', () => {
     mockGetPollStats.mockReturnValue({
       average: 4.2,
       distribution: [0, 1, 2, 3, 1],
@@ -44,7 +44,7 @@ describe('PollResults Component', () => {
 
     expect(screen.getByText('4.2')).toBeInTheDocument();
     expect(screen.getByText('5.0')).toBeInTheDocument();
-    expect(screen.getByText('Very Effective')).toBeInTheDocument();
+    expect(screen.queryByText('Very Effective')).not.toBeInTheDocument();
   });
 
   test('shows vote distribution chart', () => {

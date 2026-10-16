@@ -29,17 +29,22 @@ vi.mock('./VotingControls', () => ({
 
 // Mock CardReactions component
 vi.mock('./CardReactions', () => ({
-  default: ({ reactions, disabled }) => (
-    <div className="reactions">
-      {reactions && Object.entries(reactions).map(([emoji, data]) => (
-        <div key={emoji}>
-          <span>{emoji}</span>
-          <span>{data.count}</span>
-        </div>
-      ))}
-      {!disabled && <button title="Add reaction">+</button>}
-    </div>
-  )
+  default: ({ reactions }) => {
+    const entries = Object.entries(reactions || {}).filter(([, data]) => data.count > 0);
+    if (!entries.length) {
+      return null;
+    }
+    return (
+      <div className="emoji-reactions">
+        {entries.map(([emoji, data]) => (
+          <button key={emoji} data-testid="emoji-reaction">
+            <span>{emoji}</span>
+            <span>{data.count}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 }));
 
 // Mock Comments component
@@ -428,14 +433,9 @@ describe('CardGroup Component', () => {
 
     render(<CardGroup {...mockProps} groupData={groupWithComments} />);
 
-    // Find the comments toggle button
-    const commentsButton = screen.getByTitle('Toggle comments');
-    expect(commentsButton).toBeInTheDocument();
-
-    // Should show correct comment count
-    // Verify it's specifically the comment count badge, not the card count badge
-    const commentsButtonWithCount = screen.getByTitle('Toggle comments');
-    expect(commentsButtonWithCount.querySelector('.interaction-count')).toHaveTextContent('2');
+    // The comment badge shows the count; the hover action toggles comments too
+    expect(screen.getByRole('button', { name: 'Toggle group comments' })).toHaveTextContent('2');
+    expect(screen.getByRole('button', { name: 'Toggle comments' })).toBeInTheDocument();
   });
 
   test('toggles comments section when comment button is clicked', () => {
@@ -473,7 +473,7 @@ describe('CardGroup Component', () => {
     expect(screen.queryByText('Comments')).not.toBeInTheDocument();
 
     // Click the comments toggle button
-    const commentsButton = screen.getByTitle('Toggle comments');
+    const commentsButton = screen.getByRole('button', { name: 'Toggle group comments' });
     fireEvent.click(commentsButton);
 
     // Verify toggleComments was called
@@ -515,25 +515,17 @@ describe('CardGroup Component', () => {
 
     render(<CardGroup {...mockProps} groupData={groupWithReactions} />);
 
-    // Should display the reactions - use more flexible matchers due to whitespace
-    expect(screen.getByText(/👍/)).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'button' && element?.textContent?.includes('👍') && element?.textContent?.includes('3');
-    })).toBeInTheDocument();
-    expect(screen.getByText(/😄/)).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'button' && element?.textContent?.includes('😄') && element?.textContent?.includes('1');
-    })).toBeInTheDocument();
+    const reactions = screen.getAllByTestId('emoji-reaction');
+    expect(reactions).toHaveLength(2);
+    expect(reactions[0]).toHaveTextContent('👍3');
+    expect(reactions[1]).toHaveTextContent('😄1');
   });
 
-  test('shows reactions section with add button when no reactions exist', () => {
+  test('hides the reactions row but keeps the add reaction action when no reactions exist', () => {
     const { container } = render(<CardGroup {...mockProps} />);
 
-    // Should not display any specific reactions
-    expect(screen.queryByText('👍')).not.toBeInTheDocument();
-    // But the interactions section should be present with add button
-    expect(container.querySelector('.group-interactions-section')).toBeInTheDocument();
-    // Should show the add reaction button
+    expect(screen.queryByTestId('emoji-reaction')).not.toBeInTheDocument();
+    expect(container.querySelector('.emoji-reactions')).not.toBeInTheDocument();
     expect(screen.getByTitle('Add reaction')).toBeInTheDocument();
   });
 
@@ -544,9 +536,8 @@ describe('CardGroup Component', () => {
     const commentsButton = screen.getByTitle('Toggle comments');
     expect(commentsButton).toBeInTheDocument();
     
-    // When there are no comments, the count span should not be rendered
-    const commentCount = commentsButton.querySelector('.interaction-count');
-    expect(commentCount).toBeNull();
+    // When there are no comments, the count badge should not be rendered
+    expect(screen.queryByRole('button', { name: 'Toggle group comments' })).not.toBeInTheDocument();
   });
 
   test('does not enforce vote limit for groups when not in retrospective mode', () => {

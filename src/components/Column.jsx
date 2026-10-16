@@ -1,13 +1,13 @@
 import { ref, set, remove } from 'firebase/database';
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronLeft, ChevronRight, Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
-import { useFocusTrap } from '../hooks/useFocusTrap';
 import { addCard } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
+import { getDefaultGroupName } from '../utils/groupName';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
@@ -43,24 +43,14 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [showGroupModal, setShowGroupModal] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [draggedCardForGrouping, setDraggedCardForGrouping] = useState(null);
+  const [newGroupId, setNewGroupId] = useState(null);
   const columnRef = useRef(null);
-  const groupModalRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const newCardTextareaRef = useRef(null);
 
   const emojiAC = useEmojiAutocomplete(newCardContent, setNewCardContent, newCardTextareaRef);
 
-  // Cancel group creation
-  const cancelCreateGroup = () => {
-    setShowGroupModal(false);
-    setNewGroupName('');
-    setDraggedCardForGrouping(null);
-  };
-
-  useFocusTrap(groupModalRef, showGroupModal, { onClose: cancelCreateGroup });
+  const clearNewGroupId = useCallback(() => setNewGroupId(null), []);
 
   // Update local title when columnData changes (from Firebase)
   useEffect(() => {
@@ -309,53 +299,23 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
       return;
     }
 
-    // Store both the card IDs and column info for group creation
-    setDraggedCardForGrouping({
-      draggedCardId,
-      targetCardId,
-      draggedCardColumn,
-      targetCardColumn: columnId
-    });
-    setShowGroupModal(true);
-    setNewGroupName('');
-  };
+    // Create the group right away, named after the target card; the creator can rename it inline
+    const targetCard = columnData.cards?.[targetCardId];
+    const groupName = getDefaultGroupName(targetCard?.content);
+    const targetCreatedTime = targetCard?.created;
 
-  // Confirm group creation
-  const confirmCreateGroup = () => {
-    if (!newGroupName.trim()) {
-      showNotification('Please enter a group name');
-      return;
+    if (draggedCardColumn === columnId) {
+      setNewGroupId(createCardGroup(columnId, [draggedCardId, targetCardId], groupName, targetCreatedTime));
+    } else {
+      moveCard(draggedCardId, draggedCardColumn, columnId, null)
+        .then(() => {
+          setNewGroupId(createCardGroup(columnId, [draggedCardId, targetCardId], groupName, targetCreatedTime));
+        })
+        .catch(() => {
+          showNotification('Error creating group across columns');
+        });
     }
-
-    if (draggedCardForGrouping) {
-      const { draggedCardId, targetCardId, draggedCardColumn, targetCardColumn } = draggedCardForGrouping;
-
-      // Get the target card's created timestamp to maintain sort position
-      const targetCard = columnData.cards?.[targetCardId];
-      const targetCreatedTime = targetCard?.created;
-
-      if (draggedCardColumn === targetCardColumn) {
-        // Same column - create group directly
-        createCardGroup(columnId, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
-      } else {
-        // Cross-column - move the dragged card first, then create group
-        moveCard(draggedCardId, draggedCardColumn, targetCardColumn, null)
-          .then(() => {
-            // Now that the card has been moved, create the group
-            createCardGroup(targetCardColumn, [draggedCardId, targetCardId], newGroupName.trim(), targetCreatedTime);
-          })
-          .catch(() => {
-            // Error moving card for group creation
-            showNotification('Error creating group across columns');
-          });
-      }
-    }
-
-    setShowGroupModal(false);
-    setNewGroupName('');
-    setDraggedCardForGrouping(null);
   };
-
 
   // Count total cards in this column (including grouped cards)
   const getCardCount = () => {
@@ -455,6 +415,8 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
                 isFiltering={isFiltering}
                 matchingCardIds={matchingCardIds}
                 onExpandCard={onExpandCard}
+                autoEditName={item.data.id === newGroupId}
+                onAutoEditName={clearNewGroupId}
               />
             );
           } else {
@@ -471,41 +433,6 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             );
           }
         })}
-
-        {/* Group creation modal */}
-        {showGroupModal && (
-          <div className="group-modal-overlay" onClick={cancelCreateGroup} role="presentation">
-            <div ref={groupModalRef} className="group-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="create-group-title">
-              <h3 id="create-group-title">Create Card Group</h3>
-              <p>Creating a group with 2 cards</p>
-              <input
-                type="text"
-                placeholder="Enter group name..."
-                value={newGroupName}
-                onChange={e => setNewGroupName(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    confirmCreateGroup();
-                  }
-                  if (e.key === 'Escape') {
-                    cancelCreateGroup();
-                  }
-                }}
-                className="group-name-input"
-                autoFocus
-                aria-label="Group name"
-              />
-              <div className="group-modal-actions">
-                <button className="btn primary-btn" onClick={confirmCreateGroup}>
-                  Create Group
-                </button>
-                <button className="btn secondary-btn" onClick={cancelCreateGroup}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Add Card button / inline form — outside scrollable area so it's always visible */}

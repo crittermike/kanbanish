@@ -42,11 +42,17 @@
     background: var(--surface-3);
 }
 
+.card-group-header {
+    gap: var(--space-sm);
+    position: relative;
+}
+
 .card-group-title-section {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     flex: 1;
+    min-width: 0;
 }
 
 .expand-icon {
@@ -60,6 +66,9 @@
     font-weight: 600;
     color: var(--text-color);
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     cursor: pointer;
     padding: 2px 4px;
     border-radius: var(--radius-sm);
@@ -81,8 +90,8 @@
 .group-name-container {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
-    flex: 1;
+    gap: 2px;
+    min-width: 0;
 }
 
 .edit-group-name-btn {
@@ -109,6 +118,8 @@
 }
 
 .group-name-input {
+    flex: 1;
+    min-width: 0;
     font-size: var(--font-size-base);
     font-weight: 600;
     background: var(--input-bg);
@@ -121,82 +132,86 @@
 }
 
 .card-group-actions {
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.card-group-actions .votes {
-    background: var(--card-bg);
-    border-radius: var(--radius-sm);
-    padding: var(--space-xs);
-}
-
-/* Group action buttons (comments, reactions) */
-.card-group-actions .comments-btn,
-.card-group-actions .reactions-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: var(--space-xxs);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-speed);
-}
-
-.card-group-actions .comments-btn:hover,
-.card-group-actions .reactions-btn:hover {
-    color: var(--text-color);
-    background: var(--hover-bg);
-}
-
-.card-group-info {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     gap: var(--space-xs);
+    flex-shrink: 0;
 }
 
-.card-count {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    white-space: nowrap;
+/* Group hover actions overlay the name, left of the votes, with a fade like cards */
+.card-group-header .card-hover-actions {
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    padding-right: var(--space-xs);
+    background: linear-gradient(90deg, transparent, var(--surface-3) 24px);
+}
+
+.card-group-header:hover .card-hover-actions,
+.card-group-header:has(:focus-visible) .card-hover-actions,
+.card-group-header:hover .card-hover-actions .emoji-action,
+.card-group-header:has(:focus-visible) .card-hover-actions .emoji-action {
+    display: flex;
+}
+
+.card-group-header:has(:focus-visible):not(:hover) .card-hover-actions {
+    background: linear-gradient(90deg, transparent, var(--surface-2) 24px);
+}
+
+.card-group-header .card-hover-action {
+    box-shadow: none;
+}
+
+.card-group-header .card-hover-action.ungroup-action:hover {
+    background: var(--danger-transparent);
+    color: var(--danger);
 }
 
 .card-count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    background: var(--accent);
-    color: white;
-    border-radius: 50%;
-    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
-    padding: 0 var(--space-xxs);
+    font-variant-numeric: tabular-nums;
 }
 
-.group-action-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: var(--space-xs);
-    border-radius: var(--radius-sm);
-    display: flex;
+.group-comment-badge {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    transition: all var(--transition-speed);
+    gap: 4px;
+    height: 28px;
+    padding: 0 8px;
+    background: var(--accent-transparent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
 }
 
-.group-action-btn:hover {
-    background: var(--danger-transparent);
-    color: var(--danger);
+.group-reactions-row {
+    padding: 0 var(--space-md);
+}
+
+.group-reactions-row .emoji-reactions {
+    margin: 0;
+    padding: var(--space-xs) 0;
+    border-top: none;
+}
+
+.group-reactions-row:has(.emoji-reactions) {
+    border-bottom: 1px solid var(--border-color);
 }
 
 /* Group Content */
@@ -274,136 +289,6 @@
     text-overflow: ellipsis;
 }
 
-/* Group Interactions Section */
-.group-interactions-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-sm) var(--space-md);
-    border-bottom: 1px solid var(--border-color);
-    background: var(--surface-1);
-}
-
-.group-interactions-left {
-    display: flex;
-    gap: var(--space-xs);
-    align-items: center;
-}
-
-.group-interactions-left .reaction-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    padding: var(--space-xxs) var(--space-xs);
-    background: var(--hover-bg);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-speed);
-    border: 1px solid transparent;
-}
-
-.group-interactions-left .reaction-item:hover {
-    background: var(--accent-transparent);
-    border-color: var(--accent-light);
-}
-
-.group-interactions-left .reaction-item.user-reacted {
-    background: var(--accent-transparent);
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.group-interactions-left .reaction-item.disabled,
-.group-interactions-left .reaction-item:disabled,
-.interaction-btn.disabled,
-.interaction-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.group-interactions-left .reaction-item.frozen {
-    opacity: 1;
-}
-
-.group-interactions-right {
-    display: flex;
-    gap: var(--space-xs);
-    align-items: center;
-}
-
-.interaction-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: var(--space-xxs);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-speed);
-    position: relative;
-}
-
-.interaction-btn:hover {
-    background: var(--hover-bg);
-    color: var(--text-color);
-}
-
-.interaction-btn.comments-btn.has-comments {
-    background: var(--accent-transparent);
-    color: var(--accent);
-}
-
-.interaction-btn.comments-btn.has-comments:hover {
-    background: var(--accent-transparent-light);
-    color: var(--accent-hover);
-}
-
-/* Style the reactions button like cards */
-.interaction-btn.reactions-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent;
-    border: 1px dashed var(--border-color);
-    border-radius: var(--emoji-reaction-radius, var(--radius-sm));
-    width: 2.05rem;
-    height: 2.05rem;
-    cursor: pointer;
-    color: var(--text-color);
-    opacity: 0.7;
-    transition: opacity var(--transition-speed) var(--transition-ease),
-        background-color var(--transition-speed) var(--transition-ease);
-    line-height: 1;
-    padding: 0;
-    gap: 0;
-}
-
-.interaction-btn.reactions-btn:hover {
-    opacity: 1;
-    background-color: var(--hover-bg);
-}
-
-.interaction-count {
-    background: var(--accent);
-    color: white;
-    border-radius: 50%;
-    min-width: 16px;
-    height: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-    position: absolute;
-    top: -4px;
-    right: -4px;
-}
-
 /* Group Selection and Multi-select */
 .card-group.selected {
     border-color: var(--accent);
@@ -435,30 +320,6 @@
     border-bottom: none;
 }
 
-.reaction-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    padding: var(--space-xxs) var(--space-xs);
-    background: var(--hover-bg);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-speed);
-    border: 1px solid transparent;
-}
-
-.reaction-item:hover {
-    background: var(--accent-transparent);
-    border-color: var(--accent-light);
-}
-
-.reaction-item.user-reacted {
-    background: var(--accent-transparent);
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
 /* Group Comments Section */
 .group-comments-section {
     padding: var(--space-sm) var(--space-md);
@@ -485,33 +346,6 @@
     
     .card-group-name {
         font-size: var(--font-size-sm);
-    }
-    
-    .card-count,
-    .card-count-badge {
-        font-size: var(--font-size-xs);
-    }
-    
-    .card-count-badge {
-        min-width: 20px;
-        height: 20px;
-    }
-    
-    .group-interactions-section {
-        padding: var(--space-xs) var(--space-sm);
-    }
-    
-    .group-interactions-left,
-    .group-interactions-right {
-        gap: var(--space-xxs);
-    }
-    
-    .interaction-btn {
-        padding: var(--space-xxs);
-    }
-    
-    .group-action-btn {
-        padding: var(--space-sm);
     }
     
     .card-group-preview {

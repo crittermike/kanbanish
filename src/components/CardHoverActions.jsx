@@ -20,7 +20,8 @@ const CardHoverActions = React.memo(({
   reactionDisabledReason = 'cards-not-revealed',
   showEmojiAction = true,
   showCommentAction = true,
-  onEdit
+  onEdit,
+  children
 }) => {
   const emojiButtonRef = useRef(null);
 
@@ -90,6 +91,8 @@ const CardHoverActions = React.memo(({
           <MessageSquare size={16} aria-hidden="true" />
         </button>
       )}
+
+      {children}
     </div>
   );
 });

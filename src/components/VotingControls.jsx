@@ -1,7 +1,7 @@
 import React from 'react';
-import { ChevronUp, ChevronDown } from 'react-feather';
+import { Minus } from 'react-feather';
 
-const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteButton = true, disabled = false, disabledReason = 'voting-disabled' }) => {
+const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteButton = true, disabled = false, disabledReason = 'voting-disabled', active = false }) => {
   // Determine the appropriate title based on the disabled reason
   const getButtonTitle = action => {
     if (!disabled) {
@@ -18,26 +18,27 @@ const VotingControls = React.memo(({ votes, onUpvote, onDownvote, showDownvoteBu
   };
 
   return (
-    <div className="votes">
+    <div className={`votes vote-pill ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`}>
       <button
-        className={`vote-button ${disabled ? 'disabled' : ''}`}
+        className={`vote-button upvote-button ${disabled ? 'disabled' : ''}`}
         onClick={disabled ? undefined : onUpvote}
         title={getButtonTitle('upvote')}
         disabled={disabled}
         aria-label="Upvote"
+        aria-pressed={active}
       >
-        <ChevronUp size={18} aria-hidden="true" />
+        <span className="vote-emoji" aria-hidden="true">👍</span>
+        <span className="vote-count">{votes || 0}</span>
       </button>
-      <span className="vote-count">{votes || 0}</span>
       {showDownvoteButton && (
         <button
-          className={`vote-button ${disabled ? 'disabled' : ''}`}
+          className={`vote-button downvote-button ${disabled ? 'disabled' : ''}`}
           onClick={disabled ? undefined : onDownvote}
           title={getButtonTitle('downvote')}
           disabled={disabled}
           aria-label="Downvote"
         >
-          <ChevronDown size={18} aria-hidden="true" />
+          <Minus size={14} aria-hidden="true" />
         </button>
       )}
     </div>

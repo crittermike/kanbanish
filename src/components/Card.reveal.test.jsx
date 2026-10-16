@@ -106,10 +106,11 @@ describe('Card Reveal Mode', () => {
     // Should not show original text
     expect(screen.queryByText('Test card content for retro')).not.toBeInTheDocument();
 
-    // Should show obfuscated text (with block characters)
+    // Should show a skeleton placeholder with no card text
     const cardContent = screen.getByTestId('card-content');
-    expect(cardContent.textContent).toContain('█');
     expect(cardContent).toHaveClass('obfuscated');
+    expect(cardContent.textContent).toBe('');
+    expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBeGreaterThan(0);
   });
 
   test('shows normal content when reveal mode is enabled but cards are revealed', () => {
@@ -132,11 +133,11 @@ describe('Card Reveal Mode', () => {
     expect(cardContent).not.toHaveClass('obfuscated');
   });
 
-  test('obfuscated text preserves spaces only', () => {
-    const cardDataWithPunctuation = {
+  test('hidden card placeholder does not leak content and scales with length', () => {
+    const longCard = {
       ...mockCardData,
-      content: 'Hello, world! This is a test.',
-      createdBy: 'other-user-456' // Different creator so text gets obfuscated
+      content: 'Hello, world! This is a much longer card that should span several skeleton lines.',
+      createdBy: 'other-user-456'
     };
 
     useBoardContext.mockReturnValue({
@@ -149,21 +150,12 @@ describe('Card Reveal Mode', () => {
       cardsRevealed: false
     });
 
-    renderCard({ cardData: cardDataWithPunctuation });
+    renderCard({ cardData: longCard });
 
     const cardContent = screen.getByTestId('card-content');
-    const obfuscatedText = cardContent.textContent;
-
-    // Should preserve spaces
-    expect(obfuscatedText).toContain(' ');
-
-    // Should NOT preserve punctuation (now using simple fallback)
-    expect(obfuscatedText).not.toContain(',');
-    expect(obfuscatedText).not.toContain('!');
-    expect(obfuscatedText).not.toContain('.');
-
-    // Should contain block characters for letters and punctuation
-    expect(obfuscatedText).toContain('█');
+    expect(cardContent.textContent).toBe('');
+    expect(cardContent).toHaveAttribute('aria-label', 'Hidden card');
+    expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBe(3);
   });
 
   test('shows unobfuscated content to card creator even when reveal mode is active', () => {
@@ -208,10 +200,11 @@ describe('Card Reveal Mode', () => {
     // Non-creator should not see original text
     expect(screen.queryByText('Test card content for retro')).not.toBeInTheDocument();
 
-    // Should show obfuscated text (with block characters)
+    // Should show a skeleton placeholder with no card text
     const cardContent = screen.getByTestId('card-content');
-    expect(cardContent.textContent).toContain('█');
     expect(cardContent).toHaveClass('obfuscated');
+    expect(cardContent.textContent).toBe('');
+    expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBeGreaterThan(0);
   });
 
   test('hides voting when cards are obfuscated for non-creators', () => {
@@ -236,10 +229,6 @@ describe('Card Reveal Mode', () => {
     expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Voting disabled until cards are revealed')).not.toBeInTheDocument();
-
-    // Card content should have full-width class since voting is hidden
-    const cardContent = screen.getByTestId('card-content');
-    expect(cardContent).toHaveClass('full-width');
   });
 
   test('hides reactions when cards are obfuscated for non-creators', () => {
@@ -293,10 +282,6 @@ describe('Card Reveal Mode', () => {
     // Reactions should also be hidden
     expect(screen.queryByRole('button', { name: '+' })).not.toBeInTheDocument();
     expect(screen.queryByTitle('Toggle comments')).not.toBeInTheDocument();
-
-    // Card content should have full-width class since voting is hidden
-    const cardContent = screen.getByTestId('card-content');
-    expect(cardContent).toHaveClass('full-width');
   });
 
   test('enables voting and reactions when cards are revealed but interactions not revealed', () => {

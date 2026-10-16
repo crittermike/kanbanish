@@ -103,8 +103,8 @@ describe('Card Component', () => {
   test('renders emoji reactions', () => {
     render(<Card {...mockProps} />);
 
-    const emojiReaction = screen.getByText('👍');
-    expect(emojiReaction).toBeInTheDocument();
+    const emojiReaction = screen.getByTestId('emoji-reaction');
+    expect(emojiReaction).toHaveTextContent('👍');
     expect(screen.getByText('2')).toBeInTheDocument(); // Emoji reaction count
   });
 
@@ -687,10 +687,6 @@ describe('Card Component', () => {
     expect(screen.queryByTitle('Upvote')).not.toBeInTheDocument();
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
     expect(screen.queryByText('5')).not.toBeInTheDocument(); // Votes count should not be visible
-
-    // Card content should have full-width class
-    const cardContent = screen.getByTestId('card-content');
-    expect(cardContent).toHaveClass('full-width');
   });
 
   test('respects multiple votes allowed setting', async () => {

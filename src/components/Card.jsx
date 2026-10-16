@@ -81,75 +81,44 @@ const CardEditor = ({
   );
 };
 
+// Skeleton line widths (in %) that roughly match the hidden card's length without revealing it
+const SKELETON_CHARS_PER_LINE = 36;
+const SKELETON_MAX_LINES = 4;
+const getSkeletonLineWidths = text => {
+  const length = (text || '').trim().length;
+  const lineCount = Math.min(SKELETON_MAX_LINES, Math.max(1, Math.ceil(length / SKELETON_CHARS_PER_LINE)));
+  const remainder = length % SKELETON_CHARS_PER_LINE || SKELETON_CHARS_PER_LINE;
+  const lastWidth = lineCount === SKELETON_MAX_LINES
+    ? 60
+    : Math.max(30, Math.round((remainder / SKELETON_CHARS_PER_LINE) * 100));
+  return Array.from({ length: lineCount }, (_, i) => (i === lineCount - 1 ? lastWidth : 100));
+};
+
 // Card Content component for display mode
 const CardContent = ({
   cardData,
-  upvoteCard,
-  downvoteCard,
-  votingEnabled,
-  downvotingEnabled,
   userId,
   retrospectiveMode,
-  groupId,
   workflowPhase = 'CREATION',
-  disabledReason,
   children
 }) => {
-  // Determine if we should show the downvote button:
-  // 1. Always show if downvotingEnabled is true
-  // 2. Only show if user has upvoted and downvotingEnabled is false
-  const userVotes = cardData.voters && userId ? cardData.voters[userId] || 0 : 0;
-  const showDownvoteButton = downvotingEnabled || userVotes > 0;
-
-  // Generate obfuscated text that matches the length of the original content
-  const generateObfuscatedText = text => {
-    if (!text) {
-      return '';
-    }
-
-    // Replace each character with appropriate obfuscation
-    return text.split('').map(char => {
-      if (char === ' ') {
-        return ' ';
-      }
-      if (char === '\n') {
-        return '\n';
-      }
-      return '█';
-    }).join('');
-  };
-
-  // Determine what content to show
-  const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
   // During CREATION phase, only obfuscate for non-creators; creators should see their own cards
+  const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
   const showObfuscatedText = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
-
-  // Determine if interactions are disabled based on workflow phase
-  const interactionsDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
-
-  // Determine if interactions should be visible
-  const interactionsVisible = areInteractionsVisible(workflowPhase, retrospectiveMode);
-  const votesVisible = votingEnabled && !groupId && interactionsVisible;
-
-  const displayContent = showObfuscatedText ?
-    generateObfuscatedText(cardData.content) :
-    cardData.content;
 
   return (
     <div className="card-header">
-      {votesVisible && (
-        <VotingControls
-          votes={cardData.votes}
-          onUpvote={interactionsDisabled ? () => { } : upvoteCard}
-          onDownvote={interactionsDisabled ? () => { } : downvoteCard}
-          showDownvoteButton={showDownvoteButton}
-          disabled={interactionsDisabled}
-          disabledReason={disabledReason}
-        />
+      {showObfuscatedText ? (
+        <div className="card-content obfuscated" data-testid="card-content" role="img" aria-label="Hidden card">
+          {getSkeletonLineWidths(cardData.content).map((width, index) => (
+            <span key={index} className="card-skeleton-line" style={{ width: `${width}%` }} />
+          ))}
+        </div>
+      ) : (
+        <div className="card-content" data-testid="card-content">
+          <MarkdownContent content={cardData.content} />
+        </div>
       )}
-      <div className={`card-content ${!votesVisible ? 'full-width' : ''} ${showObfuscatedText ? 'obfuscated' : ''}`} data-testid="card-content">
-        {showObfuscatedText ? displayContent : <MarkdownContent content={displayContent} />}
-      </div>
       {children}
     </div>
   );
@@ -277,6 +246,9 @@ function Card({
   const reactionsDisabled = !areReactionsAllowed(workflowPhase, retrospectiveMode);
   const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const showCommentBadge = !groupId && commentCount > 0 && reviewToolsVisible;
+  const votesVisible = votingEnabled && !groupId && areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const votingDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const userVotes = (user?.uid && cardData.voters?.[user.uid]) || 0;
 
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
@@ -400,15 +372,9 @@ function Card({
         <>
           <CardContent
             cardData={displayCardData}
-            upvoteCard={upvoteCard}
-            downvoteCard={downvoteCard}
-            votingEnabled={votingEnabled}
-            downvotingEnabled={downvotingEnabled}
             userId={user?.uid}
             retrospectiveMode={retrospectiveMode}
-            groupId={groupId}
             workflowPhase={workflowPhase}
-            disabledReason={disabledReason}
           >
             {reviewToolsVisible && (
               <CardHoverActions
@@ -460,14 +426,29 @@ function Card({
             </div>
           )}
 
-          {reactionsVisible && (
-            <CardReactions
-              reactions={displayCardData.reactions}
-              userId={user?.uid}
-              addReaction={addReaction}
-              disabled={reactionsDisabled}
-              disabledReason={reactionDisabledReason}
-            />
+          {(votesVisible || reactionsVisible) && (
+            <div className="card-pill-row">
+              {votesVisible && (
+                <VotingControls
+                  votes={displayCardData.votes}
+                  onUpvote={upvoteCard}
+                  onDownvote={downvoteCard}
+                  showDownvoteButton={downvotingEnabled || userVotes > 0}
+                  disabled={votingDisabled}
+                  disabledReason={disabledReason}
+                  active={userVotes > 0}
+                />
+              )}
+              {reactionsVisible && (
+                <CardReactions
+                  reactions={displayCardData.reactions}
+                  userId={user?.uid}
+                  addReaction={addReaction}
+                  disabled={reactionsDisabled}
+                  disabledReason={reactionDisabledReason}
+                />
+              )}
+            </div>
           )}
 
           {reviewToolsVisible && showComments && (

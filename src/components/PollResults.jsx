@@ -1,6 +1,6 @@
 import { Star, Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { getEffectivenessLabel, getScoreRatingLevel } from '../utils/ratingUtils';
+import { getScoreRatingLevel } from '../utils/ratingUtils';
 
 const PollResults = () => {
   const { getPollStats } = useBoardContext();
@@ -12,8 +12,6 @@ const PollResults = () => {
     }
     return (count / stats.totalVotes) * 100;
   };
-
-  const effectivenessText = getEffectivenessLabel(stats.average);
 
   return (
     <div className="poll-results">
@@ -44,11 +42,6 @@ const PollResults = () => {
                   />
                 ))}
               </div>
-            </div>
-            <div
-              className={`effectiveness-label score-color-${getScoreRatingLevel(stats.average)}`}
-            >
-              {effectivenessText}
             </div>
           </div>
 
