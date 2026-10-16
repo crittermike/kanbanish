@@ -31,3 +31,6 @@ vitest.results.json
 # Playwright
 /test-results/
 /playwright-report/
+
+# impeccable skill cache
+/.impeccable/
