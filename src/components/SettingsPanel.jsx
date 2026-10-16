@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowDown, BarChart2, CheckSquare, ChevronRight, EyeOff, FileText, Layers, Link, Link2, Monitor, Moon, RotateCcw, Scissors, Settings, Share2, Sliders, Sun, ThumbsUp, Users, Zap } from 'react-feather';
-import { useNotification } from '../context/NotificationContext';
 import BackgroundPicker from './BackgroundPicker';
 import InsightsContent from './InsightsContent';
 import Timer from './Timer';
@@ -58,7 +57,6 @@ const SettingsPanel = ({
   onOpenLinkPrevious,
   onUnlinkSeries
 }) => {
-  const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState('appearance');
 
   // Reset to first tab whenever the modal opens
@@ -343,11 +341,7 @@ const SettingsPanel = ({
 
                     <button
                       className="settings-reset-votes-btn"
-                      onClick={() => {
-                        if (resetAllVotes()) {
-                          showNotification('All votes reset to zero');
-                        }
-                      }}
+                      onClick={resetAllVotes}
                     >
                       <RotateCcw size={12} />
                       Reset all votes

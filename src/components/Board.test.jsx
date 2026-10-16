@@ -521,9 +521,6 @@ describe('Board Component', () => {
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
 
-    // Verify notification was shown
-    expect(mockShowNotification).toHaveBeenCalledWith('All votes reset to zero');
-
     // Verify dropdown remains open
     expect(screen.getByText('Reset all votes')).toBeInTheDocument();
   });
@@ -564,9 +561,6 @@ describe('Board Component', () => {
 
     // Verify resetAllVotes was called
     expect(mockResetAllVotes).toHaveBeenCalled();
-
-    // Verify notification was NOT shown
-    expect(mockShowNotification).not.toHaveBeenCalledWith('All votes reset to zero');
 
     // Dropdown should still be open
     expect(screen.getByText('Reset all votes')).toBeInTheDocument();

@@ -148,11 +148,8 @@ function Board({ onGoHome, onNavigateToBoard }) {
     }
 
     addColumn(boardId)
-      .then(() => {
-        showNotification('Column added');
-      })
       .catch(() => {
-        // Error adding column - notification system will handle user feedback
+        // Error adding column - silent fallback
       });
   };
 
@@ -178,7 +175,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
   // Handle export board button click
   const handleExportBoard = () => {
     setIsExportModalOpen(true);
-    showNotification('Preparing board export...');
   };
 
   // Create the next board in the series and navigate to it
@@ -192,7 +188,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     try {
       const newBoardId = await startNextBoard();
       if (newBoardId && onNavigateToBoard) {
-        showNotification('Started next board in series');
         onNavigateToBoard(newBoardId);
       }
     } catch {
@@ -206,7 +201,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     if (!proceed) return;
     try {
       await unlinkFromSeries();
-      showNotification('Removed from series');
     } catch {
       showNotification('Could not update the series');
     }
@@ -262,10 +256,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
             onNavigateToBoard={onNavigateToBoard}
           />
           <SettingsPanel
-            handleStartHealthCheck={() => {
-              startHealthCheckPhase();
-              showNotification('Health check started');
-            }}
+            handleStartHealthCheck={startHealthCheckPhase}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             sortByVotes={sortByVotes}

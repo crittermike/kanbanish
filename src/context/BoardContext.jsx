@@ -40,7 +40,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [boardTitle, setBoardTitle] = useState(DEFAULT_BOARD_TITLE);
   const [columns, setColumns] = useState({});
   const [sortByVotes, setSortByVotesState] = useState(false);
-  const [votingEnabled, setVotingEnabled] = useState(true); // Default to enabled
+  const [votingEnabled, setVotingEnabled] = useState(false);
   const [downvotingEnabled, setDownvotingEnabled] = useState(true); // Default to enabled
   const [multipleVotesAllowed, setMultipleVotesAllowed] = useState(false); // Default to disallowed
   const [votesPerUser, setVotesPerUser] = useState(0); // Default to unlimited (0 = no limit)
@@ -496,7 +496,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
         owner: user.uid,
         columns: columnsObj,
         settings: {
-          votingEnabled: true, // Default to enabled for new boards
+          // Voting is off by default on kanban boards; retro mode requires it
+          votingEnabled: sanitizedOverrides.retrospectiveMode === true,
           downvotingEnabled: true, // Default to enabled for new boards
           multipleVotesAllowed: false, // Default to not allowing multiple votes
           sortByVotes: false, // Default to chronological

@@ -181,9 +181,7 @@ export const useVoting = ({
     withRetry(() => Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]), { operationName: 'Upvote group' }).then(() => {
-      showNotification('Upvoted group');
-    }).catch(error => {
+    ]), { operationName: 'Upvote group' }).catch(error => {
       console.error('Error updating group votes:', error);
     });
   }, [boardId, user, columns, multipleVotesAllowed, votesPerUser, getUserVoteCount, showNotification]);
@@ -220,9 +218,7 @@ export const useVoting = ({
     withRetry(() => Promise.all([
       set(groupVotesRef, newVotes),
       set(groupVotersRef, newVoters)
-    ]), { operationName: 'Downvote group' }).then(() => {
-      showNotification('Downvoted group');
-    }).catch(error => {
+    ]), { operationName: 'Downvote group' }).catch(error => {
       console.error('Error updating group votes:', error);
     });
   }, [boardId, user, columns, multipleVotesAllowed, showNotification]);

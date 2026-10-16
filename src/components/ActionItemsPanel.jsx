@@ -1,7 +1,6 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { Trash2, Check, Circle } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { useNotification } from '../context/NotificationContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const ActionItemRow = ({ item, onToggleStatus, onAssigneeChange, onDueDateChange, onDescriptionChange, onDelete }) => {
@@ -110,7 +109,6 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
     deleteActionItem
   } = useBoardContext();
   
-  const { showNotification } = useNotification();
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, isOpen, { onClose });
@@ -132,13 +130,11 @@ const ActionItemsPanel = ({ isOpen, onClose }) => {
   const handleToggleStatus = (item) => {
     const newStatus = item.status === 'open' ? 'done' : 'open';
     updateActionItemStatus(item.id, newStatus);
-    showNotification(`Marked as ${newStatus}`);
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this action item?')) {
       deleteActionItem(id);
-      showNotification('Action item deleted');
     }
   };
 

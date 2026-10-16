@@ -237,7 +237,7 @@ describe('createBoardFromTemplate', () => {
 
     const boardData = set.mock.calls[0][1];
     expect(boardData.settings).toEqual({
-      votingEnabled: true,
+      votingEnabled: false,
       downvotingEnabled: true,
       multipleVotesAllowed: false,
       sortByVotes: false,

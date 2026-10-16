@@ -444,7 +444,7 @@ describe('useVoting', () => {
       });
 
       expect(set).toHaveBeenCalledTimes(2); // votes ref + voters ref
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should not upvote when boardId is null', async () => {
@@ -578,7 +578,7 @@ describe('useVoting', () => {
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should skip vote limit check when votesPerUser is 0', async () => {
@@ -602,7 +602,7 @@ describe('useVoting', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted group');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -624,7 +624,7 @@ describe('useVoting', () => {
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(mockShowNotification).toHaveBeenCalledWith('Downvoted group');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should not downvote when boardId is null', async () => {
@@ -701,7 +701,7 @@ describe('useVoting', () => {
       });
 
       expect(set).toHaveBeenCalledTimes(2);
-      expect(mockShowNotification).toHaveBeenCalledWith('Downvoted group');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 });

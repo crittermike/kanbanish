@@ -282,7 +282,7 @@ describe('useCardOperations', () => {
         displayName: '',
         userColor: ''
       });
-      expect(mockShowNotification).toHaveBeenCalledWith('Card saved');
+      expect(mockShowNotification).not.toHaveBeenCalled();
       expect(result.current.isEditing).toBe(false);
     });
 
@@ -326,7 +326,7 @@ describe('useCardOperations', () => {
       // ref is called for: cardRef (useMemo) + votesRef + voterRef
       expect(ref).toHaveBeenCalled();
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should not go below 0 votes when downvoting', async () => {
@@ -449,8 +449,7 @@ describe('useCardOperations', () => {
         await result.current.downvoteCard(mockEvent);
       });
 
-      // Should show "Vote removed" when toggling
-      expect(mockShowNotification).toHaveBeenCalledWith('Vote removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should allow multiple votes when multipleVotesAllowed is true', async () => {
@@ -470,7 +469,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Upvoted card');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
   });
 
@@ -544,7 +543,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
 
       areInteractionsDisabled.mockReturnValue(false);
       areInteractionsRevealed.mockReturnValue(false);
@@ -559,7 +558,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Reaction added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should remove an existing reaction', async () => {
@@ -579,7 +578,7 @@ describe('useCardOperations', () => {
       });
 
       expect(remove).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Your reaction removed');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should not add reaction when user is null', async () => {
@@ -668,7 +667,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment added');
+      expect(mockShowNotification).not.toHaveBeenCalled();
       expect(result.current.newComment).toBe('');
     });
 
@@ -713,7 +712,7 @@ describe('useCardOperations', () => {
       });
 
       expect(set).toHaveBeenCalled();
-      expect(mockShowNotification).toHaveBeenCalledWith('Comment updated');
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should not allow editing a comment by another user', async () => {
