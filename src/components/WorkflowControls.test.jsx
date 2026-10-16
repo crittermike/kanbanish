@@ -24,6 +24,7 @@ vi.mock('react-feather', () => ({
   MessageCircle: () => <span>message-icon</span>,
   Award: () => <span>award-icon</span>,
   ArrowLeft: () => <span>arrow-left-icon</span>,
+  BarChart: () => <span>bar-chart-icon</span>,
   Heart: () => <span>heart-icon</span>
 }));
 
@@ -48,6 +49,8 @@ describe('WorkflowControls', () => {
     votesPerUser: 3,
     startGroupingPhase: vi.fn(),
     startResultsPhase: vi.fn(),
+    startPollPhase: vi.fn(),
+    startPollResultsPhase: vi.fn(),
     goToPreviousPhase: vi.fn(),
     updateBoardSettings: vi.fn()
   };

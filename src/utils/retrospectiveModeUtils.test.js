@@ -18,7 +18,9 @@ const ALL_PHASES = [
   WORKFLOW_PHASES.CREATION,
   WORKFLOW_PHASES.GROUPING,
   WORKFLOW_PHASES.INTERACTIONS,
-  WORKFLOW_PHASES.RESULTS
+  WORKFLOW_PHASES.RESULTS,
+  WORKFLOW_PHASES.POLL,
+  WORKFLOW_PHASES.POLL_RESULTS
 ];
 
 describe('getRevealPhase', () => {
@@ -33,9 +35,11 @@ describe('getRevealPhase', () => {
   });
 
   it('returns "hidden" during phases where cards are not revealed', () => {
-    // HEALTH_CHECK and HEALTH_CHECK_RESULTS also have cards not revealed
+    // HEALTH_CHECK, HEALTH_CHECK_RESULTS, POLL, POLL_RESULTS also have cards not revealed
     expect(getRevealPhase(true, WORKFLOW_PHASES.HEALTH_CHECK)).toBe('hidden');
     expect(getRevealPhase(true, WORKFLOW_PHASES.HEALTH_CHECK_RESULTS)).toBe('hidden');
+    expect(getRevealPhase(true, WORKFLOW_PHASES.POLL)).toBe('hidden');
+    expect(getRevealPhase(true, WORKFLOW_PHASES.POLL_RESULTS)).toBe('hidden');
   });
 
   it('returns "interactive" during GROUPING and INTERACTIONS (cards revealed, interactions not revealed)', () => {
@@ -93,11 +97,13 @@ describe('areInteractionsDisabled', () => {
   });
 
   it('returns true when retro is on and cards are not revealed', () => {
-    // Cards not revealed: HEALTH_CHECK, HEALTH_CHECK_RESULTS, CREATION
+    // Cards not revealed: HEALTH_CHECK, HEALTH_CHECK_RESULTS, CREATION, POLL, POLL_RESULTS
     const unrevealed = [
       WORKFLOW_PHASES.HEALTH_CHECK,
       WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
-      WORKFLOW_PHASES.CREATION
+      WORKFLOW_PHASES.CREATION,
+      WORKFLOW_PHASES.POLL,
+      WORKFLOW_PHASES.POLL_RESULTS
     ];
     unrevealed.forEach(phase => {
       expect(areInteractionsDisabled(true, phase)).toBe(true);
@@ -129,6 +135,8 @@ describe('getDisabledReason', () => {
     expect(getDisabledReason(true, WORKFLOW_PHASES.CREATION)).toBe('cards-not-revealed');
     expect(getDisabledReason(true, WORKFLOW_PHASES.HEALTH_CHECK)).toBe('cards-not-revealed');
     expect(getDisabledReason(true, WORKFLOW_PHASES.HEALTH_CHECK_RESULTS)).toBe('cards-not-revealed');
+    expect(getDisabledReason(true, WORKFLOW_PHASES.POLL)).toBe('cards-not-revealed');
+    expect(getDisabledReason(true, WORKFLOW_PHASES.POLL_RESULTS)).toBe('cards-not-revealed');
   });
 });
 

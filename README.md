@@ -12,7 +12,7 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 - 📦 **Card grouping** - stack related cards together with expand/collapse
 - 🗳️ **Voting** - upvotes, downvotes, configurable limits, sort by votes
 - 💬 **Comments & reactions** - threaded comments and emoji reactions on any card
-- ⏱️ **Timer** - shared countdown timer
+- ⏱️ **Timers** - global and per-column countdown timers
 - 🔍 **Search & filters** - filter by text, tags, color, votes, author, and more
 - 📋 **30+ templates** - retro, lean coffee, DAKI, SWOT, sailboat, starfish, and more
 - 🎨 **Customizable** - dark/light themes, board backgrounds (solids, gradients, patterns, custom images)
@@ -22,7 +22,7 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 
 Built-in guided workflow for team retros with sequential phases:
 
-**Health Check** → **Creation** (cards hidden) → **Grouping** → **Voting & Reactions** → **Results**
+**Health Check** → **Creation** (cards hidden) → **Grouping** → **Voting & Reactions** → **Results** → **Effectiveness Poll**
 
 Plus: a board setup wizard to configure everything before you start.
 

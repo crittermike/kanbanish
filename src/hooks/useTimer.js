@@ -9,17 +9,33 @@ import { database } from '../utils/firebase';
  * Timer state is stored in Firebase at boards/{boardId}/timer and
  * read by the main onValue listener in BoardContext.
  *
+ * When a global timer is started/resumed/restarted, all column timers
+ * are cleared to enforce mutual exclusion across all timers.
+ *
  * @param {Object} params
  * @param {string|null} params.boardId - Current board ID
  * @param {Object|null} params.user - Current Firebase user
  * @param {Object|null} params.timerData - Current timer state from Firebase
  * @param {Function} params.setTimerData - Setter for timer state
  * @param {string|null} params.workflowPhase - Current workflow phase (tags timer)
+ * @param {Object} params.columns - Current columns data (for clearing column timers)
  * @returns {Object} Timer operations
  */
-export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase }) => {
+export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase, columns }) => {
+  // Clear all column timers (mutual exclusion)
+  const clearAllColumnTimers = useCallback(() => {
+    if (!boardId || !columns) return;
+    Object.keys(columns).forEach((colId) => {
+      if (columns[colId]?.timer) {
+        const timerRef = ref(database, `boards/${boardId}/columns/${colId}/timer`);
+        remove(timerRef).catch(() => {});
+      }
+    });
+  }, [boardId, columns]);
+
   const startTimer = useCallback((duration) => {
     if (!boardId || !user) return;
+    clearAllColumnTimers();
     const timerRef = ref(database, `boards/${boardId}/timer`);
     const timerObj = {
       duration, // total seconds
@@ -35,7 +51,7 @@ export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase
       .catch(error => {
         console.error('Error starting timer:', error);
       });
-  }, [boardId, user, setTimerData, workflowPhase]);
+  }, [boardId, user, setTimerData, workflowPhase, clearAllColumnTimers]);
 
   const pauseTimer = useCallback(() => {
     if (!boardId || !user || !timerData) return;
@@ -59,6 +75,7 @@ export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase
 
   const resumeTimer = useCallback(() => {
     if (!boardId || !user || !timerData || !timerData.pausedRemaining) return;
+    clearAllColumnTimers();
     const timerRef = ref(database, `boards/${boardId}/timer`);
     const updatedTimer = {
       ...timerData,
@@ -74,7 +91,7 @@ export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase
       .catch(error => {
         console.error('Error resuming timer:', error);
       });
-  }, [boardId, user, timerData, setTimerData]);
+  }, [boardId, user, timerData, setTimerData, clearAllColumnTimers]);
 
   const resetTimer = useCallback(() => {
     if (!boardId || !user) return;
@@ -90,6 +107,7 @@ export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase
 
   const restartTimer = useCallback(() => {
     if (!boardId || !user || !timerData) return;
+    clearAllColumnTimers();
     const timerRef = ref(database, `boards/${boardId}/timer`);
     const timerObj = {
       duration: timerData.duration,
@@ -105,7 +123,7 @@ export const useTimer = ({ boardId, user, timerData, setTimerData, workflowPhase
       .catch(error => {
         console.error('Error restarting timer:', error);
       });
-  }, [boardId, user, timerData, setTimerData, workflowPhase]);
+  }, [boardId, user, timerData, setTimerData, workflowPhase, clearAllColumnTimers]);
 
   return { startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer };
 };

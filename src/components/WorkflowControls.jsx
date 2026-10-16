@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, MessageCircle, ArrowLeft, Heart } from 'react-feather';
+import { Eye, MessageCircle, ArrowLeft, BarChart, Heart } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
@@ -16,6 +16,8 @@ const WorkflowControls = () => {
     votesPerUser,
     startGroupingPhase,
     startResultsPhase,
+    startPollPhase,
+    startPollResultsPhase,
     goToPreviousPhase,
     updateBoardSettings
   } = useBoardContext();
@@ -49,12 +51,24 @@ const WorkflowControls = () => {
     showNotification('Results phase started - view top items by votes');
   };
 
+  const handleStartPoll = () => {
+    startPollPhase();
+    showNotification('Poll phase started - rate the effectiveness of this retrospective');
+  };
+
+  const handleStartPollResults = () => {
+    startPollResultsPhase();
+    showNotification('Poll results revealed - view effectiveness ratings');
+  };
+
   const handleGoToPreviousPhase = () => {
     const phaseMessages = {
       [WORKFLOW_PHASES.CREATION]: 'Returned to health check',
       [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
       [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
-      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting phase'
+      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting phase',
+      [WORKFLOW_PHASES.POLL]: 'Returned to results phase',
+      [WORKFLOW_PHASES.POLL_RESULTS]: 'Returned to poll phase'
     };
 
     goToPreviousPhase();
@@ -169,6 +183,58 @@ const WorkflowControls = () => {
             <div className="phase-info">
               <h3>Results Phase</h3>
               <p>Viewing the top-voted cards and groups. Use detail view to walk through each item with labels and comments.</p>
+            </div>
+            <div className="phase-controls">
+              <button
+                className="btn primary-btn"
+                onClick={handleStartPoll}
+              >
+                <BarChart size={16} />
+                Start Effectiveness Poll
+              </button>
+              <button
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.POLL:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Effectiveness Poll</h3>
+              <p>Rate the effectiveness of this retrospective on a scale of 1-5. Your vote is private.</p>
+            </div>
+            <div className="phase-controls">
+              <button
+                className="btn primary-btn"
+                onClick={handleStartPollResults}
+              >
+                <BarChart size={16} />
+                View Poll Results
+              </button>
+              <button
+                className="btn secondary-btn"
+                onClick={handleGoToPreviousPhase}
+              >
+                <ArrowLeft size={16} />
+                Go to Previous Phase
+              </button>
+            </div>
+          </div>
+        );
+
+      case WORKFLOW_PHASES.POLL_RESULTS:
+        return (
+          <div className="workflow-phase">
+            <div className="phase-info">
+              <h3>Poll Results</h3>
+              <p>View the distribution of effectiveness ratings and overall retrospective score.</p>
             </div>
             <div className="phase-controls">
               <button

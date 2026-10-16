@@ -39,6 +39,18 @@ export const useWorkflow = ({
     });
   }, [updateBoardSettings]);
 
+  const startPollPhase = useCallback(() => {
+    updateBoardSettings({
+      workflowPhase: WORKFLOW_PHASES.POLL
+    });
+  }, [updateBoardSettings]);
+
+  const startPollResultsPhase = useCallback(() => {
+    updateBoardSettings({
+      workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
+    });
+  }, [updateBoardSettings]);
+
   const goToCreationPhase = useCallback(() => {
     updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.CREATION,
@@ -104,6 +116,16 @@ export const useWorkflow = ({
       case WORKFLOW_PHASES.RESULTS:
         updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.INTERACTIONS
+        });
+        break;
+      case WORKFLOW_PHASES.POLL:
+        updateBoardSettings({
+          workflowPhase: WORKFLOW_PHASES.RESULTS
+        });
+        break;
+      case WORKFLOW_PHASES.POLL_RESULTS:
+        updateBoardSettings({
+          workflowPhase: WORKFLOW_PHASES.POLL
         });
         break;
       default:
@@ -173,6 +195,8 @@ export const useWorkflow = ({
     startGroupingPhase,
     startInteractionsPhase,
     startResultsPhase,
+    startPollPhase,
+    startPollResultsPhase,
     goToCreationPhase,
     goToPreviousPhase,
     startHealthCheckPhase,

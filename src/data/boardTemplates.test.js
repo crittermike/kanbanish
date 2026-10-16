@@ -69,10 +69,10 @@ describe('BOARD_TEMPLATES', () => {
   it('big-orca template should have exactly the correct columns', () => {
     const bigOrcaTemplate = BOARD_TEMPLATES.find((t) => t.id === 'big-orca');
     const expectedColumns = [
-      'Good stuff',
-      'Bad stuff',
-      'Feelings',
-      'Improvements',
+      { title: 'Good stuff', defaultTimerSeconds: 600 },
+      { title: 'Bad stuff', defaultTimerSeconds: 600 },
+      { title: 'Feelings', defaultTimerSeconds: 600 },
+      { title: 'Improvements', defaultTimerSeconds: 600 },
       'Past commitments',
       'New commitments'
     ];

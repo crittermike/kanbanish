@@ -9,7 +9,9 @@ export const WORKFLOW_PHASES = {
   CREATION: 'CREATION',
   GROUPING: 'GROUPING',
   INTERACTIONS: 'INTERACTIONS',
-  RESULTS: 'RESULTS'
+  RESULTS: 'RESULTS',
+  POLL: 'POLL',
+  POLL_RESULTS: 'POLL_RESULTS'
 };
 
 /**
@@ -100,7 +102,7 @@ export const areCommentsAllowed = (workflowPhase, retrospectiveMode = false) => 
 };
 
 /**
- * Determines if review metadata (labels, colors, action item conversion) can be edited.
+ * Determines if review metadata (labels, colors) can be edited.
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
  * @returns {boolean}
@@ -256,7 +258,37 @@ export const getPhaseDescription = workflowPhase => {
       return 'Add comments, votes, and reactions';
     case WORKFLOW_PHASES.RESULTS:
       return 'View top-voted items';
+    case WORKFLOW_PHASES.POLL:
+      return 'Rate the effectiveness of this retrospective';
+    case WORKFLOW_PHASES.POLL_RESULTS:
+      return 'View retrospective effectiveness ratings';
     default:
       return 'Unknown phase';
   }
+};
+
+/**
+ * Determines if polling is allowed in the current workflow phase
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const isPollAllowed = (workflowPhase, retrospectiveMode = false) => {
+  if (!retrospectiveMode) {
+    return false;
+  } // Only allow when retrospective mode is active
+  return workflowPhase === WORKFLOW_PHASES.POLL;
+};
+
+/**
+ * Determines if poll results should be visible
+ * @param {string} workflowPhase - Current workflow phase
+ * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
+ * @returns {boolean}
+ */
+export const arePollResultsVisible = (workflowPhase, retrospectiveMode = false) => {
+  if (!retrospectiveMode) {
+    return false;
+  } // Only visible when retrospective mode is active
+  return workflowPhase === WORKFLOW_PHASES.POLL_RESULTS;
 };

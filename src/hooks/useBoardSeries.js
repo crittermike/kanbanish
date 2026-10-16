@@ -28,7 +28,11 @@ function cloneColumnStructure(sourceColumns) {
 
   ordered.forEach(([, column], index) => {
     const prefix = index < 26 ? ALPHABET[index] : `col${index}`;
-    columnsObj[`${prefix}_${generateId()}`] = { title: column?.title || '', cards: {} };
+    const newColumn = { title: column?.title || '', cards: {} };
+    if (column?.defaultTimerSeconds) {
+      newColumn.defaultTimerSeconds = column.defaultTimerSeconds;
+    }
+    columnsObj[`${prefix}_${generateId()}`] = newColumn;
   });
 
   return columnsObj;

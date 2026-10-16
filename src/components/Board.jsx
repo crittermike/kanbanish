@@ -14,6 +14,8 @@ import HealthCheckVoting from './HealthCheckVoting';
 import CardDetailModal from './modals/CardDetailModal';
 import ExportBoardModal from './modals/ExportBoardModal';
 import LinkPreviousBoardModal from './modals/LinkPreviousBoardModal';
+import PollResults from './PollResults';
+import PollVoting from './PollVoting';
 import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
@@ -332,6 +334,10 @@ function Board({ onGoHome, onNavigateToBoard }) {
           <HealthCheckVoting />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView onExpandCard={handleExpandCard} />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
+          <PollVoting />
+        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
+          <PollResults />
         ) : (
           <ColumnsContainer
             columns={columns}

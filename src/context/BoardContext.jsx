@@ -3,8 +3,10 @@ import { createContext, useCallback, useContext, useRef, useState, useEffect, us
 import { useBoardBackground } from '../hooks/useBoardBackground';
 import { useBoardSeries } from '../hooks/useBoardSeries';
 import { useBoardSettings } from '../hooks/useBoardSettings';
+import { useColumnTimer } from '../hooks/useColumnTimer';
 import { useGroups } from '../hooks/useGroups';
 import { useHealthCheck, HEALTH_CHECK_QUESTIONS } from '../hooks/useHealthCheck';
+import { usePoll } from '../hooks/usePoll';
 import { usePresence } from '../hooks/usePresence';
 import { useTimer } from '../hooks/useTimer';
 import { useUndoRedo } from '../hooks/useUndoRedo';
@@ -48,6 +50,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // New workflow phase system
   const [workflowPhase, setWorkflowPhase] = useState(WORKFLOW_PHASES.CREATION);
   const [resultsViewIndex, setResultsViewIndex] = useState(0); // For navigating results
+
+  // Poll state for retrospective effectiveness rating
+  const [pollVotes, setPollVotes] = useState({}); // { userId: rating }
+  const [userPollVote, setUserPollVote] = useState(null); // Current user's vote
 
   // Health check state
   const [healthCheckVotes, setHealthCheckVotes] = useState({}); // { questionId: { userId: rating } }
@@ -167,15 +173,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
               setRetrospectiveMode(boardData.settings.retrospectiveMode);
             }
             if (boardData.settings.workflowPhase !== undefined) {
-              // The effectiveness poll phases were removed; boards left in them land on Results
-              const phase = ['POLL', 'POLL_RESULTS'].includes(boardData.settings.workflowPhase)
-                ? WORKFLOW_PHASES.RESULTS
-                : boardData.settings.workflowPhase;
-              setWorkflowPhase(phase);
+              setWorkflowPhase(boardData.settings.workflowPhase);
               // Capture initial workflow phase on first load
               if (initialWorkflowPhaseRef.current === null) {
-                initialWorkflowPhaseRef.current = phase;
-                setInitialWorkflowPhase(phase);
+                initialWorkflowPhaseRef.current = boardData.settings.workflowPhase;
+                setInitialWorkflowPhase(boardData.settings.workflowPhase);
               }
             }
             if (boardData.settings.resultsViewIndex !== undefined) {
@@ -205,6 +207,19 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             setTimerData(null);
           }
 
+
+          // Load poll data
+          if (boardData.poll) {
+            setPollVotes(boardData.poll.votes || {});
+            if (user && boardData.poll.votes && boardData.poll.votes[user.uid]) {
+              setUserPollVote(boardData.poll.votes[user.uid]);
+            } else {
+              setUserPollVote(null);
+            }
+          } else {
+            setPollVotes({});
+            setUserPollVote(null);
+          }
 
           // Load health check data
           if (boardData.healthCheck) {
@@ -344,7 +359,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateBoardSettings
   });
 
-  // Health check hook
+  // Poll and health check hooks
+  const { submitPollVote, getPollStats } = usePoll({
+    boardId, user, pollVotes, setUserPollVote
+  });
+
   const { submitHealthCheckVote, getHealthCheckStats, resetHealthCheck } = useHealthCheck({
     boardId, user, healthCheckVotes, setUserHealthCheckVotes
   });
@@ -367,7 +386,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   // Workflow phase transitions and results navigation
   const {
     startGroupingPhase, startInteractionsPhase,
-    startResultsPhase,
+    startResultsPhase, startPollPhase, startPollResultsPhase,
     goToCreationPhase, goToPreviousPhase,
     startHealthCheckPhase, startHealthCheckResultsPhase,
     navigateResults, getSortedItemsForResults
@@ -376,11 +395,18 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     resultsViewIndex, removeAllGrouping
   });
 
+  // Per-column timer functions
+  const {
+    startColumnTimer, pauseColumnTimer, resumeColumnTimer, resetColumnTimer, restartColumnTimer, setColumnDefaultTimer
+  } = useColumnTimer({
+    boardId, user, workflowPhase, columns
+  });
+
   // Global timer functions
   const {
     startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer
   } = useTimer({
-    boardId, user, timerData, setTimerData, workflowPhase
+    boardId, user, timerData, setTimerData, workflowPhase, columns
   });
   // Board series operations (link boards into an ordered chain)
   const {
@@ -543,8 +569,10 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
-    goToCreationPhase,
+    startPollPhase, startPollResultsPhase, goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
+      // Poll system
+    pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
     getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
@@ -558,6 +586,13 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
       getAllUsersAddingCards,
+      // Per-column timer system
+      startColumnTimer,
+      pauseColumnTimer,
+      resumeColumnTimer,
+      resetColumnTimer,
+      restartColumnTimer,
+      setColumnDefaultTimer,
       // Global timer system
       timerData,
       startTimer,
@@ -597,14 +632,16 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
-    goToCreationPhase,
+    startPollPhase, startPollResultsPhase, goToCreationPhase,
     goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
     getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,
-    getAllUsersAddingCards, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
+    getAllUsersAddingCards, startColumnTimer, pauseColumnTimer, resumeColumnTimer,
+    resetColumnTimer, restartColumnTimer, setColumnDefaultTimer, timerData, startTimer, pauseTimer, resumeTimer, resetTimer, restartTimer, boardOwner, recordAction, undo, redo,
     canUndo, canRedo, pastCount, futureCount,
     initialWorkflowPhase,
     previousBoardId, nextBoardId, startNextBoard, linkToPreviousBoard, unlinkFromSeries,
