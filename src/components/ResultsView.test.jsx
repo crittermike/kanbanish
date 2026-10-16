@@ -8,11 +8,15 @@ vi.mock('../context/BoardContext', () => ({
 }));
 
 vi.mock('./Card', () => ({
-  default: ({ cardData }) => <div>{cardData.content}</div>
+  default: ({ cardId, columnId, cardData, onExpandCard }) => (
+    <button onClick={() => onExpandCard(cardId, columnId)}>{cardData.content}</button>
+  )
 }));
 
 vi.mock('./CardGroup', () => ({
-  default: ({ groupData }) => <div>{groupData.name}</div>
+  default: ({ groupData, columnId, onExpandCard }) => (
+    <button onClick={() => onExpandCard(groupData.cardIds[0], columnId)}>{groupData.name}</button>
+  )
 }));
 
 describe('ResultsView', () => {
@@ -61,7 +65,7 @@ describe('ResultsView', () => {
 
     render(<ResultsView onExpandCard={onExpandCard} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /open detail view/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Highest vote card' }));
 
     expect(onExpandCard).toHaveBeenCalledWith('card-1', 'col-1', {
       cardList: [
@@ -101,7 +105,7 @@ describe('ResultsView', () => {
 
     render(<ResultsView onExpandCard={onExpandCard} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /review cards in detail/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cluster' }));
 
     expect(onExpandCard).toHaveBeenCalledWith('card-2', 'col-2', {
       cardList: [
@@ -112,12 +116,16 @@ describe('ResultsView', () => {
     });
   });
 
-  it('does not show a per-card timer', () => {
+  it('shows only navigation and the current item', () => {
     useBoardContext.mockReturnValue(baseContext);
 
     render(<ResultsView onExpandCard={vi.fn()} />);
 
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /timer/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /detail/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Highest vote card' })).toBeInTheDocument();
+    expect(screen.queryByText('Cluster')).not.toBeInTheDocument();
   });
 
   it('navigates results with the arrow keys', () => {

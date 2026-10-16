@@ -175,6 +175,8 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
       .catch(error => {
         console.error('Error creating group:', error);
       });
+
+    return groupId;
   }, [boardId, user, recordAction]);
 
   // Ungroup cards (remove group and clear groupId from cards)

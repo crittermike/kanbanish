@@ -1,5 +1,7 @@
 /* Results View Styles */
 .results-view {
+  box-sizing: border-box;
+  width: 100%;
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
@@ -73,73 +75,6 @@
   color: var(--text-secondary);
 }
 
-.results-content {
-  margin-top: 20px;
-}
-
-.result-item {
-  background: var(--card-background);
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-}
-
-.result-meta {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-}
-
-.result-review-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.result-detail-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.result-type {
-  background: var(--primary-color);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.result-votes {
-  background: var(--success-color);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.result-column {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
-.result-display {
-  /* The card or group will render here with their own styles */
-  min-height: 100px;
-}
-
 .no-results {
   text-align: center;
   padding: 40px 20px;
@@ -171,15 +106,4 @@
   .navigation-btn {
     min-width: auto;
   }
-  
-  .result-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
   }
-
-  .result-review-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}

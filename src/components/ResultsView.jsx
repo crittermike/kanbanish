@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2 } from 'react-feather';
+import { ChevronLeft, ChevronRight } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import Card from './Card';
@@ -19,8 +19,7 @@ const ResultsView = ({ onExpandCard = null }) => {
     resultsViewIndex,
     navigateResults,
     getSortedItemsForResults,
-    columns,
-    getTotalVotes
+    columns
   } = useBoardContext();
 
   useEffect(() => {
@@ -59,13 +58,8 @@ const ResultsView = ({ onExpandCard = null }) => {
   if (totalItems === 0) {
     return (
       <div className="results-view">
-        <div className="results-header">
-          <h2>Results</h2>
-        </div>
-        <div className="results-content">
-          <div className="no-results">
-            <p>No cards or groups to display in results.</p>
-          </div>
+        <div className="no-results">
+          <p>No cards or groups to display in results.</p>
         </div>
       </div>
     );
@@ -74,13 +68,8 @@ const ResultsView = ({ onExpandCard = null }) => {
   if (!currentItem) {
     return (
       <div className="results-view">
-        <div className="results-header">
-          <h2>Results</h2>
-        </div>
-        <div className="results-content">
-          <div className="no-results">
-            <p>Invalid result index.</p>
-          </div>
+        <div className="no-results">
+          <p>Invalid result index.</p>
         </div>
       </div>
     );
@@ -108,16 +97,8 @@ const ResultsView = ({ onExpandCard = null }) => {
     });
   };
 
-  const primaryResultCardId = currentItem.type === 'group'
-    ? currentItem.data.cardIds?.find(cardId => columns[currentItem.columnId]?.cards?.[cardId])
-    : currentItem.id;
-
   return (
     <div className="results-view">
-      <div className="results-header">
-        <h2>Results</h2>
-      </div>
-
       <div className="results-navigation">
         <button
           className="btn navigation-btn"
@@ -146,55 +127,25 @@ const ResultsView = ({ onExpandCard = null }) => {
         </button>
       </div>
 
-      <div className="results-content">
-        <div className="result-item">
-          <div className="result-meta">
-            <div className="result-type">
-              {currentItem.type === 'group' ? 'Group' : 'Card'}
-            </div>
-            <div className="result-votes">
-              {currentItem.votes} out of {getTotalVotes()} total vote{getTotalVotes() !== 1 ? 's' : ''}
-            </div>
-            <div className="result-column">
-              from {columnData?.title || 'Unknown Column'}
-            </div>
-          </div>
-
-          {primaryResultCardId && onExpandCard && (
-            <div className="result-review-actions">
-              <button
-                className="btn secondary-btn result-detail-btn"
-                onClick={() => handleExpandResultCard(primaryResultCardId, currentItem.columnId)}
-              >
-                <Maximize2 size={16} />
-                {currentItem.type === 'group' ? 'Review cards in detail' : 'Open detail view'}
-              </button>
-            </div>
-          )}
-
-          <div className="result-display">
-            {currentItem.type === 'group' ? (
-              <CardGroup
-                key={currentItem.id}
-                groupId={currentItem.id}
-                groupData={currentItem.data}
-                columnId={currentItem.columnId}
-                columnData={columnData}
-                sortByVotes={true}
-                onExpandCard={handleExpandResultCard}
-              />
-            ) : (
-              <Card
-                key={currentItem.id}
-                cardId={currentItem.id}
-                cardData={currentItem.data}
-                columnId={currentItem.columnId}
-                onExpandCard={handleExpandResultCard}
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      {currentItem.type === 'group' ? (
+        <CardGroup
+          key={currentItem.id}
+          groupId={currentItem.id}
+          groupData={currentItem.data}
+          columnId={currentItem.columnId}
+          columnData={columnData}
+          sortByVotes={true}
+          onExpandCard={handleExpandResultCard}
+        />
+      ) : (
+        <Card
+          key={currentItem.id}
+          cardId={currentItem.id}
+          cardData={currentItem.data}
+          columnId={currentItem.columnId}
+          onExpandCard={handleExpandResultCard}
+        />
+      )}
     </div>
   );
 };

@@ -1,14 +1,11 @@
-import { memo, useState, useRef } from 'react';
+import { memo, useEffect, useState, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight, Layers, Edit2, MessageSquare } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useGroupOperations } from '../hooks/useGroupOperations';
 import {
   filterVisibleInteractionData,
-  getDisabledReason,
-  getReactionDisabledMessage,
-  shouldHideFeature,
-  shouldUseDisabledStyling
+  getDisabledReason
 } from '../utils/retrospectiveModeUtils';
 import {
   areCommentsAllowed,
@@ -21,8 +18,9 @@ import {
   isGroupingAllowed
 } from '../utils/workflowUtils';
 import Card from './Card';
+import CardHoverActions from './CardHoverActions';
+import CardReactions from './CardReactions';
 import Comments from './Comments';
-import EmojiPicker from './EmojiPicker';
 import MarkdownContent from './MarkdownContent';
 import VotingControls from './VotingControls';
 
@@ -38,7 +36,9 @@ function CardGroup({
   dimmed = false,
   isFiltering = false,
   matchingCardIds = null,
-  onExpandCard = null
+  onExpandCard = null,
+  autoEditName = false,
+  onAutoEditName = null
 }) {
   const {
     boardId,
@@ -71,9 +71,18 @@ function CardGroup({
   });
 
   const [isExpanded, setIsExpanded] = useState(groupData.expanded !== false); // Default to expanded
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(autoEditName);
   const [editedName, setEditedName] = useState(groupData.name || 'Unnamed Group');
   const groupRef = useRef(null);
+
+  // A freshly created group opens its name for editing once; tell the parent so it isn't reopened on remount
+  useEffect(() => {
+    if (autoEditName) {
+      setIsEditingName(true);
+      setEditedName(groupData.name || 'Unnamed Group');
+      onAutoEditName?.();
+    }
+  }, [autoEditName, groupData.name, onAutoEditName]);
 
   // When retrospective mode is enabled, hide others' interactions based on workflow phase
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
@@ -87,8 +96,10 @@ function CardGroup({
   const reactionDisabledReason = reactionsDisabled ? 'cards-not-revealed' : null;
   const commentsVisible = areReviewToolsVisible(workflowPhase, retrospectiveMode);
   const commentsAllowed = areCommentsAllowed(workflowPhase, retrospectiveMode);
-  const hideReactionComposer = !reactionsVisible || shouldHideFeature(reactionDisabledReason);
-  const useReactionDisabledStyling = shouldUseDisabledStyling(reactionsDisabled, reactionDisabledReason);
+  const canUngroup = areInteractionsAllowed(workflowPhase, retrospectiveMode);
+  const votesVisible = votingEnabled && areInteractionsVisible(workflowPhase, retrospectiveMode);
+  const userVotes = (user?.uid && groupData.voters?.[user.uid]) || 0;
+  const commentCount = Object.keys(displayGroupData.comments || {}).length;
 
   // Set up drop target for cards to be added to this group
   const [{ isOver }, drop] = useDrop(() => ({
@@ -153,6 +164,8 @@ function CardGroup({
   };
 
   const handleKeyPress = e => {
+    // Keep typing (e.g. spaces) from toggling the header's expand/collapse
+    e.stopPropagation();
     if (e.key === 'Enter') {
       saveGroupName();
     } else if (e.key === 'Escape') {
@@ -198,6 +211,7 @@ function CardGroup({
               onChange={handleNameChange}
               onBlur={saveGroupName}
               onKeyDown={handleKeyPress}
+              onFocus={e => e.target.select()}
               className="group-name-input"
               autoFocus
               aria-label="Group name"
@@ -222,7 +236,7 @@ function CardGroup({
                 }}
                 role={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'button' : undefined}
                 tabIndex={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 0 : undefined}
-                title={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'Click to edit group name' : undefined}
+                title={isGroupingAllowed(workflowPhase, retrospectiveMode) ? 'Click to edit group name' : groupData.name}
               >
                 {groupData.name || 'Unnamed Group'}
               </h3>
@@ -241,120 +255,83 @@ function CardGroup({
               )}
             </div>
           )}
+
+          <span className="card-count-badge" title={`${cardCount} card${cardCount !== 1 ? 's' : ''}`}>
+            {cardCount}
+          </span>
         </div>
 
         <div className="card-group-actions">
-          {votingEnabled && areInteractionsVisible(workflowPhase, retrospectiveMode) && (
+          {(commentsVisible || canUngroup) && (
+            <CardHoverActions
+              showEmojiPicker={groupOperations.showEmojiPicker}
+              setShowEmojiPicker={groupOperations.setShowEmojiPicker}
+              setShowComments={groupOperations.setShowComments}
+              toggleComments={groupOperations.toggleComments}
+              setEmojiPickerPosition={groupOperations.setEmojiPickerPosition}
+              emojiPickerPosition={groupOperations.emojiPickerPosition}
+              addReaction={groupOperations.addReaction}
+              hasUserReactedWithEmoji={groupOperations.hasUserReactedWithEmoji}
+              reactionDisabled={reactionsDisabled}
+              reactionDisabledReason={reactionDisabledReason}
+              showEmojiAction={reactionsVisible}
+              showCommentAction={commentsVisible}
+            >
+              {canUngroup && (
+                <button
+                  className="card-hover-action ungroup-action"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleUngroup();
+                  }}
+                  title="Ungroup cards"
+                  aria-label="Ungroup cards"
+                >
+                  <Layers size={16} aria-hidden="true" />
+                </button>
+              )}
+            </CardHoverActions>
+          )}
+
+          {commentsVisible && commentCount > 0 && (
+            <button
+              className="group-comment-badge"
+              onClick={e => {
+                e.stopPropagation();
+                groupOperations.toggleComments();
+              }}
+              title="Toggle comments"
+              aria-label="Toggle group comments"
+            >
+              <MessageSquare size={12} aria-hidden="true" />
+              <span>{commentCount}</span>
+            </button>
+          )}
+
+          {votesVisible && (
             <VotingControls
               votes={displayGroupData.votes || 0}
               onUpvote={handleUpvoteGroup}
               onDownvote={handleDownvoteGroup}
-              showDownvoteButton={downvotingEnabled}
+              showDownvoteButton={downvotingEnabled || userVotes > 0}
               disabled={votingDisabled}
               disabledReason={disabledReason}
+              active={userVotes > 0}
             />
           )}
-
-          <div className="card-group-info">
-            <span className="card-count-badge" title={`${cardCount} card${cardCount !== 1 ? 's' : ''}`}>
-              {cardCount}
-            </span>
-            {areInteractionsAllowed(workflowPhase, retrospectiveMode) && (
-              <button
-                className="group-action-btn"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleUngroup();
-                }}
-                title="Ungroup cards"
-                aria-label="Ungroup cards"
-              >
-                <Layers size={14} aria-hidden="true" />
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Group Interactions Section - Comments and Reactions buttons */}
-      {(reactionsVisible || commentsVisible) && (
-        <div className="group-interactions-section">
-          <div className="group-interactions-left">
-            {/* Existing Group Reactions - inline like cards */}
-            {reactionsVisible && displayGroupData.reactions && Object.entries(displayGroupData.reactions).map(([emoji, reactionData]) => {
-              if (reactionData.count <= 0) return null;
-              const hasUserReacted = reactionData.users && reactionData.users[user?.uid];
-              return (
-                <button 
-                  key={emoji} 
-                  className={`reaction-item ${hasUserReacted ? 'user-reacted' : ''} ${useReactionDisabledStyling ? 'disabled' : ''} ${reactionDisabledReason === 'frozen' ? 'frozen' : ''}`}
-                  onClick={reactionsDisabled ? undefined : e => {
-                    e.stopPropagation();
-                    groupOperations.addReaction(e, emoji);
-                  }}
-                  title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : (hasUserReacted ? 'Click to remove your reaction' : 'Click to add your reaction')}
-                  aria-label={`${emoji} reaction, ${reactionData.count} ${reactionData.count === 1 ? 'reaction' : 'reactions'}${hasUserReacted ? ', you reacted' : ''}`}
-                  disabled={reactionsDisabled}
-                >
-                  {emoji} {reactionData.count}
-                </button>
-              );
-            })}
-            
-            {/* Group Reactions Button - add button like cards */}
-            {reactionsVisible && !hideReactionComposer && (
-              <button
-                className={`interaction-btn reactions-btn ${useReactionDisabledStyling ? 'disabled' : ''}`}
-                onClick={reactionsDisabled ? undefined : e => {
-                  e.stopPropagation();
-                  if (groupOperations.emojiButtonRef?.current) {
-                    const buttonRect = groupOperations.emojiButtonRef.current.getBoundingClientRect();
-                    groupOperations.setEmojiPickerPosition({
-                      top: buttonRect.bottom + window.scrollY + 5,
-                      left: buttonRect.left + window.scrollX
-                    });
-                  }
-                  groupOperations.setShowEmojiPicker(!groupOperations.showEmojiPicker);
-                }}
-                title={reactionsDisabled ? getReactionDisabledMessage(reactionDisabledReason) : 'Add reaction'}
-                aria-label="Add reaction to group"
-                ref={groupOperations.emojiButtonRef}
-                disabled={useReactionDisabledStyling}
-              >
-                +
-              </button>
-            )}
-          </div>
-          <div className="group-interactions-right">
-            {/* Group Comments Button - right aligned like cards */}
-            {commentsVisible && (
-              <button
-                className={`interaction-btn comments-btn ${Object.keys(displayGroupData.comments || {}).length > 0 ? 'has-comments' : ''}`}
-                onClick={e => {
-                  e.stopPropagation();
-                  groupOperations.toggleComments();
-                }}
-                title="Toggle comments"
-                aria-label="Toggle group comments"
-              >
-                <MessageSquare size={16} aria-hidden="true" />
-                {Object.keys(displayGroupData.comments || {}).length > 0 && (
-                  <span className="interaction-count">{Object.keys(displayGroupData.comments || {}).length}</span>
-                )}
-              </button>
-            )}
-          </div>
+      {reactionsVisible && (
+        <div className="group-reactions-row">
+          <CardReactions
+            reactions={displayGroupData.reactions}
+            userId={user?.uid}
+            addReaction={groupOperations.addReaction}
+            disabled={reactionsDisabled}
+            disabledReason={reactionDisabledReason}
+          />
         </div>
-      )}
-
-      {/* Emoji Picker */}
-      {groupOperations.showEmojiPicker && (
-        <EmojiPicker
-          onEmojiSelect={groupOperations.addReaction}
-          position={groupOperations.emojiPickerPosition}
-          onClose={() => groupOperations.setShowEmojiPicker(false)}
-          hasUserReactedWithEmoji={groupOperations.hasUserReactedWithEmoji}
-        />
       )}
 
       {/* Group Comments Section - only show when comments are toggled on */}
