@@ -71,11 +71,47 @@ export const useWorkflow = ({
     });
   }, [updateBoardSettings]);
 
+  const goToNextPhase = useCallback(() => {
+    switch (workflowPhase) {
+      case WORKFLOW_PHASES.HEALTH_CHECK:
+        startHealthCheckResultsPhase();
+        break;
+      case WORKFLOW_PHASES.HEALTH_CHECK_RESULTS:
+        updateBoardSettings({ workflowPhase: WORKFLOW_PHASES.CREATION });
+        break;
+      case WORKFLOW_PHASES.CREATION:
+        startGroupingPhase();
+        break;
+      case WORKFLOW_PHASES.GROUPING:
+        startInteractionsPhase();
+        break;
+      case WORKFLOW_PHASES.INTERACTIONS:
+        startResultsPhase();
+        break;
+      case WORKFLOW_PHASES.RESULTS:
+        startPollPhase();
+        break;
+      case WORKFLOW_PHASES.POLL:
+        startPollResultsPhase();
+        break;
+      default:
+        break;
+    }
+  }, [
+    workflowPhase, updateBoardSettings, startHealthCheckResultsPhase, startGroupingPhase,
+    startInteractionsPhase, startResultsPhase, startPollPhase, startPollResultsPhase
+  ]);
+
   const goToPreviousPhase = useCallback(() => {
     switch (workflowPhase) {
-      case WORKFLOW_PHASES.CREATION:
+      case WORKFLOW_PHASES.HEALTH_CHECK_RESULTS:
         updateBoardSettings({
           workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+        });
+        break;
+      case WORKFLOW_PHASES.CREATION:
+        updateBoardSettings({
+          workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS
         });
         break;
       case WORKFLOW_PHASES.GROUPING: {
@@ -129,7 +165,7 @@ export const useWorkflow = ({
         });
         break;
       default:
-        // If we're in CREATION or any unknown phase, do nothing
+        // HEALTH_CHECK is the first step; unknown phases do nothing
         break;
     }
   }, [workflowPhase, columns, updateBoardSettings, removeAllGrouping]);
@@ -198,6 +234,7 @@ export const useWorkflow = ({
     startPollPhase,
     startPollResultsPhase,
     goToCreationPhase,
+    goToNextPhase,
     goToPreviousPhase,
     startHealthCheckPhase,
     startHealthCheckResultsPhase,

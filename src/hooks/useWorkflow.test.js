@@ -129,8 +129,40 @@ describe('useWorkflow', () => {
     });
   });
 
+  describe('goToNextPhase', () => {
+    it.each([
+      [WORKFLOW_PHASES.HEALTH_CHECK, { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS }],
+      [WORKFLOW_PHASES.HEALTH_CHECK_RESULTS, { workflowPhase: WORKFLOW_PHASES.CREATION }],
+      [WORKFLOW_PHASES.CREATION, { workflowPhase: WORKFLOW_PHASES.GROUPING, retrospectiveMode: true }],
+      [WORKFLOW_PHASES.GROUPING, { workflowPhase: WORKFLOW_PHASES.INTERACTIONS }],
+      [WORKFLOW_PHASES.INTERACTIONS, { workflowPhase: WORKFLOW_PHASES.RESULTS, resultsViewIndex: 0 }],
+      [WORKFLOW_PHASES.RESULTS, { workflowPhase: WORKFLOW_PHASES.POLL }],
+      [WORKFLOW_PHASES.POLL, { workflowPhase: WORKFLOW_PHASES.POLL_RESULTS }]
+    ])('advances from %s', (from, expected) => {
+      mockProps = createMockProps({ workflowPhase: from });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToNextPhase();
+      });
+
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expected);
+    });
+
+    it('does nothing from POLL_RESULTS', () => {
+      mockProps = createMockProps({ workflowPhase: WORKFLOW_PHASES.POLL_RESULTS });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToNextPhase();
+      });
+
+      expect(mockProps.updateBoardSettings).not.toHaveBeenCalled();
+    });
+  });
+
   describe('goToPreviousPhase', () => {
-    it('should go from CREATION to HEALTH_CHECK', () => {
+    it('should go from CREATION to HEALTH_CHECK_RESULTS', () => {
       mockProps = createMockProps({
         workflowPhase: WORKFLOW_PHASES.CREATION
       });
@@ -141,8 +173,22 @@ describe('useWorkflow', () => {
       });
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
+        workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS
       });
+    });
+
+    it.each([
+      [WORKFLOW_PHASES.HEALTH_CHECK_RESULTS, WORKFLOW_PHASES.HEALTH_CHECK],
+      [WORKFLOW_PHASES.POLL_RESULTS, WORKFLOW_PHASES.POLL]
+    ])('should go from %s to %s', (from, to) => {
+      mockProps = createMockProps({ workflowPhase: from });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToPreviousPhase();
+      });
+
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({ workflowPhase: to });
     });
 
     it('should go from GROUPING to CREATION when no groups exist', () => {

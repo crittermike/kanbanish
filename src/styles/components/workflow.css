@@ -1,91 +1,161 @@
-/* Workflow Controls Styles */
+/* Retrospective stepper */
 .workflow-controls {
-  background: var(--background-color);
-  border-bottom: 2px solid var(--border-color);
-  padding: 15px 20px;
-  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 16px;
 }
 
-
-.workflow-phase {
-  margin: 0;
+.workflow-stepper {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-}
-
-.phase-info {
-  flex: 1;
-}
-
-.phase-info h3 {
-  margin: 0 0 8px 0;
-  color: var(--primary-color);
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.phase-info p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.phase-controls {
-  display: flex;
   gap: 12px;
-  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.workflow-back-btn,
+.workflow-back-placeholder {
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
-.phase-controls .btn {
+.workflow-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+}
+
+.workflow-back-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.workflow-back-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.workflow-steps {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-faint);
   white-space: nowrap;
-  min-width: auto;
 }
 
-/* Phase-specific styling */
-.workflow-phase[data-phase="CREATION"] .phase-info h3 {
-  color: var(--info-color);
+.workflow-step + .workflow-step::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  margin: 0 8px;
+  background: var(--border-color);
 }
 
-.workflow-phase[data-phase="GROUPING"] .phase-info h3 {
-  color: var(--warning-color);
+.workflow-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-color);
+  flex-shrink: 0;
 }
 
-.workflow-phase[data-phase="INTERACTIONS"] .phase-info h3 {
-  color: var(--primary-color);
+.workflow-step-done {
+  color: var(--text-muted);
 }
 
-.workflow-phase[data-phase="RESULTS"] .phase-info h3 {
-  color: var(--accent-alt);
+.workflow-step-done .workflow-step-dot {
+  background: var(--accent);
+  opacity: 0.6;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+.workflow-step-current {
+  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.workflow-step-current .workflow-step-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-transparent);
+}
+
+.workflow-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.workflow-votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.workflow-votes select {
+  padding: 4px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.workflow-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
   .workflow-controls {
-    padding: 12px 15px;
+    padding: 8px 10px;
   }
 
-  .workflow-phase {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-    text-align: center;
+  .workflow-stepper {
+    gap: 8px;
   }
 
-  .phase-controls {
-    justify-content: center;
-    flex-wrap: wrap;
+  .workflow-steps {
+    gap: 6px;
   }
 
-  .phase-controls .btn {
-    flex: 1;
-    min-width: 140px;
+  .workflow-step + .workflow-step::before {
+    display: none;
   }
 
+  .workflow-step:not(.workflow-step-current) .workflow-step-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .workflow-votes > span {
+    display: none;
+  }
 }

@@ -49,12 +49,10 @@ src/
 │   ├── CardCreationIndicator.jsx # Shows who's typing
 │   ├── Comments.jsx             # Comment thread on cards/groups
 │   ├── EmojiPicker.jsx          # Emoji selection popover
-│   ├── VoteCounter.jsx          # Per-card vote display
-│   ├── BaseVoteCounter.jsx      # Shared vote counter logic
-│   ├── TotalVoteCounter.jsx     # Aggregate vote display
+│   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── WorkflowControls.jsx     # Retrospective phase stepper
+│   ├── WorkflowControls.jsx     # Retrospective stepper (steps, back arrow, Next, votes per person)
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
 │   ├── PollResults.jsx          # Poll results display
@@ -62,8 +60,7 @@ src/
 │   ├── HealthCheckResults.jsx   # Health check results display
 │   └── modals/
 │       ├── ExportBoardModal.jsx
-│       ├── NewBoardTemplateModal.jsx
-│       └── VoteLimitModal.jsx
+│       └── NewBoardTemplateModal.jsx
 │
 ├── hooks/
 │   ├── usePoll.js                   # Poll voting operations (submitPollVote, getPollStats)
@@ -75,7 +72,7 @@ src/
 │   ├── useWorkflow.js               # Retrospective workflow phase transitions
 │   ├── useCardOperations.jsx        # Card CRUD, voting, reactions, comments
 │   ├── useGroupOperations.jsx       # Group-level reactions and comments
-│   ├── useVoteCounterVisibility.jsx # Intersection observer for vote counters
+│   ├── useVoteCounterVisibility.jsx # Whether the votes-left counter shows
 │   └── useRecentBoards.js           # localStorage-backed recent boards list (add, remove, pin)
 │
 ├── utils/
@@ -260,8 +257,10 @@ users/{userId}/preferences/
 When `retrospectiveMode` is enabled, the board operates as a guided retrospective with phases:
 
 ```
-HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → INTERACTION_REVEAL → RESULTS → POLL → POLL_RESULTS
+HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
 ```
+
+`WorkflowControls` renders these as a stepper (`Health · Add · Group · Vote · Discuss · Poll`); results sub-phases share their parent step. "Next" calls `goToNextPhase` and the back arrow calls `goToPreviousPhase` (both in `useWorkflow`). The Health step only shows when the board has a health check. Phase changes don't show toasts.
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 

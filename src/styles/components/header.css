@@ -651,53 +651,6 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 }
 
-/* Total Vote Counter Styles */
-.total-vote-counter {
-    display: flex;
-    align-items: center;
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-round);
-    padding: 4px 12px;
-    color: var(--text-color);
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-}
-
-.total-vote-counter-content {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.total-vote-counter-label {
-    color: var(--text-muted);
-    font-weight: var(--font-weight-medium);
-}
-
-.total-vote-counter-value {
-    color: var(--text-color);
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-}
-
-.total-vote-counter-value.total-vote-counter-depleted {
-    color: var(--success-color);
-}
-
-/* Responsive adjustments for total vote counter */
-@media (max-width: 767px) {
-    .total-vote-counter {
-        padding: 8px 12px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .total-vote-counter-value {
-        font-size: var(--font-size-sm);
-    }
-}
-
-
 .modal-header .close-button {
     width: 28px;
     height: 28px;

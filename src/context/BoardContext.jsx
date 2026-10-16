@@ -387,7 +387,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const {
     startGroupingPhase, startInteractionsPhase,
     startResultsPhase, startPollPhase, startPollResultsPhase,
-    goToCreationPhase, goToPreviousPhase,
+    goToCreationPhase, goToNextPhase, goToPreviousPhase,
     startHealthCheckPhase, startHealthCheckResultsPhase,
     navigateResults, getSortedItemsForResults
   } = useWorkflow({
@@ -570,7 +570,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,
-    goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    goToNextPhase, goToPreviousPhase, navigateResults, getSortedItemsForResults,
       // Poll system
     pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
@@ -633,7 +633,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     resultsViewIndex, setResultsViewIndex, startGroupingPhase,
     startInteractionsPhase, startResultsPhase,
     startPollPhase, startPollResultsPhase, goToCreationPhase,
-    goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    goToNextPhase, goToPreviousPhase, navigateResults, getSortedItemsForResults,
     pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
     getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,

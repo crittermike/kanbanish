@@ -10,6 +10,7 @@ import BoardHeader from './BoardHeader';
 import CardCreationIndicator from './CardCreationIndicator';
 import ColumnsContainer from './ColumnsContainer';
 import DisplayNamePrompt from './DisplayNamePrompt';
+import HealthCheckResults from './HealthCheckResults';
 import HealthCheckVoting from './HealthCheckVoting';
 import CardDetailModal from './modals/CardDetailModal';
 import ExportBoardModal from './modals/ExportBoardModal';
@@ -323,8 +324,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
         showDisplayNames={showDisplayNames}
       />
 
-      {/* Workflow Controls - Show when retrospective mode is enabled or during health check phase */}
-      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK) && (
+      {/* Workflow stepper - shown in retrospective mode or during a health check */}
+      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ||
+        workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS) && (
         <WorkflowControls />
       )}
 
@@ -332,6 +334,8 @@ function Board({ onGoHome, onNavigateToBoard }) {
       <main id="board-content">
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
+        ) : workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS ? (
+          <HealthCheckResults />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView onExpandCard={handleExpandCard} />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (

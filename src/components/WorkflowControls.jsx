@@ -1,268 +1,117 @@
-import { useState } from 'react';
-import { Eye, MessageCircle, ArrowLeft, BarChart, Heart } from 'react-feather';
+import { ArrowLeft, ArrowRight } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { useNotification } from '../context/NotificationContext';
 import { WORKFLOW_PHASES } from '../utils/workflowUtils';
-import VoteLimitModal from './modals/VoteLimitModal';
 
+const HEALTH_PHASES = [WORKFLOW_PHASES.HEALTH_CHECK, WORKFLOW_PHASES.HEALTH_CHECK_RESULTS];
+
+const STEPS = [
+  { id: 'health', label: 'Health', phases: HEALTH_PHASES },
+  { id: 'add', label: 'Add', phases: [WORKFLOW_PHASES.CREATION] },
+  { id: 'group', label: 'Group', phases: [WORKFLOW_PHASES.GROUPING] },
+  { id: 'vote', label: 'Vote', phases: [WORKFLOW_PHASES.INTERACTIONS] },
+  { id: 'discuss', label: 'Discuss', phases: [WORKFLOW_PHASES.RESULTS] },
+  { id: 'poll', label: 'Poll', phases: [WORKFLOW_PHASES.POLL, WORKFLOW_PHASES.POLL_RESULTS] }
+];
+
+const VOTE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const WorkflowControls = () => {
-  const [showVoteLimitModal, setShowVoteLimitModal] = useState(false);
-  const { showNotification } = useNotification();
-  
   const {
     workflowPhase,
     initialWorkflowPhase,
+    retrospectiveMode,
+    healthCheckVotes,
     votesPerUser,
-    startGroupingPhase,
-    startResultsPhase,
-    startPollPhase,
-    startPollResultsPhase,
-    goToPreviousPhase,
-    updateBoardSettings
+    updateVotesPerUser,
+    goToNextPhase,
+    goToPreviousPhase
   } = useBoardContext();
 
-  const handleContinueToBoard = () => {
-    updateBoardSettings({ workflowPhase: WORKFLOW_PHASES.CREATION });
-    showNotification('Card creation phase started');
-  };
+  const inHealthCheck = HEALTH_PHASES.includes(workflowPhase);
+  const hasHealthCheck = inHealthCheck ||
+    HEALTH_PHASES.includes(initialWorkflowPhase) ||
+    Object.keys(healthCheckVotes || {}).length > 0;
 
-  const handleStartGrouping = () => {
-    startGroupingPhase();
-    showNotification('Grouping phase started - cards revealed, grouping enabled');
-  };
+  // A standalone health check (outside retro mode) only shows its own step.
+  const steps = !retrospectiveMode
+    ? STEPS.filter(step => step.id === 'health')
+    : STEPS.filter(step => step.id !== 'health' || hasHealthCheck);
 
-  const handleStartInteractions = () => {
-    setShowVoteLimitModal(true);
-  };
+  const currentIndex = steps.findIndex(step => step.phases.includes(workflowPhase));
+  if (currentIndex === -1) {
+    return null;
+  }
 
-  const handleVoteLimitConfirm = (newVotesPerUser) => {
-    // Combine vote limit and phase transition into a single settings update
-    // to avoid a race condition where the phase transition overwrites the vote limit
-    updateBoardSettings({
-      votesPerUser: newVotesPerUser,
-      workflowPhase: WORKFLOW_PHASES.INTERACTIONS
-    });
-    showNotification(`Voting phase started - each user can cast ${newVotesPerUser} votes`);
-  };
+  const firstPhase = steps[0].phases[0];
+  const canGoBack = workflowPhase !== firstPhase;
+  const canGoNext = workflowPhase !== WORKFLOW_PHASES.POLL_RESULTS;
 
-  const handleStartResults = () => {
-    startResultsPhase();
-    showNotification('Results phase started - view top items by votes');
-  };
-
-  const handleStartPoll = () => {
-    startPollPhase();
-    showNotification('Poll phase started - rate the effectiveness of this retrospective');
-  };
-
-  const handleStartPollResults = () => {
-    startPollResultsPhase();
-    showNotification('Poll results revealed - view effectiveness ratings');
-  };
-
-  const handleGoToPreviousPhase = () => {
-    const phaseMessages = {
-      [WORKFLOW_PHASES.CREATION]: 'Returned to health check',
-      [WORKFLOW_PHASES.GROUPING]: 'Returned to creation phase',
-      [WORKFLOW_PHASES.INTERACTIONS]: 'Returned to grouping phase',
-      [WORKFLOW_PHASES.RESULTS]: 'Returned to voting phase',
-      [WORKFLOW_PHASES.POLL]: 'Returned to results phase',
-      [WORKFLOW_PHASES.POLL_RESULTS]: 'Returned to poll phase'
-    };
-
-    goToPreviousPhase();
-    const message = phaseMessages[workflowPhase] || 'Moved to previous phase';
-    showNotification(message);
-  };
-
-  const renderPhaseControls = () => {
-    switch (workflowPhase) {
-      case WORKFLOW_PHASES.HEALTH_CHECK:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Health Check Phase</h3>
-              <p>Rate how the team is feeling about key areas. View results individually when ready.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleContinueToBoard}
-              >
-                <Eye size={16} />
-                Continue to Board
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.CREATION:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Card Creation Phase</h3>
-              <p>Add cards to the board. When ready, reveal cards and start grouping.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartGrouping}
-              >
-                <Eye size={16} />
-                Reveal Cards & Start Grouping
-              </button>
-              {initialWorkflowPhase === WORKFLOW_PHASES.HEALTH_CHECK && (
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <Heart size={16} />
-                Back to Health Check
-              </button>
-              )}
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.GROUPING:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Grouping Phase</h3>
-              <p>Cards are revealed. Group related cards together, add comments, and use labels or colors to organize themes.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartInteractions}
-              >
-                <MessageCircle size={16} />
-                Start Voting
-              </button>
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.INTERACTIONS:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Voting Phase</h3>
-              <p>Add comments, votes, and reactions to cards and groups. Activity is hidden from other users.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartResults}
-              >
-                <Eye size={16} />
-                View Results
-              </button>
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.RESULTS:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Results Phase</h3>
-              <p>Viewing the top-voted cards and groups. Use detail view to walk through each item with labels and comments.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartPoll}
-              >
-                <BarChart size={16} />
-                Start Effectiveness Poll
-              </button>
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.POLL:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Effectiveness Poll</h3>
-              <p>Rate the effectiveness of this retrospective on a scale of 1-5. Your vote is private.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn primary-btn"
-                onClick={handleStartPollResults}
-              >
-                <BarChart size={16} />
-                View Poll Results
-              </button>
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      case WORKFLOW_PHASES.POLL_RESULTS:
-        return (
-          <div className="workflow-phase">
-            <div className="phase-info">
-              <h3>Poll Results</h3>
-              <p>View the distribution of effectiveness ratings and overall retrospective score.</p>
-            </div>
-            <div className="phase-controls">
-              <button
-                className="btn secondary-btn"
-                onClick={handleGoToPreviousPhase}
-              >
-                <ArrowLeft size={16} />
-                Go to Previous Phase
-              </button>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const voteOptions = votesPerUser > 0 && !VOTE_OPTIONS.includes(votesPerUser)
+    ? [...VOTE_OPTIONS, votesPerUser].sort((a, b) => a - b)
+    : VOTE_OPTIONS;
 
   return (
-    <div className="workflow-controls">
-      {renderPhaseControls()}
-      <VoteLimitModal
-        isOpen={showVoteLimitModal}
-        onClose={() => setShowVoteLimitModal(false)}
-        onConfirm={handleVoteLimitConfirm}
-        currentLimit={votesPerUser}
-      />
-    </div>
+    <nav className="workflow-controls" aria-label="Retrospective steps">
+      <div className="workflow-stepper">
+        {canGoBack ? (
+          <button
+            type="button"
+            className="workflow-back-btn"
+            onClick={goToPreviousPhase}
+            aria-label="Previous step"
+            title="Previous step"
+          >
+            <ArrowLeft size={16} />
+          </button>
+        ) : (
+          <span className="workflow-back-placeholder" aria-hidden="true" />
+        )}
+
+        <ol className="workflow-steps">
+          {steps.map((step, index) => {
+            const state = index < currentIndex ? 'done' : index === currentIndex ? 'current' : 'upcoming';
+            return (
+              <li
+                key={step.id}
+                className={`workflow-step workflow-step-${state}`}
+                aria-current={state === 'current' ? 'step' : undefined}
+              >
+                <span className="workflow-step-dot" aria-hidden="true" />
+                <span className="workflow-step-label">{step.label}</span>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="workflow-actions">
+          {workflowPhase === WORKFLOW_PHASES.INTERACTIONS && (
+            <label className="workflow-votes">
+              <span>Votes:</span>
+              <select
+                value={votesPerUser}
+                onChange={e => updateVotesPerUser(parseInt(e.target.value, 10))}
+                aria-label="Votes per person"
+              >
+                {voteOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+                <option value={0}>∞</option>
+              </select>
+            </label>
+          )}
+          {canGoNext && (
+            <button
+              type="button"
+              className="btn primary-btn workflow-next-btn"
+              onClick={goToNextPhase}
+            >
+              Next
+              <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 };
 

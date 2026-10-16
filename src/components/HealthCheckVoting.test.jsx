@@ -50,34 +50,7 @@ describe('HealthCheckVoting Component', () => {
     expect(mockSubmitHealthCheckVote).toHaveBeenCalledWith('teamwork', 4);
   });
 
-  test('shows completed status when all questions have been answered', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultMockContext,
-      userHealthCheckVotes: {
-        teamwork: 4,
-        fun: 3
-      }
-    });
-
-    render(<HealthCheckVoting />);
-
-    expect(screen.getByText(/✓ You have rated all 2 areas\./)).toBeInTheDocument();
-  });
-
-  test('shows remaining count when not all questions are answered', () => {
-    useBoardContext.mockReturnValue({
-      ...defaultMockContext,
-      userHealthCheckVotes: {
-        teamwork: 4
-      }
-    });
-
-    render(<HealthCheckVoting />);
-
-    expect(screen.getByText('1 of 2 areas rated')).toBeInTheDocument();
-  });
-
-  test('shows voting progress section', () => {
+  test('shows how many people have voted', () => {
     useBoardContext.mockReturnValue({
       ...defaultMockContext,
       activeUsers: 8,
@@ -89,8 +62,7 @@ describe('HealthCheckVoting Component', () => {
 
     render(<HealthCheckVoting />);
 
-    expect(screen.getByText('Participation')).toBeInTheDocument();
-    expect(screen.getByText('2 of 8 participants have started (25%)')).toBeInTheDocument();
+    expect(screen.getByTestId('health-check-participation')).toHaveTextContent('2 of 8 voted');
   });
 
   test('allows voting on multiple questions', () => {
@@ -158,7 +130,7 @@ describe('HealthCheckVoting Component', () => {
     expect(ratingButtons[4]).not.toHaveClass('active');
   });
 
-  test('shows 0% progress when no users have voted', () => {
+  test('shows zero voted when no users have voted', () => {
     useBoardContext.mockReturnValue({
       ...defaultMockContext,
       activeUsers: 5,
@@ -167,10 +139,10 @@ describe('HealthCheckVoting Component', () => {
 
     render(<HealthCheckVoting />);
 
-    expect(screen.getByText('0 of 5 participants have started (0%)')).toBeInTheDocument();
+    expect(screen.getByTestId('health-check-participation')).toHaveTextContent('0 of 5 voted');
   });
 
-  test('shows 100% progress when all active users have voted', () => {
+  test('shows all voted when every active user has voted', () => {
     useBoardContext.mockReturnValue({
       ...defaultMockContext,
       activeUsers: 3,
@@ -182,6 +154,11 @@ describe('HealthCheckVoting Component', () => {
 
     render(<HealthCheckVoting />);
 
-    expect(screen.getByText('3 of 3 participants have started (100%)')).toBeInTheDocument();
+    expect(screen.getByTestId('health-check-participation')).toHaveTextContent('3 of 3 voted');
+  });
+
+  test('does not show a results toggle', () => {
+    render(<HealthCheckVoting />);
+    expect(screen.queryByRole('button', { name: /view results/i })).not.toBeInTheDocument();
   });
 });

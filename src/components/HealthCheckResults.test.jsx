@@ -44,8 +44,8 @@ describe('HealthCheckResults Component', () => {
 
     render(<HealthCheckResults />);
 
-    expect(screen.getByText('No votes have been submitted yet.')).toBeInTheDocument();
-    expect(screen.getByText('Participants need to complete the health check first.')).toBeInTheDocument();
+    expect(screen.getByText('No votes yet')).toBeInTheDocument();
+    expect(screen.queryByTestId('health-result-teamwork')).not.toBeInTheDocument();
   });
 
   test('shows results with correct averages when votes exist', () => {
@@ -105,9 +105,8 @@ describe('HealthCheckResults Component', () => {
     render(<HealthCheckResults />);
 
     // Overall average is (4.0 + 3.0) / 2 = 3.5
-    expect(screen.getByText('3.5')).toBeInTheDocument();
-    expect(screen.getByText('5.0')).toBeInTheDocument();
-    expect(screen.getByText('Overall: Good')).toBeInTheDocument();
+    expect(screen.getByTestId('health-overall-score')).toHaveTextContent('3.5');
+    expect(screen.getByText('Good')).toBeInTheDocument();
   });
 
   test('shows participation count', () => {
@@ -130,9 +129,17 @@ describe('HealthCheckResults Component', () => {
       }
     ]);
 
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      healthCheckVotes: {
+        teamwork: { u1: 4, u2: 5, u3: 3 },
+        fun: { u1: 4, u4: 2 }
+      }
+    });
+
     render(<HealthCheckResults />);
 
-    expect(screen.getByText('7 participants')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
   });
 
   test('shows correct overall label for great score', () => {
@@ -158,8 +165,8 @@ describe('HealthCheckResults Component', () => {
     render(<HealthCheckResults />);
 
     // Overall average is (4.8 + 4.6) / 2 = 4.7
-    expect(screen.getByText('4.7')).toBeInTheDocument();
-    expect(screen.getByText('Overall: Great')).toBeInTheDocument();
+    expect(screen.getByTestId('health-overall-score')).toHaveTextContent('4.7');
+    expect(screen.getByText('Great')).toBeInTheDocument();
   });
 
   test('shows correct overall label for poor score', () => {
@@ -185,11 +192,11 @@ describe('HealthCheckResults Component', () => {
     render(<HealthCheckResults />);
 
     // Overall average is (2.0 + 1.8) / 2 = 1.9
-    expect(screen.getByText('1.9')).toBeInTheDocument();
-    expect(screen.getByText('Overall: Poor')).toBeInTheDocument();
+    expect(screen.getByTestId('health-overall-score')).toHaveTextContent('1.9');
+    expect(screen.getByText('Poor')).toBeInTheDocument();
   });
 
-  test('displays vote distribution section for questions with votes', () => {
+  test('shows an inline vote distribution for each question', () => {
     mockGetHealthCheckStats.mockReturnValue([
       {
         id: 'teamwork',
@@ -203,7 +210,9 @@ describe('HealthCheckResults Component', () => {
 
     render(<HealthCheckResults />);
 
-    expect(screen.getByText('Vote Distribution')).toBeInTheDocument();
+    const dist = screen.getByLabelText('Teamwork vote distribution');
+    expect(dist.querySelectorAll('.dist-bar')).toHaveLength(5);
+    expect(dist.querySelector('[data-rating="5"]')).toHaveAttribute('title', '5: 2');
   });
 
   test('handles single participant correctly', () => {
@@ -218,12 +227,17 @@ describe('HealthCheckResults Component', () => {
       }
     ]);
 
+    useBoardContext.mockReturnValue({
+      ...defaultMockContext,
+      healthCheckVotes: { teamwork: { u1: 5 } }
+    });
+
     render(<HealthCheckResults />);
 
-    expect(screen.getByText('1 participant')).toBeInTheDocument();
+    expect(screen.getByTestId('health-result-teamwork')).toHaveTextContent('5.0');
   });
 
-  test('displays all question descriptions', () => {
+  test('shows question descriptions as tooltips', () => {
     mockGetHealthCheckStats.mockReturnValue([
       {
         id: 'teamwork',
@@ -245,8 +259,8 @@ describe('HealthCheckResults Component', () => {
 
     render(<HealthCheckResults />);
 
-    expect(screen.getByText('How well is the team collaborating?')).toBeInTheDocument();
-    expect(screen.getByText('How much fun are we having at work?')).toBeInTheDocument();
+    expect(screen.getByText('Teamwork')).toHaveAttribute('title', 'How well is the team collaborating?');
+    expect(screen.getByText('Fun')).toHaveAttribute('title', 'How much fun are we having at work?');
   });
 
   test('shows no data indicator for questions with zero votes when other questions have votes', () => {

@@ -3,117 +3,61 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
 import VoteCounter from './VoteCounter';
 
-// Mock the BoardContext
 vi.mock('../context/BoardContext');
 
 describe('VoteCounter', () => {
   const mockUser = { uid: 'user123' };
   const mockGetUserVoteCount = vi.fn();
+  const baseContext = {
+    user: mockUser,
+    votesPerUser: 5,
+    getUserVoteCount: mockGetUserVoteCount,
+    workflowPhase: 'INTERACTIONS',
+    retrospectiveMode: true,
+    votingEnabled: true
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    useBoardContext.mockReturnValue({
-      user: mockUser,
-      votesPerUser: 5,
-      getUserVoteCount: mockGetUserVoteCount,
-      workflowPhase: 'INTERACTIONS',
-      retrospectiveMode: true,
-      votingEnabled: true
-    });
+    useBoardContext.mockReturnValue(baseContext);
   });
 
-  it('displays remaining votes correctly', () => {
-    mockGetUserVoteCount.mockReturnValue(2);
-
+  it("shows the current user's remaining votes", () => {
+    mockGetUserVoteCount.mockReturnValue(3);
     render(<VoteCounter />);
+    expect(screen.getByTestId('vote-counter')).toHaveTextContent('2 votes left');
+    expect(mockGetUserVoteCount).toHaveBeenCalledWith('user123');
+  });
 
-    expect(screen.getByText('Your votes remaining:')).toBeInTheDocument();
-    expect(screen.getByText('3/5')).toBeInTheDocument();
+  it('uses singular wording for one vote', () => {
+    mockGetUserVoteCount.mockReturnValue(4);
+    render(<VoteCounter />);
+    expect(screen.getByTestId('vote-counter')).toHaveTextContent('1 vote left');
   });
 
   it('shows depleted state when no votes remaining', () => {
     mockGetUserVoteCount.mockReturnValue(5);
-
     render(<VoteCounter />);
-
-    const voteValue = screen.getByText('0/5');
-    expect(voteValue).toHaveClass('vote-counter-depleted');
-  });
-
-  it('does not render when voting is disabled', () => {
-    useBoardContext.mockReturnValue({
-      user: mockUser,
-      votesPerUser: 5,
-      getUserVoteCount: mockGetUserVoteCount,
-      workflowPhase: 'INTERACTIONS',
-      retrospectiveMode: true,
-      votingEnabled: false
-    });
-
-    render(<VoteCounter />);
-
-    expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
-  });
-
-  it('does not render when user is not logged in', () => {
-    useBoardContext.mockReturnValue({
-      user: null,
-      votesPerUser: 5,
-      getUserVoteCount: mockGetUserVoteCount,
-      workflowPhase: 'INTERACTIONS',
-      retrospectiveMode: true,
-      votingEnabled: true
-    });
-
-    render(<VoteCounter />);
-
-    expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
-  });
-
-  it('does not render when interactions are not visible', () => {
-    useBoardContext.mockReturnValue({
-      user: mockUser,
-      votesPerUser: 5,
-      getUserVoteCount: mockGetUserVoteCount,
-      workflowPhase: 'CREATION',
-      retrospectiveMode: true,
-      votingEnabled: true
-    });
-
-    render(<VoteCounter />);
-
-    expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
-  });
-
-  it('does not render when retrospective mode is disabled', () => {
-    useBoardContext.mockReturnValue({
-      user: mockUser,
-      votesPerUser: 5,
-      getUserVoteCount: mockGetUserVoteCount,
-      workflowPhase: 'INTERACTIONS',
-      retrospectiveMode: false,
-      votingEnabled: true
-    });
-
-    render(<VoteCounter />);
-
-    expect(screen.queryByText('Your votes remaining:')).not.toBeInTheDocument();
-  });
-
-  it('handles zero used votes correctly', () => {
-    mockGetUserVoteCount.mockReturnValue(0);
-
-    render(<VoteCounter />);
-
-    expect(screen.getByText('5/5')).toBeInTheDocument();
+    expect(screen.getByText('0')).toHaveClass('vote-counter-depleted');
   });
 
   it('prevents negative remaining votes', () => {
-    // Edge case where user somehow has more votes than allowed
     mockGetUserVoteCount.mockReturnValue(7);
-
     render(<VoteCounter />);
+    expect(screen.getByTestId('vote-counter')).toHaveTextContent('0 votes left');
+  });
 
-    expect(screen.getByText('0/5')).toBeInTheDocument();
+  it.each([
+    ['voting is disabled', { votingEnabled: false }],
+    ['user is not logged in', { user: null }],
+    ['retrospective mode is disabled', { retrospectiveMode: false }],
+    ['phase is not voting', { workflowPhase: 'RESULTS' }],
+    ['phase is creation', { workflowPhase: 'CREATION' }],
+    ['votes are unlimited', { votesPerUser: 0 }]
+  ])('does not render when %s', (_label, overrides) => {
+    mockGetUserVoteCount.mockReturnValue(0);
+    useBoardContext.mockReturnValue({ ...baseContext, ...overrides });
+    render(<VoteCounter />);
+    expect(screen.queryByTestId('vote-counter')).not.toBeInTheDocument();
   });
 });
