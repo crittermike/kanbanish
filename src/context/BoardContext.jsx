@@ -476,7 +476,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
         settings: {
           // Voting is off by default on kanban boards; retro mode requires it
           votingEnabled: sanitizedOverrides.retrospectiveMode === true,
-          downvotingEnabled: true, // Default to enabled for new boards
+          downvotingEnabled: false, // Default to disabled for new boards
           multipleVotesAllowed: false, // Default to not allowing multiple votes
           sortByVotes: false, // Default to chronological
           retrospectiveMode: false, // Default to disabled (cards are visible)

@@ -242,7 +242,7 @@ describe('createBoardFromTemplate', () => {
     const boardData = set.mock.calls[0][1];
     expect(boardData.settings).toEqual({
       votingEnabled: false,
-      downvotingEnabled: true,
+      downvotingEnabled: false,
       multipleVotesAllowed: false,
       sortByVotes: false,
       retrospectiveMode: false,
@@ -276,7 +276,7 @@ describe('createBoardFromTemplate', () => {
     vi.mocked(parseUrlSettings).mockReturnValue({
       boardSettings: {
         votingEnabled: false,
-        downvotingEnabled: false,
+        downvotingEnabled: true,
         multipleVotesAllowed: true,
         votesPerUser: 3,
         retrospectiveMode: true,
@@ -293,7 +293,7 @@ describe('createBoardFromTemplate', () => {
 
     const boardData = set.mock.calls[0][1];
     expect(boardData.settings.votingEnabled).toBe(false);
-    expect(boardData.settings.downvotingEnabled).toBe(false);
+    expect(boardData.settings.downvotingEnabled).toBe(true);
     expect(boardData.settings.multipleVotesAllowed).toBe(true);
     expect(boardData.settings.votesPerUser).toBe(3);
     expect(boardData.settings.retrospectiveMode).toBe(true);
