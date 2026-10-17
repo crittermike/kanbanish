@@ -82,8 +82,15 @@ VITE_FIREBASE_APP_ID=your_app_id
 | `npm run preview` | `vite preview` | Preview production build |
 | `npm test` | `vitest run` | Run tests once |
 | `npm run test:watch` | `vitest` | Tests in watch mode |
+| `npm run test:e2e` | `playwright test` | Chromium end-to-end tests |
 | `npm run lint` | `eslint .` | Check for lint errors |
 | `npm run lint:fix` | `eslint . --fix` | Auto-fix lint errors |
+
+### Testing
+
+Unit tests use isolated worker threads and mock Firebase. End-to-end tests use real Firebase and create independent boards in isolated browser contexts, with two workers. Configure `.env` for a test Firebase project and install Chromium with `npx playwright install chromium` before running them.
+
+Use the shared helpers in `e2e/helpers.js` for board and card creation. Wait for user-visible state with Playwright assertions, not fixed sleeps or retries that repeat an action.
 
 ## 🤝 Contributing
 

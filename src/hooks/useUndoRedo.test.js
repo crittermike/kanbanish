@@ -339,7 +339,6 @@ describe('useUndoRedo', () => {
 
     await act(async () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true }));
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(0);
@@ -370,7 +369,6 @@ describe('useUndoRedo', () => {
 
     await act(async () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, shiftKey: true }));
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(1);
@@ -395,7 +393,6 @@ describe('useUndoRedo', () => {
 
     await act(async () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true }));
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(0);
@@ -424,7 +421,6 @@ describe('useUndoRedo', () => {
       const event = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true });
       Object.defineProperty(event, 'target', { value: input, enumerable: true });
       window.dispatchEvent(event);
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(1);
@@ -455,7 +451,6 @@ describe('useUndoRedo', () => {
       const event = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true });
       Object.defineProperty(event, 'target', { value: textarea, enumerable: true });
       window.dispatchEvent(event);
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(1);
@@ -491,7 +486,6 @@ describe('useUndoRedo', () => {
         configurable: true
       });
       editable.dispatchEvent(event);
-      await new Promise(resolve => setTimeout(resolve, 10));
     });
 
     expect(result.current.pastCount).toBe(1);

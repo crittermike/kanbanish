@@ -1,99 +1,112 @@
 import { test, expect } from '@playwright/test';
-
-/**
- * Helper: create a board by clicking the "Default" template tile on the
- * dashboard, then wait for the board view to appear. Retries because board
- * creation silently fails until Firebase anonymous auth is ready.
- */
-async function createBoard(page) {
-  await page.goto('/');
-
-  const defaultChip = page.getByRole('link', { name: 'Default' });
-  await expect(defaultChip).toBeVisible();
-
-  let boardLoaded = false;
-  for (let attempt = 0; attempt < 5; attempt++) {
-    await defaultChip.click();
-
-    try {
-      await expect(page.getByLabel('Board title')).toBeVisible({ timeout: 8000 });
-      boardLoaded = true;
-      break;
-    } catch {
-      await page.waitForTimeout(3000);
-    }
-  }
-
-  if (!boardLoaded) {
-    throw new Error('Failed to create board after 5 attempts — Firebase auth may not be working');
-  }
-}
+import { addCard, createBoard } from './helpers';
 
 test.describe('Board', () => {
-  test('can create a board from a template tile and see columns', async ({ page }) => {
+  test('creates a board in one click and saves a card', async ({ page }) => {
     await createBoard(page);
 
-    // URL should now contain ?board= parameter
-    await expect(page).toHaveURL(/[?&]board=/);
+    await expect(page.locator('.column-title')).toHaveText([/^To Do/, /^In Progress/, /^Done/]);
+    await addCard(page, 'My first test card');
 
-    // Default template has 3 columns: To Do, In Progress, Done
-    await expect(page.locator('.column')).toHaveCount(3, { timeout: 10000 });
+    const viewer = await page.context().newPage();
+    await viewer.goto(page.url());
+    await expect(viewer.locator('.card').getByText('My first test card')).toBeVisible();
   });
 
-  test('can add a card to a column', async ({ page }) => {
-    await createBoard(page);
+  test('voting settings persist and sync to another page', async ({ page }) => {
+    await createBoard(page, { settings: { voting: 'true' } });
 
-    // Click "Add Card" on the first column
-    const firstColumn = page.locator('.column').first();
-    await firstColumn.getByRole('button', { name: /add card/i }).click();
-
-    // Should show the inline card form with a textarea
-    const textarea = firstColumn.locator('textarea');
-    await expect(textarea).toBeVisible();
-
-    // Type card content and submit
-    await textarea.fill('My first test card');
-
-    // Click Add to save
-    await firstColumn.getByRole('button', { name: 'Add' }).click();
-
-    // The card should now appear in the column (target the card element, not the textarea)
-    await expect(firstColumn.locator('.card').getByText('My first test card')).toBeVisible({ timeout: 5000 });
-  });
-
-  test('can open and close board settings', async ({ page }) => {
-    await createBoard(page);
-
-    // Open settings
     await page.getByRole('button', { name: /board settings/i }).click();
+    const settings = page.getByRole('dialog', { name: /board settings/i });
+    const allowVoting = settings.getByRole('switch', { name: 'Allow voting', exact: true });
+    await expect(allowVoting).toHaveAttribute('aria-checked', 'true');
+    await allowVoting.click();
+    await expect(allowVoting).toHaveAttribute('aria-checked', 'false');
+    await expect(settings.getByText('Votes per person', { exact: true })).toHaveCount(0);
 
-    // Settings modal should appear
-    await expect(page.getByRole('heading', { name: /board settings/i })).toBeVisible();
+    await settings.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(settings).toHaveCount(0);
 
-    // Should show the voting preferences
-    await expect(page.getByRole('region', { name: /^voting$/i })).toBeVisible();
+    const viewer = await page.context().newPage();
+    await viewer.goto(page.url());
+    await expect(viewer.locator('.column').first()).toBeVisible();
+    await viewer.getByRole('button', { name: /board settings/i }).click();
+    const remoteVoting = viewer.getByRole('switch', { name: 'Allow voting', exact: true });
+    await expect(remoteVoting).toHaveAttribute('aria-checked', 'false');
+    await remoteVoting.click();
+    await expect(remoteVoting).toHaveAttribute('aria-checked', 'true');
 
-    // Close via the close button
-    await page.getByRole('button', { name: /close/i }).click();
-
-    // Settings should be gone
-    await expect(page.getByRole('heading', { name: /board settings/i })).not.toBeVisible();
+    await page.getByRole('button', { name: /board settings/i }).click();
+    await expect(allowVoting).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('can rename the board title', async ({ page }) => {
+  test('renaming a loaded board persists the new title', async ({ page }) => {
     await createBoard(page);
 
     const titleInput = page.getByLabel('Board title');
-    await expect(titleInput).toBeVisible();
-
-    // Wait for any pending Firebase syncs to settle before editing
-    await page.waitForTimeout(2000);
-
-    // Clear and type a new title
     await titleInput.fill('My Test Board');
     await titleInput.press('Tab');
+    const viewer = await page.context().newPage();
+    await viewer.goto(page.url());
+    await expect(viewer.getByLabel('Board title')).toHaveValue('My Test Board');
+  });
 
-    // Wait for the Firebase round-trip (write + listener update)
-    await expect(titleInput).toHaveValue('My Test Board', { timeout: 10000 });
+  test('completes a retrospective with a vote limit, reset, and effectiveness poll', async ({ page }) => {
+    await createBoard(page, { template: 'Retrospective', settings: { votes: '1' } });
+    const steps = page.getByRole('navigation', { name: 'Retrospective steps' });
+    const currentStep = steps.locator('[aria-current="step"]');
+    const next = steps.getByRole('button', { name: 'Next', exact: true });
+    const viewer = await page.context().newPage();
+    await viewer.goto(page.url());
+    const remoteStep = viewer.getByRole('navigation', { name: 'Retrospective steps' }).locator('[aria-current="step"]');
+    const expectStep = async label => {
+      await expect(currentStep).toHaveText(label);
+      await expect(remoteStep).toHaveText(label);
+    };
+
+    await expectStep('Add');
+    await expect(steps.getByRole('button', { name: 'Previous step' })).toHaveCount(0);
+    const firstCard = await addCard(page, 'Keep pairing on difficult tasks');
+    const secondCard = await addCard(page, 'Improve build times');
+
+    await next.click();
+    await expectStep('Group');
+    await expect(page.getByRole('button', { name: 'Add Card', exact: true })).toHaveCount(0);
+    await next.click();
+    await expectStep('Vote');
+    await expect(steps.getByLabel('Votes per person')).toHaveValue('1');
+    await expect(page.getByTestId('vote-counter')).toHaveText('1 vote left');
+
+    await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
+    await expect(firstCard.locator('.vote-count')).toHaveText('1');
+    await expect(page.getByTestId('vote-counter')).toHaveText('0 votes left');
+    await secondCard.getByRole('button', { name: 'Upvote', exact: true }).click();
+    await expect(page.getByRole('status')).toContainText('reached your vote limit');
+    await expect(secondCard.locator('.vote-count')).toHaveText('0');
+
+    await page.getByRole('button', { name: 'Board actions', exact: true }).click();
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('menuitem', { name: 'Reset all votes', exact: true }).click();
+    await expect(firstCard.locator('.vote-count')).toHaveText('0');
+    await expect(page.getByTestId('vote-counter')).toHaveText('1 vote left');
+
+    await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
+    await expect(page.getByTestId('vote-counter')).toHaveText('0 votes left');
+    await next.click();
+    await expectStep('Discuss');
+    await steps.getByRole('button', { name: 'Previous step' }).click();
+    await expectStep('Vote');
+    await expect(firstCard.locator('.vote-count')).toHaveText('1');
+
+    await next.click();
+    await expectStep('Discuss');
+    await next.click();
+    await expectStep('Poll');
+    await page.locator('.poll-voting').getByRole('button').nth(3).click();
+    await expect(page.getByText('Your vote has been submitted:', { exact: false })).toContainText('4/5 stars');
+    await next.click();
+    await expect(page.getByRole('heading', { name: 'Retrospective Effectiveness Results' })).toBeVisible();
+    await expect(page.locator('.average-rating .score-number')).toHaveText('4.0');
+    await expect(next).toHaveCount(0);
   });
 });

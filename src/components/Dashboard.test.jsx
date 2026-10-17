@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, test, beforeEach, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { vi, describe, test, beforeEach, afterEach, expect } from 'vitest';
 import { useRecentBoards } from '../hooks/useRecentBoards';
 import { createBoardFromTemplate } from '../utils/boardUtils';
+import { auth, get, signInAnonymously } from '../utils/firebase';
 import Dashboard from './Dashboard';
 
 // Mock useRecentBoards hook
@@ -51,6 +52,7 @@ describe('Dashboard Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    get.mockResolvedValue({ exists: () => false });
     localStorage.clear();
     useRecentBoards.mockReturnValue({
       recentBoards: [],
@@ -59,6 +61,10 @@ describe('Dashboard Component', () => {
       updateBoardMeta: vi.fn(),
       clearAll: mockClearAll
     });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   const renderDashboard = (props = {}) =>
@@ -70,6 +76,17 @@ describe('Dashboard Component', () => {
         {...props}
       />
     );
+
+  const renderRecentBoards = async recentBoards => {
+    useRecentBoards.mockReturnValue({
+      recentBoards,
+      removeBoard: mockRemoveBoard,
+      togglePin: mockTogglePin,
+      updateBoardMeta: vi.fn(),
+      clearAll: mockClearAll
+    });
+    await act(async () => renderDashboard());
+  };
 
   test('hides the Recent section when there are no recent boards', () => {
     renderDashboard();
@@ -140,6 +157,58 @@ describe('Dashboard Component', () => {
     expect(localStorage.getItem(LAST_TEMPLATE_KEY)).toBe('retro');
   });
 
+  test('creates a board on the first click before anonymous auth has finished', async () => {
+    auth.onAuthStateChanged.mockImplementationOnce(() => vi.fn());
+    signInAnonymously.mockResolvedValueOnce({ user: { uid: 'new-user' } });
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('link', { name: 'Default' }));
+
+    await waitFor(() => expect(mockOnOpenBoard).toHaveBeenCalledWith('new-board-123'));
+    expect(signInAnonymously).toHaveBeenCalledWith(auth);
+    expect(createBoardFromTemplate).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ user: { uid: 'new-user' }, templateName: 'Board' })
+    );
+  });
+
+  test('ignores repeated template clicks while board creation is pending', async () => {
+    let completeCreation;
+    createBoardFromTemplate.mockReturnValueOnce(new Promise(resolve => {
+      completeCreation = resolve;
+    }));
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('link', { name: 'Default' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Retrospective' }));
+
+    await waitFor(() => expect(createBoardFromTemplate).toHaveBeenCalledTimes(1));
+    expect(mockOnOpenBoard).not.toHaveBeenCalled();
+    expect(localStorage.getItem(LAST_TEMPLATE_KEY)).toBeNull();
+
+    await act(async () => completeCreation('created-once'));
+
+    expect(mockOnOpenBoard).toHaveBeenCalledExactlyOnceWith('created-once');
+    expect(localStorage.getItem(LAST_TEMPLATE_KEY)).toBe('default');
+  });
+
+  test('allows retrying failed creation without recording or opening a failed board', async () => {
+    const error = new Error('Board write failed');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    createBoardFromTemplate.mockRejectedValueOnce(error);
+    renderDashboard();
+
+    await act(async () => fireEvent.click(screen.getByRole('link', { name: 'Default' })));
+
+    expect(consoleError).toHaveBeenCalledWith('Error creating board:', error);
+    expect(mockOnOpenBoard).not.toHaveBeenCalled();
+    expect(localStorage.getItem(LAST_TEMPLATE_KEY)).toBeNull();
+
+    fireEvent.click(screen.getByRole('link', { name: 'Default' }));
+
+    await waitFor(() => expect(mockOnOpenBoard).toHaveBeenCalledExactlyOnceWith('new-board-123'));
+    expect(createBoardFromTemplate).toHaveBeenCalledTimes(2);
+  });
+
   test('uses template defaultSettings when present', async () => {
     localStorage.setItem(LAST_TEMPLATE_KEY, 'big-orca');
     renderDashboard();
@@ -158,6 +227,7 @@ describe('Dashboard Component', () => {
         })
       );
     });
+    await waitFor(() => expect(mockOnOpenBoard).toHaveBeenCalledWith('new-board-123'));
   });
 
   test('modifier-clicking a tile leaves navigation to the browser', () => {
@@ -179,71 +249,39 @@ describe('Dashboard Component', () => {
     expect(screen.getByText('Join')).toBeInTheDocument();
   });
 
-  test('renders recent boards', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 3, pinned: false },
-        { id: 'board-2', title: 'Board Two', lastVisited: Date.now() - 1000, cardCount: 7, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('renders recent boards', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 3, pinned: false },
+      { id: 'board-2', title: 'Board Two', lastVisited: Date.now() - 1000, cardCount: 7, pinned: false }
+    ]);
 
     expect(screen.getByText('Board One')).toBeInTheDocument();
     expect(screen.getByText('Board Two')).toBeInTheDocument();
   });
 
-  test('renders pinned boards in separate section', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-pinned', title: 'Pinned Board', lastVisited: Date.now(), cardCount: 2, pinned: true },
-        { id: 'board-recent', title: 'Recent Board', lastVisited: Date.now(), cardCount: 1, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('renders pinned boards in separate section', async () => {
+    await renderRecentBoards([
+      { id: 'board-pinned', title: 'Pinned Board', lastVisited: Date.now(), cardCount: 2, pinned: true },
+      { id: 'board-recent', title: 'Recent Board', lastVisited: Date.now(), cardCount: 1, pinned: false }
+    ]);
 
     expect(screen.getByText('Pinned Board')).toBeInTheDocument();
     expect(screen.getByText('Recent Board')).toBeInTheDocument();
   });
 
-  test('calls onOpenBoard when board card is clicked', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Click Me', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('calls onOpenBoard when board card is clicked', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Click Me', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     fireEvent.click(screen.getByText('Click Me'));
     expect(mockOnOpenBoard).toHaveBeenCalledWith('board-1');
   });
 
-  test('calls removeBoard when remove button is clicked', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('calls removeBoard when remove button is clicked', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     window.confirm = vi.fn().mockReturnValue(true);
     const removeBtn = screen.getByLabelText('Remove board from list');
@@ -252,18 +290,10 @@ describe('Dashboard Component', () => {
     expect(mockRemoveBoard).toHaveBeenCalledWith('board-1');
   });
 
-  test('calls togglePin when pin button is clicked', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('calls togglePin when pin button is clicked', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     const pinBtn = screen.getByLabelText('Pin board');
     fireEvent.click(pinBtn);
@@ -319,18 +349,10 @@ describe('Dashboard Component', () => {
     expect(mockToggleDarkMode).toHaveBeenCalled();
   });
 
-  test('calls clearAll when Clear all button is clicked', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('calls clearAll when Clear all button is clicked', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     window.confirm = vi.fn().mockReturnValue(true);
     fireEvent.click(screen.getByText('Clear all'));
@@ -338,18 +360,10 @@ describe('Dashboard Component', () => {
     expect(mockClearAll).toHaveBeenCalled();
   });
 
-  test('does not remove board when confirmation is cancelled', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('does not remove board when confirmation is cancelled', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     window.confirm = vi.fn().mockReturnValue(false);
     const removeBtn = screen.getByLabelText('Remove board from list');
@@ -358,18 +372,10 @@ describe('Dashboard Component', () => {
     expect(mockRemoveBoard).not.toHaveBeenCalled();
   });
 
-  test('does not clear all when confirmation is cancelled', () => {
-    useRecentBoards.mockReturnValue({
-      recentBoards: [
-        { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
-      ],
-      removeBoard: mockRemoveBoard,
-      togglePin: mockTogglePin,
-      updateBoardMeta: vi.fn(),
-      clearAll: mockClearAll
-    });
-
-    renderDashboard();
+  test('does not clear all when confirmation is cancelled', async () => {
+    await renderRecentBoards([
+      { id: 'board-1', title: 'Board One', lastVisited: Date.now(), cardCount: 0, pinned: false }
+    ]);
 
     window.confirm = vi.fn().mockReturnValue(false);
     fireEvent.click(screen.getByText('Clear all'));
@@ -381,11 +387,13 @@ describe('Dashboard Component', () => {
     renderDashboard();
 
     fireEvent.click(screen.getByText('All templates'));
-    capturedOnSelectTemplate({
-      id: 'lean-coffee',
-      name: 'Lean Coffee',
-      columns: ['Topics', 'Discussing', 'Done'],
-      tags: ['discussion']
+    await act(async () => {
+      capturedOnSelectTemplate({
+        id: 'lean-coffee',
+        name: 'Lean Coffee',
+        columns: ['Topics', 'Discussing', 'Done'],
+        tags: ['discussion']
+      });
     });
 
     await waitFor(() => {
