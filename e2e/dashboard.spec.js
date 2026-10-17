@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard', () => {
-  test('loads the landing page with key elements', async ({ page }) => {
+  test('shows quick-create links and opens and closes the template picker', async ({ page }) => {
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: 'Kanbanish' })).toBeVisible();
@@ -12,26 +12,24 @@ test.describe('Dashboard', () => {
     await expect(page.getByRole('button', { name: 'All templates' })).toBeVisible();
 
     await expect(page.getByLabel('Board ID or URL')).toBeVisible();
-  });
-
-  test('opens the template picker from All templates', async ({ page }) => {
-    await page.goto('/');
 
     await page.getByRole('button', { name: 'All templates' }).click();
-
     await expect(page.getByRole('heading', { name: 'Templates' })).toBeVisible();
     await expect(page.getByPlaceholder('Search templates')).toBeVisible();
     await expect(page.getByRole('dialog').getByRole('link', { name: /lean coffee/i })).toBeVisible();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
-  test('can close the template picker', async ({ page }) => {
+  test('filters templates and creates a board from the picker', async ({ page }) => {
     await page.goto('/');
-
     await page.getByRole('button', { name: 'All templates' }).click();
-    await expect(page.getByRole('heading', { name: 'Templates' })).toBeVisible();
+    await page.getByPlaceholder('Search templates').fill('lean coffee');
+    const templates = page.getByRole('dialog').getByRole('link');
+    await expect(templates).toHaveCount(1);
+    await templates.click();
 
-    await page.getByRole('button', { name: 'Close' }).click();
-
-    await expect(page.getByRole('heading', { name: 'Templates' })).not.toBeVisible();
+    await expect(page).toHaveURL(/[?&]board=[^&]+/);
+    await expect(page.locator('.column-title')).toHaveText([/^Topics/, /^Discussing/, /^Done/]);
   });
 });

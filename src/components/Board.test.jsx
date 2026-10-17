@@ -164,7 +164,7 @@ describe('Board Component', () => {
       updateBoardTitle: mockUpdateBoardTitle
     });
 
-    render(
+    const { rerender } = render(
       <DndProvider backend={HTML5Backend}>
         <Board />
       </DndProvider>
@@ -179,12 +179,20 @@ describe('Board Component', () => {
     expect(mockSetBoardTitle).toHaveBeenCalledWith('Updated Board Title');
     expect(mockUpdateBoardTitle).not.toHaveBeenCalled();
 
-    // Blur the input to trigger Firebase update
-    fireEvent.blur(boardTitleInput);
+    useBoardContext.mockReturnValue({
+      ...mockContextValue,
+      boardTitle: 'Updated Board Title',
+      setBoardTitle: mockSetBoardTitle,
+      updateBoardTitle: mockUpdateBoardTitle
+    });
+    rerender(
+      <DndProvider backend={HTML5Backend}>
+        <Board />
+      </DndProvider>
+    );
 
-    // updateBoardTitle should be called with the current boardTitle value
-    // Note: this will be the original value since we're not actually updating the mock state
-    expect(mockUpdateBoardTitle).toHaveBeenCalledWith('Test Board');
+    fireEvent.blur(boardTitleInput);
+    expect(mockUpdateBoardTitle).toHaveBeenCalledWith('Updated Board Title');
   });
 
   test('handles copying share URL to clipboard', async () => {
@@ -248,12 +256,8 @@ describe('Board Component', () => {
     expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
   });
 
-  test('selects sort by votes when that option is clicked', () => {
-    // For this test, let's simulate having a board ID in the URL
-    // so the template modal doesn't open automatically
-    mockURLSearchParams.mockImplementation(() => ({
-      get: param => param === 'board' ? 'existing-board-id' : null
-    }));
+  test.each([false, true])('switches sort order from sortByVotes=%s', sortByVotes => {
+    useBoardContext.mockReturnValue({ ...mockContextValue, retrospectiveMode: false, sortByVotes });
 
     render(
       <DndProvider backend={HTML5Backend}>
@@ -262,10 +266,10 @@ describe('Board Component', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Board actions' }));
-    fireEvent.click(screen.getByRole('menuitemradio', { name: 'Most votes' }));
-
-    // Check that setSortByVotes was called with true
-    expect(mockContextValue.setSortByVotes).toHaveBeenCalledWith(true);
+    const currentOption = sortByVotes ? 'Most votes' : 'Newest';
+    expect(screen.getByRole('menuitemradio', { name: currentOption })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(screen.getByRole('menuitemradio', { name: sortByVotes ? 'Newest' : 'Most votes' }));
+    expect(mockContextValue.setSortByVotes).toHaveBeenCalledExactlyOnceWith(!sortByVotes);
   });
 
   test('toggles voting enabled setting when clicked', () => {

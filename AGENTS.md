@@ -300,6 +300,7 @@ Dark theme is `:root` defaults. Light theme overrides via `html.light-mode`. Key
 
 - **Framework**: Vitest with jsdom environment, globals enabled
 - **Setup file**: `src/setupTests.js` (imports `@testing-library/jest-dom`)
+- **Workers**: Isolated threads; keep file isolation enabled for independent mocks and globals
 - **Config**: `vitest.config.js` — outputs `vitest.results.json`
 - **Test files**: Co-located with components as `*.test.jsx`
 
@@ -308,7 +309,10 @@ Dark theme is `:root` defaults. Light theme overrides via `html.light-mode`. Key
 ```bash
 npm test          # Run all tests once
 npm run test:watch # Run tests in watch mode
+npm run test:e2e   # Run Chromium e2e tests (requires Firebase .env and installed Chromium)
 ```
+
+E2e specs use two workers and isolated browser contexts. Reuse `e2e/helpers.js` and assert user-visible readiness instead of sleeping or retrying mutations. The tests create real boards, so use a test Firebase project.
 
 ### Conventions
 
