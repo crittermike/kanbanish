@@ -135,7 +135,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
     settings: {
       // Voting is off by default on kanban boards; retro mode requires it
       votingEnabled: sanitizedOverrides.retrospectiveMode === true,
-      downvotingEnabled: true,
+      downvotingEnabled: false,
       multipleVotesAllowed: false,
       sortByVotes: false,
       retrospectiveMode: false,
