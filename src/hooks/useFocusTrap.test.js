@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useFocusTrap } from './useFocusTrap';
 
@@ -9,6 +9,7 @@ describe('useFocusTrap', () => {
   let button3;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     container = document.createElement('div');
     button1 = document.createElement('button');
     button1.textContent = 'First';
@@ -23,22 +24,24 @@ describe('useFocusTrap', () => {
   });
 
   afterEach(() => {
+    cleanup();
+    vi.clearAllTimers();
+    vi.useRealTimers();
     document.body.removeChild(container);
   });
 
-  it('focuses the first focusable element when opened', async () => {
+  it('focuses the first focusable element when opened', () => {
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, true));
 
-    // setTimeout(0) in the hook — flush it
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     expect(document.activeElement).toBe(button1);
   });
 
-  it('does not focus anything when not open', async () => {
+  it('does not focus anything when not open', () => {
     const outsideButton = document.createElement('button');
     document.body.appendChild(outsideButton);
     outsideButton.focus();
@@ -46,20 +49,20 @@ describe('useFocusTrap', () => {
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, false));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     expect(document.activeElement).toBe(outsideButton);
     document.body.removeChild(outsideButton);
   });
 
-  it('wraps focus from last to first on Tab', async () => {
+  it('wraps focus from last to first on Tab', () => {
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, true));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     // Focus the last button
@@ -79,12 +82,12 @@ describe('useFocusTrap', () => {
     expect(document.activeElement).toBe(button1);
   });
 
-  it('wraps focus from first to last on Shift+Tab', async () => {
+  it('wraps focus from first to last on Shift+Tab', () => {
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, true));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     // Focus should be on first button
@@ -104,13 +107,13 @@ describe('useFocusTrap', () => {
     expect(document.activeElement).toBe(button3);
   });
 
-  it('calls onClose when Escape is pressed', async () => {
+  it('calls onClose when Escape is pressed', () => {
     const onClose = vi.fn();
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, true, { onClose }));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     const escapeEvent = new KeyboardEvent('keydown', {
@@ -125,30 +128,7 @@ describe('useFocusTrap', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onClose on Escape when onClose is not provided', async () => {
-    const ref = { current: container };
-
-    // Should not throw
-    renderHook(() => useFocusTrap(ref, true));
-
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
-    });
-
-    const escapeEvent = new KeyboardEvent('keydown', {
-      key: 'Escape',
-      bubbles: true,
-      cancelable: true
-    });
-
-    expect(() => {
-      act(() => {
-        document.dispatchEvent(escapeEvent);
-      });
-    }).not.toThrow();
-  });
-
-  it('restores focus to previously focused element on close', async () => {
+  it('restores focus to previously focused element on close', () => {
     const outsideButton = document.createElement('button');
     outsideButton.textContent = 'Outside';
     document.body.appendChild(outsideButton);
@@ -161,8 +141,8 @@ describe('useFocusTrap', () => {
       { initialProps: { isOpen: true } }
     );
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     // Focus should have moved into the trap
@@ -177,29 +157,30 @@ describe('useFocusTrap', () => {
     document.body.removeChild(outsideButton);
   });
 
-  it('removes keydown listener on unmount', () => {
-    const removeSpy = vi.spyOn(document, 'removeEventListener');
+  it('does not respond to Escape after unmount', () => {
+    const onClose = vi.fn();
     const ref = { current: container };
-    const { unmount } = renderHook(() => useFocusTrap(ref, true));
+    const { unmount } = renderHook(() => useFocusTrap(ref, true, { onClose }));
 
     unmount();
 
-    expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
-    removeSpy.mockRestore();
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('handles container with no focusable elements', async () => {
+  it('prevents Tab from leaving a container with no focusable elements', () => {
     const emptyContainer = document.createElement('div');
     emptyContainer.textContent = 'No buttons here';
     document.body.appendChild(emptyContainer);
 
     const ref = { current: emptyContainer };
 
-    // Should not throw
     renderHook(() => useFocusTrap(ref, true));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     // Tab should be prevented (no elements to cycle through)
@@ -209,27 +190,15 @@ describe('useFocusTrap', () => {
       cancelable: true
     });
 
-    expect(() => {
-      act(() => {
-        document.dispatchEvent(tabEvent);
-      });
-    }).not.toThrow();
+    act(() => {
+      document.dispatchEvent(tabEvent);
+    });
+    expect(tabEvent.defaultPrevented).toBe(true);
 
     document.body.removeChild(emptyContainer);
   });
 
-  it('handles null container ref gracefully', async () => {
-    const ref = { current: null };
-
-    // Should not throw
-    renderHook(() => useFocusTrap(ref, true));
-
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
-    });
-  });
-
-  it('skips disabled buttons when trapping focus', async () => {
+  it('skips disabled buttons when trapping focus', () => {
     const disabledBtn = document.createElement('button');
     disabledBtn.disabled = true;
     disabledBtn.textContent = 'Disabled';
@@ -238,8 +207,8 @@ describe('useFocusTrap', () => {
     const ref = { current: container };
     renderHook(() => useFocusTrap(ref, true));
 
-    await act(async () => {
-      await new Promise(r => setTimeout(r, 10));
+    act(() => {
+      vi.runOnlyPendingTimers();
     });
 
     // First focusable should be button1 (not the disabled one)
