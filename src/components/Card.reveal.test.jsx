@@ -344,7 +344,7 @@ describe('Card Reveal Mode', () => {
 
     // Find voting buttons - they should be disabled when interactions are revealed
     const votingButtons = screen.getAllByTitle('Voting is frozen - no more changes allowed');
-    expect(votingButtons).toHaveLength(2); // upvote and downvote
+    expect(votingButtons).toHaveLength(1); // frozen controls show only the up arrow
     votingButtons.forEach(button => {
       expect(button).toBeDisabled();
     });

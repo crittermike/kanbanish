@@ -342,7 +342,7 @@ describe('useCardOperations', () => {
       expect(set).not.toHaveBeenCalled();
     });
 
-    it('should show "You\'ve already voted" for duplicate single-vote', async () => {
+    it('should remove the vote when upvoting again in single-vote mode', async () => {
       const props = createMockProps({
         cardData: {
           ...createMockProps().cardData,
@@ -357,7 +357,9 @@ describe('useCardOperations', () => {
         await result.current.upvoteCard(mockEvent);
       });
 
-      expect(mockShowNotification).toHaveBeenCalledWith("You've already voted");
+      expect(set).toHaveBeenCalledWith(expect.anything(), 0);
+      expect(remove).toHaveBeenCalled();
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should show notification when interactions are disabled', async () => {

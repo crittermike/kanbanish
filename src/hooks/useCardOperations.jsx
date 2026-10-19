@@ -212,12 +212,6 @@ export function useCardOperations({
 
     const currentVotes = cardData.votes || 0;
 
-    // Prevent negative votes
-    if (delta < 0 && currentVotes <= 0) {
-      showNotification("Can't have negative votes");
-      return;
-    }
-
     // Get the user's current vote if any
     const userCurrentVote = cardData.voters && cardData.voters[user.uid] ? cardData.voters[user.uid] : 0;
 
@@ -240,20 +234,15 @@ export function useCardOperations({
       }
     }
 
-    // If multiple votes are not allowed
-    if (!multipleVotesAllowed) {
-      // If the user is trying to vote in the same direction they already voted
-      if (userCurrentVote === delta) {
-        showNotification("You've already voted");
-        return;
-      }
+    // With single votes, clicking either arrow after voting clears the existing vote
+    if (!multipleVotesAllowed && userCurrentVote !== 0) {
+      delta = -userCurrentVote;
+    }
 
-      // If the user already voted and is now voting in opposite direction,
-      // just reset their vote (remove previous vote, don't add new one)
-      if (userCurrentVote !== 0) {
-        // Cancel their previous vote only
-        delta = -userCurrentVote;
-      }
+    // Prevent negative votes
+    if (currentVotes + delta < 0) {
+      showNotification("Can't have negative votes");
+      return;
     }
 
     try {

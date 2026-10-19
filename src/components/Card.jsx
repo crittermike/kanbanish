@@ -249,6 +249,8 @@ function Card({
   const votesVisible = votingEnabled && !groupId && areInteractionsVisible(workflowPhase, retrospectiveMode);
   const votingDisabled = !areInteractionsAllowed(workflowPhase, retrospectiveMode);
   const userVotes = (user?.uid && cardData.voters?.[user.uid]) || 0;
+  const voteLimitReached = votesVisible && votesPerUser > 0 && !!user?.uid &&
+    getUserVoteCount(user.uid) >= votesPerUser && (multipleVotesAllowed || userVotes === 0);
 
   // Determine if dragging should be disabled and if grouping is allowed
   const dragDisabled = !isCardDraggingAllowed(workflowPhase, retrospectiveMode);
@@ -370,75 +372,77 @@ function Card({
         />
       ) : (
         <>
-          <CardContent
-            cardData={displayCardData}
-            userId={user?.uid}
-            retrospectiveMode={retrospectiveMode}
-            workflowPhase={workflowPhase}
-          >
-            {reviewToolsVisible && (
-              <CardHoverActions
-                showEmojiPicker={showEmojiPicker}
-                setShowEmojiPicker={setShowEmojiPicker}
-                setShowComments={setShowComments}
-                toggleComments={toggleComments}
-                setEmojiPickerPosition={setEmojiPickerPosition}
-                emojiPickerPosition={emojiPickerPosition}
-                addReaction={addReaction}
-                hasUserReactedWithEmoji={hasUserReactedWithEmoji}
-                reactionDisabled={reactionsDisabled}
-                reactionDisabledReason={reactionDisabledReason}
-                showEmojiAction={reactionsVisible}
-                onEdit={toggleEditMode}
+          <div className="card-main">
+            {votesVisible && (
+              <VotingControls
+                votes={displayCardData.votes}
+                onUpvote={upvoteCard}
+                onDownvote={downvoteCard}
+                showDownvoteButton={downvotingEnabled || (multipleVotesAllowed && userVotes > 0)}
+                downvoteRemovesVote={!downvotingEnabled}
+                disabled={votingDisabled}
+                disabledReason={disabledReason}
+                userVote={userVotes}
+                limitReached={voteLimitReached}
               />
             )}
-          </CardContent>
-
-          {showDisplayNames && (
-            <div className="card-author">
-              <div 
-                className="card-author-avatar" 
-                style={{ 
-                  backgroundColor: presenceData?.[displayCardData.createdBy]?.color || displayCardData.userColor || 'var(--text-muted)' 
-                }}
+            <div className="card-body">
+              <CardContent
+                cardData={displayCardData}
+                userId={user?.uid}
+                retrospectiveMode={retrospectiveMode}
+                workflowPhase={workflowPhase}
               >
-                {getInitials(presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous')}
-              </div>
-              <span className="card-author-name">
-                {presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous'}
-              </span>
-            </div>
-          )}
+                {reviewToolsVisible && (
+                  <CardHoverActions
+                    showEmojiPicker={showEmojiPicker}
+                    setShowEmojiPicker={setShowEmojiPicker}
+                    setShowComments={setShowComments}
+                    toggleComments={toggleComments}
+                    setEmojiPickerPosition={setEmojiPickerPosition}
+                    emojiPickerPosition={emojiPickerPosition}
+                    addReaction={addReaction}
+                    hasUserReactedWithEmoji={hasUserReactedWithEmoji}
+                    reactionDisabled={reactionsDisabled}
+                    reactionDisabledReason={reactionDisabledReason}
+                    showEmojiAction={reactionsVisible}
+                    onEdit={toggleEditMode}
+                  />
+                )}
+              </CardContent>
 
-          {displayCardData.tags && displayCardData.tags.length > 0 && (
-            <div className="card-tags">
-              {displayCardData.tags.map(tag => (
-                <span key={tag} className="card-tag-chip">{tag}</span>
-              ))}
-            </div>
-          )}
-
-          {!isEditing && showCommentBadge && (
-            <div className="card-inline-badges">
-              <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
-                <MessageSquare size={11} /> {commentCount}
-              </span>
-            </div>
-          )}
-
-          {(votesVisible || reactionsVisible) && (
-            <div className="card-pill-row">
-              {votesVisible && (
-                <VotingControls
-                  votes={displayCardData.votes}
-                  onUpvote={upvoteCard}
-                  onDownvote={downvoteCard}
-                  showDownvoteButton={downvotingEnabled || userVotes > 0}
-                  disabled={votingDisabled}
-                  disabledReason={disabledReason}
-                  active={userVotes > 0}
-                />
+              {showDisplayNames && (
+                <div className="card-author">
+                  <div
+                    className="card-author-avatar"
+                    style={{
+                      backgroundColor: presenceData?.[displayCardData.createdBy]?.color || displayCardData.userColor || 'var(--text-muted)'
+                    }}
+                  >
+                    {getInitials(presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous')}
+                  </div>
+                  <span className="card-author-name">
+                    {presenceData?.[displayCardData.createdBy]?.displayName || displayCardData.displayName || 'Anonymous'}
+                  </span>
+                </div>
               )}
+
+              {displayCardData.tags && displayCardData.tags.length > 0 && (
+                <div className="card-tags">
+                  {displayCardData.tags.map(tag => (
+                    <span key={tag} className="card-tag-chip">{tag}</span>
+                  ))}
+                </div>
+              )}
+
+              {showCommentBadge && (
+                <div className="card-inline-badges">
+                  <span className="card-inline-badge comment-badge" title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}>
+                    <MessageSquare size={11} /> {commentCount}
+                  </span>
+                </div>
+              )}
+
               {reactionsVisible && (
                 <CardReactions
                   reactions={displayCardData.reactions}
@@ -449,7 +453,7 @@ function Card({
                 />
               )}
             </div>
-          )}
+          </div>
 
           {reviewToolsVisible && showComments && (
             <Comments

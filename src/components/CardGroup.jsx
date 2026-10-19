@@ -48,6 +48,9 @@ function CardGroup({
     updateGroupName,
     votingEnabled,
     downvotingEnabled,
+    multipleVotesAllowed,
+    votesPerUser,
+    getUserVoteCount,
     upvoteGroup,
     downvoteGroup,
     retrospectiveMode,
@@ -99,6 +102,8 @@ function CardGroup({
   const canUngroup = areInteractionsAllowed(workflowPhase, retrospectiveMode);
   const votesVisible = votingEnabled && areInteractionsVisible(workflowPhase, retrospectiveMode);
   const userVotes = (user?.uid && groupData.voters?.[user.uid]) || 0;
+  const voteLimitReached = votesVisible && votesPerUser > 0 && !!user?.uid &&
+    getUserVoteCount(user.uid) >= votesPerUser && (multipleVotesAllowed || userVotes === 0);
   const commentCount = Object.keys(displayGroupData.comments || {}).length;
 
   // Set up drop target for cards to be added to this group
@@ -313,10 +318,13 @@ function CardGroup({
               votes={displayGroupData.votes || 0}
               onUpvote={handleUpvoteGroup}
               onDownvote={handleDownvoteGroup}
-              showDownvoteButton={downvotingEnabled || userVotes > 0}
+              showDownvoteButton={downvotingEnabled || (multipleVotesAllowed && userVotes > 0)}
+              downvoteRemovesVote={!downvotingEnabled}
               disabled={votingDisabled}
               disabledReason={disabledReason}
-              active={userVotes > 0}
+              userVote={userVotes}
+              limitReached={voteLimitReached}
+              orientation="horizontal"
             />
           )}
         </div>

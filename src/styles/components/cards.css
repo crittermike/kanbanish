@@ -287,80 +287,104 @@
     border-top: 1px solid var(--border-subtle);
 }
 
-/* Votes and reactions share one row of pills under the card text */
-.card-pill-row {
+/* Vote rail on the left; text, tags, badges and reactions sit beside it */
+.card-main {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--emoji-reaction-gap);
+    align-items: flex-start;
+    gap: var(--space-xs);
+}
+
+.card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-body .emoji-reactions {
     margin-top: var(--space-xs);
+    padding-top: 0;
+    border-top: none;
 }
 
-.card-pill-row .emoji-reactions,
-.card-pill-row .reactions-left {
-    display: contents;
-}
-
-/* Vote pill: 👍 + count, with an optional "−" segment */
-.vote-pill {
-    display: inline-flex;
-    align-items: stretch;
+/* Vote control: up arrow, count, optional down arrow */
+.votes {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
-    height: 28px;
-    background-color: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 999px;
-    overflow: hidden;
-    transition: border-color var(--transition-speed) var(--transition-ease), background-color var(--transition-speed) var(--transition-ease);
 }
 
-.vote-pill.active {
-    background-color: var(--emoji-reaction-active-bg);
-    border-color: var(--accent);
+/* Pulled into the card padding so a one-line card stays one line tall */
+.votes-vertical {
+    flex-direction: column;
+    width: 26px;
+    margin: -5px 0 -5px -6px;
+}
+
+.card[style*="border-left"] .votes-vertical {
+    margin-left: -3px;
+}
+
+.votes-horizontal {
+    gap: 2px;
 }
 
 .vote-button {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    width: 26px;
+    height: 18px;
+    padding: 0;
     background: transparent;
     border: none;
-    color: var(--text-color);
+    border-radius: var(--radius-xs);
+    color: var(--text-muted);
     cursor: pointer;
-    padding: 0 10px;
-    font: inherit;
     transition: background-color var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
 }
 
+.votes-horizontal .vote-button {
+    width: 24px;
+    height: 24px;
+}
+
 .vote-button:hover {
-    background-color: var(--accent-subtle);
-}
-
-.vote-button.downvote-button {
-    padding: 0 8px;
-    color: var(--text-muted);
-    border-left: 1px solid var(--border-color);
-}
-
-.vote-button.downvote-button:hover {
+    background-color: var(--hover-bg);
     color: var(--text-color);
 }
 
-.vote-emoji {
-    font-size: 0.95rem;
-    line-height: 1;
+.vote-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
 }
 
-/* Disabled pills stay readable (e.g. results); they just stop reacting */
-.vote-button.disabled,
+.vote-button.active,
+.vote-button.active:hover {
+    color: var(--accent);
+}
+
+.vote-button.active:hover {
+    background-color: var(--accent-subtle);
+}
+
+/* Out of votes: still clickable so the limit message can explain */
+.vote-button.blocked {
+    opacity: 0.35;
+}
+
+.vote-button.blocked:hover {
+    background-color: transparent;
+    color: var(--text-muted);
+}
+
+/* Frozen (e.g. Discuss): the count stays readable, the arrow is just context */
 .vote-button:disabled {
     cursor: default;
-    pointer-events: none;
+    opacity: 0.5;
 }
 
-.vote-pill.disabled .downvote-button {
-    display: none;
+.vote-button:disabled:hover {
+    background-color: transparent;
+    color: var(--text-muted);
 }
 
 .card.editing-disabled {
@@ -403,13 +427,22 @@
 }
 
 .vote-count {
-    min-width: 0.6rem;
+    min-width: 1.25rem;
     text-align: center;
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-sm);
+    line-height: 14px;
     color: var(--text-color);
-    line-height: 1;
     font-variant-numeric: tabular-nums;
+}
+
+.vote-count.zero {
+    color: var(--text-muted);
+}
+
+.votes.voted-up .vote-count,
+.votes.voted-down .vote-count {
+    color: var(--accent);
 }
 
 /* Card Comments */
@@ -697,9 +730,10 @@
         margin-bottom: var(--space-sm);
     }
 
-    /* Increase touch area for voting buttons */
-    .vote-pill {
-        height: 34px;
+    /* Wider touch targets for voting without making cards taller */
+    .votes-vertical,
+    .vote-button {
+        width: 32px;
     }
 
     /* Make comments button easier to tap */

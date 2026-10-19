@@ -482,7 +482,7 @@ describe('useVoting', () => {
       expect(set).not.toHaveBeenCalled();
     });
 
-    it('should block duplicate vote in single-vote mode', async () => {
+    it('should remove an existing vote when upvoting again in single-vote mode', async () => {
       const props = createMockProps({
         multipleVotesAllowed: false,
         columns: {
@@ -499,8 +499,9 @@ describe('useVoting', () => {
         result.current.upvoteGroup('col1', 'group1', 1);
       });
 
-      expect(mockShowNotification).toHaveBeenCalledWith('You have already voted on this group');
-      expect(set).not.toHaveBeenCalled();
+      expect(set).toHaveBeenCalledWith(expect.anything(), 0);
+      expect(set).toHaveBeenCalledWith(expect.anything(), { user1: 0 });
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should enforce vote limit when votesPerUser > 0', async () => {
@@ -662,7 +663,7 @@ describe('useVoting', () => {
       expect(set).not.toHaveBeenCalled();
     });
 
-    it('should block duplicate negative vote in single-vote mode', async () => {
+    it('should remove an existing downvote when downvoting again in single-vote mode', async () => {
       const props = createMockProps({
         multipleVotesAllowed: false,
         columns: {
@@ -679,8 +680,9 @@ describe('useVoting', () => {
         result.current.downvoteGroup('col1', 'group1', -1);
       });
 
-      expect(mockShowNotification).toHaveBeenCalledWith('You have already voted on this group');
-      expect(set).not.toHaveBeenCalled();
+      expect(set).toHaveBeenCalledWith(expect.anything(), 0);
+      expect(set).toHaveBeenCalledWith(expect.anything(), { user1: 0 });
+      expect(mockShowNotification).not.toHaveBeenCalled();
     });
 
     it('should allow multiple downvotes when multipleVotesAllowed', async () => {
