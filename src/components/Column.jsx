@@ -5,9 +5,10 @@ import { ChevronLeft, ChevronRight, Trash2, Plus } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import useEmojiAutocomplete from '../hooks/useEmojiAutocomplete';
-import { addCard } from '../utils/boardUtils';
+import { addCard, addCards } from '../utils/boardUtils';
 import { database } from '../utils/firebase';
 import { getDefaultGroupName } from '../utils/groupName';
+import { parsePastedCards } from '../utils/pasteCards';
 import { isGroupingAllowed, isCardCreationAllowed } from '../utils/workflowUtils';
 import Card from './Card';
 import CardGroup from './CardGroup';
@@ -43,6 +44,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const [isEditing, setIsEditing] = useState(false);
   const [newCardContent, setNewCardContent] = useState('');
   const [isAddingCard, setIsAddingCard] = useState(false);
+  const [splitOnSave, setSplitOnSave] = useState(false);
   const [newGroupId, setNewGroupId] = useState(null);
   const columnRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -51,6 +53,10 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const emojiAC = useEmojiAutocomplete(newCardContent, setNewCardContent, newCardTextareaRef);
 
   const clearNewGroupId = useCallback(() => setNewGroupId(null), []);
+
+  // Only a multi-line paste offers to split; typed multi-line text stays one card
+  const pastedCards = splitOnSave ? parsePastedCards(newCardContent) : [];
+  const isSplitting = pastedCards.length > 1;
 
   // Update local title when columnData changes (from Firebase)
   useEffect(() => {
@@ -154,12 +160,14 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
   const showAddCardForm = () => {
     setIsAddingCard(true);
     setNewCardContent('');
+    setSplitOnSave(false);
   };
 
   // Hide the inline card form
   const hideAddCardForm = () => {
     setIsAddingCard(false);
     setNewCardContent('');
+    setSplitOnSave(false);
     clearTypingTimeout();
     stopCardCreation();
   };
@@ -176,24 +184,42 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
     }, TYPING_INDICATOR_TIMEOUT_MS);
   };
 
-  // Add a new card inline
-  const saveNewCard = () => {
+  const handleNewCardPaste = (e) => {
+    const pasted = e.clipboardData?.getData('text') || '';
+    if (parsePastedCards(pasted).length > 1) {
+      setSplitOnSave(true);
+    }
+  };
+
+  const highlightNewCards = (cardIds) => {
+    setTimeout(() => {
+      cardIds.forEach((cardId, index) => {
+        const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+        if (!newCardElement) {
+          return;
+        }
+        if (index === 0) {
+          newCardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        // Add a subtle fading highlight effect via CSS animation
+        newCardElement.classList.add('card-highlight');
+        setTimeout(() => {
+          newCardElement.classList.remove('card-highlight');
+        }, 2000);
+      });
+    }, 100);
+  };
+
+  // Add a new card inline, or one card per line for a pasted list
+  const saveNewCard = ({ split = isSplitting } = {}) => {
     if (boardId && newCardContent.trim()) {
-      addCard(boardId, columnId, newCardContent, user, displayName, userColor)
-        .then((cardId) => {
+      const save = split
+        ? addCards(boardId, columnId, pastedCards, user, displayName, userColor)
+        : addCard(boardId, columnId, newCardContent, user, displayName, userColor).then(cardId => [cardId]);
+      save
+        .then((cardIds) => {
           hideAddCardForm();
-          
-          setTimeout(() => {
-            const newCardElement = document.querySelector(`[data-card-id="${cardId}"]`);
-            if (newCardElement) {
-              newCardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              // Add a subtle fading highlight effect via CSS animation
-              newCardElement.classList.add('card-highlight');
-              setTimeout(() => {
-                newCardElement.classList.remove('card-highlight');
-              }, 2000);
-            }
-          }, 100);
+          highlightNewCards(cardIds);
         })
         .catch(error => {
           // Error adding card - handle user feedback
@@ -444,6 +470,7 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             value={newCardContent}
             onChange={handleNewCardChange}
             onKeyDown={handleNewCardKeyPress}
+            onPaste={handleNewCardPaste}
             className="inline-card-textarea"
             autoFocus
             aria-label="Card content"
@@ -456,7 +483,12 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
           />
           <div className="inline-card-actions">
             <button className="btn secondary-btn" onClick={hideAddCardForm}>Cancel</button>
-            <button className="btn primary-btn" onClick={saveNewCard}>Add</button>
+            {isSplitting && (
+              <button className="btn secondary-btn" onClick={() => saveNewCard({ split: false })}>Add as 1</button>
+            )}
+            <button className="btn primary-btn" onClick={() => saveNewCard()}>
+              {isSplitting ? `Add ${pastedCards.length} cards` : 'Add'}
+            </button>
           </div>
         </div>
       ) : (

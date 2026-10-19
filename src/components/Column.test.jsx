@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
+import { addCard, addCards } from '../utils/boardUtils';
 import Column from './Column';
 
 // Mock react-dnd
@@ -53,7 +54,8 @@ vi.mock('../hooks/useOnClickOutside', () => ({
 
 // Mock utils
 vi.mock('../utils/boardUtils', () => ({
-  addCard: vi.fn().mockResolvedValue({})
+  addCard: vi.fn().mockResolvedValue('new-card'),
+  addCards: vi.fn().mockResolvedValue(['new-1', 'new-2', 'new-3'])
 }));
 
 vi.mock('../utils/firebase', () => ({
@@ -155,6 +157,46 @@ const mockProps = {
     
     expect(columnContentEl).not.toContainElement(formEl);
     expect(columnEl).toContainElement(formEl);
+  });
+
+  describe('pasting a list', () => {
+    const paste = (text) => {
+      fireEvent.click(screen.getByRole('button', { name: /add card/i }));
+      const textarea = screen.getByPlaceholderText('Enter card content...');
+      fireEvent.paste(textarea, { clipboardData: { getData: () => text } });
+      fireEvent.change(textarea, { target: { value: text } });
+      return textarea;
+    };
+
+    test('a multi-line paste adds one card per line', () => {
+      render(<Column {...mockProps} />);
+      paste('- One\n- Two\n\n- Three');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add 3 cards' }));
+
+      expect(addCards).toHaveBeenCalledWith('board1', 'col1', ['One', 'Two', 'Three'], { uid: 'user1' }, undefined, undefined);
+      expect(addCard).not.toHaveBeenCalled();
+    });
+
+    test('"Add as 1" keeps a multi-line paste as a single card', () => {
+      render(<Column {...mockProps} />);
+      paste('One\nTwo');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add as 1' }));
+
+      expect(addCard).toHaveBeenCalledWith('board1', 'col1', 'One\nTwo', { uid: 'user1' }, undefined, undefined);
+      expect(addCards).not.toHaveBeenCalled();
+    });
+
+    test('a single-line paste behaves as before', () => {
+      render(<Column {...mockProps} />);
+      const textarea = paste('Just one');
+
+      expect(screen.queryByRole('button', { name: 'Add as 1' })).not.toBeInTheDocument();
+      fireEvent.keyDown(textarea, { key: 'Enter' });
+
+      expect(addCard).toHaveBeenCalledWith('board1', 'col1', 'Just one', { uid: 'user1' }, undefined, undefined);
+    });
   });
 
   describe('Column - Collapsed State', () => {

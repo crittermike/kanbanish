@@ -50,20 +50,57 @@ export function addCard(boardId, columnId, content, user = null, displayName = '
   }
 
   const cardId = generateId();
-  const cardData = {
-    content: content.trim(),
-    votes: 0,
-    created: Date.now(),
-    createdBy: user ? user.uid : null, // Add creator information
-    displayName: displayName || '',
-    userColor: userColor || '' // Used for author avatar (not card border)
-  };
+  const cardData = buildCardData(content, Date.now(), user, displayName, userColor);
 
   // Create a direct reference to the card path
   const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
 
   // Return the promise for the caller to handle notifications, and include the cardId
   return set(cardRef, cardData).then(() => cardId);
+}
+
+/**
+ * Adds several cards to a column at once, e.g. from a pasted list.
+ * Earlier items get a later `created` time so they appear first in the
+ * newest-first column order.
+ *
+ * @param {string} boardId - The ID of the board
+ * @param {string} columnId - The ID of the column
+ * @param {string[]} contents - Card contents, in display order
+ * @param {object} user - The user object who created the cards
+ * @returns {Promise<string[]>} - Resolves with the new card IDs, in the same order as contents
+ */
+export function addCards(boardId, columnId, contents, user = null, displayName = '', userColor = '') {
+  if (!boardId) {
+    return Promise.reject(new Error('Board ID is required'));
+  }
+  if (!columnId) {
+    return Promise.reject(new Error('Column ID is required'));
+  }
+  const items = (contents || []).filter(content => content && content.trim());
+  if (items.length === 0) {
+    return Promise.reject(new Error('Card content is required'));
+  }
+
+  const now = Date.now();
+  const cardIds = items.map(() => generateId());
+  const writes = items.map((content, index) => set(
+    ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardIds[index]}`),
+    buildCardData(content, now - index, user, displayName, userColor)
+  ));
+
+  return Promise.all(writes).then(() => cardIds);
+}
+
+function buildCardData(content, created, user, displayName, userColor) {
+  return {
+    content: content.trim(),
+    votes: 0,
+    created,
+    createdBy: user ? user.uid : null,
+    displayName: displayName || '',
+    userColor: userColor || '' // Used for author avatar (not card border)
+  };
 }
 
 /**

@@ -1,6 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addColumn, addCard, createBoardFromTemplate } from './boardUtils';
+import { addColumn, addCard, addCards, createBoardFromTemplate } from './boardUtils';
 import { parseUrlSettings } from './urlSettings';
 // Mock Firebase
 vi.mock('./firebase', () => ({ database: {} }));
@@ -143,6 +143,22 @@ describe('addCard', () => {
   it('returns cardId on success', async () => {
     const result = await addCard('board-1', 'col-1', 'test', { uid: 'u1' });
     expect(result).toBe('mock-id-123');
+  });
+});
+
+describe('addCards', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('writes one card per item, with earlier items newer so they sort first', async () => {
+    await addCards('board-1', 'col-1', ['First', 'Second', 'Third'], { uid: 'u1' });
+
+    const cards = set.mock.calls.map(([, data]) => data);
+    expect(cards.map(card => card.content)).toEqual(['First', 'Second', 'Third']);
+    expect(cards.every(card => card.createdBy === 'u1')).toBe(true);
+    expect(cards[0].created).toBeGreaterThan(cards[1].created);
+    expect(cards[1].created).toBeGreaterThan(cards[2].created);
   });
 });
 
