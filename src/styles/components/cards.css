@@ -8,7 +8,7 @@
 /* Card styling */
 .card {
     background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius-md);
     padding: var(--space-sm) var(--space-md);
     cursor: pointer;
@@ -19,10 +19,10 @@
     flex-direction: column;
 }
 
-.card:hover {
-    border-color: var(--border-color);
-    box-shadow: var(--card-shadow-hover);
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .card:hover {
+        border-color: var(--card-border-hover);
+    }
 }
 
 /* Comment indicator badge - shown when card has comments */
@@ -168,7 +168,6 @@
 
 .card.groupable:hover {
     border-color: var(--accent);
-    box-shadow: var(--card-shadow-hover);
 }
 
 .card.drop-target {
@@ -446,7 +445,6 @@
 
 .card.editing-disabled:hover {
     background-color: var(--card-bg);
-    transform: none;
 }
 
 .card.drag-disabled {
@@ -455,7 +453,6 @@
 
 .card.drag-disabled:hover {
     background-color: var(--card-bg);
-    transform: none;
 }
 
 /* Dynamic card states */
@@ -966,11 +963,6 @@
     font-style: normal;
     padding: var(--space-xs);
     text-align: center;
-}
-
-/* Light mode card overrides */
-html.light-mode .card {
-    border: 1px solid var(--border-subtle);
 }
 
 /* Card Inline Badges */

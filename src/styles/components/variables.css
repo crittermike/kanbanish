@@ -71,10 +71,11 @@
     --rating-5: #22c55e;
     --star-color: #ffd700;
     --card-highlight: rgba(88, 166, 255, 0.6);
+    --card-border: rgba(255, 255, 255, 0.06);
+    --card-border-hover: rgba(255, 255, 255, 0.16);
 
     /* Shadows - semantic */
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.15);
-    --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
     --card-shadow-drag: 0 12px 32px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.2);
     --modal-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.25);
     --notification-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -139,11 +140,12 @@
     --hover-bg: #f3f4f6;
     --border-color: rgba(208, 215, 222, 0.8);
     --border-subtle: rgba(208, 215, 222, 0.4);
+    --card-border: var(--border-subtle);
+    --card-border-hover: rgba(140, 149, 159, 0.55);
     --column-bg: rgba(232, 236, 240, 0.6);
     
     /* Shadows for light theme */
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
-    --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
     --card-shadow-drag: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
     --modal-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
     --notification-shadow: 0 2px 8px rgba(140, 149, 159, 0.15);
