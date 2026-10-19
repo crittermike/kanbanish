@@ -14,7 +14,9 @@ describe('WorkflowControls', () => {
     votesPerUser: 3,
     updateVotesPerUser: vi.fn(),
     goToNextPhase: vi.fn(),
-    goToPreviousPhase: vi.fn()
+    goToPreviousPhase: vi.fn(),
+    endFlow: vi.fn(),
+    columns: {}
   };
 
   const renderWith = (overrides = {}) => {
@@ -29,14 +31,20 @@ describe('WorkflowControls', () => {
     vi.clearAllMocks();
   });
 
-  test('shows the retro steps without Health when there is no health check', () => {
+  test('shows Add, Group, Vote, Discuss by default', () => {
     renderWith();
-    expect(stepLabels()).toEqual(['Add', 'Group', 'Vote', 'Discuss', 'Poll']);
+    expect(screen.getByRole('navigation', { name: 'Steps' })).toBeInTheDocument();
+    expect(stepLabels()).toEqual(['Add', 'Group', 'Vote', 'Discuss']);
   });
 
-  test('includes the Health step when the board started with a health check', () => {
-    renderWith({ initialWorkflowPhase: 'HEALTH_CHECK' });
+  test('includes the optional Health and Poll steps when enabled', () => {
+    renderWith({ flowStartedAt: 1, flowHealthCheck: true, flowPoll: true });
     expect(stepLabels()).toEqual(['Health', 'Add', 'Group', 'Vote', 'Discuss', 'Poll']);
+  });
+
+  test('ignores a past health check once a run has started without one', () => {
+    renderWith({ flowStartedAt: 1, initialWorkflowPhase: 'HEALTH_CHECK' });
+    expect(stepLabels()[0]).toBe('Add');
   });
 
   test('includes the Health step when health check votes exist', () => {
@@ -59,7 +67,7 @@ describe('WorkflowControls', () => {
     ['POLL', 'Poll'],
     ['POLL_RESULTS', 'Poll']
   ])('marks the current step for %s', (phase, label) => {
-    renderWith({ workflowPhase: phase, initialWorkflowPhase: 'HEALTH_CHECK' });
+    renderWith({ workflowPhase: phase, initialWorkflowPhase: 'HEALTH_CHECK', flowPoll: true });
     const current = screen.getByRole('listitem', { current: 'step' });
     expect(current).toHaveTextContent(label);
     expect(current).toHaveClass('workflow-step-current');
@@ -77,9 +85,33 @@ describe('WorkflowControls', () => {
     expect(defaultContext.goToNextPhase).toHaveBeenCalled();
   });
 
-  test('hides Next on the final step', () => {
-    renderWith({ workflowPhase: 'POLL_RESULTS' });
+  test.each([
+    ['RESULTS', {}],
+    ['POLL_RESULTS', { flowPoll: true }]
+  ])('the last step (%s) shows Done instead of Next and End', (phase, overrides) => {
+    renderWith({ workflowPhase: phase, ...overrides });
     expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'End' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /done/i }));
+    expect(defaultContext.goToNextPhase).toHaveBeenCalled();
+  });
+
+  test('End ends the run', () => {
+    renderWith({ workflowPhase: 'GROUPING' });
+    fireEvent.click(screen.getByRole('button', { name: 'End' }));
+    expect(defaultContext.endFlow).toHaveBeenCalled();
+  });
+
+  test('End during Add asks before revealing this run\'s hidden cards', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderWith({
+      flowStartedAt: 500,
+      columns: { col: { cards: { old: { created: 100 }, fresh: { created: 600 } } } }
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'End' }));
+    expect(confirm).toHaveBeenCalled();
+    expect(defaultContext.endFlow).not.toHaveBeenCalled();
+    confirm.mockRestore();
   });
 
   test('hides back on the first step', () => {

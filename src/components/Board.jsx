@@ -52,7 +52,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
     retrospectiveMode,
-    updateRetrospectiveMode,
     resetAllVotes,
     updateBoardTitle,
     user,
@@ -62,7 +61,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
-    startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
     displayName,
@@ -85,6 +83,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
 
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
+
+  const isHealthPhase = workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ||
+    workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS;
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -241,7 +242,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
             onNavigateToBoard={onNavigateToBoard}
           />
           <SettingsPanel
-            handleStartHealthCheck={startHealthCheckPhase}
+            showFlowStart={!retrospectiveMode && !isHealthPhase}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}
@@ -251,7 +252,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
             retrospectiveMode={retrospectiveMode}
-            updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
@@ -316,9 +316,8 @@ function Board({ onGoHome, onNavigateToBoard }) {
         showDisplayNames={showDisplayNames}
       />
 
-      {/* Workflow stepper - shown in retrospective mode or during a health check */}
-      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ||
-        workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS) && (
+      {/* Stepper - shown while the steps are running or during a standalone health check */}
+      {(retrospectiveMode || isHealthPhase) && (
         <WorkflowControls />
       )}
 

@@ -17,8 +17,8 @@ describe('templateUtils', () => {
     expect(getTemplateSettings({ tags: [], defaultSettings: settings })).toBe(settings);
   });
 
-  it('infers retrospective mode from tags', () => {
-    expect(getTemplateSettings({ tags: ['agile', 'team'] })).toEqual({ retrospectiveMode: true });
+  it('retro-style templates start in Add with the poll on', () => {
+    expect(getTemplateSettings({ tags: ['agile', 'team'] })).toEqual({ retrospectiveMode: true, flowPoll: true });
     expect(getTemplateSettings({ tags: ['kanban'] })).toEqual({ retrospectiveMode: false });
   });
 

@@ -113,6 +113,23 @@ describe('Card Reveal Mode', () => {
     expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBeGreaterThan(0);
   });
 
+  test.each([
+    [100, false],
+    [600, true]
+  ])('on a repeat run, hides only cards added since it started (created %i → hidden %s)', (created, hidden) => {
+    useBoardContext.mockReturnValue({
+      boardId: 'board123',
+      user: { uid: 'user123' },
+      retrospectiveMode: true,
+      workflowPhase: 'CREATION',
+      flowStartedAt: 500
+    });
+
+    renderCard({ cardData: { ...mockCardData, createdBy: 'other-user-456', created } });
+
+    expect(screen.queryByText('Test card content for retro') === null).toBe(hidden);
+  });
+
   test('shows normal content when reveal mode is enabled but cards are revealed', () => {
     useBoardContext.mockReturnValue({
       boardId: 'board123',

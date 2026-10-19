@@ -25,7 +25,7 @@ export function parseBool(value) {
  * - downvotes: boolean (allow downvoting)
  * - multivote: boolean (allow multiple votes per item)
  * - votes: number (votes per user)
- * - retro: boolean (retrospective mode on)
+ * - retro: boolean (start the steps right away)
  * - sort: 'votes' | 'chrono' (UI preference)
  * - theme: 'dark' | 'light' (UI preference)
  *
@@ -57,6 +57,8 @@ export function parseUrlSettings(queryString) {
 
     const retro = parseBool(params.get('retro'));
     if (retro !== undefined) boardSettings.retrospectiveMode = retro;
+    // Same steps as the retro templates, including the closing poll
+    if (retro) boardSettings.flowPoll = true;
 
     const sort = params.get('sort');
     if (typeof sort === 'string') {

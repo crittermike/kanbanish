@@ -584,7 +584,8 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 
     .header-content .settings-toggle-btn,
     .header-content .board-actions-menu,
-    .header-content .timer-active {
+    .header-content .timer-active,
+    .header-content .flow-start {
         order: 1;
     }
 
@@ -597,12 +598,12 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 
     .header-content .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay) {
+    .header-content .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .flow-start, .modal-overlay) {
         order: 3;
     }
 
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
-    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay),
+    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .flow-start, .modal-overlay),
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .timer-active .timer-controls {
         display: none;
     }
@@ -729,4 +730,42 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 
     .modal-header .close-button:hover {
     background: var(--hover-bg);
+}
+
+/* ▶ split button: start the steps, caret for optional steps */
+.flow-start {
+    display: flex;
+    align-items: stretch;
+}
+
+.flow-start .flow-start-btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    color: var(--accent);
+}
+
+.flow-start .flow-start-options {
+    display: flex;
+}
+
+.flow-start .flow-start-options-btn {
+    height: 100%;
+    margin-left: -1px;
+    padding: 0 2px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    color: var(--text-muted);
+}
+
+.flow-start .flow-start-options-btn[aria-expanded="true"] {
+    background-color: var(--hover-bg);
+}
+
+.header-content .flow-start .flow-start-options-btn {
+    width: 20px;
+    padding: 0;
+}
+
+.flow-start .flow-start-options-btn svg {
+    flex-shrink: 0;
 }

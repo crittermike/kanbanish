@@ -3,7 +3,7 @@ const LAST_TEMPLATE_KEY = 'kanbanish_last_template';
 
 /**
  * Settings to apply when creating a board from a template. Templates with
- * explicit defaultSettings use them; otherwise the board mode is inferred from tags.
+ * explicit defaultSettings use them; otherwise whether the steps start right away is inferred from tags.
  * @param {Object} template
  * @returns {Object}
  */
@@ -12,7 +12,10 @@ export function getTemplateSettings(template) {
     return template.defaultSettings;
   }
   const tags = template.tags || [];
-  return { retrospectiveMode: tags.some(tag => RETRO_TAGS.includes(tag)) };
+  // Retro-style templates open straight into the Add step and end with the poll
+  return tags.some(tag => RETRO_TAGS.includes(tag))
+    ? { retrospectiveMode: true, flowPoll: true }
+    : { retrospectiveMode: false };
 }
 
 /**

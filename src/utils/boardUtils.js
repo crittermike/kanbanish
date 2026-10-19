@@ -145,7 +145,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
   });
 
   // Only allow a safe subset of settings to be overridden on creation
-  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'workflowPhase'];
+  const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'workflowPhase', 'flowHealthCheck', 'flowPoll'];
   const sanitizedOverrides = {};
   if (parsed.boardSettings && typeof parsed.boardSettings === 'object') {
     allowedOverrideKeys.forEach(k => {
@@ -170,7 +170,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
     owner: user.uid,
     columns: columnsObj,
     settings: {
-      // Voting is off by default on kanban boards; retro mode requires it
+      // Voting is off by default; the steps require it
       votingEnabled: sanitizedOverrides.retrospectiveMode === true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,

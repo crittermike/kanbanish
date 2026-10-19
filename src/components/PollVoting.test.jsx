@@ -33,8 +33,8 @@ describe('PollVoting Component', () => {
   test('renders poll voting interface', () => {
     render(<PollVoting />);
 
-    expect(screen.getByText('How effective was this retrospective?')).toBeInTheDocument();
-    expect(screen.getByText('Rate from 1 (not effective) to 5 (extremely effective)')).toBeInTheDocument();
+    expect(screen.getByText('How useful was this?')).toBeInTheDocument();
+    expect(screen.getByText('Rate from 1 (not useful) to 5 (extremely useful)')).toBeInTheDocument();
     expect(screen.getByText('Click on a star to submit your rating')).toBeInTheDocument();
   });
 

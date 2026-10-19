@@ -1,4 +1,4 @@
-/* Retrospective stepper */
+/* Stepper: Add → Group → Vote → Discuss */
 .workflow-controls {
   border-bottom: 1px solid var(--border-subtle);
   padding: 8px 16px;
@@ -13,13 +13,15 @@
 }
 
 .workflow-back-btn,
-.workflow-back-placeholder {
+.workflow-back-placeholder,
+.workflow-end-btn {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
 }
 
-.workflow-back-btn {
+.workflow-back-btn,
+.workflow-end-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -32,12 +34,14 @@
   transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
 }
 
-.workflow-back-btn:hover {
+.workflow-back-btn:hover,
+.workflow-end-btn:hover {
   background: var(--hover-bg);
   color: var(--text-color);
 }
 
-.workflow-back-btn:focus-visible {
+.workflow-back-btn:focus-visible,
+.workflow-end-btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

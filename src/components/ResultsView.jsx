@@ -93,7 +93,7 @@ const ResultsView = ({ onExpandCard = null }) => {
 
     onExpandCard(nextCardId, nextColumnId, {
       cardList: reviewCardList,
-      contextLabel: 'Retro review'
+      contextLabel: 'Discuss'
     });
   };
 

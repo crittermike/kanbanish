@@ -441,6 +441,7 @@ describe('parseUrlSettings', () => {
       const result = parseUrlSettings('retro=true&voting=true&downvotes=true&theme=light');
       expect(result.boardSettings).toEqual({
         retrospectiveMode: true,
+        flowPoll: true,
         votingEnabled: true,
         downvotingEnabled: true,
       });

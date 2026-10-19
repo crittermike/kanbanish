@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { database } from '../utils/firebase';
 import { withRetry } from '../utils/firebaseRetry';
 import { generateId } from '../utils/ids';
+import { hasCardAddedSince } from '../utils/workflowUtils';
 
 /**
  * Hook for card grouping operations.
@@ -233,17 +234,20 @@ export const useGroups = ({ boardId, user, columns, recordAction = null }) => {
   }, [boardId, user, columns, recordAction]);
 
   // Remove all grouping from the board
-  const removeAllGrouping = useCallback(() => {
+  // Removes every group, or with `since`, only groups that hold a card added at or after it
+  const removeAllGrouping = useCallback((since = null) => {
     if (!boardId || !user) {
       return Promise.resolve();
     }
 
     const promises = [];
 
-    // Loop through all columns and ungroup all groups
     Object.entries(columns).forEach(([columnId, column]) => {
       if (column.groups) {
         Object.entries(column.groups).forEach(([groupId, group]) => {
+          if (since && !hasCardAddedSince(column, group, since)) {
+            return;
+          }
           if (group.cardIds) {
             // Clear groupId from each card in the group
             group.cardIds.forEach(cardId => {

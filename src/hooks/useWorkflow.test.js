@@ -87,21 +87,6 @@ describe('useWorkflow', () => {
       });
     });
 
-    it('should call updateBoardSettings with CREATION, retrospectiveMode false, and resultsViewIndex 0 for goToCreationPhase', () => {
-      mockProps = createMockProps();
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.goToCreationPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
-        workflowPhase: WORKFLOW_PHASES.CREATION,
-        retrospectiveMode: false,
-        resultsViewIndex: 0
-      });
-    });
-
     it('should call updateBoardSettings with HEALTH_CHECK for startHealthCheckPhase', () => {
       mockProps = createMockProps();
       const { result } = renderHook(() => useWorkflow(mockProps));
@@ -129,6 +114,66 @@ describe('useWorkflow', () => {
     });
   });
 
+  describe('startFlow / endFlow', () => {
+    const END = { workflowPhase: WORKFLOW_PHASES.CREATION, retrospectiveMode: false, resultsViewIndex: 0 };
+
+    it('starts at Add, clears previous answers, and records the start time', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(1000);
+      mockProps = createMockProps({ resetHealthCheck: vi.fn(), resetPoll: vi.fn() });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.startFlow();
+      });
+
+      expect(mockProps.resetHealthCheck).toHaveBeenCalled();
+      expect(mockProps.resetPoll).toHaveBeenCalled();
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
+        retrospectiveMode: true,
+        votingEnabled: true,
+        workflowPhase: WORKFLOW_PHASES.CREATION,
+        resultsViewIndex: 0,
+        flowStartedAt: 1000
+      });
+      Date.now.mockRestore();
+    });
+
+    it('starts with the health check when enabled', () => {
+      mockProps = createMockProps({ flowHealthCheck: true });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.startFlow();
+      });
+
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK })
+      );
+    });
+
+    it('ends from Discuss when the poll is off', () => {
+      mockProps = createMockProps({ workflowPhase: WORKFLOW_PHASES.RESULTS });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToNextPhase();
+      });
+
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(END);
+    });
+
+    it('ends after the poll results', () => {
+      mockProps = createMockProps({ workflowPhase: WORKFLOW_PHASES.POLL_RESULTS, flowPoll: true });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToNextPhase();
+      });
+
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(END);
+    });
+  });
+
   describe('goToNextPhase', () => {
     it.each([
       [WORKFLOW_PHASES.HEALTH_CHECK, { workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS }],
@@ -139,7 +184,7 @@ describe('useWorkflow', () => {
       [WORKFLOW_PHASES.RESULTS, { workflowPhase: WORKFLOW_PHASES.POLL }],
       [WORKFLOW_PHASES.POLL, { workflowPhase: WORKFLOW_PHASES.POLL_RESULTS }]
     ])('advances from %s', (from, expected) => {
-      mockProps = createMockProps({ workflowPhase: from });
+      mockProps = createMockProps({ workflowPhase: from, flowPoll: true });
       const { result } = renderHook(() => useWorkflow(mockProps));
 
       act(() => {
@@ -147,17 +192,6 @@ describe('useWorkflow', () => {
       });
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expected);
-    });
-
-    it('does nothing from POLL_RESULTS', () => {
-      mockProps = createMockProps({ workflowPhase: WORKFLOW_PHASES.POLL_RESULTS });
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.goToNextPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).not.toHaveBeenCalled();
     });
   });
 
@@ -227,6 +261,34 @@ describe('useWorkflow', () => {
 
       expect(window.confirm).toHaveBeenCalled();
       expect(mockProps.removeAllGrouping).toHaveBeenCalled();
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
+        workflowPhase: WORKFLOW_PHASES.CREATION
+      });
+
+      window.confirm.mockRestore();
+    });
+
+    it('keeps groups from earlier runs when going back from GROUPING', () => {
+      vi.spyOn(window, 'confirm');
+
+      mockProps = createMockProps({
+        workflowPhase: WORKFLOW_PHASES.GROUPING,
+        flowStartedAt: 500,
+        columns: {
+          col1: {
+            cards: { old: { created: 100 } },
+            groups: { group1: { name: 'Old', cardIds: ['old'] } }
+          }
+        }
+      });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToPreviousPhase();
+      });
+
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(mockProps.removeAllGrouping).not.toHaveBeenCalled();
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
         workflowPhase: WORKFLOW_PHASES.CREATION
       });

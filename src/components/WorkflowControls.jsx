@@ -1,6 +1,6 @@
-import { ArrowLeft, ArrowRight } from 'react-feather';
+import { ArrowLeft, ArrowRight, Check, Square } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import { WORKFLOW_PHASES, isCardFromCurrentRun } from '../utils/workflowUtils';
 
 const HEALTH_PHASES = [WORKFLOW_PHASES.HEALTH_CHECK, WORKFLOW_PHASES.HEALTH_CHECK_RESULTS];
 
@@ -21,21 +21,30 @@ const WorkflowControls = () => {
     initialWorkflowPhase,
     retrospectiveMode,
     healthCheckVotes,
+    flowHealthCheck,
+    flowPoll,
+    flowStartedAt,
+    columns,
     votesPerUser,
     updateVotesPerUser,
     goToNextPhase,
-    goToPreviousPhase
+    goToPreviousPhase,
+    endFlow
   } = useBoardContext();
 
   const inHealthCheck = HEALTH_PHASES.includes(workflowPhase);
-  const hasHealthCheck = inHealthCheck ||
-    HEALTH_PHASES.includes(initialWorkflowPhase) ||
-    Object.keys(healthCheckVotes || {}).length > 0;
+  const inPoll = workflowPhase === WORKFLOW_PHASES.POLL || workflowPhase === WORKFLOW_PHASES.POLL_RESULTS;
+  // Runs started from the ▶ button record their options; older boards infer them
+  const hasHealthCheck = inHealthCheck || (flowStartedAt
+    ? !!flowHealthCheck
+    : HEALTH_PHASES.includes(initialWorkflowPhase) || Object.keys(healthCheckVotes || {}).length > 0);
+  const hasPoll = inPoll || !!flowPoll;
 
-  // A standalone health check (outside retro mode) only shows its own step.
+  // A standalone health check only shows its own step.
   const steps = !retrospectiveMode
     ? STEPS.filter(step => step.id === 'health')
-    : STEPS.filter(step => step.id !== 'health' || hasHealthCheck);
+    : STEPS.filter(step =>
+      (step.id !== 'health' || hasHealthCheck) && (step.id !== 'poll' || hasPoll));
 
   const currentIndex = steps.findIndex(step => step.phases.includes(workflowPhase));
   if (currentIndex === -1) {
@@ -44,14 +53,26 @@ const WorkflowControls = () => {
 
   const firstPhase = steps[0].phases[0];
   const canGoBack = workflowPhase !== firstPhase;
-  const canGoNext = workflowPhase !== WORKFLOW_PHASES.POLL_RESULTS;
+  const lastStep = steps[steps.length - 1];
+  const isLastPhase = workflowPhase === lastStep.phases[lastStep.phases.length - 1];
+
+  const handleEnd = () => {
+    // Ending during Add reveals cards that are still hidden
+    const hasHiddenCards = workflowPhase === WORKFLOW_PHASES.CREATION &&
+      Object.values(columns || {}).some(column =>
+        Object.values(column.cards || {}).some(card => isCardFromCurrentRun(card, flowStartedAt)));
+    if (hasHiddenCards && !window.confirm('End now? Hidden cards will be revealed.')) {
+      return;
+    }
+    endFlow();
+  };
 
   const voteOptions = votesPerUser > 0 && !VOTE_OPTIONS.includes(votesPerUser)
     ? [...VOTE_OPTIONS, votesPerUser].sort((a, b) => a - b)
     : VOTE_OPTIONS;
 
   return (
-    <nav className="workflow-controls" aria-label="Retrospective steps">
+    <nav className="workflow-controls" aria-label="Steps">
       <div className="workflow-stepper">
         {canGoBack ? (
           <button
@@ -99,14 +120,26 @@ const WorkflowControls = () => {
               </select>
             </label>
           )}
-          {canGoNext && (
+          <button
+            type="button"
+            className="btn primary-btn workflow-next-btn"
+            onClick={goToNextPhase}
+          >
+            {isLastPhase ? (
+              <>Done<Check size={16} aria-hidden="true" /></>
+            ) : (
+              <>Next<ArrowRight size={16} aria-hidden="true" /></>
+            )}
+          </button>
+          {!isLastPhase && (
             <button
               type="button"
-              className="btn primary-btn workflow-next-btn"
-              onClick={goToNextPhase}
+              className="workflow-end-btn"
+              onClick={handleEnd}
+              aria-label="End"
+              title="End"
             >
-              Next
-              <ArrowRight size={16} />
+              <Square size={12} fill="currentColor" aria-hidden="true" />
             </button>
           )}
         </div>

@@ -40,8 +40,8 @@ const PollVoting = () => {
   return (
     <div className="poll-voting">
       <div className="poll-question">
-        <h3>How effective was this retrospective?</h3>
-        <p>Rate from 1 (not effective) to 5 (extremely effective)</p>
+        <h3>How useful was this?</h3>
+        <p>Rate from 1 (not useful) to 5 (extremely useful)</p>
       </div>
 
       <div className="voting-progress">

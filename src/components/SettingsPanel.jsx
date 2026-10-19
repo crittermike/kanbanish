@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Settings } from 'react-feather';
 import BackgroundPicker from './BackgroundPicker';
 import BoardActionsMenu from './BoardActionsMenu';
+import FlowStartButton from './FlowStartButton';
 import Timer from './Timer';
 
 const VOTE_PRESETS = [3, 5, 10];
@@ -25,11 +26,11 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
 );
 
 /**
- * Header actions (timer, board actions menu) and the Board Settings modal.
+ * Header actions (start steps, timer, board actions menu) and the Board Settings modal.
  * Settings holds board preferences only; sort, theme and one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
-  handleStartHealthCheck,
+  showFlowStart,
   copyShareUrl,
   handleExportBoard,
   votingEnabled,
@@ -39,7 +40,6 @@ const SettingsPanel = ({
   multipleVotesAllowed,
   updateMultipleVotesAllowed,
   retrospectiveMode,
-  updateRetrospectiveMode,
   sortDropdownOpen,
   setSortDropdownOpen,
   showSort,
@@ -65,7 +65,7 @@ const SettingsPanel = ({
   onOpenLinkPrevious,
   onUnlinkSeries
 }) => {
-  // Voting is always on in retrospective mode
+  // Voting is always on while the steps are running
   const votingActive = votingEnabled || retrospectiveMode;
   const isCustomVoteLimit = votesPerUser > 0 && !VOTE_PRESETS.includes(votesPerUser);
   const hasBackground = !!backgroundId && backgroundId !== 'none';
@@ -105,6 +105,7 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
+      {showFlowStart && <FlowStartButton />}
       <Timer />
       {children}
       <BoardActionsMenu
@@ -114,7 +115,6 @@ const SettingsPanel = ({
         onShare={copyShareUrl}
         darkMode={darkMode}
         onToggleDarkMode={updateDarkMode}
-        onStartHealthCheck={handleStartHealthCheck}
         onExportBoard={handleExportBoard}
         onStartNextBoard={onStartNextBoard}
         onOpenLinkPrevious={onOpenLinkPrevious}
@@ -224,13 +224,6 @@ const SettingsPanel = ({
                   label="Anonymous"
                   checked={!showDisplayNames}
                   onChange={(anonymous) => updateShowDisplayNames(!anonymous)}
-                />
-
-                <ToggleRow
-                  label="Retrospective mode"
-                  checked={retrospectiveMode}
-                  onChange={updateRetrospectiveMode}
-                  hint="Guided steps: add cards, group, vote, discuss"
                 />
 
                 <ToggleRow

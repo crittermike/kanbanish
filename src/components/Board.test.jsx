@@ -72,7 +72,6 @@ describe('Board Component', () => {
     updateVotesPerUser: vi.fn(),
     retrospectiveMode: true,
     setRetrospectiveMode: vi.fn(),
-    updateRetrospectiveMode: vi.fn(),
     workflowPhase: 'INTERACTIONS', // Cards revealed, voting in progress
     setWorkflowPhase: vi.fn(),
     resetAllVotes: vi.fn().mockReturnValue(true),
@@ -355,9 +354,8 @@ describe('Board Component', () => {
     const multiVoteToggle = screen.getByRole('switch', { name: /vote multiple times/ });
     fireEvent.click(multiVoteToggle);
 
-    // Verify that only updateMultipleVotesAllowed was called, not updateRetrospectiveMode
+    // Changing a vote rule doesn't touch the running steps
     expect(contextWithRetrospectiveMode.updateMultipleVotesAllowed).toHaveBeenCalledWith(true);
-    expect(contextWithRetrospectiveMode.updateRetrospectiveMode).not.toHaveBeenCalled();
     expect(contextWithRetrospectiveMode.setWorkflowPhase).not.toHaveBeenCalled();
   });
 

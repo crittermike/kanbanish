@@ -73,7 +73,7 @@ describe('ResultsView', () => {
         { cardId: 'card-2', columnId: 'col-2' },
         { cardId: 'card-3', columnId: 'col-2' }
       ],
-      contextLabel: 'Retro review'
+      contextLabel: 'Discuss'
     });
   });
 
@@ -112,7 +112,7 @@ describe('ResultsView', () => {
         { cardId: 'card-2', columnId: 'col-2' },
         { cardId: 'card-3', columnId: 'col-2' }
       ],
-      contextLabel: 'Retro review'
+      contextLabel: 'Discuss'
     });
   });
 

@@ -273,6 +273,7 @@ const BOARD_TEMPLATES = [
     tags: ['agile', 'reflection', 'team'],
     defaultSettings: {
       retrospectiveMode: true,
+      flowPoll: true,
       multipleVotesAllowed: true,
       workflowPhase: WORKFLOW_PHASES.CREATION
     }

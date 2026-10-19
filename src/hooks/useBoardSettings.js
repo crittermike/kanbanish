@@ -1,7 +1,6 @@
 import { ref, set } from 'firebase/database';
 import { useCallback } from 'react';
 import { database } from '../utils/firebase';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 /**
  * Hook for board settings management.
@@ -23,6 +22,9 @@ import { WORKFLOW_PHASES } from '../utils/workflowUtils';
  * @param {number} params.settingsState.resultsViewIndex
  * @param {boolean} params.settingsState.showDisplayNames
  * @param {boolean} params.settingsState.detailNavigationHintsDismissed
+ * @param {boolean} params.settingsState.flowHealthCheck - Run starts with a health check
+ * @param {boolean} params.settingsState.flowPoll - Run ends with a poll
+ * @param {number|null} params.settingsState.flowStartedAt - When the current run started
  * @param {Object} params.setters - State setter functions
  * @returns {Object} Settings operations
  */
@@ -31,14 +33,16 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode,
     workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
-    backgroundId, customBackgroundCss, customBackgroundSize
+    backgroundId, customBackgroundCss, customBackgroundSize,
+    flowHealthCheck, flowPoll, flowStartedAt
   } = settingsState;
 
   const {
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
-    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize
+    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize,
+    setFlowHealthCheck, setFlowPoll, setFlowStartedAt
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -81,11 +85,21 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.customBackgroundSize !== undefined) {
       setCustomBackgroundSize(newSettings.customBackgroundSize);
     }
+    if (newSettings.flowHealthCheck !== undefined) {
+      setFlowHealthCheck(newSettings.flowHealthCheck);
+    }
+    if (newSettings.flowPoll !== undefined) {
+      setFlowPoll(newSettings.flowPoll);
+    }
+    if (newSettings.flowStartedAt !== undefined) {
+      setFlowStartedAt(newSettings.flowStartedAt);
+    }
   }, [
     setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
-    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize
+    setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize,
+    setFlowHealthCheck, setFlowPoll, setFlowStartedAt
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -106,6 +120,9 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         backgroundId,
         customBackgroundCss,
         customBackgroundSize,
+        flowHealthCheck: !!flowHealthCheck,
+        flowPoll: !!flowPoll,
+        flowStartedAt: flowStartedAt ?? null,
         ...newSettings
       };
 
@@ -124,7 +141,8 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     boardId, user, votingEnabled, downvotingEnabled, multipleVotesAllowed,
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
     resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
-    backgroundId, customBackgroundCss, customBackgroundSize, applySettingsLocally
+    backgroundId, customBackgroundCss, customBackgroundSize,
+    flowHealthCheck, flowPoll, flowStartedAt, applySettingsLocally
   ]);
 
   // Convenience wrappers
@@ -152,22 +170,12 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateBoardSettings({ sortByVotes: enabled });
   }, [updateBoardSettings]);
 
-  const updateRetrospectiveMode = useCallback((enabled) => {
-    if (enabled) {
-      // When enabling retrospective mode, force voting on and start with health check phase
-      updateBoardSettings({
-        retrospectiveMode: enabled,
-        votingEnabled: true,
-        workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
-      });
-    } else {
-      // When disabling retrospective mode, also reset workflow to creation phase
-      updateBoardSettings({
-        retrospectiveMode: enabled,
-        workflowPhase: WORKFLOW_PHASES.CREATION,
-        resultsViewIndex: 0
-      });
-    }
+  const updateFlowHealthCheck = useCallback((enabled) => {
+    updateBoardSettings({ flowHealthCheck: enabled });
+  }, [updateBoardSettings]);
+
+  const updateFlowPoll = useCallback((enabled) => {
+    updateBoardSettings({ flowPoll: enabled });
   }, [updateBoardSettings]);
 
   return {
@@ -177,7 +185,8 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateRetrospectiveMode,
-    updateShowDisplayNames
+    updateShowDisplayNames,
+    updateFlowHealthCheck,
+    updateFlowPoll
   };
 };

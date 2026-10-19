@@ -42,7 +42,6 @@ describe('Board URL settings', () => {
     multipleVotesAllowed: false,
     updateMultipleVotesAllowed: vi.fn(),
     retrospectiveMode: false,
-    updateRetrospectiveMode: vi.fn(),
     resetAllVotes: vi.fn(),
     openExistingBoard: vi.fn(),
     updateBoardTitle: vi.fn(),

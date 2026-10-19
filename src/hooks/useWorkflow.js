@@ -1,24 +1,54 @@
 import { useCallback } from 'react';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
+import { WORKFLOW_PHASES, hasCardAddedSince } from '../utils/workflowUtils';
 
 /**
  * Hook for workflow phase transitions and results navigation.
  *
- * Manages the retrospective workflow: phase progression, going back,
- * and navigating the sorted results view.
+ * Manages the Add → Group → Vote → Discuss steps (with optional health check
+ * and poll): starting and ending a run, moving between steps, and navigating
+ * the sorted results view. `retrospectiveMode` means a run is in progress.
  *
  * @param {Object} params
  * @param {Function} params.updateBoardSettings - Function to update board settings in Firebase
  * @param {Object} params.columns - Board columns data
  * @param {string} params.workflowPhase - Current workflow phase
  * @param {number} params.resultsViewIndex - Current results view index
- * @param {Function} params.removeAllGrouping - Function to remove all card groups
+ * @param {Function} params.removeAllGrouping - Function to remove card groups
+ * @param {boolean} params.flowHealthCheck - Start runs with a health check
+ * @param {boolean} params.flowPoll - End runs with a poll
+ * @param {number|null} params.flowStartedAt - When the current run started
+ * @param {Function} params.resetHealthCheck - Clears health check answers
+ * @param {Function} params.resetPoll - Clears poll answers
  * @returns {Object} Workflow operations
  */
 export const useWorkflow = ({
   updateBoardSettings, columns, workflowPhase,
-  resultsViewIndex, removeAllGrouping
+  resultsViewIndex, removeAllGrouping,
+  flowHealthCheck = false, flowPoll = false, flowStartedAt = null,
+  resetHealthCheck, resetPoll
 }) => {
+  const startFlow = useCallback(() => {
+    // Answers from a previous run don't carry over
+    resetHealthCheck?.();
+    resetPoll?.();
+    updateBoardSettings({
+      retrospectiveMode: true,
+      votingEnabled: true,
+      workflowPhase: flowHealthCheck ? WORKFLOW_PHASES.HEALTH_CHECK : WORKFLOW_PHASES.CREATION,
+      resultsViewIndex: 0,
+      flowStartedAt: Date.now()
+    });
+  }, [updateBoardSettings, flowHealthCheck, resetHealthCheck, resetPoll]);
+
+  // Groups and votes stay on the board
+  const endFlow = useCallback(() => {
+    updateBoardSettings({
+      retrospectiveMode: false,
+      workflowPhase: WORKFLOW_PHASES.CREATION,
+      resultsViewIndex: 0
+    });
+  }, [updateBoardSettings]);
+
   const startGroupingPhase = useCallback(() => {
     updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.GROUPING,
@@ -48,14 +78,6 @@ export const useWorkflow = ({
   const startPollResultsPhase = useCallback(() => {
     updateBoardSettings({
       workflowPhase: WORKFLOW_PHASES.POLL_RESULTS
-    });
-  }, [updateBoardSettings]);
-
-  const goToCreationPhase = useCallback(() => {
-    updateBoardSettings({
-      workflowPhase: WORKFLOW_PHASES.CREATION,
-      retrospectiveMode: false,
-      resultsViewIndex: 0
     });
   }, [updateBoardSettings]);
 
@@ -89,17 +111,24 @@ export const useWorkflow = ({
         startResultsPhase();
         break;
       case WORKFLOW_PHASES.RESULTS:
-        startPollPhase();
+        if (flowPoll) {
+          startPollPhase();
+        } else {
+          endFlow();
+        }
         break;
       case WORKFLOW_PHASES.POLL:
         startPollResultsPhase();
+        break;
+      case WORKFLOW_PHASES.POLL_RESULTS:
+        endFlow();
         break;
       default:
         break;
     }
   }, [
-    workflowPhase, updateBoardSettings, startHealthCheckResultsPhase, startGroupingPhase,
-    startInteractionsPhase, startResultsPhase, startPollPhase, startPollResultsPhase
+    workflowPhase, flowPoll, updateBoardSettings, startHealthCheckResultsPhase, startGroupingPhase,
+    startInteractionsPhase, startResultsPhase, startPollPhase, startPollResultsPhase, endFlow
   ]);
 
   const goToPreviousPhase = useCallback(() => {
@@ -115,19 +144,21 @@ export const useWorkflow = ({
         });
         break;
       case WORKFLOW_PHASES.GROUPING: {
-        // When going back to CREATION from GROUPING, warn about losing group data
+        // Going back to Add undoes this run's grouping; groups from earlier runs stay
         const hasGroups = Object.values(columns).some(column =>
-          column.groups && Object.keys(column.groups).length > 0
+          Object.values(column.groups || {}).some(group =>
+            !flowStartedAt || hasCardAddedSince(column, group, flowStartedAt)
+          )
         );
 
         if (hasGroups) {
-          const confirmMessage = 'Going back to the creation phase will remove all card grouping. This cannot be undone. Are you sure you want to continue?';
+          const confirmMessage = 'Going back to Add will undo grouping. This cannot be undone. Continue?';
           if (!window.confirm(confirmMessage)) {
             return; // User cancelled
           }
 
           // Remove all grouping before transitioning
-          removeAllGrouping()
+          removeAllGrouping(flowStartedAt)
             .then(() => {
               updateBoardSettings({
                 workflowPhase: WORKFLOW_PHASES.CREATION
@@ -168,7 +199,7 @@ export const useWorkflow = ({
         // HEALTH_CHECK is the first step; unknown phases do nothing
         break;
     }
-  }, [workflowPhase, columns, updateBoardSettings, removeAllGrouping]);
+  }, [workflowPhase, columns, flowStartedAt, updateBoardSettings, removeAllGrouping]);
 
   // Get sorted items (cards and groups) for results view
   const getSortedItemsForResults = useCallback(() => {
@@ -233,7 +264,8 @@ export const useWorkflow = ({
     startResultsPhase,
     startPollPhase,
     startPollResultsPhase,
-    goToCreationPhase,
+    startFlow,
+    endFlow,
     goToNextPhase,
     goToPreviousPhase,
     startHealthCheckPhase,
