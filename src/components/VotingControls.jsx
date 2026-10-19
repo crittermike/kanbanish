@@ -30,9 +30,11 @@ const VotingControls = React.memo(({
   };
 
   const count = votes || 0;
+  const hasDown = showDownvoteButton && !disabled;
   const classes = [
     'votes',
     `votes-${orientation}`,
+    hasDown && 'has-down',
     upActive && 'voted-up',
     downActive && 'voted-down',
     disabled && 'disabled'
@@ -48,10 +50,10 @@ const VotingControls = React.memo(({
         aria-label="Upvote"
         aria-pressed={upActive}
       >
-        <ChevronUp size={18} strokeWidth={2.5} aria-hidden="true" />
+        <ChevronUp size={16} strokeWidth={2.5} aria-hidden="true" />
       </button>
       <span className={`vote-count${count === 0 ? ' zero' : ''}`}>{count}</span>
-      {showDownvoteButton && !disabled && (
+      {hasDown && (
         <button
           className={`vote-button downvote-button${downActive ? ' active' : ''}`}
           onClick={onDownvote}
@@ -59,7 +61,7 @@ const VotingControls = React.memo(({
           aria-label={downvoteRemovesVote ? 'Remove vote' : 'Downvote'}
           aria-pressed={downvoteRemovesVote ? undefined : downActive}
         >
-          <ChevronDown size={18} strokeWidth={2.5} aria-hidden="true" />
+          <ChevronDown size={16} strokeWidth={2.5} aria-hidden="true" />
         </button>
       )}
     </div>
