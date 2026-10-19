@@ -163,16 +163,12 @@ export const useVoting = ({
       }
     }
 
-    // Check if multiple votes are allowed
-    if (!multipleVotesAllowed && currentVoters[userId] && currentVoters[userId] > 0) {
-      showNotification('You have already voted on this group');
-      return;
-    }
-
-    const newVotes = currentVotes + 1;
+    // With single votes, clicking again after voting clears the existing vote
+    const delta = !multipleVotesAllowed && currentVoters[userId] ? -currentVoters[userId] : 1;
+    const newVotes = currentVotes + delta;
     const newVoters = {
       ...currentVoters,
-      [userId]: (currentVoters[userId] || 0) + 1
+      [userId]: (currentVoters[userId] || 0) + delta
     };
 
     const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
@@ -200,16 +196,12 @@ export const useVoting = ({
     const currentVoters = currentGroup.voters || {};
     const userId = user.uid;
 
-    // Check if multiple votes are allowed
-    if (!multipleVotesAllowed && currentVoters[userId] && currentVoters[userId] < 0) {
-      showNotification('You have already voted on this group');
-      return;
-    }
-
-    const newVotes = currentVotes - 1;
+    // With single votes, clicking again after voting clears the existing vote
+    const delta = !multipleVotesAllowed && currentVoters[userId] ? -currentVoters[userId] : -1;
+    const newVotes = currentVotes + delta;
     const newVoters = {
       ...currentVoters,
-      [userId]: (currentVoters[userId] || 0) - 1
+      [userId]: (currentVoters[userId] || 0) + delta
     };
 
     const groupVotesRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}/votes`);
@@ -221,7 +213,7 @@ export const useVoting = ({
     ]), { operationName: 'Downvote group' }).catch(error => {
       console.error('Error updating group votes:', error);
     });
-  }, [boardId, user, columns, multipleVotesAllowed, showNotification]);
+  }, [boardId, user, columns, multipleVotesAllowed]);
 
   return {
     resetAllVotes,

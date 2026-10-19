@@ -201,11 +201,11 @@ describe('Card Component', () => {
     expect(screen.queryByTitle('Downvote')).not.toBeInTheDocument();
   });
 
-  test('shows downvote button when the user has upvoted even if downvotingEnabled is false', () => {
-    // Override the mock for this specific test
+  test('shows a remove-vote button when the user has multiple upvotes even if downvotingEnabled is false', () => {
     useBoardContext.mockReturnValue({
       ...mockBoardContext,
-      downvotingEnabled: false
+      downvotingEnabled: false,
+      multipleVotesAllowed: true
     });
 
     // Set up card data with the user having upvoted
@@ -221,8 +221,8 @@ describe('Card Component', () => {
     // Upvote button should be visible
     expect(screen.getByTitle('Upvote')).toBeInTheDocument();
 
-    // Downvote button should be visible since user has upvoted
-    expect(screen.getByTitle('Downvote')).toBeInTheDocument();
+    // The down arrow only removes the user's own votes
+    expect(screen.getByRole('button', { name: 'Remove vote' })).toBeInTheDocument();
   });
 
   test('allows removing downvotes', async () => {
@@ -770,7 +770,7 @@ describe('Card Component', () => {
     render(<Card {...mockProps} />);
 
     // Try to upvote when user is at limit
-    const upvoteButton = screen.getByTitle('Upvote');
+    const upvoteButton = screen.getByTitle('No votes left');
     fireEvent.click(upvoteButton);
 
     // Verify vote was blocked by limit

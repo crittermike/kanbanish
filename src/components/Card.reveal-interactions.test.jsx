@@ -198,7 +198,7 @@ describe('Card Workflow Phase Interactions (Correct Behavior)', () => {
     expect(screen.getByRole('button', { name: 'Add reaction' })).toBeInTheDocument();
     expect(screen.getByTitle('Toggle comments')).toBeInTheDocument();
     // Check that voting buttons show the frozen message
-    expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(2);
+    expect(screen.getAllByTitle('Voting is frozen - no more changes allowed')).toHaveLength(1);
 
     // Reactions should remain enabled during the reveal/review phases.
     const existingReaction = screen.getByTestId('emoji-reaction');
