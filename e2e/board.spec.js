@@ -72,12 +72,11 @@ test.describe('Board', () => {
     await expectStep('Group');
     await expect(page.getByRole('button', { name: 'Add Card', exact: true })).toHaveCount(0);
     await goTo('Vote');
-    await expectStep('Vote');
-    await expect(page.getByTestId('vote-counter')).toHaveText('1 vote left');
+    await expectStep('Vote, 1 vote left');
 
     await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
     await expect(firstCard.locator('.vote-count')).toHaveText('1');
-    await expect(page.getByTestId('vote-counter')).toHaveText('0 votes left');
+    await expect(currentStep).toHaveAccessibleName('Vote, 0 votes left');
     await secondCard.getByRole('button', { name: 'Upvote', exact: true }).click();
     await expect(page.getByRole('status')).toContainText('reached your vote limit');
     await expect(secondCard.locator('.vote-count')).toHaveText('0');
@@ -86,14 +85,14 @@ test.describe('Board', () => {
     page.once('dialog', dialog => dialog.accept());
     await page.getByRole('menuitem', { name: 'Reset all votes', exact: true }).click();
     await expect(firstCard.locator('.vote-count')).toHaveText('0');
-    await expect(page.getByTestId('vote-counter')).toHaveText('1 vote left');
+    await expect(currentStep).toHaveAccessibleName('Vote, 1 vote left');
 
     await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
-    await expect(page.getByTestId('vote-counter')).toHaveText('0 votes left');
+    await expect(currentStep).toHaveAccessibleName('Vote, 0 votes left');
     await goTo('Discuss');
     await expectStep('Discuss');
     await goTo('Vote');
-    await expectStep('Vote');
+    await expectStep('Vote, 0 votes left');
     await expect(firstCard.locator('.vote-count')).toHaveText('1');
 
     await goTo('Board');
