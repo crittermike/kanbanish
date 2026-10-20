@@ -20,8 +20,6 @@ describe('SettingsPanel', () => {
   const defaultProps = {
     copyShareUrl: vi.fn(),
     handleExportBoard: vi.fn(),
-    handleStartHealthCheck: vi.fn(),
-    handleStartPoll: vi.fn(),
     votingEnabled: true,
     updateVotingEnabled: vi.fn(),
     downvotingEnabled: true,
@@ -87,7 +85,7 @@ describe('SettingsPanel', () => {
       render(<SettingsPanel {...defaultProps} />);
       const dialog = screen.getByRole('dialog');
 
-      for (const name of ['Start health check', 'Export board', 'Start next board', 'Link to previous board', 'Reset all votes']) {
+      for (const name of ['Export board', 'Start next board', 'Link to previous board', 'Reset all votes']) {
         expect(within(dialog).queryByRole('button', { name })).not.toBeInTheDocument();
       }
       expect(within(dialog).queryByText('Theme')).not.toBeInTheDocument();
@@ -172,8 +170,6 @@ describe('SettingsPanel', () => {
       expect(within(menu).getAllByRole('menuitem').map(i => i.textContent)).toEqual([
         'Copy board link',
         'Export board',
-        'Start health check',
-        'Start poll',
         'Start next board',
         'Link to previous board',
         'Reset all votes',
@@ -233,8 +229,6 @@ describe('SettingsPanel', () => {
 
       const actions = [
         ['Export board', defaultProps.handleExportBoard],
-        ['Start health check', defaultProps.handleStartHealthCheck],
-        ['Start poll', defaultProps.handleStartPoll],
         ['Start next board', defaultProps.onStartNextBoard],
         ['Link to previous board', defaultProps.onOpenLinkPrevious],
         ['Remove from series', defaultProps.onUnlinkSeries],

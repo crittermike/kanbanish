@@ -1,12 +1,17 @@
 import { useCallback } from 'react';
 import { WORKFLOW_PHASES, hasCardAddedSince } from '../utils/workflowUtils';
 
+const isHealthOrPoll = phase => [
+  WORKFLOW_PHASES.HEALTH_CHECK, WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
+  WORKFLOW_PHASES.POLL, WORKFLOW_PHASES.POLL_RESULTS
+].includes(phase);
+
 /**
  * Hook for workflow phase transitions and results navigation.
  *
- * Manages the Add → Group → Vote → Discuss steps: starting and ending a run,
- * jumping between steps, standalone health checks and polls, and navigating
- * the sorted results view. `retrospectiveMode` means a run is in progress.
+ * Manages the Health → Add → Group → Vote → Discuss → Poll steps: starting
+ * and ending a run, jumping between steps, and navigating the sorted results
+ * view. `retrospectiveMode` means a run is in progress.
  *
  * @param {Object} params
  * @param {Function} params.updateBoardSettings - Function to update board settings in Firebase
@@ -17,13 +22,17 @@ import { WORKFLOW_PHASES, hasCardAddedSince } from '../utils/workflowUtils';
  * @param {Function} params.removeAllGrouping - Function to remove card groups
  * @param {number|null} params.flowStartedAt - When the current run started
  * @param {Function} params.resetPoll - Clears poll answers
+ * @param {Function} params.resetHealthCheck - Clears health check answers
  * @returns {Object} Workflow operations
  */
 export const useWorkflow = ({
   updateBoardSettings, columns, workflowPhase, retrospectiveMode = false,
-  resultsViewIndex, removeAllGrouping, flowStartedAt = null, resetPoll
+  resultsViewIndex, removeAllGrouping, flowStartedAt = null, resetPoll, resetHealthCheck
 }) => {
+  // A new run starts without earlier health check and poll answers
   const startFlow = useCallback((phase = WORKFLOW_PHASES.CREATION) => {
+    resetHealthCheck?.();
+    resetPoll?.();
     updateBoardSettings({
       retrospectiveMode: true,
       votingEnabled: true,
@@ -31,7 +40,7 @@ export const useWorkflow = ({
       resultsViewIndex: 0,
       flowStartedAt: Date.now()
     });
-  }, [updateBoardSettings]);
+  }, [updateBoardSettings, resetHealthCheck, resetPoll]);
 
   // Groups and votes stay on the board
   const endFlow = useCallback(() => {
@@ -45,7 +54,18 @@ export const useWorkflow = ({
   // Jumps to a step, starting a run first if none is in progress
   const goToPhase = useCallback(phase => {
     if (!retrospectiveMode) {
-      startFlow(phase);
+      // A health check opened by a template carries on into the steps with its answers
+      if (isHealthOrPoll(workflowPhase)) {
+        updateBoardSettings({
+          retrospectiveMode: true,
+          votingEnabled: true,
+          workflowPhase: phase,
+          resultsViewIndex: 0,
+          flowStartedAt: Date.now()
+        });
+      } else {
+        startFlow(phase);
+      }
       return;
     }
     if (phase === workflowPhase) {
@@ -79,20 +99,6 @@ export const useWorkflow = ({
         console.error('Failed to remove grouping:', error);
       });
   }, [retrospectiveMode, workflowPhase, columns, flowStartedAt, startFlow, updateBoardSettings, removeAllGrouping]);
-
-  const startHealthCheckPhase = useCallback(() => {
-    updateBoardSettings({
-      workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK
-    });
-  }, [updateBoardSettings]);
-
-  // A new poll starts without earlier answers
-  const startPollPhase = useCallback(() => {
-    resetPoll?.();
-    updateBoardSettings({
-      workflowPhase: WORKFLOW_PHASES.POLL
-    });
-  }, [updateBoardSettings, resetPoll]);
 
   // Get sorted items (cards and groups) for results view
   const getSortedItemsForResults = useCallback(() => {
@@ -155,8 +161,6 @@ export const useWorkflow = ({
     startFlow,
     endFlow,
     goToPhase,
-    startHealthCheckPhase,
-    startPollPhase,
     navigateResults,
     getSortedItemsForResults
   };

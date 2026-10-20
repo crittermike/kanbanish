@@ -31,8 +31,9 @@ describe('StepSwitcher', () => {
 
   test('shows Board as current when no steps are running', () => {
     setup();
-    expect(steps().getAllByRole('button').map(b => b.textContent)).toEqual(['Board', 'Add', 'Group', 'Vote', 'Discuss']);
-    expect(current()).toHaveTextContent('Board');
+    expect(steps().getAllByRole('button').map(b => b.getAttribute('aria-label') || b.textContent))
+      .toEqual(['Board', 'Health', 'Add', 'Group', 'Vote', 'Discuss', 'Poll']);
+    expect(current()).toHaveAccessibleName('Board');
   });
 
   test('picking a step goes to it', () => {
@@ -55,7 +56,7 @@ describe('StepSwitcher', () => {
     expect(context.endFlow).not.toHaveBeenCalled();
   });
 
-  test('a standalone health check shows its own step and Board ends it', () => {
+  test('a health check opened by a template shows as the current step and Board ends it', () => {
     const context = setup({ workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS });
     expect(current()).toHaveTextContent('Health');
 

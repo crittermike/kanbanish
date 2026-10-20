@@ -29,8 +29,6 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
  * Settings holds board preferences only; sort, theme and one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
-  handleStartHealthCheck,
-  handleStartPoll,
   copyShareUrl,
   handleExportBoard,
   votingEnabled,
@@ -114,8 +112,6 @@ const SettingsPanel = ({
         onShare={copyShareUrl}
         darkMode={darkMode}
         onToggleDarkMode={updateDarkMode}
-        onStartHealthCheck={handleStartHealthCheck}
-        onStartPoll={handleStartPoll}
         onExportBoard={handleExportBoard}
         onStartNextBoard={onStartNextBoard}
         onOpenLinkPrevious={onOpenLinkPrevious}

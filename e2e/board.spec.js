@@ -100,8 +100,7 @@ test.describe('Board', () => {
     await expectStep('Board');
     await expect(firstCard.locator('.vote-count')).toHaveText('1');
 
-    await page.getByRole('button', { name: 'Board actions', exact: true }).click();
-    await page.getByRole('menuitem', { name: 'Start poll', exact: true }).click();
+    await goTo('Poll');
     await expectStep('Poll');
     await page.locator('.poll-voting .star-button').nth(3).click();
     await expect(page.getByText('Your vote has been submitted:', { exact: false })).toContainText('4/5 stars');

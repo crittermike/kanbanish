@@ -22,9 +22,9 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 
 Switch the board header from **Board** to a step to take everyone through:
 
-**Add** (new cards hidden) → **Group** → **Vote** → **Discuss**
+**Health** → **Add** (new cards hidden) → **Group** → **Vote** → **Discuss** → **Poll**
 
-Switch back to **Board** when you're done; groups and votes stay. Works on any board and can be run again. A **health check** or **poll** can be started from the board menu.
+Switch back to **Board** when you're done; groups and votes stay. Works on any board and can be run again.
 
 Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
 

@@ -52,7 +52,7 @@ src/
 │   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── StepSwitcher.jsx         # Header segmented control: Board · Add · Group · Vote · Discuss
+│   ├── StepSwitcher.jsx         # Header step control: Board | Health › Add › Group › Vote › Discuss › Poll
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
 │   ├── PollResults.jsx          # Poll results display
@@ -153,7 +153,7 @@ const { startFlow, endFlow, ... } = useWorkflow({ updateBoardSettings, columns, 
 | `useHealthCheck` | Health check voting | `submitHealthCheckVote`, `getHealthCheckStats` |
 | `useVoting` | Vote operations and counting | `resetAllVotes`, `getTotalVotes`, `getUserVoteCount`, `upvoteGroup`, `downvoteGroup` |
 | `useGroups` | Card grouping | `moveCard`, `createCardGroup`, `ungroupCards`, `removeAllGrouping` |
-| `useWorkflow` | Starting/ending the steps, phase transitions | `startFlow`, `endFlow`, `goToPhase`, `startHealthCheckPhase`, `startPollPhase` |
+| `useWorkflow` | Starting/ending the steps, phase transitions | `startFlow`, `endFlow`, `goToPhase` |
 
 **There is no routing library.** The board ID comes from the `?board=` query parameter. If none is provided, a new board is created.
 
@@ -253,20 +253,20 @@ users/{userId}/preferences/
 - **Reactions** track both count and per-user state for toggling
 - **Groups** hold a `cardIds` array; cards reference their group via `groupId`
 
-## Steps (Add → Group → Vote → Discuss)
+## Steps (Health → Add → Group → Vote → Discuss → Poll)
 
-There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The steps are the board's view: `StepSwitcher` is a segmented control in the header (`Board · Add · Group · Vote · Discuss`, collapsing to a `<select>` on mobile). Under the hood `retrospectiveMode: true` means a run is in progress.
+There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The steps are the board's view: `StepSwitcher` is a control in the header (a Board icon, a divider, then `Health › Add › Group › Vote › Discuss › Poll`, collapsing to a `<select>` on mobile). Under the hood `retrospectiveMode: true` means a run is in progress.
 
 ```
-CREATION → GROUPING → INTERACTIONS → RESULTS
-HEALTH_CHECK / HEALTH_CHECK_RESULTS, POLL / POLL_RESULTS (standalone)
+HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
 ```
 
-- Picking a step calls `goToPhase`. From Board it starts a run (`startFlow`: voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
+- Picking a step calls `goToPhase`. From Board it starts a run at that step (`startFlow`: clears earlier health check/poll answers, voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
 - Picking Board calls `endFlow` (`retrospectiveMode: false`, back to CREATION). Groups and votes stay. Ending during Add confirms first because it reveals hidden cards.
 - Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back to Add only removes groups containing this run's cards.
+- Health and Poll are ordinary steps. A health check on its own is just Health, then Board.
 - Retro-tagged templates (and `?retro=true`) create boards already in the Add step.
-- Health check and poll run on their own (`retrospectiveMode: false` + a health/poll phase) from ⋮ "Start health check" / "Start poll" (or the Big Orca template). The switcher shows an extra Health/Poll segment while one is open; Board closes it. "Start poll" clears earlier poll answers.
+- The Big Orca template opens on Health without a run (`retrospectiveMode: false` + a health phase). The switcher still shows Health as current; picking another step starts a run and keeps the answers.
 - While answering, "See results" in `HealthCheckVoting` / `PollVoting` shows the live results.
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.

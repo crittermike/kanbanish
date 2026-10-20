@@ -20,9 +20,9 @@ describe('useWorkflow', () => {
   });
 
   describe('startFlow / endFlow', () => {
-    it('starts at Add with voting on and records the start time', () => {
+    it('starts at Add with voting on, clears earlier answers, and records the start time', () => {
       vi.spyOn(Date, 'now').mockReturnValue(1000);
-      mockProps = createMockProps();
+      mockProps = createMockProps({ resetPoll: vi.fn(), resetHealthCheck: vi.fn() });
       const { result } = renderHook(() => useWorkflow(mockProps));
 
       act(() => {
@@ -36,6 +36,8 @@ describe('useWorkflow', () => {
         resultsViewIndex: 0,
         flowStartedAt: 1000
       });
+      expect(mockProps.resetPoll).toHaveBeenCalled();
+      expect(mockProps.resetHealthCheck).toHaveBeenCalled();
       Date.now.mockRestore();
     });
 
@@ -67,6 +69,25 @@ describe('useWorkflow', () => {
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expect.objectContaining({
         retrospectiveMode: true,
         workflowPhase: WORKFLOW_PHASES.GROUPING
+      }));
+    });
+
+    it('keeps a template health check\'s answers when moving on to the steps', () => {
+      mockProps = createMockProps({
+        workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
+        resetPoll: vi.fn(),
+        resetHealthCheck: vi.fn()
+      });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+
+      act(() => {
+        result.current.goToPhase(WORKFLOW_PHASES.CREATION);
+      });
+
+      expect(mockProps.resetHealthCheck).not.toHaveBeenCalled();
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expect.objectContaining({
+        retrospectiveMode: true,
+        workflowPhase: WORKFLOW_PHASES.CREATION
       }));
     });
 
@@ -144,31 +165,6 @@ describe('useWorkflow', () => {
       expect(mockProps.removeAllGrouping).not.toHaveBeenCalled();
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({ workflowPhase: WORKFLOW_PHASES.CREATION });
       window.confirm.mockRestore();
-    });
-  });
-
-  describe('standalone health check and poll', () => {
-    it('opens the health check', () => {
-      mockProps = createMockProps();
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.startHealthCheckPhase();
-      });
-
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({ workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK });
-    });
-
-    it('clears earlier answers when opening a poll', () => {
-      mockProps = createMockProps({ resetPoll: vi.fn() });
-      const { result } = renderHook(() => useWorkflow(mockProps));
-
-      act(() => {
-        result.current.startPollPhase();
-      });
-
-      expect(mockProps.resetPoll).toHaveBeenCalled();
-      expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({ workflowPhase: WORKFLOW_PHASES.POLL });
     });
   });
 

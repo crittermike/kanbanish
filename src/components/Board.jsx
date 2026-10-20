@@ -61,8 +61,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
-    startHealthCheckPhase,
-    startPollPhase,
     votesPerUser,
     updateVotesPerUser,
     displayName,
@@ -85,9 +83,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
 
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
-
-  // Health check and poll can run on their own, outside the steps
-  const canStartStandalone = !retrospectiveMode && workflowPhase === WORKFLOW_PHASES.CREATION;
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -245,8 +240,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
           />
           <StepSwitcher />
           <SettingsPanel
-            handleStartHealthCheck={canStartStandalone ? startHealthCheckPhase : undefined}
-            handleStartPoll={canStartStandalone ? startPollPhase : undefined}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}

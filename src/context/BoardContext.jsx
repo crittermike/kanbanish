@@ -390,11 +390,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Workflow phase transitions and results navigation
   const {
-    startFlow, endFlow, goToPhase, startHealthCheckPhase, startPollPhase,
+    startFlow, endFlow, goToPhase,
     navigateResults, getSortedItemsForResults
   } = useWorkflow({
     updateBoardSettings, columns, workflowPhase, retrospectiveMode,
-    resultsViewIndex, removeAllGrouping, flowStartedAt, resetPoll
+    resultsViewIndex, removeAllGrouping, flowStartedAt, resetPoll, resetHealthCheck
   });
 
   // Per-column timer functions
@@ -570,13 +570,13 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       workflowPhase,
       setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex,
-    startPollPhase, startFlow, endFlow, flowStartedAt,
+    startFlow, endFlow, flowStartedAt,
     goToPhase, navigateResults, getSortedItemsForResults,
       // Poll system
     pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, resetHealthCheck,
+    getHealthCheckStats, resetHealthCheck,
       HEALTH_CHECK_QUESTIONS,
       // Card grouping functions
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
@@ -632,11 +632,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
     resultsViewIndex, setResultsViewIndex,
-    startPollPhase, startFlow, endFlow, flowStartedAt,
+    startFlow, endFlow, flowStartedAt,
     goToPhase, navigateResults, getSortedItemsForResults,
     pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, resetHealthCheck,
+    getHealthCheckStats, resetHealthCheck,
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,

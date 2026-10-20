@@ -1,4 +1,4 @@
-/* Header step switch: Board · Add · Group · Vote · Discuss */
+/* Header step switch: Board | Health › Add › Group › Vote › Discuss › Poll */
 .step-switch {
   display: flex;
   align-items: center;
@@ -7,7 +7,8 @@
 
 .step-switch-segments {
   display: inline-flex;
-  gap: 2px;
+  align-items: center;
+  gap: 1px;
   padding: 2px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -15,7 +16,7 @@
 }
 
 .step-switch-btn {
-  padding: 3px 12px;
+  padding: 3px 8px;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -27,6 +28,26 @@
   white-space: nowrap;
   cursor: pointer;
   transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+}
+
+.step-switch-board {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 8px;
+}
+
+.step-switch-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 3px;
+  background: var(--border-color);
+}
+
+.step-switch-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.5;
 }
 
 .step-switch-btn:hover {
