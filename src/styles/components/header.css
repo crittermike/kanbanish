@@ -656,52 +656,6 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     }
 }
 
-/* Vote Counter Styles */
-.vote-counter {
-    display: flex;
-    align-items: center;
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-round);
-    padding: 4px 12px;
-    color: var(--text-color);
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-}
-
-.vote-counter-content {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.vote-counter-label {
-    color: var(--text-muted);
-    font-weight: var(--font-weight-medium);
-}
-
-.vote-counter-value {
-    color: var(--text-color);
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-}
-
-.vote-counter-value.vote-counter-depleted {
-    color: var(--warning-color);
-}
-
-/* Responsive adjustments for vote counter */
-@media (max-width: 767px) {
-    .vote-counter {
-        padding: 8px 12px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .vote-counter-value {
-        font-size: var(--font-size-sm);
-    }
-}
-
 .modal-header .close-button {
     width: 28px;
     height: 28px;

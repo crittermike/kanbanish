@@ -49,10 +49,9 @@ src/
 │   ├── CardCreationIndicator.jsx # Shows who's typing
 │   ├── Comments.jsx             # Comment thread on cards/groups
 │   ├── EmojiPicker.jsx          # Emoji selection popover
-│   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── StepSwitcher.jsx         # Header step control: Board | Health › Add › Group › Vote › Discuss › Poll
+│   ├── StepSwitcher.jsx         # Header step control: Board | Health › Add › Group › Vote › Discuss › Poll (Vote shows votes left)
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
 │   ├── PollResults.jsx          # Poll results display
@@ -72,7 +71,7 @@ src/
 │   ├── useWorkflow.js               # Start/end the steps and phase transitions
 │   ├── useCardOperations.jsx        # Card CRUD, voting, reactions, comments
 │   ├── useGroupOperations.jsx       # Group-level reactions and comments
-│   ├── useVoteCounterVisibility.jsx # Whether the votes-left counter shows
+│   ├── useVoteCounterVisibility.jsx # Whether "Vote · N" (votes left) shows in StepSwitcher
 │   └── useRecentBoards.js           # localStorage-backed recent boards list (add, remove, pin)
 │
 ├── utils/

@@ -42,6 +42,14 @@
   gap: 6px;
 }
 
+.step-switch-votes {
+  font-variant-numeric: tabular-nums;
+}
+
+.step-switch-votes .depleted {
+  color: var(--warning-color);
+}
+
 .step-switch-chevron {
   flex-shrink: 0;
   color: var(--text-muted);
