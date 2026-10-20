@@ -25,7 +25,7 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
 );
 
 /**
- * Header actions (start steps, timer, board actions menu) and the Board Settings modal.
+ * Right side of the board header (search, timer, board actions menu, settings) and the Board Settings modal.
  * Settings holds board preferences only; sort, theme and one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
@@ -50,6 +50,7 @@ const SettingsPanel = ({
   updateShowDisplayNames,
   votesPerUser,
   updateVotesPerUser,
+  leading,
   children,
   backgroundId,
   setBoardBackground,
@@ -103,6 +104,7 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
+      {leading}
       <Timer />
       {children}
       <BoardActionsMenu

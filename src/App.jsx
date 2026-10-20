@@ -73,14 +73,6 @@ function AppContent() {
     addBoard({ id: boardId });
   }, [addBoard]);
 
-  // Navigate back to dashboard: remove ?board= param
-  const handleGoHome = useCallback(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('board');
-    window.history.pushState({}, '', url.toString());
-    setActiveBoardId(null);
-  }, []);
-
   // Handle ?template=X URL param: auto-create board from template and redirect
   const templateProcessed = useRef(false);
   useEffect(() => {
@@ -144,7 +136,7 @@ function AppContent() {
         </a>
       )}
       {activeBoardId ? (
-        <BoardGate key={activeBoardId} boardId={activeBoardId} onGoHome={handleGoHome} onOpenBoard={handleOpenBoard} />
+        <BoardGate key={activeBoardId} boardId={activeBoardId} onOpenBoard={handleOpenBoard} />
       ) : (
         <DashboardGate onOpenBoard={handleOpenBoard} />
       )}
@@ -166,14 +158,14 @@ function AppContent() {
 }
 
 /**
- * Wraps the Board in a BoardProvider and passes the boardId + goHome handler.
+ * Wraps the Board in a BoardProvider and passes the boardId.
  * BoardProvider handles Firebase subscription; Board handles rendering.
  */
-function BoardGate({ boardId, onGoHome, onOpenBoard }) {
+function BoardGate({ boardId, onOpenBoard }) {
   return (
     <DndProvider backend={HTML5Backend}>
       <BoardProvider initialBoardId={boardId}>
-        <BoardWithTracking onGoHome={onGoHome} onOpenBoard={onOpenBoard} />
+        <BoardWithTracking onOpenBoard={onOpenBoard} />
       </BoardProvider>
     </DndProvider>
   );
@@ -182,7 +174,7 @@ function BoardGate({ boardId, onGoHome, onOpenBoard }) {
 /**
  * Wrapper that tracks board visits in localStorage once board data loads.
  */
-function BoardWithTracking({ onGoHome, onOpenBoard }) {
+function BoardWithTracking({ onOpenBoard }) {
   const { boardId, boardTitle, columns } = useBoardContext();
   const { addBoard } = useRecentBoards();
 
@@ -197,7 +189,7 @@ function BoardWithTracking({ onGoHome, onOpenBoard }) {
     }
   }, [boardId, boardTitle, columns, addBoard]);
 
-  return <Board onGoHome={onGoHome} onNavigateToBoard={onOpenBoard} />;
+  return <Board onNavigateToBoard={onOpenBoard} />;
 }
 
 /**

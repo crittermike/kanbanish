@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Search } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBackgroundById } from '../data/boardBackgrounds';
@@ -27,7 +28,7 @@ import StepSwitcher from './StepSwitcher';
  * Main Board component responsible for rendering and managing the kanban board.
  * Orchestrates board initialization, URL settings, and layout of header, columns, and modals.
  */
-function Board({ onGoHome, onNavigateToBoard }) {
+function Board({ onNavigateToBoard }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -231,15 +232,22 @@ function Board({ onGoHome, onNavigateToBoard }) {
             boardTitle={boardTitle}
             handleBoardTitleChange={handleBoardTitleChange}
             handleBoardTitleBlur={handleBoardTitleBlur}
-            onGoHome={onGoHome}
-            onSearchOpen={searchFilter.openSearch}
-            isSearchOpen={searchFilter.isOpen}
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
           />
           <StepSwitcher />
           <SettingsPanel
+            leading={!searchFilter.isOpen && (
+              <button
+                className="search-trigger-btn"
+                onClick={searchFilter.openSearch}
+                title="Search cards (Ctrl+F)"
+                aria-label="Search cards"
+              >
+                <Search size={16} />
+              </button>
+            )}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}

@@ -26,11 +26,17 @@ html.light-mode header {
     gap: var(--space-xs);
 }
 
+/* Steps sit in the true center; the title side shrinks before the control moves */
 @media (min-width: 768px) {
     .header-content {
-        flex-direction: row;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
+        column-gap: var(--space-md);
+    }
+
+    .header-content > .action-buttons {
+        justify-self: end;
     }
 }
 
@@ -64,28 +70,6 @@ h1 {
     min-width: 0;
 }
 
-/* Home button - subtle icon-only button */
-.home-btn {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-speed) var(--transition-ease);
-}
-
-.home-btn:hover {
-    color: var(--accent);
-    background: var(--accent-subtle);
-}
-
 .share-export-buttons {
     display: flex;
     gap: var(--space-sm);
@@ -103,6 +87,7 @@ h1 {
     padding: 2px var(--space-xs);
     width: 100%;
     min-width: 0;
+    text-overflow: ellipsis;
     transition: all var(--transition-speed) var(--transition-ease);
 }
 
@@ -554,7 +539,7 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 }
 
 /*
- * Narrow screens: keep the header to one row (home, title, more, board actions, settings).
+ * Narrow screens: keep the header to one row (people, title, more, step, board actions, settings).
  * The header's wrapper divs are flattened with display: contents so every icon
  * becomes a flex item of .header-content; secondary icons are hidden until the
  * "more" toggle is expanded, then shown on a second row.
@@ -596,12 +581,12 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
         justify-content: center;
     }
 
-    .header-content .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
+    .header-content .board-title-container > :not(.user-counter, #board-title, .header-more-btn),
     .header-content .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay) {
         order: 3;
     }
 
-    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .board-title-container > :not(.home-btn, #board-title, .header-more-btn, .action-buttons),
+    .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .board-title-container > :not(.user-counter, #board-title, .header-more-btn),
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .action-buttons > :not(.settings-toggle-btn, .board-actions-menu, .timer-active, .modal-overlay),
     .header-content:not(:has(.header-more-btn[aria-expanded="true"])) .timer-active .timer-controls {
         display: none;
@@ -729,4 +714,9 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 
     .modal-header .close-button:hover {
     background: var(--hover-bg);
+}
+
+.board-title-container .user-counter {
+    flex-shrink: 0;
+    padding: 4px 6px;
 }
