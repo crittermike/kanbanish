@@ -260,11 +260,22 @@ describe('createBoardFromTemplate', () => {
       votingEnabled: false,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
+      votesPerUser: 5,
       sortByVotes: false,
       retrospectiveMode: false,
       workflowPhase: 'CREATION',
       resultsViewIndex: 0
     });
+  });
+
+  it('a vote limit override replaces the default of 5', async () => {
+    await createBoardFromTemplate({
+      columns: ['A'],
+      user: { uid: 'user-1' },
+      settingsOverrides: { votesPerUser: 0 }
+    });
+
+    expect(set.mock.calls[0][1].settings.votesPerUser).toBe(0);
   });
 
   it('URL settings overrides are applied when queryString is provided', async () => {

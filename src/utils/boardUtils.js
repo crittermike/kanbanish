@@ -174,6 +174,7 @@ export function createBoardFromTemplate({ columns, templateName = null, user, qu
       votingEnabled: sanitizedOverrides.retrospectiveMode === true,
       downvotingEnabled: false,
       multipleVotesAllowed: false,
+      votesPerUser: 5,
       sortByVotes: false,
       retrospectiveMode: false,
       workflowPhase: WORKFLOW_PHASES.CREATION,

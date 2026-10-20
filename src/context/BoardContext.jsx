@@ -480,6 +480,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
           votingEnabled: sanitizedOverrides.retrospectiveMode === true,
           downvotingEnabled: false, // Default to disabled for new boards
           multipleVotesAllowed: false, // Default to not allowing multiple votes
+          votesPerUser: 5,
           sortByVotes: false, // Default to chronological
           retrospectiveMode: false, // Default to disabled (cards are visible)
           workflowPhase: WORKFLOW_PHASES.CREATION, // Default to creation phase
