@@ -60,8 +60,8 @@ test.describe('Board', () => {
     await viewer.goto(page.url());
     const remoteStep = viewer.getByRole('group', { name: 'Steps' }).locator('[aria-current="step"]');
     const expectStep = async label => {
-      await expect(currentStep).toHaveText(label);
-      await expect(remoteStep).toHaveText(label);
+      await expect(currentStep).toHaveAccessibleName(label);
+      await expect(remoteStep).toHaveAccessibleName(label);
     };
 
     await expectStep('Add');
