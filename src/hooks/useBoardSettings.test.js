@@ -22,8 +22,6 @@ const createMockSetters = () => ({
   setRetrospectiveMode: vi.fn(),
   setWorkflowPhase: vi.fn(),
   setResultsViewIndex: vi.fn(),
-  setFlowHealthCheck: vi.fn(),
-  setFlowPoll: vi.fn(),
   setFlowStartedAt: vi.fn()
 });
 
@@ -41,8 +39,6 @@ const createMockProps = (overrides = {}) => {
       retrospectiveMode: false,
       workflowPhase: 'CREATION',
       resultsViewIndex: 0,
-      flowHealthCheck: false,
-      flowPoll: false,
       flowStartedAt: null,
       ...overrides.settingsState
     },
@@ -81,8 +77,6 @@ describe('useBoardSettings', () => {
         retrospectiveMode: false,
         workflowPhase: 'CREATION',
         resultsViewIndex: 0,
-        flowHealthCheck: false,
-        flowPoll: false,
         flowStartedAt: null
       });
     });
@@ -132,7 +126,6 @@ describe('useBoardSettings', () => {
           retrospectiveMode: true,
           workflowPhase: 'INTERACTIONS',
           resultsViewIndex: 2,
-          flowPoll: true,
           flowStartedAt: 123
         }
       });
@@ -151,8 +144,6 @@ describe('useBoardSettings', () => {
         retrospectiveMode: true,
         workflowPhase: 'INTERACTIONS',
         resultsViewIndex: 2,
-        flowHealthCheck: false,
-        flowPoll: true,
         flowStartedAt: 123
       });
     });
@@ -325,18 +316,6 @@ describe('useBoardSettings', () => {
       expect(set).toHaveBeenCalled();
       const settingsArg = set.mock.calls[0][1];
       expect(settingsArg.sortByVotes).toBe(true);
-    });
-  });
-
-  describe('step options', () => {
-    it('persists the poll option to Firebase', async () => {
-      const { result } = renderHook(() => useBoardSettings(mockProps));
-
-      await act(async () => {
-        result.current.updateFlowPoll(true);
-      });
-
-      expect(set).toHaveBeenCalledWith('mock-ref', expect.objectContaining({ flowPoll: true, flowHealthCheck: false }));
     });
   });
 });

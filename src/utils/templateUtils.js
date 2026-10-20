@@ -12,10 +12,8 @@ export function getTemplateSettings(template) {
     return template.defaultSettings;
   }
   const tags = template.tags || [];
-  // Retro-style templates open straight into the Add step and end with the poll
-  return tags.some(tag => RETRO_TAGS.includes(tag))
-    ? { retrospectiveMode: true, flowPoll: true }
-    : { retrospectiveMode: false };
+  // Retro-style templates open straight into the Add step
+  return { retrospectiveMode: tags.some(tag => RETRO_TAGS.includes(tag)) };
 }
 
 /**

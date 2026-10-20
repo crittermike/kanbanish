@@ -47,8 +47,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
   const [showDisplayNames, setShowDisplayNames] = useState(false); // Default to off
   const [detailNavigationHintsDismissed, setDetailNavigationHintsDismissed] = useState(false);
   // Optional first/last steps and start time of the current run of the steps
-  const [flowHealthCheck, setFlowHealthCheck] = useState(false);
-  const [flowPoll, setFlowPoll] = useState(false);
   const [flowStartedAt, setFlowStartedAt] = useState(null);
 
   // New workflow phase system
@@ -191,8 +189,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
               setShowDisplayNames(boardData.settings.showDisplayNames);
             }
             setDetailNavigationHintsDismissed(!!boardData.settings.detailNavigationHintsDismissed);
-            setFlowHealthCheck(!!boardData.settings.flowHealthCheck);
-            setFlowPoll(!!boardData.settings.flowPoll);
             setFlowStartedAt(boardData.settings.flowStartedAt ?? null);
             if (boardData.settings.backgroundId !== undefined) {
               setBackgroundId(boardData.settings.backgroundId);
@@ -205,8 +201,6 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
             }
           } else {
             setDetailNavigationHintsDismissed(false);
-            setFlowHealthCheck(false);
-            setFlowPoll(false);
             setFlowStartedAt(null);
           }
 
@@ -343,9 +337,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateShowDisplayNames,
-    updateFlowHealthCheck,
-    updateFlowPoll
+    updateShowDisplayNames
   } = useBoardSettings({
     boardId,
     user,
@@ -354,14 +346,14 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       votesPerUser, sortByVotes, retrospectiveMode,
       workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
       backgroundId, customBackgroundCss, customBackgroundSize: customBackgroundSizeState,
-      flowHealthCheck, flowPoll, flowStartedAt
+      flowStartedAt
     },
     setters: {
       setVotingEnabled, setDownvotingEnabled, setMultipleVotesAllowed,
       setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
       setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
       setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize: setCustomBackgroundSizeState,
-      setFlowHealthCheck, setFlowPoll, setFlowStartedAt
+      setFlowStartedAt
     }
   });
 
@@ -398,15 +390,11 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Workflow phase transitions and results navigation
   const {
-    startGroupingPhase, startInteractionsPhase,
-    startResultsPhase, startPollPhase, startPollResultsPhase,
-    startFlow, endFlow, goToNextPhase, goToPreviousPhase,
-    startHealthCheckPhase, startHealthCheckResultsPhase,
+    startFlow, endFlow, goToPhase, startHealthCheckPhase, startPollPhase,
     navigateResults, getSortedItemsForResults
   } = useWorkflow({
-    updateBoardSettings, columns, workflowPhase,
-    resultsViewIndex, removeAllGrouping,
-    flowHealthCheck, flowPoll, flowStartedAt, resetHealthCheck, resetPoll
+    updateBoardSettings, columns, workflowPhase, retrospectiveMode,
+    resultsViewIndex, removeAllGrouping, flowStartedAt, resetPoll
   });
 
   // Per-column timer functions
@@ -472,7 +460,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       });
 
       // Only allow a safe subset of settings to be overridden on creation
-      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames', 'flowHealthCheck', 'flowPoll'];
+      const allowedOverrideKeys = ['votingEnabled', 'downvotingEnabled', 'multipleVotesAllowed', 'votesPerUser', 'retrospectiveMode', 'sortByVotes', 'showDisplayNames'];
       const sanitizedOverrides = {};
       if (settingsOverride && typeof settingsOverride === 'object') {
         allowedOverrideKeys.forEach(k => {
@@ -581,16 +569,14 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
       // Workflow phase system
       workflowPhase,
       setWorkflowPhase,
-    resultsViewIndex, setResultsViewIndex, startGroupingPhase,
-    startInteractionsPhase, startResultsPhase,
-    startPollPhase, startPollResultsPhase, startFlow, endFlow,
-    flowHealthCheck, flowPoll, flowStartedAt, updateFlowHealthCheck, updateFlowPoll,
-    goToNextPhase, goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    resultsViewIndex, setResultsViewIndex,
+    startPollPhase, startFlow, endFlow, flowStartedAt,
+    goToPhase, navigateResults, getSortedItemsForResults,
       // Poll system
     pollVotes, userPollVote, submitPollVote, getPollStats,
       // Health check system
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
+    getHealthCheckStats, startHealthCheckPhase, resetHealthCheck,
       HEALTH_CHECK_QUESTIONS,
       // Card grouping functions
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
@@ -645,14 +631,12 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     displayName, userColor, updateDisplayName, updateUserColor, clearDisplayName,
     prefsLoaded,
     activeUsers, presenceData, workflowPhase, setWorkflowPhase,
-    resultsViewIndex, setResultsViewIndex, startGroupingPhase,
-    startInteractionsPhase, startResultsPhase,
-    startPollPhase, startPollResultsPhase, startFlow, endFlow,
-    flowHealthCheck, flowPoll, flowStartedAt, updateFlowHealthCheck, updateFlowPoll,
-    goToNextPhase, goToPreviousPhase, navigateResults, getSortedItemsForResults,
+    resultsViewIndex, setResultsViewIndex,
+    startPollPhase, startFlow, endFlow, flowStartedAt,
+    goToPhase, navigateResults, getSortedItemsForResults,
     pollVotes, userPollVote, submitPollVote, getPollStats,
     healthCheckVotes, userHealthCheckVotes, submitHealthCheckVote,
-    getHealthCheckStats, startHealthCheckPhase, startHealthCheckResultsPhase, resetHealthCheck,
+    getHealthCheckStats, startHealthCheckPhase, resetHealthCheck,
     createCardGroup, ungroupCards, removeAllGrouping, updateGroupName,
     toggleGroupExpanded, upvoteGroup, downvoteGroup, usersAddingCards,
     startCardCreation, stopCardCreation, getUsersAddingCardsInColumn,

@@ -57,8 +57,6 @@ export function parseUrlSettings(queryString) {
 
     const retro = parseBool(params.get('retro'));
     if (retro !== undefined) boardSettings.retrospectiveMode = retro;
-    // Same steps as the retro templates, including the closing poll
-    if (retro) boardSettings.flowPoll = true;
 
     const sort = params.get('sort');
     if (typeof sort === 'string') {

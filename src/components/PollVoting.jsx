@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Star, Users } from 'react-feather';
+import { ArrowLeft, BarChart2, Star, Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import PollResults from './PollResults';
 
 const PollVoting = () => {
   const { userPollVote, submitPollVote, getPollStats, activeUsers } = useBoardContext();
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [showResults, setShowResults] = useState(false);
 
   const handleVote = rating => {
     submitPollVote(rating);
@@ -36,6 +38,19 @@ const PollVoting = () => {
   const pollStats = getPollStats();
   const votedCount = pollStats.totalVotes;
   const progressPercentage = activeUsers > 0 ? Math.round((votedCount / activeUsers) * 100) : 0;
+
+  // Live results update as others answer
+  if (showResults) {
+    return (
+      <div className="poll-live-results">
+        <button type="button" className="health-check-toggle-btn" onClick={() => setShowResults(false)}>
+          <ArrowLeft size={14} aria-hidden="true" />
+          Your answer
+        </button>
+        <PollResults />
+      </div>
+    );
+  }
 
   return (
     <div className="poll-voting">
@@ -115,6 +130,11 @@ const PollVoting = () => {
           <p>Click on a star to submit your rating</p>
         </div>
       )}
+
+      <button type="button" className="health-check-toggle-btn" onClick={() => setShowResults(true)}>
+        <BarChart2 size={14} aria-hidden="true" />
+        See results
+      </button>
     </div>
   );
 };

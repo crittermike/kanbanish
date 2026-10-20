@@ -22,8 +22,6 @@ import { database } from '../utils/firebase';
  * @param {number} params.settingsState.resultsViewIndex
  * @param {boolean} params.settingsState.showDisplayNames
  * @param {boolean} params.settingsState.detailNavigationHintsDismissed
- * @param {boolean} params.settingsState.flowHealthCheck - Run starts with a health check
- * @param {boolean} params.settingsState.flowPoll - Run ends with a poll
  * @param {number|null} params.settingsState.flowStartedAt - When the current run started
  * @param {Object} params.setters - State setter functions
  * @returns {Object} Settings operations
@@ -34,7 +32,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     votesPerUser, sortByVotes, retrospectiveMode,
     workflowPhase, resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
     backgroundId, customBackgroundCss, customBackgroundSize,
-    flowHealthCheck, flowPoll, flowStartedAt
+    flowStartedAt
   } = settingsState;
 
   const {
@@ -42,7 +40,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
     setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize,
-    setFlowHealthCheck, setFlowPoll, setFlowStartedAt
+    setFlowStartedAt
   } = setters;
 
   const applySettingsLocally = useCallback((newSettings) => {
@@ -85,12 +83,6 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     if (newSettings.customBackgroundSize !== undefined) {
       setCustomBackgroundSize(newSettings.customBackgroundSize);
     }
-    if (newSettings.flowHealthCheck !== undefined) {
-      setFlowHealthCheck(newSettings.flowHealthCheck);
-    }
-    if (newSettings.flowPoll !== undefined) {
-      setFlowPoll(newSettings.flowPoll);
-    }
     if (newSettings.flowStartedAt !== undefined) {
       setFlowStartedAt(newSettings.flowStartedAt);
     }
@@ -99,7 +91,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     setVotesPerUser, setSortByVotesState, setRetrospectiveMode,
     setWorkflowPhase, setResultsViewIndex, setShowDisplayNames, setDetailNavigationHintsDismissed,
     setBackgroundId, setCustomBackgroundCss, setCustomBackgroundSize,
-    setFlowHealthCheck, setFlowPoll, setFlowStartedAt
+    setFlowStartedAt
   ]);
 
   const updateBoardSettings = useCallback((newSettings) => {
@@ -120,8 +112,6 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
         backgroundId,
         customBackgroundCss,
         customBackgroundSize,
-        flowHealthCheck: !!flowHealthCheck,
-        flowPoll: !!flowPoll,
         flowStartedAt: flowStartedAt ?? null,
         ...newSettings
       };
@@ -142,7 +132,7 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     votesPerUser, sortByVotes, retrospectiveMode, workflowPhase,
     resultsViewIndex, showDisplayNames, detailNavigationHintsDismissed,
     backgroundId, customBackgroundCss, customBackgroundSize,
-    flowHealthCheck, flowPoll, flowStartedAt, applySettingsLocally
+    flowStartedAt, applySettingsLocally
   ]);
 
   // Convenience wrappers
@@ -170,14 +160,6 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateBoardSettings({ sortByVotes: enabled });
   }, [updateBoardSettings]);
 
-  const updateFlowHealthCheck = useCallback((enabled) => {
-    updateBoardSettings({ flowHealthCheck: enabled });
-  }, [updateBoardSettings]);
-
-  const updateFlowPoll = useCallback((enabled) => {
-    updateBoardSettings({ flowPoll: enabled });
-  }, [updateBoardSettings]);
-
   return {
     updateBoardSettings,
     updateVotingEnabled,
@@ -185,8 +167,6 @@ export const useBoardSettings = ({ boardId, user, settingsState, setters }) => {
     updateMultipleVotesAllowed,
     updateVotesPerUser,
     setSortByVotes,
-    updateShowDisplayNames,
-    updateFlowHealthCheck,
-    updateFlowPoll
+    updateShowDisplayNames
   };
 };

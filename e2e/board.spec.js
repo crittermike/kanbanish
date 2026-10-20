@@ -51,30 +51,28 @@ test.describe('Board', () => {
     await expect(viewer.getByLabel('Board title')).toHaveValue('My Test Board');
   });
 
-  test('runs the steps from a retro template with a vote limit, reset, and poll', async ({ page }) => {
+  test('runs the steps from a retro template with a vote limit, reset, and a poll', async ({ page }) => {
     await createBoard(page, { template: 'Retrospective', settings: { votes: '1' } });
-    const steps = page.getByRole('navigation', { name: 'Steps' });
+    const steps = page.getByRole('group', { name: 'Steps' });
     const currentStep = steps.locator('[aria-current="step"]');
-    const next = steps.getByRole('button', { name: 'Next', exact: true });
+    const goTo = label => steps.getByRole('button', { name: label, exact: true }).click();
     const viewer = await page.context().newPage();
     await viewer.goto(page.url());
-    const remoteStep = viewer.getByRole('navigation', { name: 'Steps' }).locator('[aria-current="step"]');
+    const remoteStep = viewer.getByRole('group', { name: 'Steps' }).locator('[aria-current="step"]');
     const expectStep = async label => {
       await expect(currentStep).toHaveText(label);
       await expect(remoteStep).toHaveText(label);
     };
 
     await expectStep('Add');
-    await expect(steps.getByRole('button', { name: 'Previous step' })).toHaveCount(0);
     const firstCard = await addCard(page, 'Keep pairing on difficult tasks');
     const secondCard = await addCard(page, 'Improve build times');
 
-    await next.click();
+    await goTo('Group');
     await expectStep('Group');
     await expect(page.getByRole('button', { name: 'Add Card', exact: true })).toHaveCount(0);
-    await next.click();
+    await goTo('Vote');
     await expectStep('Vote');
-    await expect(steps.getByLabel('Votes per person')).toHaveValue('1');
     await expect(page.getByTestId('vote-counter')).toHaveText('1 vote left');
 
     await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
@@ -92,26 +90,26 @@ test.describe('Board', () => {
 
     await firstCard.getByRole('button', { name: 'Upvote', exact: true }).click();
     await expect(page.getByTestId('vote-counter')).toHaveText('0 votes left');
-    await next.click();
+    await goTo('Discuss');
     await expectStep('Discuss');
-    await steps.getByRole('button', { name: 'Previous step' }).click();
+    await goTo('Vote');
     await expectStep('Vote');
     await expect(firstCard.locator('.vote-count')).toHaveText('1');
 
-    await next.click();
-    await expectStep('Discuss');
-    await next.click();
-    await expectStep('Poll');
-    await page.locator('.poll-voting').getByRole('button').nth(3).click();
-    await expect(page.getByText('Your vote has been submitted:', { exact: false })).toContainText('4/5 stars');
-    await next.click();
-    await expect(page.getByRole('heading', { name: 'Poll results' })).toBeVisible();
-    await expect(page.locator('.average-rating .score-number')).toHaveText('4.0');
-    await expect(next).toHaveCount(0);
+    await goTo('Board');
+    await expectStep('Board');
+    await expect(firstCard.locator('.vote-count')).toHaveText('1');
 
-    await steps.getByRole('button', { name: 'Done', exact: true }).click();
-    await expect(steps).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /^Start:/ })).toBeVisible();
+    await page.getByRole('button', { name: 'Board actions', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Start poll', exact: true }).click();
+    await expectStep('Poll');
+    await page.locator('.poll-voting .star-button').nth(3).click();
+    await expect(page.getByText('Your vote has been submitted:', { exact: false })).toContainText('4/5 stars');
+    await page.getByRole('button', { name: 'See results', exact: true }).click();
+    await expect(page.locator('.average-rating .score-number')).toHaveText('4.0');
+
+    await goTo('Board');
+    await expectStep('Board');
     await expect(firstCard.locator('.vote-count')).toHaveText('1');
   });
 });

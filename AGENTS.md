@@ -52,8 +52,7 @@ src/
 │   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── FlowStartButton.jsx      # Header ▶ button: opens StartStepsModal (steps + health check / poll switches)
-│   ├── WorkflowControls.jsx     # Stepper (steps, back arrow, Next/Done, end ■, votes per person)
+│   ├── StepSwitcher.jsx         # Header segmented control: Board · Add · Group · Vote · Discuss
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
 │   ├── PollResults.jsx          # Poll results display
@@ -61,7 +60,6 @@ src/
 │   ├── HealthCheckResults.jsx   # Health check results display
 │   └── modals/
 │       ├── ExportBoardModal.jsx
-│       ├── StartStepsModal.jsx       # ▶ dialog: step list, optional step switches, Start
 │       └── NewBoardTemplateModal.jsx  # "All templates" picker (one click creates)
 │
 ├── hooks/
@@ -155,7 +153,7 @@ const { startFlow, endFlow, ... } = useWorkflow({ updateBoardSettings, columns, 
 | `useHealthCheck` | Health check voting | `submitHealthCheckVote`, `getHealthCheckStats` |
 | `useVoting` | Vote operations and counting | `resetAllVotes`, `getTotalVotes`, `getUserVoteCount`, `upvoteGroup`, `downvoteGroup` |
 | `useGroups` | Card grouping | `moveCard`, `createCardGroup`, `ungroupCards`, `removeAllGrouping` |
-| `useWorkflow` | Starting/ending the steps, phase transitions | `startFlow`, `endFlow`, `goToNextPhase`, `goToPreviousPhase` |
+| `useWorkflow` | Starting/ending the steps, phase transitions | `startFlow`, `endFlow`, `goToPhase`, `startHealthCheckPhase`, `startPollPhase` |
 
 **There is no routing library.** The board ID comes from the `?board=` query parameter. If none is provided, a new board is created.
 
@@ -232,8 +230,6 @@ boards/{boardId}/
     retrospectiveMode: boolean   (true while the steps are running)
     workflowPhase: string
     resultsViewIndex: number
-    flowHealthCheck: boolean     (start runs with a health check)
-    flowPoll: boolean            (end runs with a poll)
     flowStartedAt: timestamp     (when the current run started)
   presence/{userId}/
     lastSeen: timestamp
@@ -259,19 +255,19 @@ users/{userId}/preferences/
 
 ## Steps (Add → Group → Vote → Discuss)
 
-There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The ▶ button in the header (`FlowStartButton`) opens a dialog (`modals/StartStepsModal`) listing the steps, with switches for the optional first/last steps (`flowHealthCheck`, `flowPoll`, remembered per board); its Start button calls `startFlow`. Under the hood `retrospectiveMode: true` means a run is in progress.
+There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The steps are the board's view: `StepSwitcher` is a segmented control in the header (`Board · Add · Group · Vote · Discuss`, collapsing to a `<select>` on mobile). Under the hood `retrospectiveMode: true` means a run is in progress.
 
 ```
-HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
+CREATION → GROUPING → INTERACTIONS → RESULTS
+HEALTH_CHECK / HEALTH_CHECK_RESULTS, POLL / POLL_RESULTS (standalone)
 ```
 
-- `startFlow` clears previous health check/poll answers, turns voting on, records `flowStartedAt`, and jumps to HEALTH_CHECK or CREATION.
-- `WorkflowControls` renders the stepper (`Health · Add · Group · Vote · Discuss · Poll`, optional steps only when enabled); results sub-phases share their parent step. "Next" calls `goToNextPhase`; on the last step it reads "Done" and ends the run. The ■ button calls `endFlow`.
-- `endFlow` sets `retrospectiveMode: false` and returns to CREATION. Groups and votes stay on the board.
-- Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back from Group to Add only removes groups containing this run's cards.
-- Retro-tagged templates (and `?retro=true`) create boards already in the Add step with the poll on.
-- A standalone health check (`retrospectiveMode: false` + a health phase; ⋮ "Start health check" or the Big Orca template) shows only the Health step and drops to the plain board when done.
-- While answering, "See results" in `HealthCheckVoting` shows live `HealthCheckResults`; the stepper's button reads "Results" when the next phase is a results sub-phase.
+- Picking a step calls `goToPhase`. From Board it starts a run (`startFlow`: voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
+- Picking Board calls `endFlow` (`retrospectiveMode: false`, back to CREATION). Groups and votes stay. Ending during Add confirms first because it reveals hidden cards.
+- Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back to Add only removes groups containing this run's cards.
+- Retro-tagged templates (and `?retro=true`) create boards already in the Add step.
+- Health check and poll run on their own (`retrospectiveMode: false` + a health/poll phase) from ⋮ "Start health check" / "Start poll" (or the Big Orca template). The switcher shows an extra Health/Poll segment while one is open; Board closes it. "Start poll" clears earlier poll answers.
+- While answering, "See results" in `HealthCheckVoting` / `PollVoting` shows the live results.
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 

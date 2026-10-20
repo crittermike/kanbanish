@@ -146,7 +146,7 @@ describe('Dashboard Component', () => {
         expect.objectContaining({
           columns: ['Went Well', 'Could Improve', 'Action Items'],
           templateName: 'Retro',
-          settingsOverrides: { retrospectiveMode: true, flowPoll: true },
+          settingsOverrides: { retrospectiveMode: true },
           user: { uid: 'test-user' }
         })
       );

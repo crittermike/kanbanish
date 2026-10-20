@@ -21,7 +21,7 @@ import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
-import WorkflowControls from './WorkflowControls';
+import StepSwitcher from './StepSwitcher';
 
 /**
  * Main Board component responsible for rendering and managing the kanban board.
@@ -62,6 +62,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
     workflowPhase,
     getAllUsersAddingCards,
     startHealthCheckPhase,
+    startPollPhase,
     votesPerUser,
     updateVotesPerUser,
     displayName,
@@ -85,8 +86,8 @@ function Board({ onGoHome, onNavigateToBoard }) {
   // Search state
   const searchFilter = useSearchFilter({ columns, userId: user?.uid });
 
-  const isHealthPhase = workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ||
-    workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS;
+  // Health check and poll can run on their own, outside the steps
+  const canStartStandalone = !retrospectiveMode && workflowPhase === WORKFLOW_PHASES.CREATION;
 
   // State for settings dropdown menu
   const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
@@ -242,9 +243,10 @@ function Board({ onGoHome, onNavigateToBoard }) {
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
           />
+          <StepSwitcher />
           <SettingsPanel
-            showFlowStart={!retrospectiveMode && !isHealthPhase}
-            handleStartHealthCheck={!retrospectiveMode && !isHealthPhase ? startHealthCheckPhase : undefined}
+            handleStartHealthCheck={canStartStandalone ? startHealthCheckPhase : undefined}
+            handleStartPoll={canStartStandalone ? startPollPhase : undefined}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}
@@ -318,12 +320,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
         showDisplayNames={showDisplayNames}
       />
 
-      {/* Stepper - shown while the steps are running or during a standalone health check */}
-      {(retrospectiveMode || isHealthPhase) && (
-        <WorkflowControls />
-      )}
-
-
       <main id="board-content">
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
@@ -331,9 +327,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
           <HealthCheckResults />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView onExpandCard={handleExpandCard} />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
+        ) : workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
+        ) : workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
           <PollResults />
         ) : (
           <ColumnsContainer

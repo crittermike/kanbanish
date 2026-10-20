@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Settings } from 'react-feather';
 import BackgroundPicker from './BackgroundPicker';
 import BoardActionsMenu from './BoardActionsMenu';
-import FlowStartButton from './FlowStartButton';
 import Timer from './Timer';
 
 const VOTE_PRESETS = [3, 5, 10];
@@ -30,8 +29,8 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
  * Settings holds board preferences only; sort, theme and one-off actions live in the board actions menu.
  */
 const SettingsPanel = ({
-  showFlowStart,
   handleStartHealthCheck,
+  handleStartPoll,
   copyShareUrl,
   handleExportBoard,
   votingEnabled,
@@ -106,7 +105,6 @@ const SettingsPanel = ({
 
   return (
     <div className="action-buttons">
-      {showFlowStart && <FlowStartButton />}
       <Timer />
       {children}
       <BoardActionsMenu
@@ -117,6 +115,7 @@ const SettingsPanel = ({
         darkMode={darkMode}
         onToggleDarkMode={updateDarkMode}
         onStartHealthCheck={handleStartHealthCheck}
+        onStartPoll={handleStartPoll}
         onExportBoard={handleExportBoard}
         onStartNextBoard={onStartNextBoard}
         onOpenLinkPrevious={onOpenLinkPrevious}

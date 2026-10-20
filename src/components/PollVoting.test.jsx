@@ -41,8 +41,17 @@ describe('PollVoting Component', () => {
   test('renders 5 star buttons', () => {
     render(<PollVoting />);
 
-    const starButtons = screen.getAllByRole('button');
+    const starButtons = screen.getAllByRole('button').filter(button => button.classList.contains('star-button'));
     expect(starButtons).toHaveLength(5);
+  });
+
+  test('toggles between your answer and the live results', () => {
+    render(<PollVoting />);
+    fireEvent.click(screen.getByRole('button', { name: 'See results' }));
+    expect(screen.getByText('Poll results')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Your answer' }));
+    expect(screen.getByText('How useful was this?')).toBeInTheDocument();
   });
 
   test('submits vote when star is clicked', () => {
