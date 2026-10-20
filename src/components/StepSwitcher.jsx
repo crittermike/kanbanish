@@ -37,6 +37,7 @@ const StepSwitcher = () => {
   const votesLeft = isUserVoteCounterVisible && votesPerUser > 0
     ? Math.max(0, votesPerUser - getUserVoteCount(user.uid))
     : null;
+  const votesLeftText = `${votesLeft} ${votesLeft === 1 ? 'vote' : 'votes'} left`;
 
   const activeStep = STEPS.find(step => step.phases.includes(workflowPhase));
   // A template can open a health check without starting the steps
@@ -94,15 +95,12 @@ const StepSwitcher = () => {
                 aria-current={ariaCurrent(step.id)}
                 onClick={() => select(step.id)}
                 aria-label={step.id === 'vote' && votesLeft !== null
-                  ? `Vote, ${votesLeft} ${votesLeft === 1 ? 'vote' : 'votes'} left`
+                  ? `Vote, ${votesLeftText}`
                   : undefined}
               >
                 {step.label}
                 {step.id === 'vote' && votesLeft !== null && (
-                  <span className="step-switch-votes">
-                    {' · '}
-                    <span className={votesLeft === 0 ? 'depleted' : undefined}>{votesLeft}</span>
-                  </span>
+                  <span className={`step-switch-votes${votesLeft === 0 ? ' depleted' : ''}`}>{votesLeftText}</span>
                 )}
               </button>
             </Fragment>
@@ -118,7 +116,7 @@ const StepSwitcher = () => {
         <option value={BOARD}>Board</option>
         {STEPS.map(step => (
           <option key={step.id} value={step.id}>
-            {step.id === 'vote' && votesLeft !== null ? `Vote · ${votesLeft}` : step.label}
+            {step.id === 'vote' && votesLeft !== null ? `Vote (${votesLeft} left)` : step.label}
           </option>
         ))}
       </select>

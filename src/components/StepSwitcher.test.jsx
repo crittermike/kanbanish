@@ -77,14 +77,14 @@ describe('StepSwitcher', () => {
     test('shows votes left on the Vote step', () => {
       voting(5, 2);
       expect(current()).toHaveAccessibleName('Vote, 3 votes left');
-      expect(current()).toHaveTextContent('Vote · 3');
-      expect(screen.getByRole('option', { name: 'Vote · 3' })).toBeInTheDocument();
+      expect(within(current()).getByText('3 votes left')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Vote (3 left)' })).toBeInTheDocument();
     });
 
     test('marks the count when no votes are left', () => {
       voting(3, 3);
       expect(current()).toHaveAccessibleName('Vote, 0 votes left');
-      expect(within(current()).getByText('0')).toHaveClass('depleted');
+      expect(within(current()).getByText('0 votes left')).toHaveClass('depleted');
     });
 
     test('shows plain Vote when votes are unlimited', () => {

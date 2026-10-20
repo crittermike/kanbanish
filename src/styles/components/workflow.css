@@ -42,11 +42,22 @@
   gap: 6px;
 }
 
-.step-switch-votes {
-  font-variant-numeric: tabular-nums;
+.step-switch-btn:has(.step-switch-votes) {
+  display: inline-flex;
+  align-items: center;
 }
 
-.step-switch-votes .depleted {
+.step-switch-votes {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
+}
+
+.step-switch-votes.depleted {
   color: var(--warning-color);
 }
 
