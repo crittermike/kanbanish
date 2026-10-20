@@ -64,31 +64,33 @@ const StepSwitcher = () => {
 
   return (
     <div className="step-switch">
-      <div className="step-switch-segments" role="group" aria-label="Steps">
-        <button
-          type="button"
-          className={`${className(BOARD)} step-switch-board`}
-          aria-label="Board"
-          title="Board"
-          aria-current={ariaCurrent(BOARD)}
-          onClick={() => select(BOARD)}
-        >
-          <Columns size={14} aria-hidden="true" />
-        </button>
-        <span className="step-switch-divider" aria-hidden="true" />
-        {STEPS.map((step, index) => (
-          <Fragment key={step.id}>
-            {index > 0 && <ChevronRight className="step-switch-chevron" size={12} aria-hidden="true" />}
-            <button
-              type="button"
-              className={className(step.id)}
-              aria-current={ariaCurrent(step.id)}
-              onClick={() => select(step.id)}
-            >
-              {step.label}
-            </button>
-          </Fragment>
-        ))}
+      <div className="step-switch-pills" role="group" aria-label="Steps">
+        <div className="step-switch-segments">
+          <button
+            type="button"
+            className={`${className(BOARD)} step-switch-board`}
+            aria-current={ariaCurrent(BOARD)}
+            onClick={() => select(BOARD)}
+          >
+            <Columns size={14} aria-hidden="true" />
+            Board
+          </button>
+        </div>
+        <div className="step-switch-segments">
+          {STEPS.map((step, index) => (
+            <Fragment key={step.id}>
+              {index > 0 && <ChevronRight className="step-switch-chevron" size={12} aria-hidden="true" />}
+              <button
+                type="button"
+                className={className(step.id)}
+                aria-current={ariaCurrent(step.id)}
+                onClick={() => select(step.id)}
+              >
+                {step.label}
+              </button>
+            </Fragment>
+          ))}
+        </div>
       </div>
       <select
         className="step-switch-select"

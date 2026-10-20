@@ -5,6 +5,12 @@
   flex-shrink: 0;
 }
 
+.step-switch-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .step-switch-segments {
   display: inline-flex;
   align-items: center;
@@ -33,15 +39,7 @@
 .step-switch-board {
   display: inline-flex;
   align-items: center;
-  align-self: stretch;
-  padding: 0 8px;
-}
-
-.step-switch-divider {
-  width: 1px;
-  align-self: stretch;
-  margin: 3px 3px;
-  background: var(--border-color);
+  gap: 6px;
 }
 
 .step-switch-chevron {
@@ -94,7 +92,7 @@ html.light-mode .step-switch-btn.active {
     order: 1;
   }
 
-  .step-switch-segments {
+  .step-switch-pills {
     display: none;
   }
 
