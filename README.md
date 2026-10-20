@@ -24,7 +24,7 @@ Press ▶ in the board header to step everyone through:
 
 **Add** (new cards hidden) → **Group** → **Vote** → **Discuss**
 
-Optionally start with a **health check** and end with a **poll**. Works on any board and can be run again; groups and votes stay when you end.
+Optionally start with a **health check** and end with a **poll**, or run a health check on its own from the board menu. Works on any board and can be run again; groups and votes stay when you end.
 
 Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
 

@@ -61,6 +61,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
     updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
+    startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
     displayName,
@@ -243,6 +244,7 @@ function Board({ onGoHome, onNavigateToBoard }) {
           />
           <SettingsPanel
             showFlowStart={!retrospectiveMode && !isHealthPhase}
+            handleStartHealthCheck={!retrospectiveMode && !isHealthPhase ? startHealthCheckPhase : undefined}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}

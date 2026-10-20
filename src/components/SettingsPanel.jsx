@@ -31,6 +31,7 @@ const ToggleRow = ({ label, checked, onChange, ariaLabel, hint }) => (
  */
 const SettingsPanel = ({
   showFlowStart,
+  handleStartHealthCheck,
   copyShareUrl,
   handleExportBoard,
   votingEnabled,
@@ -115,6 +116,7 @@ const SettingsPanel = ({
         onShare={copyShareUrl}
         darkMode={darkMode}
         onToggleDarkMode={updateDarkMode}
+        onStartHealthCheck={handleStartHealthCheck}
         onExportBoard={handleExportBoard}
         onStartNextBoard={onStartNextBoard}
         onOpenLinkPrevious={onOpenLinkPrevious}

@@ -20,6 +20,7 @@ describe('SettingsPanel', () => {
   const defaultProps = {
     copyShareUrl: vi.fn(),
     handleExportBoard: vi.fn(),
+    handleStartHealthCheck: vi.fn(),
     votingEnabled: true,
     updateVotingEnabled: vi.fn(),
     downvotingEnabled: true,
@@ -170,6 +171,7 @@ describe('SettingsPanel', () => {
       expect(within(menu).getAllByRole('menuitem').map(i => i.textContent)).toEqual([
         'Copy board link',
         'Export board',
+        'Start health check',
         'Start next board',
         'Link to previous board',
         'Reset all votes',
@@ -229,6 +231,7 @@ describe('SettingsPanel', () => {
 
       const actions = [
         ['Export board', defaultProps.handleExportBoard],
+        ['Start health check', defaultProps.handleStartHealthCheck],
         ['Start next board', defaultProps.onStartNextBoard],
         ['Link to previous board', defaultProps.onOpenLinkPrevious],
         ['Remove from series', defaultProps.onUnlinkSeries],

@@ -732,40 +732,40 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
     background: var(--hover-bg);
 }
 
-/* ▶ split button: start the steps, caret for optional steps */
+/* ▶ button and its dialog */
 .flow-start {
     display: flex;
-    align-items: stretch;
 }
 
-.flow-start .flow-start-btn {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    color: var(--accent);
+.modal-container.start-steps-modal {
+    max-width: 320px;
 }
 
-.flow-start .flow-start-options {
+.start-steps {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-sm) var(--space-lg);
+}
+
+.start-step {
     display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 36px;
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
 }
 
-.flow-start .flow-start-options-btn {
-    height: 100%;
-    margin-left: -1px;
-    padding: 0 2px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+.start-step svg {
+    flex-shrink: 0;
     color: var(--text-muted);
 }
 
-.flow-start .flow-start-options-btn[aria-expanded="true"] {
-    background-color: var(--hover-bg);
+.start-step-label {
+    flex: 1;
 }
 
-.header-content .flow-start .flow-start-options-btn {
-    width: 20px;
-    padding: 0;
-}
-
-.flow-start .flow-start-options-btn svg {
-    flex-shrink: 0;
+.start-step-off .start-step-label,
+.start-step-off svg {
+    color: var(--text-faint);
 }

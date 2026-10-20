@@ -1,4 +1,4 @@
-import { Check, FileText, Layers, Link2, Moon, MoreVertical, RotateCcw, Scissors, Share2 } from 'react-feather';
+import { Activity, Check, FileText, Layers, Link2, Moon, MoreVertical, RotateCcw, Scissors, Share2 } from 'react-feather';
 import HeaderMenu from './HeaderMenu';
 
 const SORT_OPTIONS = [
@@ -30,6 +30,7 @@ const BoardActionsMenu = ({
   sortByVotes,
   onSortChange,
   onShare,
+  onStartHealthCheck,
   onExportBoard,
   onStartNextBoard,
   onOpenLinkPrevious,
@@ -77,6 +78,9 @@ const BoardActionsMenu = ({
         )}
         <MenuItem icon={Share2} label="Copy board link" onSelect={onShare} close={close} />
         <MenuItem icon={FileText} label="Export board" onSelect={onExportBoard} close={close} />
+        {onStartHealthCheck && (
+          <MenuItem icon={Activity} label="Start health check" onSelect={onStartHealthCheck} close={close} />
+        )}
         <Separator />
         <MenuItem icon={Layers} label="Start next board" onSelect={onStartNextBoard} close={close} />
         <MenuItem icon={Link2} label="Link to previous board" onSelect={onOpenLinkPrevious} close={close} />

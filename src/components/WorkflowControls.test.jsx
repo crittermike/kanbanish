@@ -86,6 +86,15 @@ describe('WorkflowControls', () => {
   });
 
   test.each([
+    ['HEALTH_CHECK', { flowHealthCheck: true }],
+    ['POLL', { flowPoll: true }]
+  ])('%s labels Next as Results', (phase, overrides) => {
+    renderWith({ workflowPhase: phase, ...overrides });
+    expect(screen.getByRole('button', { name: /results/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+  });
+
+  test.each([
     ['RESULTS', {}],
     ['POLL_RESULTS', { flowPoll: true }]
   ])('the last step (%s) shows Done instead of Next and End', (phase, overrides) => {

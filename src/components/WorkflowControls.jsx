@@ -55,6 +55,8 @@ const WorkflowControls = () => {
   const canGoBack = workflowPhase !== firstPhase;
   const lastStep = steps[steps.length - 1];
   const isLastPhase = workflowPhase === lastStep.phases[lastStep.phases.length - 1];
+  // Health check and poll reveal their results before moving on
+  const nextIsResults = workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK || workflowPhase === WORKFLOW_PHASES.POLL;
 
   const handleEnd = () => {
     // Ending during Add reveals cards that are still hidden
@@ -127,6 +129,8 @@ const WorkflowControls = () => {
           >
             {isLastPhase ? (
               <>Done<Check size={16} aria-hidden="true" /></>
+            ) : nextIsResults ? (
+              <>Results<ArrowRight size={16} aria-hidden="true" /></>
             ) : (
               <>Next<ArrowRight size={16} aria-hidden="true" /></>
             )}

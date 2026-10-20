@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Users } from 'react-feather';
+import { ArrowLeft, BarChart2, Users } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import HealthCheckResults from './HealthCheckResults';
 
 const RATING_LABELS = {
   1: 'Terrible',
@@ -20,6 +21,7 @@ const HealthCheckVoting = () => {
   } = useBoardContext();
 
   const [hoveredRatings, setHoveredRatings] = useState({});
+  const [showResults, setShowResults] = useState(false);
 
   const getDisplayRating = (questionId) => {
     return hoveredRatings[questionId] || userHealthCheckVotes[questionId] || 0;
@@ -29,6 +31,19 @@ const HealthCheckVoting = () => {
   Object.values(healthCheckVotes || {}).forEach(questionVotes => {
     Object.keys(questionVotes).forEach(uid => votedUserIds.add(uid));
   });
+
+  // Live results update as others answer
+  if (showResults) {
+    return (
+      <div className="health-check-live-results">
+        <button type="button" className="health-check-toggle-btn" onClick={() => setShowResults(false)}>
+          <ArrowLeft size={14} aria-hidden="true" />
+          Your answers
+        </button>
+        <HealthCheckResults />
+      </div>
+    );
+  }
 
   return (
     <div className="health-check-voting">
@@ -67,6 +82,11 @@ const HealthCheckVoting = () => {
       <div className="health-check-participation" data-testid="health-check-participation">
         <Users size={14} />
         <span>{votedUserIds.size} of {activeUsers} voted</span>
+        <span aria-hidden="true">·</span>
+        <button type="button" className="health-check-toggle-btn" onClick={() => setShowResults(true)}>
+          <BarChart2 size={14} aria-hidden="true" />
+          See results
+        </button>
       </div>
     </div>
   );

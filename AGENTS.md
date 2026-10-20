@@ -52,7 +52,7 @@ src/
 │   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── FlowStartButton.jsx      # Header ▶ split button: start the steps; caret toggles health check / poll
+│   ├── FlowStartButton.jsx      # Header ▶ button: opens StartStepsModal (steps + health check / poll switches)
 │   ├── WorkflowControls.jsx     # Stepper (steps, back arrow, Next/Done, end ■, votes per person)
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
@@ -61,6 +61,7 @@ src/
 │   ├── HealthCheckResults.jsx   # Health check results display
 │   └── modals/
 │       ├── ExportBoardModal.jsx
+│       ├── StartStepsModal.jsx       # ▶ dialog: step list, optional step switches, Start
 │       └── NewBoardTemplateModal.jsx  # "All templates" picker (one click creates)
 │
 ├── hooks/
@@ -258,7 +259,7 @@ users/{userId}/preferences/
 
 ## Steps (Add → Group → Vote → Discuss)
 
-There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The ▶ split button in the header (`FlowStartButton`) calls `startFlow`; its caret toggles the optional first/last steps (`flowHealthCheck`, `flowPoll`, remembered per board). Under the hood `retrospectiveMode: true` means a run is in progress.
+There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The ▶ button in the header (`FlowStartButton`) opens a dialog (`modals/StartStepsModal`) listing the steps, with switches for the optional first/last steps (`flowHealthCheck`, `flowPoll`, remembered per board); its Start button calls `startFlow`. Under the hood `retrospectiveMode: true` means a run is in progress.
 
 ```
 HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
@@ -269,7 +270,8 @@ HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS
 - `endFlow` sets `retrospectiveMode: false` and returns to CREATION. Groups and votes stay on the board.
 - Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back from Group to Add only removes groups containing this run's cards.
 - Retro-tagged templates (and `?retro=true`) create boards already in the Add step with the poll on.
-- A standalone health check (`retrospectiveMode: false` + a health phase, e.g. the Big Orca template) shows only the Health step and drops to the plain board when done.
+- A standalone health check (`retrospectiveMode: false` + a health phase; ⋮ "Start health check" or the Big Orca template) shows only the Health step and drops to the plain board when done.
+- While answering, "See results" in `HealthCheckVoting` shows live `HealthCheckResults`; the stepper's button reads "Results" when the next phase is a results sub-phase.
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 

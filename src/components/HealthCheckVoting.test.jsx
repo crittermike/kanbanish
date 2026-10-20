@@ -3,6 +3,8 @@ import { vi } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
 import HealthCheckVoting from './HealthCheckVoting';
 
+vi.mock('./HealthCheckResults', () => ({ default: () => <div data-testid="health-check-results" /> }));
+
 // Mock the BoardContext
 vi.mock('../context/BoardContext', () => ({
   useBoardContext: vi.fn()
@@ -63,6 +65,16 @@ describe('HealthCheckVoting Component', () => {
     render(<HealthCheckVoting />);
 
     expect(screen.getByTestId('health-check-participation')).toHaveTextContent('2 of 8 voted');
+  });
+
+  test('toggles between your answers and the live results', () => {
+    render(<HealthCheckVoting />);
+    fireEvent.click(screen.getByRole('button', { name: 'See results' }));
+    expect(screen.getByTestId('health-check-results')).toBeInTheDocument();
+    expect(screen.queryByText('Teamwork')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Your answers' }));
+    expect(screen.getByText('Teamwork')).toBeInTheDocument();
   });
 
   test('allows voting on multiple questions', () => {
