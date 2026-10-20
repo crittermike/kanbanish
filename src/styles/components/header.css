@@ -738,7 +738,26 @@ html.light-mode .settings-toggle-switch[aria-checked="true"] {
 }
 
 .modal-container.start-steps-modal {
-    max-width: 320px;
+    max-width: 360px;
+}
+
+.start-steps-intro {
+    padding: var(--space-lg) var(--space-lg) var(--space-xs);
+}
+
+.start-steps-intro h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: none;
+}
+
+.start-steps-intro p {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    line-height: 1.4;
 }
 
 .start-steps {

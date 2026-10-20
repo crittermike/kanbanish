@@ -46,8 +46,13 @@ const StartStepsModal = ({ isOpen, onClose }) => {
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Start"
+        aria-labelledby="start-steps-title"
+        aria-describedby="start-steps-desc"
       >
+        <div className="start-steps-intro">
+          <h2 id="start-steps-title">Collect ideas as a team</h2>
+          <p id="start-steps-desc">Everyone adds cards privately, then you group, vote and discuss.</p>
+        </div>
         <ol className="start-steps">
           {steps.map(({ icon: Icon, label, optional, on, toggle }) => (
             <li key={label} className={`start-step${optional && !on ? ' start-step-off' : ''}`}>
