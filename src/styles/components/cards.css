@@ -47,9 +47,10 @@
 
 /* Card hover actions - shown on hover to save vertical space */
 /* Overlays the top-right of the text; the gradient fades text out under the buttons */
+/* Centered on the first line of text (1.4em line-height from .markdown-content, 28px buttons) */
 .card-hover-actions {
     position: absolute;
-    top: -2px;
+    top: calc((1.4em - 28px) / 2);
     right: -4px;
     display: none;
     gap: 2px;
