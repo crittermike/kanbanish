@@ -259,28 +259,28 @@ export const getWorkflowDisabledReason = (action, workflowPhase) => {
 };
 
 /**
- * Gets the current phase description
+ * One-line explanation of what to do in a phase
  * @param {string} workflowPhase - Current workflow phase
  * @returns {string}
  */
 export const getPhaseDescription = workflowPhase => {
   switch (workflowPhase) {
     case WORKFLOW_PHASES.HEALTH_CHECK:
-      return 'Rate how the team is feeling about key areas';
+      return 'Rate how things are going in each area.';
     case WORKFLOW_PHASES.HEALTH_CHECK_RESULTS:
-      return 'Review team health check results';
+      return 'See how everyone rated each area.';
     case WORKFLOW_PHASES.CREATION:
-      return 'Create and add cards to the board';
+      return 'Add cards to any column. Other people\'s cards stay hidden until Group.';
     case WORKFLOW_PHASES.GROUPING:
-      return 'Group related cards together';
+      return 'Drag cards onto each other to group similar ones.';
     case WORKFLOW_PHASES.INTERACTIONS:
-      return 'Add comments, votes, and reactions';
+      return 'Vote on the cards that matter most. Votes stay hidden until Discuss.';
     case WORKFLOW_PHASES.RESULTS:
-      return 'View top-voted items';
+      return 'Talk through the top-voted cards one at a time.';
     case WORKFLOW_PHASES.POLL:
-      return 'Rate how useful this was';
+      return 'Rate how useful this was.';
     case WORKFLOW_PHASES.POLL_RESULTS:
-      return 'View poll results';
+      return 'See how useful everyone found this.';
     default:
       return 'Unknown phase';
   }

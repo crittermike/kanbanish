@@ -497,21 +497,21 @@ describe('getWorkflowDisabledReason', () => {
 describe('getPhaseDescription', () => {
   it('returns the correct description for each phase', () => {
     expect(getPhaseDescription(WORKFLOW_PHASES.HEALTH_CHECK))
-      .toBe('Rate how the team is feeling about key areas');
+      .toBe('Rate how things are going in each area.');
     expect(getPhaseDescription(WORKFLOW_PHASES.HEALTH_CHECK_RESULTS))
-      .toBe('Review team health check results');
+      .toBe('See how everyone rated each area.');
     expect(getPhaseDescription(WORKFLOW_PHASES.CREATION))
-      .toBe('Create and add cards to the board');
+      .toBe('Add cards to any column. Other people\'s cards stay hidden until Group.');
     expect(getPhaseDescription(WORKFLOW_PHASES.GROUPING))
-      .toBe('Group related cards together');
+      .toBe('Drag cards onto each other to group similar ones.');
     expect(getPhaseDescription(WORKFLOW_PHASES.INTERACTIONS))
-      .toBe('Add comments, votes, and reactions');
+      .toBe('Vote on the cards that matter most. Votes stay hidden until Discuss.');
     expect(getPhaseDescription(WORKFLOW_PHASES.RESULTS))
-      .toBe('View top-voted items');
+      .toBe('Talk through the top-voted cards one at a time.');
     expect(getPhaseDescription(WORKFLOW_PHASES.POLL))
-      .toBe('Rate how useful this was');
+      .toBe('Rate how useful this was.');
     expect(getPhaseDescription(WORKFLOW_PHASES.POLL_RESULTS))
-      .toBe('View poll results');
+      .toBe('See how useful everyone found this.');
   });
 
   it('returns "Unknown phase" for an unknown phase', () => {

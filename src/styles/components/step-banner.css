@@ -1,0 +1,73 @@
+/* What to do in the current step, with back/next */
+.step-banner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 6px var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.step-banner-side {
+  display: flex;
+}
+
+.step-banner-side-end {
+  justify-content: flex-end;
+}
+
+.step-banner-text {
+  margin: 0;
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.step-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+}
+
+.step-banner-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.step-banner-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.step-banner-next {
+  color: var(--text-color);
+}
+
+@media (max-width: 600px) {
+  .step-banner {
+    gap: var(--space-sm);
+    padding: 6px var(--space-sm);
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .step-banner-btn {
+    padding: 4px;
+  }
+
+  .step-banner-btn-label {
+    display: none;
+  }
+}

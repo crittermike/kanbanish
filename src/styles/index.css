@@ -33,6 +33,7 @@
 @import 'components/board-background.css';
 @import 'components/card-detail-modal.css';
 @import 'components/board-series.css';
+@import 'components/step-banner.css';
 
 /* Utility classes and notifications */
 .notification {

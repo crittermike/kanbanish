@@ -22,6 +22,7 @@ import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
+import StepBanner from './StepBanner';
 import StepSwitcher from './StepSwitcher';
 
 /**
@@ -291,6 +292,8 @@ function Board({ onNavigateToBoard }) {
           </SettingsPanel>
         </div>
       </header>
+
+      <StepBanner />
 
       {/* Search and Filter Bar */}
       {searchFilter.isOpen && (
