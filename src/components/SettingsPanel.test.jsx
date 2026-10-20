@@ -18,7 +18,6 @@ vi.mock('./Timer', () => ({
 
 describe('SettingsPanel', () => {
   const defaultProps = {
-    handleStartHealthCheck: vi.fn(),
     copyShareUrl: vi.fn(),
     handleExportBoard: vi.fn(),
     votingEnabled: true,
@@ -28,7 +27,6 @@ describe('SettingsPanel', () => {
     multipleVotesAllowed: false,
     updateMultipleVotesAllowed: vi.fn(),
     retrospectiveMode: false,
-    updateRetrospectiveMode: vi.fn(),
     sortDropdownOpen: true,
     setSortDropdownOpen: vi.fn(),
     resetAllVotes: vi.fn(),
@@ -79,7 +77,7 @@ describe('SettingsPanel', () => {
       expect(within(voting).getByRole('switch', { name: 'Allow users to vote multiple times on the same card' })).toBeVisible();
 
       expect(within(board).getByRole('switch', { name: 'Anonymous' })).toBeVisible();
-      expect(within(board).getByRole('switch', { name: 'Retrospective mode' })).toBeVisible();
+      expect(within(board).queryByRole('switch', { name: /retro/i })).not.toBeInTheDocument();
       expect(within(board).getByRole('switch', { name: 'Custom background' })).toBeVisible();
     });
 
@@ -87,7 +85,7 @@ describe('SettingsPanel', () => {
       render(<SettingsPanel {...defaultProps} />);
       const dialog = screen.getByRole('dialog');
 
-      for (const name of ['Start health check', 'Export board', 'Start next board', 'Link to previous board', 'Reset all votes']) {
+      for (const name of ['Export board', 'Start next board', 'Link to previous board', 'Reset all votes']) {
         expect(within(dialog).queryByRole('button', { name })).not.toBeInTheDocument();
       }
       expect(within(dialog).queryByText('Theme')).not.toBeInTheDocument();
@@ -115,22 +113,13 @@ describe('SettingsPanel', () => {
     });
   });
 
-  describe('Retrospective mode', () => {
+  describe('While the steps are running', () => {
     test('hides Allow voting but keeps vote rules', () => {
       render(<SettingsPanel {...defaultProps} votingEnabled={false} retrospectiveMode={true} />);
 
       expect(screen.queryByRole('switch', { name: 'Allow voting' })).not.toBeInTheDocument();
       expect(screen.getByText('Votes per person')).toBeVisible();
       expect(screen.getByRole('switch', { name: 'Allow downvoting' })).toBeVisible();
-    });
-
-    test('toggle has an accurate hint', () => {
-      render(<SettingsPanel {...defaultProps} />);
-
-      fireEvent.click(screen.getByRole('switch', { name: 'Retrospective mode' }));
-      expect(defaultProps.updateRetrospectiveMode).toHaveBeenCalledWith(true);
-      expect(screen.getByText('Guided steps: add cards, group, vote, discuss')).toBeVisible();
-      expect(screen.queryByText(/hidden text until revealed/i)).not.toBeInTheDocument();
     });
   });
 
@@ -181,7 +170,6 @@ describe('SettingsPanel', () => {
       expect(within(menu).getAllByRole('menuitem').map(i => i.textContent)).toEqual([
         'Copy board link',
         'Export board',
-        'Start health check',
         'Start next board',
         'Link to previous board',
         'Reset all votes',
@@ -234,21 +222,6 @@ describe('SettingsPanel', () => {
       expect(screen.getByRole('menuitemcheckbox', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'false');
       fireEvent.click(screen.getByRole('menuitemcheckbox', { name: 'Dark mode' }));
       expect(defaultProps.updateDarkMode).toHaveBeenCalledWith(true);
-    });
-
-    test('Start health check works outside retrospective mode', () => {
-      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} retrospectiveMode={false} />);
-      openActions();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Start health check' }));
-
-      expect(defaultProps.handleStartHealthCheck).toHaveBeenCalled();
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-    });
-
-    test('Start health check is available in retrospective mode', () => {
-      render(<SettingsPanel {...defaultProps} sortDropdownOpen={false} retrospectiveMode={true} />);
-      openActions();
-      expect(screen.getByRole('menuitem', { name: 'Start health check' })).toBeVisible();
     });
 
     test('runs export, series, and reset actions', () => {

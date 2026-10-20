@@ -15,6 +15,26 @@ export const WORKFLOW_PHASES = {
 };
 
 /**
+ * Whether a card was added during the current run of the steps. Without a run
+ * start time (older boards, boards created from templates) every card counts.
+ * @param {Object} card
+ * @param {number|null} flowStartedAt
+ * @returns {boolean}
+ */
+export const isCardFromCurrentRun = (card, flowStartedAt) =>
+  !flowStartedAt || (card?.created || 0) >= flowStartedAt;
+
+/**
+ * Whether a group holds at least one card added at or after `since`.
+ * @param {Object} column - Column data with cards
+ * @param {Object} group - Group data with cardIds
+ * @param {number} since
+ * @returns {boolean}
+ */
+export const hasCardAddedSince = (column, group, since) =>
+  (group.cardIds || []).some(cardId => isCardFromCurrentRun(column.cards?.[cardId], since));
+
+/**
  * Determines if grouping is allowed in the current workflow phase
  * @param {string} workflowPhase - Current workflow phase
  * @param {boolean} retrospectiveMode - Whether retrospective mode is enabled
@@ -258,9 +278,9 @@ export const getPhaseDescription = workflowPhase => {
     case WORKFLOW_PHASES.RESULTS:
       return 'View top-voted items';
     case WORKFLOW_PHASES.POLL:
-      return 'Rate the effectiveness of this retrospective';
+      return 'Rate how useful this was';
     case WORKFLOW_PHASES.POLL_RESULTS:
-      return 'View retrospective effectiveness ratings';
+      return 'View poll results';
     default:
       return 'Unknown phase';
   }

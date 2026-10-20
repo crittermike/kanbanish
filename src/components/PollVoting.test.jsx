@@ -33,16 +33,25 @@ describe('PollVoting Component', () => {
   test('renders poll voting interface', () => {
     render(<PollVoting />);
 
-    expect(screen.getByText('How effective was this retrospective?')).toBeInTheDocument();
-    expect(screen.getByText('Rate from 1 (not effective) to 5 (extremely effective)')).toBeInTheDocument();
+    expect(screen.getByText('How useful was this?')).toBeInTheDocument();
+    expect(screen.getByText('Rate from 1 (not useful) to 5 (extremely useful)')).toBeInTheDocument();
     expect(screen.getByText('Click on a star to submit your rating')).toBeInTheDocument();
   });
 
   test('renders 5 star buttons', () => {
     render(<PollVoting />);
 
-    const starButtons = screen.getAllByRole('button');
+    const starButtons = screen.getAllByRole('button').filter(button => button.classList.contains('star-button'));
     expect(starButtons).toHaveLength(5);
+  });
+
+  test('toggles between your answer and the live results', () => {
+    render(<PollVoting />);
+    fireEvent.click(screen.getByRole('button', { name: 'See results' }));
+    expect(screen.getByText('Poll results')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Your answer' }));
+    expect(screen.getByText('How useful was this?')).toBeInTheDocument();
   });
 
   test('submits vote when star is clicked', () => {

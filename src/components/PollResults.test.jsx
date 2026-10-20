@@ -29,7 +29,7 @@ describe('PollResults Component', () => {
 
     render(<PollResults />);
 
-    expect(screen.getByText('Retrospective Effectiveness Results')).toBeInTheDocument();
+    expect(screen.getByText('Poll results')).toBeInTheDocument();
     expect(screen.getByText('7 participants')).toBeInTheDocument();
   });
 

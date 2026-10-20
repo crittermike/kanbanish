@@ -1,9 +1,9 @@
-import { ref, set } from 'firebase/database';
+import { ref, remove, set } from 'firebase/database';
 import { useCallback } from 'react';
 import { database } from '../utils/firebase';
 
 /**
- * Hook for poll functionality (retrospective effectiveness rating).
+ * Hook for the optional closing poll (1-5 rating).
  *
  * @param {Object} params
  * @param {string|null} params.boardId - Current board ID
@@ -46,5 +46,17 @@ export const usePoll = ({ boardId, user, pollVotes, setUserPollVote }) => {
     return { average, distribution, totalVotes: votes.length };
   }, [pollVotes]);
 
-  return { submitPollVote, getPollStats };
+  const resetPoll = useCallback(() => {
+    if (!boardId || !user) {
+      return Promise.resolve();
+    }
+
+    return remove(ref(database, `boards/${boardId}/poll`)).then(() => {
+      setUserPollVote(null);
+    }).catch(error => {
+      console.error('Error resetting poll:', error);
+    });
+  }, [boardId, user, setUserPollVote]);
+
+  return { submitPollVote, getPollStats, resetPoll };
 };

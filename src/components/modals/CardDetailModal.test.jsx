@@ -140,7 +140,7 @@ describe('CardDetailModal', () => {
         { cardId: 'card-1', columnId: 'col-1' },
         { cardId: 'card-2', columnId: 'col-1' }
       ]}
-      contextLabel="Retro review"
+      contextLabel="Discuss"
     />
   );
 

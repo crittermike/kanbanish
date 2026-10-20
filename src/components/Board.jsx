@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Search } from 'react-feather';
 import { useBoardContext, DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import { useNotification } from '../context/NotificationContext';
 import { getBackgroundById } from '../data/boardBackgrounds';
@@ -21,13 +22,13 @@ import ProfileButton from './ProfileButton';
 import ResultsView from './ResultsView';
 import SearchFilterBar from './SearchFilterBar';
 import SettingsPanel from './SettingsPanel';
-import WorkflowControls from './WorkflowControls';
+import StepSwitcher from './StepSwitcher';
 
 /**
  * Main Board component responsible for rendering and managing the kanban board.
  * Orchestrates board initialization, URL settings, and layout of header, columns, and modals.
  */
-function Board({ onGoHome, onNavigateToBoard }) {
+function Board({ onNavigateToBoard }) {
   const { showNotification } = useNotification();
   // State for modals
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -52,7 +53,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     multipleVotesAllowed,
     updateMultipleVotesAllowed,
     retrospectiveMode,
-    updateRetrospectiveMode,
     resetAllVotes,
     updateBoardTitle,
     user,
@@ -62,7 +62,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
     updateShowDisplayNames,
     workflowPhase,
     getAllUsersAddingCards,
-    startHealthCheckPhase,
     votesPerUser,
     updateVotesPerUser,
     displayName,
@@ -233,15 +232,22 @@ function Board({ onGoHome, onNavigateToBoard }) {
             boardTitle={boardTitle}
             handleBoardTitleChange={handleBoardTitleChange}
             handleBoardTitleBlur={handleBoardTitleBlur}
-            onGoHome={onGoHome}
-            onSearchOpen={searchFilter.openSearch}
-            isSearchOpen={searchFilter.isOpen}
             previousBoardId={previousBoardId}
             nextBoardId={nextBoardId}
             onNavigateToBoard={onNavigateToBoard}
           />
+          <StepSwitcher />
           <SettingsPanel
-            handleStartHealthCheck={startHealthCheckPhase}
+            leading={!searchFilter.isOpen && (
+              <button
+                className="search-trigger-btn"
+                onClick={searchFilter.openSearch}
+                title="Search cards (Ctrl+F)"
+                aria-label="Search cards"
+              >
+                <Search size={16} />
+              </button>
+            )}
             copyShareUrl={copyShareUrl}
             handleExportBoard={handleExportBoard}
             votingEnabled={votingEnabled}
@@ -251,7 +257,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
             multipleVotesAllowed={multipleVotesAllowed}
             updateMultipleVotesAllowed={updateMultipleVotesAllowed}
             retrospectiveMode={retrospectiveMode}
-            updateRetrospectiveMode={updateRetrospectiveMode}
             sortDropdownOpen={settingsDropdownOpen}
             setSortDropdownOpen={setSettingsDropdownOpen}
             showSort={!!(votingEnabled || retrospectiveMode || sortByVotes)}
@@ -316,13 +321,6 @@ function Board({ onGoHome, onNavigateToBoard }) {
         showDisplayNames={showDisplayNames}
       />
 
-      {/* Workflow stepper - shown in retrospective mode or during a health check */}
-      {(retrospectiveMode || workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ||
-        workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK_RESULTS) && (
-        <WorkflowControls />
-      )}
-
-
       <main id="board-content">
         {workflowPhase === WORKFLOW_PHASES.HEALTH_CHECK ? (
           <HealthCheckVoting />
@@ -330,9 +328,9 @@ function Board({ onGoHome, onNavigateToBoard }) {
           <HealthCheckResults />
         ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.RESULTS ? (
           <ResultsView onExpandCard={handleExpandCard} />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL ? (
+        ) : workflowPhase === WORKFLOW_PHASES.POLL ? (
           <PollVoting />
-        ) : retrospectiveMode && workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
+        ) : workflowPhase === WORKFLOW_PHASES.POLL_RESULTS ? (
           <PollResults />
         ) : (
           <ColumnsContainer

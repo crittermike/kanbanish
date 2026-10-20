@@ -18,11 +18,13 @@ A real-time collaborative kanban board. No accounts, no setup - just create a bo
 - 🎨 **Customizable** - dark/light themes, board backgrounds (solids, gradients, patterns, custom images)
 - 📤 **Export** - Markdown, plain text, CSV, or JSON
 
-### 🔄 Retrospective Mode
+### Add, group, vote, discuss
 
-Built-in guided workflow for team retros with sequential phases:
+Switch the board header from **Board** to a step to take everyone through:
 
-**Health Check** → **Creation** (cards hidden) → **Grouping** → **Voting & Reactions** → **Results** → **Effectiveness Poll**
+**Health** → **Add** (new cards hidden) → **Group** → **Vote** → **Discuss** → **Poll**
+
+Switch back to **Board** when you're done; groups and votes stay. Works on any board and can be run again.
 
 Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
 

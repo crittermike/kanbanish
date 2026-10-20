@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, MoreHorizontal, Search } from 'react-feather';
+import { MoreHorizontal } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import BoardSeriesPager from './BoardSeriesPager';
 import UserCounter from './UserCounter';
@@ -22,25 +22,16 @@ const HeaderMoreToggle = () => {
 };
 
 /**
- * Board header with title input, user/vote counters, and share/export buttons.
+ * Left side of the board header: people count, series pager, title, and votes left.
  *
  * @param {Object} props
  * @param {string} props.boardTitle - Current board title
  * @param {Function} props.handleBoardTitleChange - Called on title input change
  * @param {Function} props.handleBoardTitleBlur - Called on title input blur (persists to Firebase)
  */
-const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, onGoHome, onSearchOpen, isSearchOpen, previousBoardId, nextBoardId, onNavigateToBoard }) => (
+const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur, previousBoardId, nextBoardId, onNavigateToBoard }) => (
   <div className="board-title-container">
-    {onGoHome && (
-      <button
-        className="home-btn"
-        title="Back to Dashboard"
-        aria-label="Back to Dashboard"
-        onClick={onGoHome}
-      >
-        <Home size={16} />
-      </button>
-    )}
+    <UserCounter />
     {onNavigateToBoard && (
       <BoardSeriesPager
         previousBoardId={previousBoardId}
@@ -58,22 +49,8 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       onBlur={handleBoardTitleBlur}
       className="header-input"
     />
+    <VoteCounter />
     <HeaderMoreToggle />
-    {!isSearchOpen && (
-      <button
-        className="search-trigger-btn"
-        onClick={onSearchOpen}
-        title="Search cards (Ctrl+F)"
-        aria-label="Search cards"
-      >
-        <Search size={16} />
-      </button>
-    )}
-    <div className="action-buttons">
-      <UserCounter />
-      <VoteCounter />
-    </div>
-
   </div>
 );
 

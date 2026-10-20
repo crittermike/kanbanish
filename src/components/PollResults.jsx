@@ -16,7 +16,7 @@ const PollResults = () => {
   return (
     <div className="poll-results">
       <div className="results-header">
-        <h3>Retrospective Effectiveness Results</h3>
+        <h3>Poll results</h3>
         <div className="participation-stats">
           <Users size={16} />
           <span>{stats.totalVotes} participant{stats.totalVotes !== 1 ? 's' : ''}</span>

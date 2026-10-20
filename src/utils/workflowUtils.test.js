@@ -509,9 +509,9 @@ describe('getPhaseDescription', () => {
     expect(getPhaseDescription(WORKFLOW_PHASES.RESULTS))
       .toBe('View top-voted items');
     expect(getPhaseDescription(WORKFLOW_PHASES.POLL))
-      .toBe('Rate the effectiveness of this retrospective');
+      .toBe('Rate how useful this was');
     expect(getPhaseDescription(WORKFLOW_PHASES.POLL_RESULTS))
-      .toBe('View retrospective effectiveness ratings');
+      .toBe('View poll results');
   });
 
   it('returns "Unknown phase" for an unknown phase', () => {

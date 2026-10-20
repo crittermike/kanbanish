@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { ref, set } from 'firebase/database';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 import { useBoardSettings } from './useBoardSettings';
 
 vi.mock('../utils/firebase', () => ({
@@ -14,19 +13,6 @@ vi.mock('firebase/database', () => ({
   remove: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('../utils/workflowUtils', () => ({
-  WORKFLOW_PHASES: {
-    HEALTH_CHECK: 'HEALTH_CHECK',
-    HEALTH_CHECK_RESULTS: 'HEALTH_CHECK_RESULTS',
-    CREATION: 'CREATION',
-    GROUPING: 'GROUPING',
-    INTERACTIONS: 'INTERACTIONS',
-    RESULTS: 'RESULTS',
-    POLL: 'POLL',
-    POLL_RESULTS: 'POLL_RESULTS'
-  }
-}));
-
 const createMockSetters = () => ({
   setVotingEnabled: vi.fn(),
   setDownvotingEnabled: vi.fn(),
@@ -35,7 +21,8 @@ const createMockSetters = () => ({
   setSortByVotesState: vi.fn(),
   setRetrospectiveMode: vi.fn(),
   setWorkflowPhase: vi.fn(),
-  setResultsViewIndex: vi.fn()
+  setResultsViewIndex: vi.fn(),
+  setFlowStartedAt: vi.fn()
 });
 
 const createMockProps = (overrides = {}) => {
@@ -52,6 +39,7 @@ const createMockProps = (overrides = {}) => {
       retrospectiveMode: false,
       workflowPhase: 'CREATION',
       resultsViewIndex: 0,
+      flowStartedAt: null,
       ...overrides.settingsState
     },
     setters: {
@@ -88,7 +76,8 @@ describe('useBoardSettings', () => {
         sortByVotes: false,
         retrospectiveMode: false,
         workflowPhase: 'CREATION',
-        resultsViewIndex: 0
+        resultsViewIndex: 0,
+        flowStartedAt: null
       });
     });
 
@@ -136,7 +125,8 @@ describe('useBoardSettings', () => {
           sortByVotes: true,
           retrospectiveMode: true,
           workflowPhase: 'INTERACTIONS',
-          resultsViewIndex: 2
+          resultsViewIndex: 2,
+          flowStartedAt: 123
         }
       });
       const { result } = renderHook(() => useBoardSettings(props));
@@ -153,7 +143,8 @@ describe('useBoardSettings', () => {
         sortByVotes: true,
         retrospectiveMode: true,
         workflowPhase: 'INTERACTIONS',
-        resultsViewIndex: 2
+        resultsViewIndex: 2,
+        flowStartedAt: 123
       });
     });
   });
@@ -325,95 +316,6 @@ describe('useBoardSettings', () => {
       expect(set).toHaveBeenCalled();
       const settingsArg = set.mock.calls[0][1];
       expect(settingsArg.sortByVotes).toBe(true);
-    });
-  });
-
-  describe('updateRetrospectiveMode', () => {
-    it('should set HEALTH_CHECK phase when enabling retrospective mode', async () => {
-      const { result } = renderHook(() => useBoardSettings(mockProps));
-
-      await act(async () => {
-        result.current.updateRetrospectiveMode(true);
-      });
-
-      expect(set).toHaveBeenCalled();
-      const settingsArg = set.mock.calls[0][1];
-      expect(settingsArg.retrospectiveMode).toBe(true);
-      expect(settingsArg.workflowPhase).toBe(WORKFLOW_PHASES.HEALTH_CHECK);
-    });
-
-    it('should reset to CREATION phase when disabling retrospective mode', async () => {
-      const props = createMockProps({
-        settingsState: {
-          votingEnabled: true,
-          downvotingEnabled: false,
-          multipleVotesAllowed: false,
-          votesPerUser: 3,
-          sortByVotes: false,
-          retrospectiveMode: true,
-          workflowPhase: 'INTERACTIONS',
-          resultsViewIndex: 2
-        }
-      });
-      const { result } = renderHook(() => useBoardSettings(props));
-
-      await act(async () => {
-        result.current.updateRetrospectiveMode(false);
-      });
-
-      expect(set).toHaveBeenCalled();
-      const settingsArg = set.mock.calls[0][1];
-      expect(settingsArg.retrospectiveMode).toBe(false);
-      expect(settingsArg.workflowPhase).toBe(WORKFLOW_PHASES.CREATION);
-      expect(settingsArg.resultsViewIndex).toBe(0);
-    });
-
-    it('should not reset resultsViewIndex when enabling retrospective mode', async () => {
-      const props = createMockProps({
-        settingsState: {
-          votingEnabled: true,
-          downvotingEnabled: false,
-          multipleVotesAllowed: false,
-          votesPerUser: 3,
-          sortByVotes: false,
-          retrospectiveMode: false,
-          workflowPhase: 'CREATION',
-          resultsViewIndex: 5
-        }
-      });
-      const { result } = renderHook(() => useBoardSettings(props));
-
-      await act(async () => {
-        result.current.updateRetrospectiveMode(true);
-      });
-
-      const settingsArg = set.mock.calls[0][1];
-      // When enabling, resultsViewIndex should remain from existing state (5)
-      expect(settingsArg.resultsViewIndex).toBe(5);
-    });
-
-    it('should write to Firebase when boardId and user are present', async () => {
-      const { result } = renderHook(() => useBoardSettings(mockProps));
-
-      await act(async () => {
-        result.current.updateRetrospectiveMode(true);
-      });
-
-      expect(ref).toHaveBeenCalledWith({}, 'boards/board-123/settings');
-      expect(set).toHaveBeenCalled();
-    });
-
-    it('should only update local state when boardId is null', async () => {
-      const props = createMockProps({ boardId: null });
-      const { result } = renderHook(() => useBoardSettings(props));
-
-      await act(async () => {
-        result.current.updateRetrospectiveMode(true);
-      });
-
-      expect(set).not.toHaveBeenCalled();
-      expect(props.setters.setRetrospectiveMode).toHaveBeenCalledWith(true);
-      expect(props.setters.setWorkflowPhase).toHaveBeenCalledWith(WORKFLOW_PHASES.HEALTH_CHECK);
     });
   });
 });

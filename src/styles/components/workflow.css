@@ -1,161 +1,102 @@
-/* Retrospective stepper */
-.workflow-controls {
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 8px 16px;
-}
-
-.workflow-stepper {
+/* Header step switch: Board | Health › Add › Group › Vote › Discuss › Poll */
+.step-switch {
   display: flex;
   align-items: center;
-  gap: 12px;
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.workflow-back-btn,
-.workflow-back-placeholder {
-  width: 28px;
-  height: 28px;
   flex-shrink: 0;
 }
 
-.workflow-back-btn {
+.step-switch-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-switch-segments {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.step-switch-btn {
+  padding: 3px 8px;
   border: none;
-  border-radius: var(--radius-round);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
 }
 
-.workflow-back-btn:hover {
-  background: var(--hover-bg);
-  color: var(--text-color);
-}
-
-.workflow-back-btn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.workflow-steps {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  min-width: 0;
-}
-
-.workflow-step {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-size-sm);
-  color: var(--text-faint);
-  white-space: nowrap;
-}
-
-.workflow-step + .workflow-step::before {
-  content: '';
-  width: 24px;
-  height: 1px;
-  margin: 0 8px;
-  background: var(--border-color);
-}
-
-.workflow-step-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--border-color);
-  flex-shrink: 0;
-}
-
-.workflow-step-done {
-  color: var(--text-muted);
-}
-
-.workflow-step-done .workflow-step-dot {
-  background: var(--accent);
-  opacity: 0.6;
-}
-
-.workflow-step-current {
-  color: var(--text-color);
-  font-weight: var(--font-weight-semibold);
-}
-
-.workflow-step-current .workflow-step-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-transparent);
-}
-
-.workflow-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.workflow-votes {
+.step-switch-board {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
 }
 
-.workflow-votes select {
-  padding: 4px 6px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--card-bg);
+.step-switch-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.step-switch-btn:hover {
   color: var(--text-color);
+}
+
+.step-switch-btn.active {
+  background: var(--hover-bg);
+  color: var(--text-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+html.light-mode .step-switch-segments {
+  background: var(--hover-bg);
+}
+
+html.light-mode .step-switch-btn.active {
+  background: var(--card-bg);
+}
+
+.step-switch-btn:focus-visible,
+.step-switch-select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.step-switch-select {
+  display: none;
+  height: 32px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--hover-bg);
+  color: var(--text-color);
+  font-family: inherit;
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
 }
 
-.workflow-next-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-@media (max-width: 640px) {
-  .workflow-controls {
-    padding: 8px 10px;
+/* Narrow screens: collapse to the current step */
+@media (max-width: 767px) {
+  .header-content .step-switch {
+    order: 1;
   }
 
-  .workflow-stepper {
-    gap: 8px;
-  }
-
-  .workflow-steps {
-    gap: 6px;
-  }
-
-  .workflow-step + .workflow-step::before {
+  .step-switch-pills {
     display: none;
   }
 
-  .workflow-step:not(.workflow-step-current) .workflow-step-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .workflow-votes > span {
-    display: none;
+  .step-switch-select {
+    display: block;
   }
 }

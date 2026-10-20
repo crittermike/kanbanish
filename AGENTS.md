@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-Kanbanish is a real-time collaborative kanban board with retrospective workflow support. Single-page React app backed by Firebase Realtime Database. No backend server — all state is synced directly through Firebase.
+Kanbanish is a real-time collaborative kanban board with a guided add → group → vote → discuss flow. Single-page React app backed by Firebase Realtime Database. No backend server — all state is synced directly through Firebase.
 
 - **Live site**: https://www.kanbanish.com (deployed to GitHub Pages)
 - **Repo**: https://github.com/crittermike/kanbanish
@@ -52,7 +52,7 @@ src/
 │   ├── VoteCounter.jsx          # Current user's "N votes left" (Vote step only)
 │   ├── UserCounter.jsx          # Active users indicator
 │   ├── VotingControls.jsx       # Vote up/down buttons
-│   ├── WorkflowControls.jsx     # Retrospective stepper (steps, back arrow, Next, votes per person)
+│   ├── StepSwitcher.jsx         # Header step control: Board | Health › Add › Group › Vote › Discuss › Poll
 │   ├── ResultsView.jsx          # Results phase display
 │   ├── PollVoting.jsx           # 1-5 star poll input
 │   ├── PollResults.jsx          # Poll results display
@@ -69,7 +69,7 @@ src/
 │   ├── usePresence.js               # User presence tracking, card creation activity indicators
 │   ├── useVoting.js                 # Vote operations (resetAllVotes, upvoteGroup, downvoteGroup, vote counting)
 │   ├── useGroups.js                 # Card grouping (moveCard, createCardGroup, ungroupCards, removeAllGrouping)
-│   ├── useWorkflow.js               # Retrospective workflow phase transitions
+│   ├── useWorkflow.js               # Start/end the steps and phase transitions
 │   ├── useCardOperations.jsx        # Card CRUD, voting, reactions, comments
 │   ├── useGroupOperations.jsx       # Group-level reactions and comments
 │   ├── useVoteCounterVisibility.jsx # Whether the votes-left counter shows
@@ -142,7 +142,7 @@ const { resetAllVotes, ... } = useVoting({ boardId, user, columns, activeUsers, 
 // 6. useGroups — no hook dependencies
 const { moveCard, ..., removeAllGrouping } = useGroups({ boardId, user, columns });
 // 7. useWorkflow — depends on updateBoardSettings AND removeAllGrouping
-const { startGroupingPhase, ... } = useWorkflow({ updateBoardSettings, columns, ..., removeAllGrouping });
+const { startFlow, endFlow, ... } = useWorkflow({ updateBoardSettings, columns, ..., removeAllGrouping });
 ```
 
 | Hook | Responsibility | Key exports |
@@ -153,7 +153,7 @@ const { startGroupingPhase, ... } = useWorkflow({ updateBoardSettings, columns, 
 | `useHealthCheck` | Health check voting | `submitHealthCheckVote`, `getHealthCheckStats` |
 | `useVoting` | Vote operations and counting | `resetAllVotes`, `getTotalVotes`, `getUserVoteCount`, `upvoteGroup`, `downvoteGroup` |
 | `useGroups` | Card grouping | `moveCard`, `createCardGroup`, `ungroupCards`, `removeAllGrouping` |
-| `useWorkflow` | Retrospective phase transitions | Phase transition functions (`startGroupingPhase`, etc.) |
+| `useWorkflow` | Starting/ending the steps, phase transitions | `startFlow`, `endFlow`, `goToPhase` |
 
 **There is no routing library.** The board ID comes from the `?board=` query parameter. If none is provided, a new board is created.
 
@@ -227,9 +227,10 @@ boards/{boardId}/
     multipleVotesAllowed: boolean
     votesPerUser: number
     sortByVotes: boolean
-    retrospectiveMode: boolean
+    retrospectiveMode: boolean   (true while the steps are running)
     workflowPhase: string
     resultsViewIndex: number
+    flowStartedAt: timestamp     (when the current run started)
   presence/{userId}/
     lastSeen: timestamp
     uid: string
@@ -252,15 +253,21 @@ users/{userId}/preferences/
 - **Reactions** track both count and per-user state for toggling
 - **Groups** hold a `cardIds` array; cards reference their group via `groupId`
 
-## Workflow / Retrospective Mode
+## Steps (Health → Add → Group → Vote → Discuss → Poll)
 
-When `retrospectiveMode` is enabled, the board operates as a guided retrospective with phases:
+There is no mode toggle and no user-facing name for the flow ("retro", "session", etc. are intentionally avoided). The steps are the board's view: `StepSwitcher` is a control in the header (a Board icon, a divider, then `Health › Add › Group › Vote › Discuss › Poll`, collapsing to a `<select>` on mobile). Under the hood `retrospectiveMode: true` means a run is in progress.
 
 ```
 HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
 ```
 
-`WorkflowControls` renders these as a stepper (`Health · Add · Group · Vote · Discuss · Poll`); results sub-phases share their parent step. "Next" calls `goToNextPhase` and the back arrow calls `goToPreviousPhase` (both in `useWorkflow`). The Health step only shows when the board has a health check. Phase changes don't show toasts.
+- Picking a step calls `goToPhase`. From Board it starts a run at that step (`startFlow`: clears earlier health check/poll answers, voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
+- Picking Board calls `endFlow` (`retrospectiveMode: false`, back to CREATION). Groups and votes stay. Ending during Add confirms first because it reveals hidden cards.
+- Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back to Add only removes groups containing this run's cards.
+- Health and Poll are ordinary steps. A health check on its own is just Health, then Board.
+- Retro-tagged templates (and `?retro=true`) create boards already in the Add step.
+- The Big Orca template opens on Health without a run (`retrospectiveMode: false` + a health phase). The switcher still shows Health as current; picking another step starts a run and keeps the answers.
+- While answering, "See results" in `HealthCheckVoting` / `PollVoting` shows the live results.
 
 Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restricts what actions are available (e.g., voting only in INTERACTIONS, card creation only in CREATION). Phase permission logic is in the `canPerformAction()` and related functions in `workflowUtils.js`.
 
@@ -268,7 +275,7 @@ Defined in `workflowUtils.js` as the `WORKFLOW_PHASES` enum. Each phase restrict
 
 ## Board Series
 
-Boards can be linked into an ordered chain so users can page back to earlier boards (e.g. to review a previous retro's commitments). Works in both kanban and retrospective formats — it links *boards*, independent of workflow phases.
+Boards can be linked into an ordered chain so users can page back to earlier boards (e.g. to review a previous retro's commitments). Works whether or not the steps are used — it links *boards*, independent of workflow phases.
 
 - Pointers live on the board node in Firebase (shared, not localStorage): `boards/{boardId}/previousBoardId` and `nextBoardId`. Linking A→B sets `B.previousBoardId = A` and `A.nextBoardId = B` (doubly-linked, adjacent paging only).
 - Operations live in `src/hooks/useBoardSeries.js`: `startNextBoard` (clones the current board's column structure + settings with empty cards, links pointers, returns the new ID), `linkToPreviousBoard`, `unlinkFromSeries`. Wired through `BoardContext`.

@@ -104,6 +104,44 @@
     font-size: 0.85rem;
 }
 
+/* Toggle between your answers and the live results */
+.health-check-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.health-check-toggle-btn:hover {
+    background: var(--hover-bg);
+}
+
+.health-check-toggle-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+.health-check-live-results {
+    box-sizing: border-box;
+    width: min(680px, calc(100% - 2rem));
+    margin: 1rem auto;
+}
+
+.health-check-live-results .health-check-toggle-btn {
+    margin: 0 0 0.5rem -6px;
+}
+
+.health-check-live-results .health-check-results {
+    width: 100%;
+    margin: 0;
+}
+
 /* Rating button colors by data-rating attribute */
 .rating-button.active[data-rating="1"] { background-color: var(--rating-1); }
 .rating-button.active[data-rating="2"] { background-color: var(--rating-2); }

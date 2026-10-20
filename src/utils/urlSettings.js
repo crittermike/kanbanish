@@ -25,7 +25,7 @@ export function parseBool(value) {
  * - downvotes: boolean (allow downvoting)
  * - multivote: boolean (allow multiple votes per item)
  * - votes: number (votes per user)
- * - retro: boolean (retrospective mode on)
+ * - retro: boolean (start the steps right away)
  * - sort: 'votes' | 'chrono' (UI preference)
  * - theme: 'dark' | 'light' (UI preference)
  *

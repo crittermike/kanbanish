@@ -128,7 +128,7 @@
 .user-counter-popover {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   margin-top: 8px;
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
