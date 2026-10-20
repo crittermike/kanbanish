@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { ChevronRight, Columns } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
+import { useVoteCounterVisibility } from '../hooks/useVoteCounterVisibility';
 import { WORKFLOW_PHASES, isCardFromCurrentRun } from '../utils/workflowUtils';
 
 const BOARD = 'board';
@@ -27,8 +28,16 @@ const StepSwitcher = () => {
     columns,
     flowStartedAt,
     goToPhase,
-    endFlow
+    endFlow,
+    user,
+    votesPerUser,
+    getUserVoteCount
   } = useBoardContext();
+  const { isUserVoteCounterVisible } = useVoteCounterVisibility();
+  const votesLeft = isUserVoteCounterVisible && votesPerUser > 0
+    ? Math.max(0, votesPerUser - getUserVoteCount(user.uid))
+    : null;
+  const votesLeftText = `${votesLeft} ${votesLeft === 1 ? 'vote' : 'votes'} left`;
 
   const activeStep = STEPS.find(step => step.phases.includes(workflowPhase));
   // A template can open a health check without starting the steps
@@ -85,8 +94,14 @@ const StepSwitcher = () => {
                 className={className(step.id)}
                 aria-current={ariaCurrent(step.id)}
                 onClick={() => select(step.id)}
+                aria-label={step.id === 'vote' && votesLeft !== null
+                  ? `Vote, ${votesLeftText}`
+                  : undefined}
               >
                 {step.label}
+                {step.id === 'vote' && votesLeft !== null && (
+                  <span className={`step-switch-votes${votesLeft === 0 ? ' depleted' : ''}`}>{votesLeftText}</span>
+                )}
               </button>
             </Fragment>
           ))}
@@ -100,7 +115,9 @@ const StepSwitcher = () => {
       >
         <option value={BOARD}>Board</option>
         {STEPS.map(step => (
-          <option key={step.id} value={step.id}>{step.label}</option>
+          <option key={step.id} value={step.id}>
+            {step.id === 'vote' && votesLeft !== null ? `Vote (${votesLeft} left)` : step.label}
+          </option>
         ))}
       </select>
     </div>

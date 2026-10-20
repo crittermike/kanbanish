@@ -3,7 +3,6 @@ import { MoreHorizontal } from 'react-feather';
 import { DEFAULT_BOARD_TITLE } from '../context/BoardContext';
 import BoardSeriesPager from './BoardSeriesPager';
 import UserCounter from './UserCounter';
-import VoteCounter from './VoteCounter';
 
 // On narrow screens, header.css hides secondary header icons until this is expanded.
 const HeaderMoreToggle = () => {
@@ -22,7 +21,7 @@ const HeaderMoreToggle = () => {
 };
 
 /**
- * Left side of the board header: people count, series pager, title, and votes left.
+ * Left side of the board header: people count, series pager, and title.
  *
  * @param {Object} props
  * @param {string} props.boardTitle - Current board title
@@ -49,7 +48,6 @@ const BoardHeader = ({ boardTitle, handleBoardTitleChange, handleBoardTitleBlur,
       onBlur={handleBoardTitleBlur}
       className="header-input"
     />
-    <VoteCounter />
     <HeaderMoreToggle />
   </div>
 );

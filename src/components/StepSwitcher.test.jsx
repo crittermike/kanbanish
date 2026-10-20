@@ -63,4 +63,34 @@ describe('StepSwitcher', () => {
     fireEvent.click(steps().getByRole('button', { name: 'Board' }));
     expect(context.endFlow).toHaveBeenCalled();
   });
+
+  describe('votes left', () => {
+    const voting = (votesPerUser, used) => setup({
+      retrospectiveMode: true,
+      workflowPhase: WORKFLOW_PHASES.INTERACTIONS,
+      votingEnabled: true,
+      user: { uid: 'u1' },
+      votesPerUser,
+      getUserVoteCount: () => used
+    });
+
+    test('shows votes left on the Vote step', () => {
+      voting(5, 2);
+      expect(current()).toHaveAccessibleName('Vote, 3 votes left');
+      expect(within(current()).getByText('3 votes left')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Vote (3 left)' })).toBeInTheDocument();
+    });
+
+    test('marks the count when no votes are left', () => {
+      voting(3, 3);
+      expect(current()).toHaveAccessibleName('Vote, 0 votes left');
+      expect(within(current()).getByText('0 votes left')).toHaveClass('depleted');
+    });
+
+    test('shows plain Vote when votes are unlimited', () => {
+      voting(0, 2);
+      expect(current()).toHaveAccessibleName('Vote');
+      expect(current()).toHaveTextContent(/^Vote$/);
+    });
+  });
 });
