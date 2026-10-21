@@ -115,6 +115,25 @@ export default [
     }
   },
   {
+    files: ['src/**/*.{js,jsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [{
+          name: 'firebase/database',
+          importNames: ['update'],
+          message: 'Use set() and remove() for Firebase writes.'
+        }]
+      }],
+      'no-restricted-syntax': ['error', {
+        selector: "ImportNamespaceSpecifier[parent.source.value='firebase/database']",
+        message: 'Use named Firebase imports so the set()/remove() write guard applies.'
+      }, {
+        selector: "ImportExpression[source.value='firebase/database']",
+        message: 'Use named Firebase imports so the set()/remove() write guard applies.'
+      }]
+    }
+  },
+  {
     // Test files configuration
     files: ['**/*.test.{js,jsx}', '**/__tests__/**/*.{js,jsx}', '**/setupTests.js'],
     languageOptions: {
@@ -155,13 +174,15 @@ export default [
     ignores: [
       'dist/',
       'build/',
+      'build-e2e/',
       'node_modules/',
       '*.min.js',
       'public/manifest.json',
       'coverage/',
+      'test-results/',
+      'playwright-report/',
       '.vscode/',
-      '.git/',
-      'e2e/'
+      '.git/'
     ]
   }
 ];

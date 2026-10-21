@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { ref, set, remove } from 'firebase/database';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useGroups } from './useGroups';
 
 // Mock Firebase
@@ -33,6 +33,8 @@ describe('useGroups', () => {
     mockProps = createMockProps();
   });
 
+  afterEach(() => vi.restoreAllMocks());
+
   describe('moveCard', () => {
     it('should do nothing when boardId is null', async () => {
       const props = createMockProps({ boardId: null });
@@ -59,6 +61,7 @@ describe('useGroups', () => {
     });
 
     it('should do nothing when card is not found', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
       const props = createMockProps({
         columns: {
           col1: { cards: {} }
@@ -72,6 +75,7 @@ describe('useGroups', () => {
 
       expect(set).not.toHaveBeenCalled();
       expect(remove).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith('Card not found');
     });
 
     it('should do nothing when moving to same group state within same column', async () => {

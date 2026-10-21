@@ -315,10 +315,10 @@ Dark theme is `:root` defaults. Light theme overrides via `html.light-mode`. Key
 ```bash
 npm test          # Run all tests once
 npm run test:watch # Run tests in watch mode
-npm run test:e2e   # Run Chromium e2e tests (requires Firebase .env and installed Chromium)
+npm run test:e2e   # Run isolated emulator e2e tests (requires Java 21+ and installed Chromium)
 ```
 
-E2e specs use two workers and isolated browser contexts. Reuse `e2e/helpers.js` and assert user-visible readiness instead of sleeping or retrying mutations. The tests create real boards, so use a test Firebase project.
+E2e specs use two workers, local Auth/Realtime Database emulators, and isolated browser contexts for different users. Install emulator tooling separately with `npm ci --prefix e2e`; do not add it to the app's dependencies. The harness builds the app with fixed demo-project config, needs no `.env` or cloud credentials, and owns server startup/teardown. Reuse `e2e/helpers.js` and assert user-visible readiness instead of sleeping or retrying mutations. Never reset the entire emulator database while parallel tests run. Retries are disabled; use `npm run test:e2e -- --repeat-each=5` for stability checks. Emulator rules are test fixtures, not production rules.
 
 ### Conventions
 
@@ -358,13 +358,14 @@ npm run lint:check # Same as lint (alias)
 
 ### Test Workflow (`.github/workflows/test.yml`)
 
-- Triggers on: push to main, PRs targeting main
-- Runs on: Ubuntu latest, Node 20
-- Steps: checkout → install → lint → test
+- Triggers on: PRs targeting main, and reusable workflow calls from deployment
+- Runs on: Ubuntu latest, Node 22; e2e also uses Java 21
+- Parallel jobs: `unit-tests` (lint, unit tests, production build) and `e2e-tests` (built app against local Firebase emulators, no secrets)
 
 ### Deploy Workflow (`.github/workflows/deploy-to-github-pages.yml`)
 
 - Triggers on: push to main
+- Calls the test workflow and waits for both jobs to pass on the same commit before deploying; production deployments are serialized
 - Builds with Vite and pushes the build to the `gh-pages` branch, which GitHub Pages serves at www.kanbanish.com
 - This is the only deploy workflow; base path is always `/` (custom domain)
 
@@ -383,7 +384,7 @@ npm run lint:check # Same as lint (alias)
 
 ## Known Issues & Technical Debt
 
-1. **Firebase config comes from env vars** in `src/utils/firebase.js` (`VITE_FIREBASE_*`) and **throws if any are missing** — local `npm run dev`/`test:e2e` need a `.env` (copy `.env.example`); CI/deploy inject them as secrets. The project is "big-orca" on Firebase. (The web config values are public client config, shipped in the deployed bundle.)
+1. **Firebase config comes from env vars** in `src/utils/firebase.js` (`VITE_FIREBASE_*`) and **throws if any are missing** — local `npm run dev` needs a `.env` (copy `.env.example`); deploy injects secrets. E2e supplies fixed local emulator config without secrets. The production project is "big-orca" on Firebase. (The web config values are public client config, shipped in the deployed bundle.)
 2. **No TypeScript** — all files are `.jsx`. No type checking beyond ESLint.
 3. **No routing library** — board ID is managed via query params manually.
 

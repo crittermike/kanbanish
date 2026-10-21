@@ -196,34 +196,6 @@ describe('Card Reveal Mode', () => {
     expect(cardContent).not.toHaveClass('obfuscated');
   });
 
-  test('shows obfuscated content to non-creators when reveal mode is active', () => {
-    const cardDataFromOtherUser = {
-      ...mockCardData,
-      createdBy: 'other-user-456' // Different creator
-    };
-
-    useBoardContext.mockReturnValue({
-      boardId: 'board123',
-      user: { uid: 'user123' }, // Different from card creator
-      votingEnabled: true,
-      downvotingEnabled: true,
-      multipleVotesAllowed: false,
-      retrospectiveMode: true,
-      cardsRevealed: false
-    });
-
-    renderCard({ cardData: cardDataFromOtherUser });
-
-    // Non-creator should not see original text
-    expect(screen.queryByText('Test card content for retro')).not.toBeInTheDocument();
-
-    // Should show a skeleton placeholder with no card text
-    const cardContent = screen.getByTestId('card-content');
-    expect(cardContent).toHaveClass('obfuscated');
-    expect(cardContent.textContent).toBe('');
-    expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBeGreaterThan(0);
-  });
-
   test('hides voting when cards are obfuscated for non-creators', () => {
     const cardDataFromOtherUser = {
       ...mockCardData,

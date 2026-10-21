@@ -1,0 +1,8 @@
+{
+  "name": "kanbanish-e2e",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "firebase-tools": "15.33.0"
+  }
+}

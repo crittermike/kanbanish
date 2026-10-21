@@ -27,6 +27,7 @@ Switch the board header from **Board** to a step to take everyone through:
 Switch back to **Board** when you're done; groups and votes stay. Works on any board and can be run again.
 
 Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
+Explicit URL settings override template defaults, for example `?template=default&retro=true` starts at Add.
 
 ## 🔧 Technology Stack
 
@@ -39,13 +40,13 @@ Plus: one-click board creation from the dashboard or a bookmarkable `?template=<
 - **Styling**: Pure CSS with custom properties (no Tailwind, no CSS-in-JS)
 - **Testing**: Vitest + React Testing Library
 - **Linting**: ESLint with react, react-hooks, import, and jsx-a11y plugins
-- **CI/CD**: GitHub Actions (test on PR, auto-deploy to GitHub Pages on push to main)
+- **CI/CD**: GitHub Actions (lint, test, and build on PR; deploy main only after checks pass)
 
 ## 🛠️ Development
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
+- Node.js 22
 - npm
 
 ### Getting Started
@@ -90,9 +91,17 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 ### Testing
 
-Unit tests use isolated worker threads and mock Firebase. End-to-end tests use real Firebase and create independent boards in isolated browser contexts, with two workers. Configure `.env` for a test Firebase project and install Chromium with `npx playwright install chromium` before running them.
+Unit tests use isolated worker threads and mock Firebase. Pure utility tests run without jsdom; DOM tests keep their browser environment.
+
+End-to-end tests require Java 21+, emulator tooling (`npm ci --prefix e2e`), and Chromium (`npx playwright install chromium`). Run `npm run test:e2e` to start local Firebase Auth/Realtime Database emulators, build the app, and run Chromium tests with two workers. No `.env`, Firebase login, or cloud credentials are needed. The harness always supplies local demo-project config, refuses to reuse running servers, and stops its servers when done. Ports 3000, 4400, 4500, 9000, and 9099 must be free. Emulator dependencies are installed separately so they do not affect the app's lockfile or unit-test setup.
+
+Each test creates independent boards; different participants use separate browser contexts. Emulator database rules are authenticated test fixtures, not production rules. These tests do not validate production Firebase rules or service availability.
+
+Check stability with `npm run test:e2e -- --repeat-each=5`. Retries are disabled, including in CI, so intermittent failures cannot silently pass.
 
 Use the shared helpers in `e2e/helpers.js` for board and card creation. Wait for user-visible state with Playwright assertions, not fixed sleeps or retries that repeat an action.
+
+PR checks run unit/lint/production-build and emulator e2e jobs in parallel. Main deployment calls the same checks and waits for both to succeed on that commit. Protect `main` by requiring PRs and the `unit-tests` and `e2e-tests` checks, with the branch up to date before merging; workflow files alone do not enforce merge protection.
 
 ## 🤝 Contributing
 

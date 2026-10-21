@@ -6,7 +6,27 @@ export default defineConfig({
   test: {
     globals: true,
     pool: 'threads',
-    environment: 'jsdom',
+    maxWorkers: 4,
+    minWorkers: 1,
+    workspace: [
+      {
+        extends: true,
+        test: {
+          name: 'dom',
+          environment: 'jsdom',
+          include: ['src/**/*.test.{js,jsx}'],
+          exclude: ['src/{utils,data}/**']
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: 'node',
+          environment: 'node',
+          include: ['src/{utils,data}/**/*.test.js']
+        }
+      }
+    ],
     setupFiles: ['./src/setupTests.js'],
     exclude: ['e2e/**', 'node_modules/**'],
     reporters: ['default', 'json'],

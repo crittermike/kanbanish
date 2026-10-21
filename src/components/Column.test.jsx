@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { useBoardContext } from '../context/BoardContext';
@@ -168,32 +168,32 @@ const mockProps = {
       return textarea;
     };
 
-    test('a multi-line paste adds one card per line', () => {
+    test('a multi-line paste adds one card per line', async () => {
       render(<Column {...mockProps} />);
       paste('- One\n- Two\n\n- Three');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Add 3 cards' }));
+      await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Add 3 cards' })));
 
       expect(addCards).toHaveBeenCalledWith('board1', 'col1', ['One', 'Two', 'Three'], { uid: 'user1' }, undefined, undefined);
       expect(addCard).not.toHaveBeenCalled();
     });
 
-    test('"Add as 1" keeps a multi-line paste as a single card', () => {
+    test('"Add as 1" keeps a multi-line paste as a single card', async () => {
       render(<Column {...mockProps} />);
       paste('One\nTwo');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Add as 1' }));
+      await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Add as 1' })));
 
       expect(addCard).toHaveBeenCalledWith('board1', 'col1', 'One\nTwo', { uid: 'user1' }, undefined, undefined);
       expect(addCards).not.toHaveBeenCalled();
     });
 
-    test('a single-line paste behaves as before', () => {
+    test('a single-line paste behaves as before', async () => {
       render(<Column {...mockProps} />);
       const textarea = paste('Just one');
 
       expect(screen.queryByRole('button', { name: 'Add as 1' })).not.toBeInTheDocument();
-      fireEvent.keyDown(textarea, { key: 'Enter' });
+      await act(async () => fireEvent.keyDown(textarea, { key: 'Enter' }));
 
       expect(addCard).toHaveBeenCalledWith('board1', 'col1', 'Just one', { uid: 'user1' }, undefined, undefined);
     });

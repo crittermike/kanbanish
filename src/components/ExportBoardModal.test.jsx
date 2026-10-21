@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import ExportBoardModal from './modals/ExportBoardModal';
 
 // Mock the BoardContext
@@ -372,7 +372,10 @@ describe('ExportBoardModal - download', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(window.HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   });
+
+  afterEach(() => vi.restoreAllMocks());
 
   test('download creates a blob and triggers download', () => {
     const mockCreateObjectURL = vi.fn().mockReturnValue('blob:test');
@@ -390,6 +393,7 @@ describe('ExportBoardModal - download', () => {
     const blobArg = mockCreateObjectURL.mock.calls[0][0];
     expect(blobArg).toBeInstanceOf(Blob);
     expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:test');
+    expect(window.HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce();
   });
 
   test('download uses correct file extension for each format', () => {
@@ -424,6 +428,7 @@ describe('ExportBoardModal - download', () => {
     fireEvent.click(screen.getByRole('radio', { name: /json/i }));
     fireEvent.click(screen.getByText('Download File'));
     expect(createdLinks[createdLinks.length - 1].download).toMatch(/\.json$/);
+    expect(window.HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(3);
 
     document.createElement.mockRestore();
   });

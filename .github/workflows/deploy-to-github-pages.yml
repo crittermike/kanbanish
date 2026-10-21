@@ -5,9 +5,18 @@ on:
     branches: [ "main" ]
 
   workflow_dispatch:
-jobs:
-  build:
 
+concurrency:
+  group: production-pages
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    needs: checks
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     steps:
