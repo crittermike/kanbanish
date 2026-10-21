@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   WORKFLOW_PHASES,
+  isCardFromCurrentRun,
   isGroupingAllowed,
   areInteractionsAllowed,
   areReactionsAllowed,
@@ -32,6 +33,13 @@ const ALL_PHASES = [
   WORKFLOW_PHASES.POLL,
   WORKFLOW_PHASES.POLL_RESULTS
 ];
+
+test('run boundary includes cards created at the start, with legacy boards revealing as before', () => {
+  expect(isCardFromCurrentRun({ created: 99 }, 100)).toBe(false);
+  expect(isCardFromCurrentRun({ created: 100 }, 100)).toBe(true);
+  expect(isCardFromCurrentRun({ created: 101 }, 100)).toBe(true);
+  expect(isCardFromCurrentRun({}, null)).toBe(true);
+});
 
 describe('WORKFLOW_PHASES', () => {
   it('has all 8 phases', () => {

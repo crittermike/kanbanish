@@ -4,12 +4,12 @@ import App from './App';
 
 // Mock Dashboard — rendered when no ?board= param
 vi.mock('./components/Dashboard', () => ({
-  default: (props) => <div data-testid="dashboard" {...props}>Dashboard</div>
+  default: () => <div data-testid="dashboard">Dashboard</div>
 }));
 
 // Mock Board — rendered inside BoardGate when ?board= param exists
 vi.mock('./components/Board', () => ({
-  default: (props) => <div data-testid="board" {...props}>Board</div>
+  default: () => <div data-testid="board">Board</div>
 }));
 
 // Mock useRecentBoards — used directly in AppContent

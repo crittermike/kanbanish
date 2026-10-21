@@ -1,7 +1,7 @@
 // Firebase configuration for the Kanban app
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getDatabase, get, ref } from 'firebase/database';
+import { getAuth, signInAnonymously, connectAuthEmulator } from 'firebase/auth';
+import { getDatabase, get, ref, connectDatabaseEmulator } from 'firebase/database';
 
 const requiredEnvVars = [
   'VITE_FIREBASE_API_KEY',
@@ -29,10 +29,24 @@ const firebaseConfig = {
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
 };
 
+const useEmulators = import.meta.env.VITE_FIREBASE_EMULATORS === 'true';
+if (useEmulators && (
+  import.meta.env.MODE !== 'e2e' ||
+  firebaseConfig.projectId !== 'demo-kanbanish' ||
+  firebaseConfig.databaseURL !== 'http://127.0.0.1:9000?ns=demo-kanbanish-default-rtdb'
+)) {
+  throw new Error('Firebase emulators require e2e mode and the local demo-kanbanish project.');
+}
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
+
+if (useEmulators) {
+  connectDatabaseEmulator(database, '127.0.0.1', 9000);
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+}
 
 // Export for use in other files
 export { database, auth, signInAnonymously, get, ref };

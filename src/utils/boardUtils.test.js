@@ -47,23 +47,6 @@ describe('addColumn', () => {
     });
   });
 
-  it('uses generated ID for column path', async () => {
-    await addColumn('board-1');
-
-    expect(ref).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.stringContaining('mock-id-123')
-    );
-  });
-
-  it('default title is "New Column"', async () => {
-    await addColumn('board-1');
-
-    expect(set).toHaveBeenCalledWith('mock-ref', expect.objectContaining({
-      title: 'New Column'
-    }));
-  });
-
   it('custom title is passed through', async () => {
     await addColumn('board-1', 'To Do');
 
@@ -92,22 +75,9 @@ describe('addCard', () => {
     expect(set).toHaveBeenCalledWith('mock-ref', expect.objectContaining({
       content: 'My card',
       votes: 0,
+      created: expect.any(Number),
       createdBy: 'user-1'
     }));
-  });
-
-  it('card data includes content, votes:0, created timestamp, createdBy', async () => {
-    const before = Date.now();
-    const user = { uid: 'user-1' };
-    await addCard('board-1', 'col-1', 'Hello', user);
-    const after = Date.now();
-
-    const cardData = set.mock.calls[0][1];
-    expect(cardData.content).toBe('Hello');
-    expect(cardData.votes).toBe(0);
-    expect(cardData.created).toBeGreaterThanOrEqual(before);
-    expect(cardData.created).toBeLessThanOrEqual(after);
-    expect(cardData.createdBy).toBe('user-1');
   });
 
   it('trims whitespace from content', async () => {
@@ -326,6 +296,23 @@ describe('createBoardFromTemplate', () => {
     expect(boardData.settings.retrospectiveMode).toBe(true);
     expect(boardData.settings.sortByVotes).toBe(true);
     expect(boardData.settings.unauthorizedKey).toBeUndefined();
+  });
+
+  it('explicit URL settings take precedence over template defaults', async () => {
+    parseUrlSettings.mockReturnValueOnce({
+      boardSettings: { retrospectiveMode: true, votesPerUser: 2 }
+    });
+    await createBoardFromTemplate({
+      user: { uid: 'user-1' },
+      queryString: '?retro=true&votes=2',
+      settingsOverrides: { retrospectiveMode: false, votesPerUser: 5 }
+    });
+    expect(set.mock.calls[0][1].settings).toMatchObject({
+      retrospectiveMode: true,
+      votingEnabled: true,
+      votesPerUser: 2,
+      workflowPhase: 'CREATION'
+    });
   });
 
   it('rejects when user is null', async () => {

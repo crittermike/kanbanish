@@ -1,10 +1,13 @@
 name: Tests
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_call:
   pull_request:
     branches: [ "main" ]
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   unit-tests:
@@ -17,7 +20,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'npm'
         
     - name: Install dependencies
@@ -28,6 +31,15 @@ jobs:
 
     - name: Run unit tests
       run: npm test
+
+    - name: Check production build
+      run: npm run build
+      env:
+        VITE_FIREBASE_API_KEY: build-check
+        VITE_FIREBASE_AUTH_DOMAIN: demo-kanbanish.firebaseapp.com
+        VITE_FIREBASE_DATABASE_URL: https://demo-kanbanish-default-rtdb.firebaseio.com
+        VITE_FIREBASE_PROJECT_ID: demo-kanbanish
+        VITE_FIREBASE_APP_ID: build-check
       
     - name: Upload test results
       if: always()
@@ -49,25 +61,34 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'npm'
+        cache-dependency-path: |
+          package-lock.json
+          e2e/package-lock.json
         
     - name: Install dependencies
-      run: npm ci
+      run: npm ci && npm ci --prefix e2e
+
+    - name: Set up Java for Firebase emulators
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Cache test binaries
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/ms-playwright
+          ~/.cache/firebase/emulators
+        key: ${{ runner.os }}-test-binaries-${{ hashFiles('package-lock.json', 'e2e/package-lock.json') }}
 
     - name: Install Playwright browsers
       run: npx playwright install --with-deps chromium
       
     - name: Run E2E tests
       run: npm run test:e2e
-      env:
-        VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
-        VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-        VITE_FIREBASE_DATABASE_URL: ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
-        VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-        VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-        VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-        VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
       
     - name: Upload Playwright report
       if: always()
@@ -77,4 +98,5 @@ jobs:
         path: |
           test-results/
           playwright-report/
+          *-debug.log
         if-no-files-found: ignore

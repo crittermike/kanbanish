@@ -1,4 +1,15 @@
-import { expect } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
+
+export const test = base.extend({
+  viewer: async ({ browser }, provide) => {
+    const context = await browser.newContext();
+    try {
+      await provide(await context.newPage());
+    } finally {
+      await context.close();
+    }
+  },
+});
 
 export async function createBoard(page, { template = 'Default', settings = {} } = {}) {
   const query = new URLSearchParams(settings).toString();

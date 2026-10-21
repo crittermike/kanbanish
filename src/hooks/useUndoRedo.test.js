@@ -19,7 +19,7 @@ describe('useUndoRedo', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('initial state has canUndo=false, canRedo=false, pastCount=0, futureCount=0', () => {
@@ -495,6 +495,7 @@ describe('useUndoRedo', () => {
   });
 
   test('failed undo shows "Undo failed" notification', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const showNotification = vi.fn();
     const { result } = renderHook(() => useUndoRedo({ boardId: 'board-1', showNotification }));
 
@@ -517,9 +518,11 @@ describe('useUndoRedo', () => {
     });
 
     expect(showNotification).toHaveBeenCalledWith('Undo failed');
+    expect(consoleError).toHaveBeenCalledWith('Error undoing action:', expect.any(Error));
   });
 
   test('failed redo shows "Redo failed" notification', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const showNotification = vi.fn();
     const { result } = renderHook(() => useUndoRedo({ boardId: 'board-1', showNotification }));
 
@@ -546,6 +549,7 @@ describe('useUndoRedo', () => {
     });
 
     expect(showNotification).toHaveBeenCalledWith('Redo failed');
+    expect(consoleError).toHaveBeenCalledWith('Error redoing action:', expect.any(Error));
   });
 
   test('actions recorded during undo/redo execution are NOT recorded (isUndoRedoRef prevents it)', async () => {
