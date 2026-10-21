@@ -476,6 +476,8 @@ function Column({ columnId, columnData, sortByVotes, collapsed, onToggleCollapse
             aria-label="Card content"
           />
           <EmojiAutocomplete
+            loading={emojiAC.loading}
+            error={emojiAC.error}
             suggestions={emojiAC.suggestions}
             selectedIndex={emojiAC.selectedIndex}
             onSelect={emojiAC.onSelect}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { COMMON_EMOJIS, getEmojiKeywords } from '../utils/emoji';
+import useEmojiData from '../hooks/useEmojiData';
+import { COMMON_EMOJIS } from '../utils/emoji';
 
 const EmojiPicker = React.memo(({
   position,
@@ -9,20 +10,15 @@ const EmojiPicker = React.memo(({
   hasUserReactedWithEmoji
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { data, loading, error } = useEmojiData(true);
 
   const filteredEmojis = useMemo(() => {
     if (!searchTerm.trim()) {
       return COMMON_EMOJIS;
     }
 
-    const lowerSearchTerm = searchTerm.toLowerCase().trim();
-    return COMMON_EMOJIS.filter(emoji => {
-      const keywords = getEmojiKeywords(emoji);
-      return keywords.some(keyword => 
-        keyword.toLowerCase().includes(lowerSearchTerm)
-      );
-    });
-  }, [searchTerm]);
+    return data?.search(searchTerm).map(result => result.emoji) || [];
+  }, [searchTerm, data]);
 
   return ReactDOM.createPortal(
     <div
@@ -52,6 +48,7 @@ const EmojiPicker = React.memo(({
             key={emoji}
             className={`emoji-option ${hasUserReactedWithEmoji(emoji) ? 'selected' : ''}`}
             data-testid="emoji-option"
+            aria-label={data?.getLabel(emoji) || emoji}
             onClick={e => {
               e.stopPropagation();
               onEmojiSelect(e, emoji);
@@ -61,7 +58,15 @@ const EmojiPicker = React.memo(({
             {emoji}
           </button>
         ))}
-        {filteredEmojis.length === 0 && searchTerm.trim() && (
+        {searchTerm.trim() && loading && (
+          <div className="emoji-picker-no-results" role="status">Loading emojis...</div>
+        )}
+        {error && (
+          <div className="emoji-picker-no-results emoji-search-error" role="alert">
+            Emoji search unavailable. <button className="emoji-search-reload" onClick={() => window.location.reload()}>Reload</button>
+          </div>
+        )}
+        {filteredEmojis.length === 0 && searchTerm.trim() && !loading && !error && (
           <div className="emoji-picker-no-results" data-testid="emoji-no-results">
             No emojis found for &ldquo;{searchTerm}&rdquo;
           </div>

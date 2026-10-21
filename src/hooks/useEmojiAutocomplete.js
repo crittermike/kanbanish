@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { searchEmojiShortcodes } from '../utils/emojiShortcodes';
+import useEmojiData from './useEmojiData';
 
 /**
  * Extracts the `:shortcode` token being typed at the cursor position.
@@ -58,7 +59,13 @@ function getActiveToken(text, cursorPos) {
  */
 export default function useEmojiAutocomplete(value, setValue, inputRef) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [dismissedValue, setDismissedValue] = useState(null);
   const tokenRef = useRef(null); // caches the active token
+  const token = inputRef?.current
+    ? getActiveToken(value, inputRef.current.selectionStart ?? value.length)
+    : null;
+  const active = !!token && value !== dismissedValue;
+  const { data, loading, error } = useEmojiData(active);
 
   // Derive suggestions from the current value + cursor position.
   // We store the token in a ref so onKeyDown can read it synchronously.
@@ -67,9 +74,9 @@ export default function useEmojiAutocomplete(value, setValue, inputRef) {
     if (!el) return [];
     const token = getActiveToken(value, el.selectionStart ?? value.length);
     tokenRef.current = token;
-    if (!token) return [];
+    if (!token || !active || !data) return [];
     return searchEmojiShortcodes(token.query);
-  }, [value, inputRef]);
+  }, [value, inputRef, active, data]);
 
   const isOpen = suggestions.length > 0;
 
@@ -111,8 +118,9 @@ export default function useEmojiAutocomplete(value, setValue, inputRef) {
 
   const close = useCallback(() => {
     tokenRef.current = null;
+    setDismissedValue(value);
     setSelectedIndex(0);
-  }, []);
+  }, [value]);
 
   /**
    * Keyboard handler — should be called from the textarea / input's
@@ -164,5 +172,7 @@ export default function useEmojiAutocomplete(value, setValue, inputRef) {
     onKeyDown,
     onSelect,
     close,
+    loading,
+    error: active ? error : null,
   };
 }
