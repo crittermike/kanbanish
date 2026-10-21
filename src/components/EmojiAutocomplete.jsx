@@ -8,8 +8,8 @@ import ReactDOM from 'react-dom';
  * Rendered via portal so it is not clipped by parent overflow.
  */
 const EmojiAutocomplete = React.memo(
-  ({ suggestions, selectedIndex, onSelect, inputRef }) => {
-    if (!suggestions || suggestions.length === 0) return null;
+  ({ suggestions = [], selectedIndex, onSelect, inputRef, loading, error }) => {
+    if (!suggestions?.length && !loading && !error) return null;
 
     // Position the dropdown near the input element
     const rect = inputRef?.current?.getBoundingClientRect();
@@ -25,10 +25,16 @@ const EmojiAutocomplete = React.memo(
       <div
         className="emoji-autocomplete"
         style={style}
-        role="listbox"
+        role={suggestions.length ? 'listbox' : 'status'}
         aria-label="Emoji suggestions"
         data-testid="emoji-autocomplete"
       >
+        {loading && <div className="emoji-autocomplete-item">Loading emojis...</div>}
+        {error && (
+          <div className="emoji-autocomplete-item emoji-search-error" role="alert">
+            Emoji search unavailable. <button className="emoji-search-reload" onMouseDown={e => e.preventDefault()} onClick={() => window.location.reload()}>Reload</button>
+          </div>
+        )}
         {suggestions.map(({ shortcode, emoji }, index) => (
           <div
             key={shortcode}

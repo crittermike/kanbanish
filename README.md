@@ -38,6 +38,7 @@ Explicit URL settings override template defaults, for example `?template=default
 - **Backend/Database**: Firebase Realtime Database
 - **Authentication**: Firebase Anonymous Auth
 - **Styling**: Pure CSS with custom properties (no Tailwind, no CSS-in-JS)
+- **Emoji search**: Bundled English Emojibase labels, tags, and shortcodes, loaded on first picker/autocomplete use; no external search service ([license](public/emojibase-license.txt))
 - **Testing**: Vitest + React Testing Library
 - **Linting**: ESLint with react, react-hooks, import, and jsx-a11y plugins
 - **CI/CD**: GitHub Actions (lint, test, and build on PR; deploy main only after checks pass)

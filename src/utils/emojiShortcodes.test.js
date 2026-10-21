@@ -1,5 +1,8 @@
-import { describe, test, expect } from 'vitest';
+import { beforeAll, describe, test, expect } from 'vitest';
+import { loadEmojiSearch } from './emojiSearch';
 import { searchEmojiShortcodes } from './emojiShortcodes';
+
+beforeAll(() => loadEmojiSearch());
 
 describe('searchEmojiShortcodes', () => {
   test('returns empty array for empty query', () => {

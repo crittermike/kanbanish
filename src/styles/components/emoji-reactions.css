@@ -207,6 +207,21 @@
   background-color: var(--accent-subtle);
 }
 
+.emoji-search-error {
+  color: var(--text-color);
+}
+
+.emoji-picker .emoji-search-reload,
+.emoji-autocomplete .emoji-search-reload {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
 /* Modal enhancements for reactions */
 .modal-reactions {
   margin-top: var(--space-md);

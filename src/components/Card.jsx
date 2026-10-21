@@ -68,6 +68,8 @@ const CardEditor = ({
         autoFocus
       />
       <EmojiAutocomplete
+        loading={emojiAC.loading}
+        error={emojiAC.error}
         suggestions={emojiAC.suggestions}
         selectedIndex={emojiAC.selectedIndex}
         onSelect={emojiAC.onSelect}

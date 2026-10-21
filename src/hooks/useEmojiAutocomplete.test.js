@@ -1,6 +1,9 @@
 import { renderHook, act } from '@testing-library/react';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { vi, describe, test, expect, beforeAll, beforeEach } from 'vitest';
+import { loadEmojiSearch } from '../utils/emojiSearch';
 import useEmojiAutocomplete from './useEmojiAutocomplete';
+
+beforeAll(() => loadEmojiSearch());
 
 /**
  * Creates a mock inputRef that simulates a textarea/input element
@@ -183,9 +186,8 @@ describe('useEmojiAutocomplete', () => {
       result.current.close();
     });
 
-    // selectedIndex is reset; isOpen/suggestions still derive from value+cursor
-    // so they remain until the value changes — close is for keyboard dismissal
     expect(result.current.selectedIndex).toBe(0);
+    expect(result.current.isOpen).toBe(false);
   });
 
   test('returns all expected properties from the hook', () => {

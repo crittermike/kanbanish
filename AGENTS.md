@@ -79,7 +79,9 @@ src/
 │   ├── boardUtils.js            # addColumn(), addCard(), createBoardFromTemplate() helpers
 │   ├── helpers.js               # Re-export barrel (imports from ids, emoji, urlSettings, linkify)
 │   ├── ids.js                   # generateId() — unique ID generation
-│   ├── emoji.js                 # COMMON_EMOJIS array, getEmojiKeywords()
+│   ├── emoji.js                 # Default COMMON_EMOJIS array
+│   ├── emojiSearch.js           # Shared lazy loader for bundled English Emojibase search data
+│   ├── emojiSearchData.js       # Local label, tag, and shortcode search index (lazy chunk)
 │   ├── urlSettings.js           # parseBool(), parseUrlSettings()
 │   ├── linkify.js               # linkifyText() — URL detection in text
 │   ├── workflowUtils.js         # WORKFLOW_PHASES enum, phase permission checks

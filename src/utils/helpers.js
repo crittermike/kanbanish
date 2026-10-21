@@ -3,11 +3,11 @@
  *
  * Prefer importing directly from the focused modules:
  *   - ./ids          — generateId()
- *   - ./emoji        — COMMON_EMOJIS, getEmojiKeywords()
+ *   - ./emoji        — COMMON_EMOJIS
  *   - ./urlSettings  — parseBool(), parseUrlSettings()
  *   - ./linkify      — linkifyText()
  */
 export { generateId } from './ids';
-export { COMMON_EMOJIS, getEmojiKeywords } from './emoji';
+export { COMMON_EMOJIS } from './emoji';
 export { parseBool, parseUrlSettings } from './urlSettings';
 export { linkifyText } from './linkify';
