@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     pool: 'threads',
-    maxWorkers: process.env.CI ? 2 : 4,
+    maxWorkers: 4,
     minWorkers: 1,
     workspace: [
       {
