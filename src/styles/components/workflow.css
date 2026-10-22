@@ -30,7 +30,7 @@
   font-family: inherit;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  line-height: 1.4;
+  line-height: 18px;
   white-space: nowrap;
   cursor: pointer;
   transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
