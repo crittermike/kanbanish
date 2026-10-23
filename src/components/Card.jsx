@@ -21,7 +21,6 @@ import {
   shouldObfuscateCards,
   isCardEditingAllowed,
   isCardDraggingAllowed,
-  isCardFromCurrentRun,
   WORKFLOW_PHASES
 } from '../utils/workflowUtils';
 // Import modularized components
@@ -103,13 +102,11 @@ const CardContent = ({
   userId,
   retrospectiveMode,
   workflowPhase = 'CREATION',
-  flowStartedAt = null,
   children
 }) => {
-  // During Add, hide other people's cards added in this run; cards from before stay visible
+  // During Add, each person sees only their own cards
   const isCreator = cardData.createdBy && userId && cardData.createdBy === userId;
-  const showObfuscatedText = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator &&
-    isCardFromCurrentRun(cardData, flowStartedAt);
+  const showObfuscatedText = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
 
   return (
     <div className="card-header">
@@ -148,7 +145,6 @@ function Card({
     getUserVoteCount, 
     retrospectiveMode, 
     workflowPhase = 'CREATION',
-    flowStartedAt,
     recordAction,
     undo,
     presenceData,
@@ -398,7 +394,6 @@ function Card({
                 userId={user?.uid}
                 retrospectiveMode={retrospectiveMode}
                 workflowPhase={workflowPhase}
-                flowStartedAt={flowStartedAt}
               >
                 {reviewToolsVisible && (
                   <CardHoverActions

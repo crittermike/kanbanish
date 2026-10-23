@@ -24,7 +24,6 @@ import {
   areReviewToolsVisible,
   isCardMetadataEditingAllowed,
   isCardEditingAllowed,
-  isCardFromCurrentRun,
   shouldObfuscateCards
 } from '../../utils/workflowUtils';
 import CardColorPicker from '../CardColorPicker';
@@ -58,7 +57,6 @@ const CardDetailModal = ({
     getUserVoteCount,
     retrospectiveMode,
     workflowPhase,
-    flowStartedAt,
     recordAction,
     undo,
     boardTags,
@@ -319,8 +317,7 @@ const CardDetailModal = ({
   if (!isOpen || !cardData) return null;
 
   // Obfuscation check
-  const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator &&
-    isCardFromCurrentRun(cardData, flowStartedAt);
+  const showObfuscated = shouldObfuscateCards(workflowPhase, retrospectiveMode) && !isCreator;
   const shouldHideOthersInteractions = retrospectiveMode && !areOthersInteractionsVisible(workflowPhase, retrospectiveMode);
   const displayCardData = filterVisibleInteractionData(cardData, user?.uid, shouldHideOthersInteractions);
 
