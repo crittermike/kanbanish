@@ -375,7 +375,7 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
 
   // Voting operations
   const {
-    resetAllVotes, getTotalVotes, getUserVoteCount,
+    clearVotes, resetAllVotes, getTotalVotes, getUserVoteCount,
     getTotalVotesRemaining, upvoteGroup, downvoteGroup
   } = useVoting({
     boardId, user, columns, activeUsers,
@@ -394,7 +394,8 @@ export const BoardProvider = ({ children, initialBoardId = null }) => {
     navigateResults, getSortedItemsForResults
   } = useWorkflow({
     updateBoardSettings, columns, workflowPhase, retrospectiveMode,
-    resultsViewIndex, removeAllGrouping, flowStartedAt, resetPoll, resetHealthCheck
+    resultsViewIndex, removeAllGrouping, flowStartedAt, resetPoll, resetHealthCheck,
+    clearVotes, showNotification
   });
 
   // Per-column timer functions

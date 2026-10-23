@@ -23,16 +23,28 @@ const isHealthOrPoll = phase => [
  * @param {number|null} params.flowStartedAt - When the current run started
  * @param {Function} params.resetPoll - Clears poll answers
  * @param {Function} params.resetHealthCheck - Clears health check answers
+ * @param {Function} params.clearVotes - Clears card and group votes before a new run
+ * @param {Function} params.showNotification - Displays errors to the user
  * @returns {Object} Workflow operations
  */
 export const useWorkflow = ({
   updateBoardSettings, columns, workflowPhase, retrospectiveMode = false,
-  resultsViewIndex, removeAllGrouping, flowStartedAt = null, resetPoll, resetHealthCheck
+  resultsViewIndex, removeAllGrouping, flowStartedAt = null, resetPoll, resetHealthCheck,
+  clearVotes, showNotification
 }) => {
-  // A new run starts without earlier health check and poll answers
-  const startFlow = useCallback((phase = WORKFLOW_PHASES.CREATION) => {
-    resetHealthCheck?.();
-    resetPoll?.();
+  // A new run starts with a fresh vote budget for everyone
+  const startFlow = useCallback(async (phase = WORKFLOW_PHASES.CREATION, keepAnswers = false) => {
+    try {
+      await clearVotes();
+    } catch (error) {
+      console.error('Failed to clear votes before starting a run:', error);
+      showNotification('Could not start the steps because votes could not be reset. Please try again.');
+      return;
+    }
+    if (!keepAnswers) {
+      resetHealthCheck?.();
+      resetPoll?.();
+    }
     updateBoardSettings({
       retrospectiveMode: true,
       votingEnabled: true,
@@ -40,7 +52,7 @@ export const useWorkflow = ({
       resultsViewIndex: 0,
       flowStartedAt: Date.now()
     });
-  }, [updateBoardSettings, resetHealthCheck, resetPoll]);
+  }, [updateBoardSettings, resetHealthCheck, resetPoll, clearVotes, showNotification]);
 
   // Groups and votes stay on the board
   const endFlow = useCallback(() => {
@@ -55,18 +67,7 @@ export const useWorkflow = ({
   const goToPhase = useCallback(phase => {
     if (!retrospectiveMode) {
       // A health check opened by a template carries on into the steps with its answers
-      if (isHealthOrPoll(workflowPhase)) {
-        updateBoardSettings({
-          retrospectiveMode: true,
-          votingEnabled: true,
-          workflowPhase: phase,
-          resultsViewIndex: 0,
-          flowStartedAt: Date.now()
-        });
-      } else {
-        startFlow(phase);
-      }
-      return;
+      return startFlow(phase, isHealthOrPoll(workflowPhase));
     }
     if (phase === workflowPhase) {
       return;

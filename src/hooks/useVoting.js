@@ -86,6 +86,26 @@ export const useVoting = ({
     return Math.max(0, totalPossibleVotes - totalVotesCast);
   }, [activeUsers, votesPerUser, getTotalVotes]);
 
+  const clearVotes = useCallback(() => {
+    if (!boardId || !user) {
+      return Promise.reject(new Error('A board and signed-in user are required to clear votes.'));
+    }
+
+    return withRetry(() => Promise.all(
+      Object.entries(columns).flatMap(([columnId, column]) =>
+        ['cards', 'groups'].flatMap(type =>
+          Object.keys(column[type] || {}).flatMap(id => {
+            const path = `boards/${boardId}/columns/${columnId}/${type}/${id}`;
+            return [
+              set(ref(database, `${path}/votes`), 0),
+              set(ref(database, `${path}/voters`), null)
+            ];
+          })
+        )
+      )
+    ), { operationName: 'Clear votes' });
+  }, [boardId, user, columns]);
+
   // Reset all votes in the board
   const resetAllVotes = useCallback(() => {
     if (!boardId || !user) {
@@ -98,36 +118,13 @@ export const useVoting = ({
       return false;
     }
 
-    // Loop through all columns and cards
-    Object.entries(columns).forEach(([columnId, column]) => {
-      if (column.cards) {
-        Object.entries(column.cards).forEach(([cardId, card]) => {
-          // Reset votes to 0 and clear all voters
-          const cardRef = ref(database, `boards/${boardId}/columns/${columnId}/cards/${cardId}`);
-          const updatedCard = { ...card, votes: 0, voters: {} };
-          withRetry(() => set(cardRef, updatedCard), { operationName: 'Reset card votes' })
-            .catch(error => {
-              console.error(`Error resetting votes for card ${cardId}:`, error);
-            });
-        });
-      }
-
-      // Also reset group votes
-      if (column.groups) {
-        Object.entries(column.groups).forEach(([groupId, group]) => {
-          // Reset group votes to 0 and clear all voters
-          const groupRef = ref(database, `boards/${boardId}/columns/${columnId}/groups/${groupId}`);
-          const updatedGroup = { ...group, votes: 0, voters: {} };
-          withRetry(() => set(groupRef, updatedGroup), { operationName: 'Reset group votes' })
-            .catch(error => {
-              console.error(`Error resetting votes for group ${groupId}:`, error);
-            });
-        });
-      }
+    clearVotes().catch(error => {
+      console.error('Error resetting votes:', error);
+      showNotification('Could not reset votes. Please try again.');
     });
 
     return true;
-  }, [boardId, user, columns]);
+  }, [boardId, user, clearVotes, showNotification]);
 
   // Upvote a group
   const upvoteGroup = useCallback((columnId, groupId, currentVotes = 0) => {
@@ -216,6 +213,7 @@ export const useVoting = ({
   }, [boardId, user, columns, multipleVotesAllowed]);
 
   return {
+    clearVotes,
     resetAllVotes,
     getTotalVotes,
     getUserVoteCount,

@@ -124,7 +124,7 @@ test.describe('Board', () => {
 
     await goTo('Board');
     await expectStep('Board');
-    await expect(groupHeader.locator('.vote-count')).toHaveText('1');
+    await expect(groupHeader.locator('.vote-count')).toHaveText('0');
 
     await goTo('Add');
     await expectStep('Add');

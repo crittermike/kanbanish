@@ -9,6 +9,8 @@ const createMockProps = (overrides = {}) => ({
   workflowPhase: WORKFLOW_PHASES.CREATION,
   resultsViewIndex: 0,
   removeAllGrouping: vi.fn(() => Promise.resolve()),
+  clearVotes: vi.fn(() => Promise.resolve()),
+  showNotification: vi.fn(),
   ...overrides
 });
 
@@ -20,13 +22,13 @@ describe('useWorkflow', () => {
   });
 
   describe('startFlow / endFlow', () => {
-    it('starts at Add with voting on, clears earlier answers, and records the start time', () => {
+    it('starts at Add with voting on, clears earlier votes and answers, and records the start time', async () => {
       vi.spyOn(Date, 'now').mockReturnValue(1000);
       mockProps = createMockProps({ resetPoll: vi.fn(), resetHealthCheck: vi.fn() });
       const { result } = renderHook(() => useWorkflow(mockProps));
 
-      act(() => {
-        result.current.startFlow();
+      await act(async () => {
+        await result.current.startFlow();
       });
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith({
@@ -38,7 +40,39 @@ describe('useWorkflow', () => {
       });
       expect(mockProps.resetPoll).toHaveBeenCalled();
       expect(mockProps.resetHealthCheck).toHaveBeenCalled();
+      expect(mockProps.clearVotes).toHaveBeenCalledOnce();
       Date.now.mockRestore();
+    });
+
+    it('waits for votes to clear before starting a run', async () => {
+      let finishReset;
+      mockProps = createMockProps({
+        clearVotes: vi.fn(() => new Promise(resolve => { finishReset = resolve; }))
+      });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+      const starting = result.current.startFlow();
+      expect(mockProps.updateBoardSettings).not.toHaveBeenCalled();
+      finishReset();
+      await act(async () => { await starting; });
+      expect(mockProps.updateBoardSettings).toHaveBeenCalledOnce();
+    });
+
+    it('does not start a run when votes cannot be cleared', async () => {
+      const error = new Error('Permission denied');
+      const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockProps = createMockProps({
+        clearVotes: vi.fn().mockRejectedValue(error),
+        resetPoll: vi.fn(),
+        resetHealthCheck: vi.fn()
+      });
+      const { result } = renderHook(() => useWorkflow(mockProps));
+      await act(async () => { await result.current.startFlow(); });
+      expect(mockProps.updateBoardSettings).not.toHaveBeenCalled();
+      expect(mockProps.resetPoll).not.toHaveBeenCalled();
+      expect(mockProps.resetHealthCheck).not.toHaveBeenCalled();
+      expect(mockProps.showNotification).toHaveBeenCalledWith(expect.stringContaining('could not be reset'));
+      expect(log).toHaveBeenCalledWith(expect.any(String), error);
+      log.mockRestore();
     });
 
     it('ends back on the plain board', () => {
@@ -54,16 +88,17 @@ describe('useWorkflow', () => {
         workflowPhase: WORKFLOW_PHASES.CREATION,
         resultsViewIndex: 0
       });
+      expect(mockProps.clearVotes).not.toHaveBeenCalled();
     });
   });
 
   describe('goToPhase', () => {
-    it('starts a run at the chosen step when none is in progress', () => {
+    it('starts a run at the chosen step when none is in progress', async () => {
       mockProps = createMockProps();
       const { result } = renderHook(() => useWorkflow(mockProps));
 
-      act(() => {
-        result.current.goToPhase(WORKFLOW_PHASES.GROUPING);
+      await act(async () => {
+        await result.current.goToPhase(WORKFLOW_PHASES.GROUPING);
       });
 
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expect.objectContaining({
@@ -72,7 +107,7 @@ describe('useWorkflow', () => {
       }));
     });
 
-    it('keeps a template health check\'s answers when moving on to the steps', () => {
+    it('keeps a template health check\'s answers when moving on to the steps', async () => {
       mockProps = createMockProps({
         workflowPhase: WORKFLOW_PHASES.HEALTH_CHECK_RESULTS,
         resetPoll: vi.fn(),
@@ -80,11 +115,12 @@ describe('useWorkflow', () => {
       });
       const { result } = renderHook(() => useWorkflow(mockProps));
 
-      act(() => {
-        result.current.goToPhase(WORKFLOW_PHASES.CREATION);
+      await act(async () => {
+        await result.current.goToPhase(WORKFLOW_PHASES.CREATION);
       });
 
       expect(mockProps.resetHealthCheck).not.toHaveBeenCalled();
+      expect(mockProps.clearVotes).toHaveBeenCalledOnce();
       expect(mockProps.updateBoardSettings).toHaveBeenCalledWith(expect.objectContaining({
         retrospectiveMode: true,
         workflowPhase: WORKFLOW_PHASES.CREATION
@@ -103,6 +139,7 @@ describe('useWorkflow', () => {
         workflowPhase: WORKFLOW_PHASES.RESULTS,
         resultsViewIndex: 0
       });
+      expect(mockProps.clearVotes).not.toHaveBeenCalled();
     });
 
     it('confirms and undoes this run\'s grouping when going back to Add', async () => {

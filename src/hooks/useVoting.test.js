@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { set } from 'firebase/database';
+import { ref, set } from 'firebase/database';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useVoting } from './useVoting';
 
@@ -339,11 +339,11 @@ describe('useVoting', () => {
 
       const returned = result.current.resetAllVotes();
       expect(returned).toBe(true);
-      expect(set).toHaveBeenCalledWith('mock-ref', {
-        content: 'test',
-        votes: 0,
-        voters: {}
-      });
+      expect(ref).toHaveBeenCalledWith({}, 'boards/board-123/columns/col1/cards/card1/votes');
+      expect(ref).toHaveBeenCalledWith({}, 'boards/board-123/columns/col1/cards/card1/voters');
+      expect(set).toHaveBeenCalledWith('mock-ref', 0);
+      expect(set).toHaveBeenCalledWith('mock-ref', null);
+      expect(set).toHaveBeenCalledTimes(2);
 
       window.confirm.mockRestore();
     });
@@ -364,11 +364,11 @@ describe('useVoting', () => {
 
       const returned = result.current.resetAllVotes();
       expect(returned).toBe(true);
-      expect(set).toHaveBeenCalledWith('mock-ref', {
-        name: 'Group 1',
-        votes: 0,
-        voters: {}
-      });
+      expect(ref).toHaveBeenCalledWith({}, 'boards/board-123/columns/col1/groups/group1/votes');
+      expect(ref).toHaveBeenCalledWith({}, 'boards/board-123/columns/col1/groups/group1/voters');
+      expect(set).toHaveBeenCalledWith('mock-ref', 0);
+      expect(set).toHaveBeenCalledWith('mock-ref', null);
+      expect(set).toHaveBeenCalledTimes(2);
 
       window.confirm.mockRestore();
     });
@@ -391,8 +391,8 @@ describe('useVoting', () => {
 
       const returned = result.current.resetAllVotes();
       expect(returned).toBe(true);
-      // 3 calls: card1 + group1 + card2
-      expect(set).toHaveBeenCalledTimes(3);
+      // Each item's total and voters are cleared without rewriting its other fields
+      expect(set).toHaveBeenCalledTimes(6);
 
       window.confirm.mockRestore();
     });

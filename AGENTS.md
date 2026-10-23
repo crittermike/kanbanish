@@ -262,7 +262,7 @@ There is no mode toggle and no user-facing name for the flow ("retro", "session"
 HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS → RESULTS → POLL → POLL_RESULTS
 ```
 
-- Picking a step calls `goToPhase`. From Board it starts a run at that step (`startFlow`: clears earlier health check/poll answers, voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
+- Picking a step calls `goToPhase`. From Board it starts a run at that step (`startFlow`: clears earlier card/group votes and health check/poll answers, voting on, records `flowStartedAt`); otherwise it jumps straight to the step without clearing votes. Going back to Add confirms and undoes this run's grouping.
 - Picking Board calls `endFlow` (`retrospectiveMode: false`, back to CREATION). Groups and votes stay. Ending during Add confirms first because it reveals hidden cards.
 - During Add, everyone sees only their own cards, including cards from earlier runs. Going back to Add only removes groups containing this run's cards (created at or after `flowStartedAt`).
 - Health and Poll are ordinary steps. A health check on its own is just Health, then Board.
