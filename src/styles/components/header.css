@@ -7,7 +7,7 @@
 
 /* Header & Controls */
 header {
-    padding: 6px var(--space-md);
+    padding: 7px var(--space-md) 6px;
     background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(22, 27, 34, 0.95));
     border-bottom: 1px solid var(--border-subtle);
     position: sticky;
