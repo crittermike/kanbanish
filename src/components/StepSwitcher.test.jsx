@@ -41,12 +41,12 @@ describe('StepSwitcher', () => {
     expect(context.goToPhase).toHaveBeenCalledWith(WORKFLOW_PHASES.GROUPING);
   });
 
-  test('picking Board during Add confirms before revealing other people\'s cards', () => {
+  test('picking Board during Add confirms before revealing cards, even your own', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const context = setup({
       retrospectiveMode: true,
       user: { uid: 'u1' },
-      columns: { a: { cards: { c1: { createdBy: 'u2' } } } }
+      columns: { a: { cards: { c1: { createdBy: 'u1' } } } }
     });
     expect(current()).toHaveTextContent('Add');
 

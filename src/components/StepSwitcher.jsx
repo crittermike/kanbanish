@@ -49,7 +49,7 @@ const StepSwitcher = () => {
     // Ending during Add reveals cards that are still hidden
     const hasHiddenCards = retrospectiveMode && workflowPhase === WORKFLOW_PHASES.CREATION &&
       Object.values(columns || {}).some(column =>
-        Object.values(column.cards || {}).some(card => card.createdBy !== user?.uid));
+        Object.keys(column.cards || {}).length > 0);
     if (hasHiddenCards && !window.confirm('End now? Hidden cards will be revealed.')) {
       return;
     }

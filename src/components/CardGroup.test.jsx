@@ -188,6 +188,15 @@ describe('CardGroup Component', () => {
     expect(screen.queryByTestId('card-content')).not.toBeInTheDocument();
   });
 
+  test('hides someone else\'s card in a collapsed preview during Add', () => {
+    useBoardContext.mockReturnValue({ ...mockBoardContext, retrospectiveMode: true, workflowPhase: 'CREATION' });
+    const columnData = { cards: { ...mockColumnData.cards, card1: { ...mockColumnData.cards.card1, createdBy: 'user2' } } };
+    render(<CardGroup {...mockProps} columnData={columnData} groupData={{ ...mockGroupData, expanded: false }} />);
+
+    expect(screen.queryByText(/First card/)).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Hidden card' })).toBeInTheDocument();
+  });
+
   test('toggles expanded state when header is clicked', () => {
     render(<CardGroup {...mockProps} />);
 

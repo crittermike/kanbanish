@@ -15,7 +15,8 @@ import {
   areReactionsAllowed,
   areReactionsVisible,
   areReviewToolsVisible,
-  isGroupingAllowed
+  isGroupingAllowed,
+  shouldObfuscateCards
 } from '../utils/workflowUtils';
 import Card from './Card';
 import CardHoverActions from './CardHoverActions';
@@ -399,9 +400,15 @@ function CardGroup({
                 '0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1)'
             }}
           >
-            <div className="card-preview-content">
-              <MarkdownContent content={sortedCards()[0]?.content} />
-            </div>
+            {shouldObfuscateCards(workflowPhase, retrospectiveMode) && sortedCards()[0]?.createdBy !== user?.uid ? (
+              <div className="card-preview-content card-content obfuscated" role="img" aria-label="Hidden card">
+                <span className="card-skeleton-line" style={{ width: '60%' }} />
+              </div>
+            ) : (
+              <div className="card-preview-content">
+                <MarkdownContent content={sortedCards()[0]?.content} />
+              </div>
+            )}
           </div>
         </div>
       )}
