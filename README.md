@@ -24,7 +24,7 @@ Switch the board header from **Board** to a step to take everyone through:
 
 **Health** → **Add** (new cards hidden) → **Group** → **Vote** → **Discuss** → **Poll**
 
-Switch back to **Board** when you're done; groups and votes stay. Works on any board and can be run again.
+Switch back to **Board** when you're done; groups and votes stay. Starting a new run clears earlier votes so everyone gets a fresh per-person allowance; moving between steps keeps votes. Works on any board and can be run again.
 
 Plus: one-click board creation from the dashboard or a bookmarkable `?template=<id>` link.
 Explicit URL settings override template defaults, for example `?template=default&retro=true` starts at Add.
