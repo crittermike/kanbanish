@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { ChevronRight, Columns } from 'react-feather';
 import { useBoardContext } from '../context/BoardContext';
 import { useVoteCounterVisibility } from '../hooks/useVoteCounterVisibility';
-import { WORKFLOW_PHASES, isCardFromCurrentRun } from '../utils/workflowUtils';
+import { WORKFLOW_PHASES } from '../utils/workflowUtils';
 
 const BOARD = 'board';
 
@@ -26,7 +26,6 @@ const StepSwitcher = () => {
     workflowPhase,
     retrospectiveMode,
     columns,
-    flowStartedAt,
     goToPhase,
     endFlow,
     user,
@@ -50,7 +49,7 @@ const StepSwitcher = () => {
     // Ending during Add reveals cards that are still hidden
     const hasHiddenCards = retrospectiveMode && workflowPhase === WORKFLOW_PHASES.CREATION &&
       Object.values(columns || {}).some(column =>
-        Object.values(column.cards || {}).some(card => isCardFromCurrentRun(card, flowStartedAt)));
+        Object.values(column.cards || {}).some(card => card.createdBy !== user?.uid));
     if (hasHiddenCards && !window.confirm('End now? Hidden cards will be revealed.')) {
       return;
     }

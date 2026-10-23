@@ -264,7 +264,7 @@ HEALTH_CHECK → HEALTH_CHECK_RESULTS → CREATION → GROUPING → INTERACTIONS
 
 - Picking a step calls `goToPhase`. From Board it starts a run at that step (`startFlow`: clears earlier health check/poll answers, voting on, records `flowStartedAt`); otherwise it jumps straight to the step. Going back to Add confirms and undoes this run's grouping.
 - Picking Board calls `endFlow` (`retrospectiveMode: false`, back to CREATION). Groups and votes stay. Ending during Add confirms first because it reveals hidden cards.
-- Repeat runs: only cards created at or after `flowStartedAt` are hidden during Add, and going back to Add only removes groups containing this run's cards.
+- During Add, everyone sees only their own cards, including cards from earlier runs. Going back to Add only removes groups containing this run's cards (created at or after `flowStartedAt`).
 - Health and Poll are ordinary steps. A health check on its own is just Health, then Board.
 - Retro-tagged templates (and `?retro=true`) create boards already in the Add step.
 - The Big Orca template opens on Health without a run (`retrospectiveMode: false` + a health phase). The switcher still shows Health as current; picking another step starts a run and keeps the answers.

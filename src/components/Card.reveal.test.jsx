@@ -113,10 +113,7 @@ describe('Card Reveal Mode', () => {
     expect(cardContent.querySelectorAll('.card-skeleton-line').length).toBeGreaterThan(0);
   });
 
-  test.each([
-    [100, false],
-    [600, true]
-  ])('on a repeat run, hides only cards added since it started (created %i → hidden %s)', (created, hidden) => {
+  test('on a repeat run, still hides cards added before it started', () => {
     useBoardContext.mockReturnValue({
       boardId: 'board123',
       user: { uid: 'user123' },
@@ -125,9 +122,9 @@ describe('Card Reveal Mode', () => {
       flowStartedAt: 500
     });
 
-    renderCard({ cardData: { ...mockCardData, createdBy: 'other-user-456', created } });
+    renderCard({ cardData: { ...mockCardData, createdBy: 'other-user-456', created: 100 } });
 
-    expect(screen.queryByText('Test card content for retro') === null).toBe(hidden);
+    expect(screen.queryByText('Test card content for retro')).not.toBeInTheDocument();
   });
 
   test('shows normal content when reveal mode is enabled but cards are revealed', () => {

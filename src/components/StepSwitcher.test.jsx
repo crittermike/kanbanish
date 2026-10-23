@@ -13,7 +13,6 @@ const setup = (overrides = {}) => {
     workflowPhase: WORKFLOW_PHASES.CREATION,
     retrospectiveMode: false,
     columns: {},
-    flowStartedAt: null,
     goToPhase: vi.fn(),
     endFlow: vi.fn(),
     ...overrides
@@ -42,12 +41,12 @@ describe('StepSwitcher', () => {
     expect(context.goToPhase).toHaveBeenCalledWith(WORKFLOW_PHASES.GROUPING);
   });
 
-  test('picking Board during Add confirms before revealing this run\'s cards', () => {
+  test('picking Board during Add confirms before revealing other people\'s cards', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const context = setup({
       retrospectiveMode: true,
-      flowStartedAt: 100,
-      columns: { a: { cards: { c1: { created: 200 } } } }
+      user: { uid: 'u1' },
+      columns: { a: { cards: { c1: { createdBy: 'u2' } } } }
     });
     expect(current()).toHaveTextContent('Add');
 

@@ -128,14 +128,41 @@ test.describe('Board', () => {
 
     await goTo('Add');
     await expectStep('Add');
-    await expect(viewer.getByText('Keep pull requests small', { exact: true })).toBeVisible();
+    await expect(viewer.getByText('Keep pull requests small', { exact: true })).toHaveCount(0);
     await addCard(page, 'A new thought in the second run');
-    await expect(viewer.getByRole('img', { name: 'Hidden card' })).toHaveCount(1);
+    await expect(viewer.getByRole('img', { name: 'Hidden card' })).toHaveCount(4);
     await expect(viewer.getByText('A new thought in the second run', { exact: true })).toHaveCount(0);
     await goTo('Group');
     await expectStep('Group');
     await expect(viewer.getByText('A new thought in the second run', { exact: true })).toBeVisible();
     await expect(group.locator('.card')).toHaveCount(2);
+  });
+
+  test('returning to Add keeps other people\'s cards hidden, even with clock skew', async ({ page, viewer }) => {
+    // The facilitator's clock runs ahead of the other person's
+    await page.addInitScript(() => {
+      const now = Date.now;
+      Date.now = () => now() + 10 * 60 * 1000;
+    });
+    await createBoard(page, { template: 'Retrospective' });
+    const steps = page.getByRole('group', { name: 'Steps' });
+    const currentStep = steps.locator('[aria-current="step"]');
+    await viewer.goto(page.url());
+    await expect(viewer.locator('.column').first()).toBeVisible();
+
+    await addCard(page, 'Owner first card');
+    await addCard(viewer, 'Viewer first card');
+    await steps.getByRole('button', { name: 'Group', exact: true }).click();
+    await expect(currentStep).toHaveAccessibleName('Group');
+    await steps.getByRole('button', { name: 'Board', exact: true }).click();
+    await expect(currentStep).toHaveAccessibleName('Board');
+    await steps.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(currentStep).toHaveAccessibleName('Add');
+
+    await addCard(page, 'Owner second card');
+    await addCard(viewer, 'Viewer second card');
+    await expect(page.getByRole('img', { name: 'Hidden card' })).toHaveCount(2);
+    await expect(viewer.getByRole('img', { name: 'Hidden card' })).toHaveCount(2);
   });
 
   test('Big Orca health answers sync between users and survive starting the steps', async ({ page, viewer }) => {
